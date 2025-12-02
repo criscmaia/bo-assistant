@@ -7,9 +7,9 @@ from typing import Optional, Dict, Any
 import uvicorn
 from pathlib import Path
 
-from state_machine import BOStateMachine
-from llm_service import LLMService
-from validator import ResponseValidator
+from backend.state_machine import BOStateMachine
+from backend.llm_service import LLMService
+from backend.validator import ResponseValidator
 
 app = FastAPI(title="BO Assistant API", version="0.1")
 

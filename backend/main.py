@@ -7,11 +7,19 @@ from typing import Optional, Dict, Any
 import uvicorn
 from pathlib import Path
 
-from state_machine import BOStateMachine
-from llm_service import LLMService
-from validator import ResponseValidator
+# Imports compatíveis com local E Render
+try:
+    # Tenta import direto (funciona quando roda de dentro de backend/)
+    from state_machine import BOStateMachine
+    from llm_service import LLMService
+    from validator import ResponseValidator
+except ImportError:
+    # Fallback quando roda de fora da pasta backend/ (Render)
+    from backend.state_machine import BOStateMachine
+    from backend.llm_service import LLMService
+    from backend.validator import ResponseValidator
 
-app = FastAPI(title="BO Assistant API", version="0.2")
+app = FastAPI(title="BO Assistant API", version="0.2.1")
 
 # Configurar CORS para permitir frontend acessar
 app.add_middleware(
@@ -62,7 +70,7 @@ if frontend_path.exists():
 async def root():
     return {
         "message": "BO Assistant API",
-        "version": "0.2",
+        "version": "0.2.1",
         "endpoints": ["/new_session", "/chat", "/health"]
     }
 

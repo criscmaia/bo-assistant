@@ -88,6 +88,7 @@ class ResponseValidator:
         # Validação customizada para data/hora (1.1)
         if rules.get("custom_check") == "datetime":
             import re
+            from datetime import datetime as dt
             
             # Verificar se tem formato de data (números e barras OU palavras como "março")
             has_date = "/" in answer or any(mes in answer.lower() for mes in [
@@ -114,6 +115,23 @@ class ResponseValidator:
             
             if minute > 59:
                 return False, f"Minuto inválido ({minute}min). Use 0-59. Ex: '21h03' ou '09h59'"
+            
+            # Validar data se estiver no formato DD/MM
+            date_match = re.search(r'(\d{1,2})/(\d{1,2})(?:/(\d{4}))?', answer)
+            if date_match:
+                day = int(date_match.group(1))
+                month = int(date_match.group(2))
+                year = int(date_match.group(3)) if date_match.group(3) else dt.now().year
+                
+                # Validar mês
+                if month < 1 or month > 12:
+                    return False, f"Mês inválido ({month}). Use 1-12. Ex: '22/03/2025'"
+                
+                # Validar dia usando datetime (valida dias por mês automaticamente)
+                try:
+                    dt(year, month, day)
+                except ValueError:
+                    return False, f"Data inválida ({day}/{month:02d}/{year}). Verifique o dia para este mês."
             
             # Verificar se tem ano (aviso, mas não bloqueia)
             has_year = bool(re.search(r'20\d{2}', answer))

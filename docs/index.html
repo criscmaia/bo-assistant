@@ -11,7 +11,7 @@
         <!-- Header -->
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-4xl mx-auto">
-                <h1 class="text-2xl font-bold">📋 BO Assistant</h1>
+                <h1 class="text-2xl font-bold">📋 BO Assistant v0.3</h1>
                 <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
             </div>
         </header>
@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <!-- Generated Text Area (oculto inicialmente) -->
+            <!-- Generated Text Area -->
             <div id="result-container" class="hidden mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
                 <div class="flex justify-between items-start mb-2">
                     <h3 class="font-bold text-green-900">✅ Seção 1 - Texto Gerado</h3>
@@ -77,19 +77,20 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Assistant v0.1 - POC | Dados não são persistidos</p>
+            <p>BO Assistant v0.3.0 - POC | Dados não são persistidos</p>
         </footer>
     </div>
 
     <script>
         // Configuração da API
         const API_URL = window.location.hostname === 'localhost' 
-				? 'http://localhost:8000' 
-				: 'https://bo-assistant-backend.onrender.com';
+            ? 'http://localhost:8000' 
+            : 'https://bo-assistant-backend.onrender.com';
         
         // Estado da aplicação
         let sessionId = null;
         let isWaitingResponse = false;
+        let currentQuestionStep = '1.1';
 
         // Elementos DOM
         const chatContainer = document.getElementById('chat-container');
@@ -101,10 +102,11 @@
         const generatedText = document.getElementById('generated-text');
         const copyButton = document.getElementById('copy-button');
 
-        // Funções auxiliares
-        function addMessage(text, isBot = true, isError = false) {
+        // Adicionar mensagem ao chat
+        function addMessage(text, isBot = true, isError = false, step = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex ${isBot ? 'justify-start' : 'justify-end'}`;
+            messageDiv.dataset.step = step;
             
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = `max-w-[80%] p-3 rounded-lg ${
@@ -115,16 +117,140 @@
                         : 'bg-blue-600 text-white'
             }`;
             
-            // Preservar quebras de linha em mensagens de erro
             if (isError) {
                 bubbleDiv.style.whiteSpace = 'pre-wrap';
             }
             
-            bubbleDiv.textContent = text;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'flex items-start gap-2';
             
+            const textSpan = document.createElement('span');
+            textSpan.textContent = text;
+            textSpan.className = 'flex-1';
+            contentDiv.appendChild(textSpan);
+            
+            // Botão editar para mensagens do usuário
+            if (!isBot && !isError && step) {
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '✏️ Editar';
+                editButton.className = 'text-xs bg-white bg-opacity-20 hover:bg-opacity-30 px-2 py-1 rounded transition-colors whitespace-nowrap';
+                editButton.onclick = () => editAnswer(step, text, messageDiv, bubbleDiv);
+                contentDiv.appendChild(editButton);
+            }
+            
+            bubbleDiv.appendChild(contentDiv);
             messageDiv.appendChild(bubbleDiv);
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Editar resposta anterior
+        function editAnswer(step, currentText, messageDiv, bubbleDiv) {
+            const contentDiv = bubbleDiv.querySelector('div');
+            const textSpan = contentDiv.querySelector('span');
+            const editButton = contentDiv.querySelector('button');
+            
+            editButton.style.display = 'none';
+            
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'flex-1 flex flex-col gap-1';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentText;
+            input.className = 'px-2 py-1 bg-white bg-opacity-90 text-gray-900 rounded';
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'text-sm text-red-200 hidden';
+            errorDiv.style.whiteSpace = 'pre-wrap';
+            
+            inputContainer.appendChild(input);
+            inputContainer.appendChild(errorDiv);
+            
+            const saveButton = document.createElement('button');
+            saveButton.innerHTML = '💾 Salvar';
+            saveButton.className = 'text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded transition-colors';
+            
+            const cancelButton = document.createElement('button');
+            cancelButton.innerHTML = '❌ Cancelar';
+            cancelButton.className = 'text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition-colors ml-1';
+            
+            contentDiv.innerHTML = '';
+            contentDiv.appendChild(inputContainer);
+            contentDiv.appendChild(saveButton);
+            contentDiv.appendChild(cancelButton);
+            
+            input.focus();
+            
+            const cancel = () => {
+                contentDiv.innerHTML = '';
+                contentDiv.appendChild(textSpan);
+                contentDiv.appendChild(editButton);
+                editButton.style.display = 'block';
+            };
+            
+            const save = async () => {
+                const newText = input.value.trim();
+                
+                if (!newText) {
+                    errorDiv.textContent = '⚠️ Resposta não pode estar vazia';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                saveButton.disabled = true;
+                cancelButton.disabled = true;
+                saveButton.textContent = '⏳ Salvando...';
+                
+                try {
+                    const response = await fetch(`${API_URL}/chat/${sessionId}/answer/${step}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: newText, llm_provider: 'gemini' })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        errorDiv.textContent = '⚠️ ' + (data.detail || 'Erro ao atualizar resposta');
+                        errorDiv.classList.remove('hidden');
+                        saveButton.disabled = false;
+                        cancelButton.disabled = false;
+                        saveButton.textContent = '💾 Salvar';
+                        input.focus();
+                        return;
+                    }
+                    
+                    errorDiv.classList.add('hidden');
+                    textSpan.textContent = newText;
+                    
+                    contentDiv.innerHTML = '';
+                    contentDiv.appendChild(textSpan);
+                    contentDiv.appendChild(editButton);
+                    editButton.style.display = 'block';
+                    
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'text-sm text-green-300 mt-1';
+                    successDiv.textContent = '✅ Salvo!';
+                    bubbleDiv.appendChild(successDiv);
+                    
+                    setTimeout(() => successDiv.remove(), 2000);
+                    
+                } catch (error) {
+                    errorDiv.textContent = '⚠️ Erro: ' + error.message;
+                    errorDiv.classList.remove('hidden');
+                    saveButton.disabled = false;
+                    cancelButton.disabled = false;
+                    saveButton.textContent = '💾 Salvar';
+                }
+            };
+            
+            cancelButton.onclick = cancel;
+            saveButton.onclick = save;
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter') save();
+                if (e.key === 'Escape') cancel();
+            };
         }
 
         function updateProgress(answered, total) {
@@ -137,11 +263,7 @@
             const loadingDiv = document.createElement('div');
             loadingDiv.id = 'loading';
             loadingDiv.className = 'flex justify-start';
-            loadingDiv.innerHTML = `
-                <div class="bg-gray-200 text-gray-600 p-3 rounded-lg">
-                    <span class="animate-pulse">Processando...</span>
-                </div>
-            `;
+            loadingDiv.innerHTML = '<div class="bg-gray-200 text-gray-600 p-3 rounded-lg"><span class="animate-pulse">Processando...</span></div>';
             chatContainer.appendChild(loadingDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
@@ -167,14 +289,12 @@
         // Iniciar sessão
         async function startSession() {
             try {
-                const response = await fetch(`${API_URL}/new_session`, {
-                    method: 'POST'
-                });
-                
+                const response = await fetch(`${API_URL}/new_session`, { method: 'POST' });
                 if (!response.ok) throw new Error('Erro ao iniciar sessão');
                 
                 const data = await response.json();
                 sessionId = data.session_id;
+                currentQuestionStep = '1.1';
                 
                 addMessage('Olá! Vou te ajudar a fazer o BO de tráfico de drogas, simples, técnico e dentro da lei. Vou perguntar uma coisa por vez. Responda com o que você viu, sem arredondar. Se algo não se aplicar, escreva "NÃO".');
                 
@@ -193,11 +313,10 @@
         // Enviar mensagem
         async function sendMessage() {
             const message = userInput.value.trim();
-            
             if (!message || isWaitingResponse) return;
             
-            // Mostrar mensagem do usuário
-            addMessage(message, false);
+            const stepToUse = currentQuestionStep;
+            addMessage(message, false, false, stepToUse);
             userInput.value = '';
             
             disableInput();
@@ -206,9 +325,7 @@
             try {
                 const response = await fetch(`${API_URL}/chat`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         session_id: sessionId,
                         message: message,
@@ -219,33 +336,30 @@
                 if (!response.ok) throw new Error('Erro ao processar resposta');
                 
                 const data = await response.json();
-                
                 removeLoading();
                 
-                // Verificar se houve erro de validação
-                if (data.validation_error) {
-                    addMessage('⚠️ ' + data.validation_error, true, true);  // true = bot, true = erro
-                    enableInput();
-                    return;  // Não avançar
+                // Atualizar step ANTES de processar resto
+                if (!data.is_section_complete && data.current_step) {
+                    currentQuestionStep = data.current_step;
                 }
                 
-                // Atualizar progresso
-                const currentStep = parseFloat(data.current_step);
-                const progress = currentStep === 'complete' ? 6 : Math.floor(currentStep * 10) % 10;
+                if (data.validation_error) {
+                    addMessage('⚠️ ' + data.validation_error, true, true);
+                    enableInput();
+                    return;
+                }
+                
+                const progress = data.current_step === 'complete' ? 6 : parseInt(data.current_step.split('.')[1]);
                 updateProgress(progress, 6);
                 
                 if (data.is_section_complete) {
-                    // Mostrar texto gerado
                     addMessage('✅ Todas as perguntas respondidas! Gerando texto...');
-                    
                     setTimeout(() => {
                         generatedText.textContent = data.generated_text;
                         resultContainer.classList.remove('hidden');
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }, 1000);
-                    
                 } else {
-                    // Próxima pergunta
                     addMessage(data.question);
                     enableInput();
                 }
@@ -260,20 +374,16 @@
 
         // Event listeners
         sendButton.addEventListener('click', sendMessage);
-        
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
-
         copyButton.addEventListener('click', () => {
             navigator.clipboard.writeText(generatedText.textContent);
             copyButton.textContent = '✅ Copiado!';
-            setTimeout(() => {
-                copyButton.textContent = '📋 Copiar';
-            }, 2000);
+            setTimeout(() => copyButton.textContent = '📋 Copiar', 2000);
         });
 
-        // Iniciar ao carregar
+        // Iniciar
         window.addEventListener('load', startSession);
     </script>
 </body>

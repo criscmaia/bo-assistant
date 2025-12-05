@@ -1,0 +1,146 @@
+{
+  "version": "v0.3.2",
+  "backend_url": "http://localhost:8000",
+  "frontend_url": "http://localhost:3000",
+  "browser": "chromium",
+  "resolutions": {
+    "desktop": {"width": 1280, "height": 720},
+    "mobile": {"width": 430, "height": 932}
+  },
+  "test_flow": [
+    {
+      "step": 1,
+      "question": "Dia, data e hora do acionamento.",
+      "answer": "21:11, dia 22/03",
+      "should_pass": true,
+      "screenshot": "after_answer"
+    },
+    {
+      "step": 2,
+      "question": "Composição da guarnição e prefixo.",
+      "answer": "prefixo 1234, Sargentos João Silva e Pedro Santos",
+      "should_pass": true,
+      "screenshot": "after_answer"
+    },
+    {
+      "step": "edit_1",
+      "edit_question_step": "1.1",
+      "description": "Editar pergunta 1 com resposta inválida",
+      "answer": "asd",
+      "should_pass": false,
+      "expected_error": "Por favor, informe dia, data E hora completos",
+      "screenshot": "05-desktop-editando-erro.png"
+    },
+    {
+      "step": "edit_2",
+      "edit_question_step": "1.1",
+      "description": "Editar pergunta 1 com resposta válida",
+      "answer": "21:11, dia 23/03",
+      "should_pass": true,
+      "screenshot": "04-desktop-editando.png"
+    },
+    {
+      "step": 3,
+      "question": "Natureza do empenho.",
+      "answer": "Tráfico",
+      "should_pass": false,
+      "expected_error": "Seja mais específico",
+      "screenshot": "03-desktop-erro.png"
+    },
+    {
+      "step": "3_retry",
+      "question": "Natureza do empenho.",
+      "answer": "Tráfico de drogas",
+      "should_pass": true,
+      "screenshot": "02-desktop-sidebar-progress.png"
+    },
+    {
+      "step": 4,
+      "question": "O que constava na ordem de serviço, informações do COPOM, DDU.",
+      "answer": "Denúncia anônima",
+      "should_pass": false,
+      "expected_error": "Descreva o que constava na ordem"
+    },
+    {
+      "step": "4_retry",
+      "question": "O que constava na ordem de serviço, informações do COPOM, DDU.",
+      "answer": "Denúncia anônima via COPOM reportando venda de drogas na esquina",
+      "should_pass": true
+    },
+    {
+      "step": 5,
+      "question": "Local exato da ocorrência (logradouro, número, bairro).",
+      "answer": "Rua das Acácias",
+      "should_pass": false,
+      "expected_error": "Informe logradouro + número + bairro"
+    },
+    {
+      "step": "5_retry",
+      "question": "Local exato da ocorrência (logradouro, número, bairro).",
+      "answer": "Rua das Acácias, sem número, apt 12, bairro Jardins",
+      "should_pass": true
+    },
+    {
+      "step": 6,
+      "question": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?",
+      "answer": "Sim",
+      "should_pass": false,
+      "expected_error": "Se sim, forneça detalhes"
+    },
+    {
+      "step": "6_retry",
+      "question": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?",
+      "answer": "Local com histórico de operações em 2024. Facção ABC atua na região",
+      "should_pass": true,
+      "wait_for_generation": true,
+      "screenshot": "08-desktop-final.png"
+    }
+  ],
+  "screenshots": {
+    "01-desktop-sidebar-empty.png": {
+      "timing": "initial_load",
+      "viewport": "desktop",
+      "description": "Estado inicial com sidebar vazia"
+    },
+    "02-desktop-sidebar-progress.png": {
+      "timing": "after_step_3",
+      "viewport": "desktop",
+      "description": "Progresso 3/6 perguntas respondidas"
+    },
+    "03-desktop-erro.png": {
+      "timing": "error_validation",
+      "viewport": "desktop",
+      "description": "Mensagem de erro de validação"
+    },
+    "04-desktop-editando.png": {
+      "timing": "edit_mode_success",
+      "viewport": "desktop",
+      "description": "Modo de edição com sucesso"
+    },
+    "05-desktop-editando-erro.png": {
+      "timing": "edit_mode_error",
+      "viewport": "desktop",
+      "description": "Erro de validação ao editar"
+    },
+    "06-mobile-empty.png": {
+      "timing": "initial_load",
+      "viewport": "mobile",
+      "description": "Layout mobile inicial"
+    },
+    "07-mobile-sidebar-open.png": {
+      "timing": "sidebar_open",
+      "viewport": "mobile",
+      "description": "Drawer lateral aberto no mobile"
+    },
+    "08-desktop-final.png": {
+      "timing": "text_generated",
+      "viewport": "desktop",
+      "description": "Texto final gerado com sucesso"
+    },
+    "09-mobile-final.png": {
+      "timing": "text_generated",
+      "viewport": "mobile",
+      "description": "Resultado final no mobile"
+    }
+  }
+}

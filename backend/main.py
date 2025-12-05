@@ -7,11 +7,11 @@ from typing import Optional, Dict, Any
 import uvicorn
 from pathlib import Path
 
-from backend.state_machine import BOStateMachine
-from backend.llm_service import LLMService
-from backend.validator import ResponseValidator
+from state_machine import BOStateMachine
+from llm_service import LLMService
+from validator import ResponseValidator
 
-app = FastAPI(title="BO Assistant API", version="0.1")
+app = FastAPI(title="BO Assistant API", version="0.2")
 
 # Configurar CORS para permitir frontend acessar
 app.add_middleware(
@@ -30,7 +30,7 @@ sessions: Dict[str, BOStateMachine] = {}
 class ChatRequest(BaseModel):
     session_id: str
     message: str
-    llm_provider: Optional[str] = "gemini"  # gemini, claude, openai
+    llm_provider: Optional[str] = "gemini"
 
 class ChatResponse(BaseModel):
     session_id: str
@@ -38,11 +38,15 @@ class ChatResponse(BaseModel):
     generated_text: Optional[str] = None
     is_section_complete: bool = False
     current_step: str
-    validation_error: Optional[str] = None  # Novo campo para erros de validação
+    validation_error: Optional[str] = None
 
 class NewSessionResponse(BaseModel):
     session_id: str
     first_question: str
+
+class UpdateAnswerRequest(BaseModel):
+    message: str
+    llm_provider: Optional[str] = "gemini"
 
 # Inicializar serviço de LLM
 llm_service = LLMService()
@@ -58,7 +62,7 @@ if frontend_path.exists():
 async def root():
     return {
         "message": "BO Assistant API",
-        "version": "0.1",
+        "version": "0.2",
         "endpoints": ["/new_session", "/chat", "/health"]
     }
 
@@ -108,7 +112,6 @@ async def chat(request: ChatRequest):
     
     if not is_valid:
         # Resposta inválida - retornar erro SEM avançar
-        # Não mostrar exemplos - mensagem de erro já é clara
         return ChatResponse(
             session_id=session_id,
             question=state_machine.get_current_question(),
@@ -159,6 +162,37 @@ async def chat(request: ChatRequest):
         is_section_complete=False,
         current_step=state_machine.current_step
     )
+
+@app.put("/chat/{session_id}/answer/{step}")
+async def update_answer(session_id: str, step: str, update_request: UpdateAnswerRequest):
+    """
+    Atualiza resposta de uma pergunta específica.
+    Útil para edição de respostas anteriores.
+    """
+    # Verificar se sessão existe
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    
+    state_machine = sessions[session_id]
+    
+    # Validar step
+    if step not in state_machine.QUESTIONS:
+        raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
+    
+    # Validar nova resposta
+    is_valid, error_message = ResponseValidator.validate(step, update_request.message)
+    
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_message)
+    
+    # Atualizar resposta
+    state_machine.answers[step] = update_request.message.strip()
+    
+    return {
+        "success": True,
+        "message": "Resposta atualizada com sucesso",
+        "step": step
+    }
 
 @app.delete("/session/{session_id}")
 async def delete_session(session_id: str):

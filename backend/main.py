@@ -10,15 +10,17 @@ from datetime import datetime
 
 # Imports compatíveis com local E Render
 try:
+    # Tenta import direto (funciona quando roda de dentro de backend/)
     from state_machine import BOStateMachine
     from llm_service import LLMService
     from validator import ResponseValidator
     from logger import BOLogger, now_brasilia
 except ImportError:
+    # Fallback quando roda de fora da pasta backend/ (Render)
     from backend.state_machine import BOStateMachine
     from backend.llm_service import LLMService
     from backend.validator import ResponseValidator
-    from logger import BOLogger, now_brasilia
+    from backend.logger import BOLogger, now_brasilia  # ✅ CORRIGIDO
 
 # Versão do sistema
 APP_VERSION = "0.4.0"
@@ -152,14 +154,14 @@ async def chat(request_body: ChatRequest, request: Request):
         request_body.message
     )
     
-    # ✅ BUG FIX #5: Log ÚNICO com is_valid correto
+    # Log único com is_valid correto
     event_id = BOLogger.log_event(
         bo_id=bo_id,
         event_type="answer_submitted",
         data={
             "step": current_step,
             "answer": request_body.message,
-            "is_valid": is_valid  # ✅ TRUE ou FALSE
+            "is_valid": is_valid
         }
     )
     
@@ -278,7 +280,6 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
         raise HTTPException(status_code=400, detail=error_message)
     
     # Log: resposta editada
-    # Tentar pegar do state_machine primeiro, senão buscar do último evento
     old_answer = state_machine.answers.get(step, "")
 
     # Se vazio, buscar do último answer_submitted desse step
@@ -303,7 +304,7 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
     # Atualizar
     state_machine.answers[step] = update_request.message.strip()
     
-    # CRITICAL BUG FIX #2: Se current_step ainda aponta para step editado,
+    # Se current_step ainda aponta para step editado,
     # significa que usuário estava travado por erro de validação.
     # Avançar state_machine para próxima pergunta!
     if state_machine.current_step == step:
@@ -325,15 +326,12 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
 async def add_feedback(feedback: FeedbackRequest, request: Request):
     """Adiciona feedback do usuário"""
     
-    # Importar now_brasilia do logger
-    from logger import now_brasilia
-    
     # Coletar metadados automaticamente
     metadata = feedback.metadata or {}
     metadata.update({
         "ip_address": get_client_ip(request),
         "user_agent": request.headers.get("User-Agent"),
-        "timestamp": now_brasilia().isoformat()  # ✅ BUG FIX #4
+        "timestamp": now_brasilia().isoformat()
     })
     
     feedback_id = BOLogger.add_feedback(
@@ -407,6 +405,27 @@ async def get_log_detail(bo_id: str):
 async def get_stats():
     """Estatísticas gerais do sistema"""
     return BOLogger.get_stats()
+
+@app.get("/api/feedbacks")
+async def list_feedbacks(
+    feedback_type: Optional[str] = None,
+    limit: int = 50
+):
+    """Lista feedbacks (útil para análise)"""
+    from logger import get_db, Feedback
+    
+    with get_db() as db:
+        query = db.query(Feedback)
+        
+        if feedback_type:
+            query = query.filter(Feedback.feedback_type == feedback_type)
+        
+        feedbacks = query.order_by(Feedback.timestamp.desc()).limit(limit).all()
+        
+        return {
+            "total": len(feedbacks),
+            "feedbacks": [f.to_dict() for f in feedbacks]
+        }
 
 # ============================================================================
 # ENDPOINTS LEGADOS (manter compatibilidade)

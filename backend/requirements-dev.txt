@@ -1,0 +1,25 @@
+# BO Inteligente - Dependências de Desenvolvimento Local
+# Inclui tudo de produção + ferramentas de teste/automação
+
+# Produção (herda tudo)
+-r requirements.txt
+
+# ============================================
+# AUTOMAÇÃO DE SCREENSHOTS/VÍDEOS
+# ============================================
+playwright>=1.40.0
+opencv-python>=4.8.0
+pillow>=10.0.0
+
+# ============================================
+# TESTES
+# ============================================
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+httpx>=0.25.0
+
+# ============================================
+# DESENVOLVIMENTO
+# ============================================
+black>=23.0.0
+isort>=5.12.0

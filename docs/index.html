@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BO Assistant - Tráfico de Drogas</title>
+    <title>BO Inteligente - Tráfico de Drogas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Animações suaves */
@@ -16,7 +16,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Scrollbar customizada para chat */
+        /* Scrollbar customizada */
         #chat-container::-webkit-scrollbar {
             width: 6px;
         }
@@ -33,6 +33,34 @@
         
         #chat-container::-webkit-scrollbar-thumb:hover {
             background: #a0aec0;
+        }
+        
+        /* Botões de feedback */
+        .feedback-btn {
+            min-width: 40px;
+            min-height: 40px;
+            font-size: 18px;
+            padding: 6px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feedback-btn:hover {
+            transform: scale(1.1);
+            border-color: #3b82f6;
+        }
+        
+        .feedback-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .feedback-btn.clicked {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
         }
         
         /* Mobile: Sidebar colapsável */
@@ -61,6 +89,12 @@
             #sidebar-overlay.open {
                 display: block;
             }
+            
+            .feedback-btn {
+                min-width: 56px;
+                min-height: 56px;
+                font-size: 24px;
+            }
         }
     </style>
 </head>
@@ -70,7 +104,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Assistant v0.3.2</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.4.0</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -160,7 +194,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Assistant v0.3.2 - POC | Dados não são persistidos</p>
+            <p>BO Inteligente v0.4.0 | Sistema de Logs Ativo 📊</p>
         </footer>
     </div>
 
@@ -170,7 +204,7 @@
             ? 'http://localhost:8000' 
             : 'https://bo-assistant-backend.onrender.com';
         
-        // Definição das 6 perguntas da Seção 1
+        // Perguntas da Seção 1
         const QUESTIONS = {
             '1.1': 'Dia, data e hora do acionamento.',
             '1.2': 'Composição da guarnição e prefixo.',
@@ -179,12 +213,13 @@
             '1.5': 'Local exato da ocorrência (logradouro, número, bairro).',
             '1.6': 'O local é ponto de tráfico? Quais evidências anteriores? Há facção?'
         };
-
+        
         // Estado da aplicação
         let sessionId = null;
+        let currentBoId = null;
         let isWaitingResponse = false;
         let currentQuestionStep = '1.1';
-        let answersState = {}; // Armazena respostas: { '1.1': 'texto resposta', ... }
+        let answersState = {}; // Para armazenar respostas localmente
 
         // Elementos DOM
         const chatContainer = document.getElementById('chat-container');
@@ -203,7 +238,11 @@
         const sidebarProgressBar = document.getElementById('sidebar-progress-bar');
         const sidebarProgressText = document.getElementById('sidebar-progress-text');
 
-        // Inicializar sidebar com as perguntas
+        // ================================================================
+        // FUNÇÕES DA SIDEBAR
+        // ================================================================
+
+        // Inicializar sidebar
         function initializeSidebar() {
             Object.entries(QUESTIONS).forEach(([step, question]) => {
                 const questionItem = document.createElement('div');
@@ -225,23 +264,20 @@
                     </div>
                 `;
                 
-                // Click para expandir/colapsar resposta
                 questionItem.addEventListener('click', () => toggleQuestionExpand(step));
-                
                 questionsList.appendChild(questionItem);
             });
             
             updateSidebarStatus('1.1', 'current');
         }
 
-        // Atualizar status visual de uma pergunta na sidebar
+        // Atualizar status visual na sidebar
         function updateSidebarStatus(step, status) {
             const questionItem = document.getElementById(`question-item-${step}`);
             const icon = document.getElementById(`icon-${step}`);
             
             if (!questionItem || !icon) return;
             
-            // Remover classes anteriores
             questionItem.classList.remove('border-blue-500', 'bg-blue-50', 'border-green-500', 'bg-green-50', 'border-gray-200');
             icon.classList.remove('bg-blue-500', 'text-white', 'bg-green-500', 'bg-gray-200', 'text-gray-600');
             
@@ -253,7 +289,7 @@
                 questionItem.classList.add('border-green-500', 'bg-green-50');
                 icon.classList.add('bg-green-500', 'text-white');
                 icon.textContent = '✓';
-            } else { // pending
+            } else {
                 questionItem.classList.add('border-gray-200');
                 icon.classList.add('bg-gray-200', 'text-gray-600');
                 icon.textContent = step.split('.')[1];
@@ -264,14 +300,13 @@
         function updateSidebarAnswer(step, answer) {
             const answerElement = document.getElementById(`answer-${step}`);
             if (answerElement && answer) {
-                // Truncar resposta para exibição
                 const truncated = answer.length > 60 ? answer.substring(0, 60) + '...' : answer;
                 answerElement.innerHTML = `<span class="text-gray-700">${truncated}</span>`;
                 answersState[step] = answer;
             }
         }
 
-        // Expandir/colapsar pergunta (mostrar resposta completa)
+        // Expandir/colapsar pergunta
         function toggleQuestionExpand(step) {
             const answerElement = document.getElementById(`answer-${step}`);
             const answer = answersState[step];
@@ -281,12 +316,10 @@
             const isExpanded = answerElement.dataset.expanded === 'true';
             
             if (isExpanded) {
-                // Colapsar
                 const truncated = answer.length > 60 ? answer.substring(0, 60) + '...' : answer;
                 answerElement.innerHTML = `<span class="text-gray-700">${truncated}</span>`;
                 answerElement.dataset.expanded = 'false';
             } else {
-                // Expandir
                 answerElement.innerHTML = `<span class="text-gray-700">${answer}</span>`;
                 answerElement.dataset.expanded = 'true';
             }
@@ -299,7 +332,7 @@
             sidebarProgressText.textContent = `${answered}/${total}`;
         }
 
-        // Toggle sidebar no mobile
+        // Toggle sidebar mobile
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.add('open');
             sidebarOverlay.classList.add('open');
@@ -315,11 +348,156 @@
             sidebarOverlay.classList.remove('open');
         });
 
-        // Adicionar mensagem ao chat
-        function addMessage(text, isBot = true, isError = false, step = null) {
+        // ================================================================
+        // FUNÇÕES DE FEEDBACK
+        // ================================================================
+
+        function sendFeedback(eventId, feedbackType, buttonElement) {
+            const boId = currentBoId || 'BO-TEMP-' + sessionId;
+			
+			// ✅ BLOQUEAR DUPLO CLIQUE
+			if (buttonElement.disabled) {
+				return; // Já está processando
+			}
+			
+			// ✅ CAPTURAR TEXTO DA MENSAGEM
+			const messageDiv = buttonElement.closest('.message-container');
+			const messageText = messageDiv ? messageDiv.dataset.currentText : '';
+			const step = messageDiv ? messageDiv.dataset.step : null;
+			
+            if (!boId) {
+                console.error('BO ID não disponível');
+                showToast('❌ Aguarde inicialização...');
+                return;
+            }
+            
+            if (buttonElement) {
+                buttonElement.classList.add('clicked');
+                buttonElement.disabled = true;
+            }
+            
+            fetch(`${API_URL}/feedback`, {
+                    method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						bo_id: boId,
+						event_id: eventId,
+						feedback_type: feedbackType,
+						context: {  // ✅ ADICIONAR CONTEXT
+							step: step,
+							message: messageText
+						},
+                    metadata: {
+                        screen_resolution: `${screen.width}x${screen.height}`,
+                        viewport: `${window.innerWidth}x${window.innerHeight}`,
+                        platform: navigator.platform,
+                        language: navigator.language,
+                        user_agent: navigator.userAgent
+                    }
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    showToast(feedbackType === 'positive' ? '✅ Obrigado pelo feedback!' : '👍 Feedback enviado!');
+                } else {
+                    throw new Error('Erro ao enviar feedback');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showToast('❌ Erro ao enviar feedback');
+                if (buttonElement) {
+                    buttonElement.classList.remove('clicked');
+                    buttonElement.disabled = false;
+                }
+            });
+        }
+
+        function openFeedbackModal(eventId, messageText, step, buttonElement) {
+            const messageDiv = buttonElement.closest('.message-container');
+            const currentText = messageDiv ? (messageDiv.dataset.currentText || messageText) : messageText;
+            
+            const message = prompt(`💬 Feedback sobre: "${currentText}"\n\nO que aconteceu? (Descreva o problema ou sugestão)`);
+            
+            if (message && message.trim()) {
+                sendDetailedFeedback(eventId, message, step, currentText, buttonElement);
+            }
+        }
+
+        function sendDetailedFeedback(eventId, userMessage, step, contextMessage, buttonElement) {
+            const boId = currentBoId || 'BO-TEMP-' + sessionId;
+            
+            if (!boId) {
+                showToast('❌ BO ID não disponível');
+                return;
+            }
+            
+            if (buttonElement) {
+                buttonElement.classList.add('clicked');
+                buttonElement.disabled = true;
+            }
+            
+            fetch(`${API_URL}/feedback`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bo_id: boId,
+                    event_id: eventId,
+                    feedback_type: 'negative',
+                    category: 'bug',
+                    user_message: userMessage,
+                    context: {
+                        step: step,
+                        message: contextMessage
+                    },
+                    metadata: {
+                        screen_resolution: `${screen.width}x${screen.height}`,
+                        viewport: `${window.innerWidth}x${window.innerHeight}`,
+                        platform: navigator.platform,
+                        language: navigator.language,
+                        user_agent: navigator.userAgent,
+                        timestamp: new Date().toISOString()
+                    }
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    showToast('✅ Feedback detalhado enviado! Obrigado!');
+                } else {
+                    throw new Error('Erro ao enviar feedback');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showToast('❌ Erro ao enviar feedback');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity';
+            toast.style.opacity = '0';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.style.opacity = '1', 10);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ================================================================
+        // FUNÇÕES DO CHAT
+        // ================================================================
+
+        function addMessage(text, isBot = true, isError = false, step = null, eventId = null) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `flex ${isBot ? 'justify-start' : 'justify-end'} fade-in`;
+            messageDiv.className = `flex ${isBot ? 'justify-start' : 'justify-end'} message-container fade-in`;
             messageDiv.dataset.step = step;
+            messageDiv.dataset.currentText = text;
+            if (eventId) messageDiv.dataset.eventId = eventId;
             
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = `max-w-[80%] p-3 rounded-lg ${
@@ -342,7 +520,7 @@
             textSpan.className = 'flex-1';
             contentDiv.appendChild(textSpan);
             
-            // Botão editar para mensagens do usuário
+            // Botão editar
             if (!isBot && !isError && step) {
                 const editButton = document.createElement('button');
                 editButton.innerHTML = '✏️ Editar';
@@ -352,12 +530,38 @@
             }
             
             bubbleDiv.appendChild(contentDiv);
+            
+            // Botões de feedback
+            if (eventId) {
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback-buttons flex gap-2 mt-2 justify-end';
+                
+                const thumbsUp = document.createElement('button');
+                thumbsUp.innerHTML = '👍';
+                thumbsUp.className = 'feedback-btn';
+                thumbsUp.title = 'Feedback positivo';
+                thumbsUp.onclick = function() {
+                    sendFeedback(eventId, 'positive', this);
+                };
+                
+                const thumbsDown = document.createElement('button');
+                thumbsDown.innerHTML = '👎';
+                thumbsDown.className = 'feedback-btn';
+                thumbsDown.title = 'Reportar problema';
+                thumbsDown.onclick = function() {
+                    openFeedbackModal(eventId, text, step, this);
+                };
+                
+                feedbackDiv.appendChild(thumbsUp);
+                feedbackDiv.appendChild(thumbsDown);
+                bubbleDiv.appendChild(feedbackDiv);
+            }
+            
             messageDiv.appendChild(bubbleDiv);
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Editar resposta anterior
         function editAnswer(step, currentText, messageDiv, bubbleDiv) {
             const contentDiv = bubbleDiv.querySelector('div');
             const textSpan = contentDiv.querySelector('span');
@@ -385,7 +589,7 @@
             saveButton.className = 'text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded transition-colors';
             
             const cancelButton = document.createElement('button');
-            cancelButton.innerHTML = '✖ Cancelar';
+            cancelButton.innerHTML = '❌ Cancelar';
             cancelButton.className = 'text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition-colors ml-1';
             
             contentDiv.innerHTML = '';
@@ -436,14 +640,16 @@
                     
                     errorDiv.classList.add('hidden');
                     textSpan.textContent = newText;
-                    
-                    // Atualizar sidebar também
-                    updateSidebarAnswer(step, newText);
+                    messageDiv.dataset.currentText = newText;
                     
                     contentDiv.innerHTML = '';
                     contentDiv.appendChild(textSpan);
                     contentDiv.appendChild(editButton);
                     editButton.style.display = 'block';
+                    
+                    // Atualizar sidebar com nova resposta E marcar como answered
+                    updateSidebarAnswer(step, newText);
+                    updateSidebarStatus(step, 'answered');
                     
                     const successDiv = document.createElement('div');
                     successDiv.className = 'text-sm text-green-300 mt-1';
@@ -451,6 +657,44 @@
                     bubbleDiv.appendChild(successDiv);
                     
                     setTimeout(() => successDiv.remove(), 2000);
+                    
+                    // Bug #2 fix: Remover erro e mostrar próxima pergunta
+                    let nextElement = messageDiv.nextElementSibling;
+                    let hadError = false;
+                    
+                    while (nextElement) {
+                        const errorDiv = nextElement.querySelector('.bg-red-100');
+                        if (errorDiv) {
+                            nextElement.remove();
+                            hadError = true;
+                            break;
+                        }
+                        nextElement = nextElement.nextElementSibling;
+                    }
+                    
+                    if (hadError) {
+                        const stepNum = parseInt(step.split('.')[1]);
+                        
+                        if (stepNum < 6) {
+                            const nextStep = `1.${stepNum + 1}`;
+                            const nextQuestion = QUESTIONS[nextStep];
+                            
+                            if (nextQuestion) {
+                                // CRÍTICO: Atualizar currentQuestionStep ANTES de mostrar pergunta
+                                currentQuestionStep = nextStep;
+                                
+                                // Atualizar sidebar
+                                updateSidebarStatus(nextStep, 'current');
+                                updateSidebarProgress(stepNum, 6);
+                                
+                                // Mostrar próxima pergunta
+                                addMessage(nextQuestion, true, false, nextStep, `evt_${nextStep}_after_edit`);
+                                
+                                // Habilitar input
+                                enableInput();
+                            }
+                        }
+                    }
                     
                 } catch (error) {
                     errorDiv.textContent = '⚠️ Erro: ' + error.message;
@@ -472,7 +716,7 @@
         function showLoading() {
             const loadingDiv = document.createElement('div');
             loadingDiv.id = 'loading';
-            loadingDiv.className = 'flex justify-start fade-in';
+            loadingDiv.className = 'flex justify-start';
             loadingDiv.innerHTML = '<div class="bg-gray-200 text-gray-600 p-3 rounded-lg"><span class="animate-pulse">Processando...</span></div>';
             chatContainer.appendChild(loadingDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -496,7 +740,6 @@
             isWaitingResponse = false;
         }
 
-        // Iniciar sessão
         async function startSession() {
             try {
                 const response = await fetch(`${API_URL}/new_session`, { method: 'POST' });
@@ -504,85 +747,180 @@
                 
                 const data = await response.json();
                 sessionId = data.session_id;
+                currentBoId = data.bo_id;
                 currentQuestionStep = '1.1';
                 
-                addMessage('Olá! Vou te ajudar a fazer o BO de tráfico de drogas, simples, técnico e dentro da lei. Vou perguntar uma coisa por vez. Responda com o que você viu, sem arredondar. Se algo não se aplicar, escreva "NÃO".');
+                console.log('Sessão iniciada:', { sessionId, currentBoId });
+                
+                addMessage('Olá! Vou te ajudar a fazer o BO de tráfico de drogas, simples, técnico e dentro da lei. Vou perguntar uma coisa por vez. Responda com o que você viu, sem arredondar. Se algo não se aplicar, escreva "NÃO".', true, false, null, 'welcome');
                 
                 setTimeout(() => {
-                    addMessage(data.first_question);
+                    addMessage(data.first_question, true, false, '1.1', 'evt_first_question');
                     enableInput();
                     updateSidebarProgress(0, 6);
                 }, 500);
                 
             } catch (error) {
-                addMessage('✖ Erro ao conectar com o servidor. Verifique se o backend está rodando.');
+                addMessage('❌ Erro ao conectar com o servidor. Verifique se o backend está rodando.');
                 console.error(error);
             }
         }
 
-        // Enviar mensagem
         async function sendMessage() {
-            const message = userInput.value.trim();
-            if (!message || isWaitingResponse) return;
-            
-            const stepToUse = currentQuestionStep;
-            addMessage(message, false, false, stepToUse);
-            userInput.value = '';
-            
-            disableInput();
-            showLoading();
-            
-            try {
-                const response = await fetch(`${API_URL}/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        session_id: sessionId,
-                        message: message,
-                        llm_provider: 'gemini'
-                    })
-                });
+			const message = userInput.value.trim();
+			if (!message || isWaitingResponse) return;
+			
+			// Capturar step ANTES de enviar
+			const displayStep = currentQuestionStep;
+			
+			// ✅ ADICIONAR AQUI (depois da linha 774, antes do addMessage):
+			// Auto-completar ano se faltando (step 1.1)
+			let finalMessage = message;
+			if (displayStep === '1.1' && !/20\d{2}/.test(message)) {
+				finalMessage = message + ` de ${new Date().getFullYear()}`;
+			}
+			
+			addMessage(finalMessage, false, false, displayStep);  // ← USAR finalMessage
+			userInput.value = '';
+			
+			disableInput();
+			showLoading();
+			
+			try {
+				const response = await fetch(`${API_URL}/chat`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						session_id: sessionId,
+						message: finalMessage,  // ← USAR finalMessage AQUI TAMBÉM
+						llm_provider: 'gemini'
+					})
+				});
                 
                 if (!response.ok) throw new Error('Erro ao processar resposta');
                 
                 const data = await response.json();
                 removeLoading();
                 
+                if (data.bo_id) {
+                    currentBoId = data.bo_id;
+                }
+                
+                // CRÍTICO: Usar step do BACKEND, não da variável local
+                // Isso garante que após edição, usamos o step correto
+                const actualStep = data.validation_error ? displayStep : (data.current_step || displayStep);
+                
+                // Atualizar sidebar com resposta (usar displayStep que foi enviado)
+                updateSidebarAnswer(displayStep, message);
+                
+                // Anexar event_id
+                if (data.event_id) {
+                    const lastUserMessage = chatContainer.querySelector('.message-container:last-of-type');
+                    if (lastUserMessage) {
+                        lastUserMessage.dataset.eventId = data.event_id;
+                        
+                        const bubbleDiv = lastUserMessage.querySelector('.bg-blue-600');
+                        if (bubbleDiv && !bubbleDiv.querySelector('.feedback-buttons')) {
+                            const feedbackDiv = document.createElement('div');
+                            feedbackDiv.className = 'feedback-buttons flex gap-2 mt-2 justify-end';
+                            
+                            const thumbsUp = document.createElement('button');
+                            thumbsUp.innerHTML = '👍';
+                            thumbsUp.className = 'feedback-btn';
+                            thumbsUp.onclick = function() {
+                                sendFeedback(data.event_id, 'positive', this);
+                            };
+                            
+                            const thumbsDown = document.createElement('button');
+                            thumbsDown.innerHTML = '👎';
+                            thumbsDown.className = 'feedback-btn';
+                            thumbsDown.onclick = function() {
+                                openFeedbackModal(data.event_id, message, displayStep, this);
+                            };
+                            
+                            feedbackDiv.appendChild(thumbsUp);
+                            feedbackDiv.appendChild(thumbsDown);
+                            bubbleDiv.appendChild(feedbackDiv);
+                        }
+                    }
+                }
+                
+                // Atualizar currentQuestionStep com valor do backend
+                if (!data.is_section_complete && data.current_step) {
+                    currentQuestionStep = data.current_step;
+                }
+                
                 if (data.validation_error) {
-                    addMessage('⚠️ ' + data.validation_error, true, true);
+                    addMessage('⚠️ ' + data.validation_error, true, true, null, data.event_id || 'evt_validation_error');
                     enableInput();
                     return;
                 }
                 
-                // Atualizar sidebar com resposta
-                updateSidebarAnswer(stepToUse, message);
-                updateSidebarStatus(stepToUse, 'answered');
+                const progress = data.current_step === 'complete' ? 6 : parseInt(data.current_step.split('.')[1]);
                 
-                // Calcular progresso
-                const progress = data.current_step === 'complete' ? 6 : parseInt(data.current_step.split('.')[1]) - 1;
+                // Atualizar sidebar com step que FOI VALIDADO (displayStep)
+                updateSidebarStatus(displayStep, 'answered');
                 updateSidebarProgress(progress, 6);
                 
-                // Atualizar próximo step se não completou
-                if (!data.is_section_complete && data.current_step) {
-                    currentQuestionStep = data.current_step;
-                    updateSidebarStatus(currentQuestionStep, 'current');
-                }
-                
                 if (data.is_section_complete) {
-                    addMessage('✅ Todas as perguntas respondidas! Gerando texto...');
+                    addMessage('✅ Todas as perguntas respondidas! Gerando texto...', true, false, null, 'evt_generating');
                     setTimeout(() => {
                         generatedText.textContent = data.generated_text;
                         resultContainer.classList.remove('hidden');
+                        
+                        // Criar botões de feedback DENTRO do result-container
+                        const finalEventId = 'evt_text_generated_' + Date.now();
+                        
+                        // Verificar se já tem botões (evitar duplicação)
+                        let feedbackDiv = resultContainer.querySelector('.feedback-section');
+                        
+                        if (!feedbackDiv) {
+                            feedbackDiv = document.createElement('div');
+                            feedbackDiv.className = 'feedback-section mt-3 pt-3 border-t border-green-300 flex items-center justify-between';
+                            
+                            const textDiv = document.createElement('div');
+                            textDiv.className = 'text-sm text-green-700';
+                            textDiv.textContent = 'Como foi o texto gerado?';
+                            
+                            const buttonsDiv = document.createElement('div');
+                            buttonsDiv.className = 'flex gap-2';
+                            
+                            const thumbsUp = document.createElement('button');
+                            thumbsUp.innerHTML = '👍';
+                            thumbsUp.className = 'feedback-btn';
+                            thumbsUp.title = 'Texto bom!';
+                            thumbsUp.onclick = function() {
+                                sendFeedback(finalEventId, 'positive', this);
+                            };
+                            
+                            const thumbsDown = document.createElement('button');
+                            thumbsDown.innerHTML = '👎';
+                            thumbsDown.className = 'feedback-btn';
+                            thumbsDown.title = 'Reportar problema no texto';
+                            thumbsDown.onclick = function() {
+                                openFeedbackModal(finalEventId, data.generated_text.substring(0, 100) + '...', 'final', this);
+                            };
+                            
+                            buttonsDiv.appendChild(thumbsUp);
+                            buttonsDiv.appendChild(thumbsDown);
+                            
+                            feedbackDiv.appendChild(textDiv);
+                            feedbackDiv.appendChild(buttonsDiv);
+                            
+                            resultContainer.appendChild(feedbackDiv);
+                        }
+                        
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }, 1000);
                 } else {
-                    addMessage(data.question);
+                    updateSidebarStatus(currentQuestionStep, 'current');
+                    addMessage(data.question, true, false, currentQuestionStep, data.event_id);
                     enableInput();
                 }
                 
             } catch (error) {
                 removeLoading();
-                addMessage('✖ Erro ao processar sua resposta. Tente novamente.');
+                addMessage('❌ Erro ao processar sua resposta. Tente novamente.');
                 console.error(error);
                 enableInput();
             }

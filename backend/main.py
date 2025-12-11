@@ -13,12 +13,12 @@ try:
     from state_machine import BOStateMachine
     from llm_service import LLMService
     from validator import ResponseValidator
-    from logger import BOLogger
+    from logger import BOLogger, now_brasilia
 except ImportError:
     from backend.state_machine import BOStateMachine
     from backend.llm_service import LLMService
     from backend.validator import ResponseValidator
-    from backend.logger import BOLogger
+    from logger import BOLogger, now_brasilia
 
 # Versão do sistema
 APP_VERSION = "0.4.0"

@@ -20,10 +20,11 @@ def now_brasilia():
     return datetime.now(BRASILIA_TZ)
 
 # Detectar ambiente
-if os.getenv("RENDER"):
-    # Produção: PostgreSQL no Render
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+    # Produção: PostgreSQL (Render fornece DATABASE_URL)
+    if DATABASE_URL.startswith("postgres://"):
         # Render usa postgres://, mas SQLAlchemy precisa postgresql://
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 else:

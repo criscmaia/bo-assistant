@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import Tuple, Optional
 
 class ResponseValidator:
@@ -23,8 +24,8 @@ class ResponseValidator:
         "1.3": {
             "min_length": 10,
             "forbidden_words": ["tráfico"],  # Se só responder "tráfico", é muito vago
-            "examples": ["Tráfico de drogas", "Flagrante de tráfico de entorpecentes"],
-            "error_message": "Seja mais específico. Ex: 'Tráfico de drogas' ou 'Flagrante de tráfico de entorpecentes'"
+            "examples": ["Ligação ao 190", "Denúncia anônima", "Incursão", "Ordem do comandante", "Operação NOME"],
+            "error_message": "Seja mais específico. Ex: Ligação ao 190. Denúncia anônima. Incursão. Ordem do comandante. Operação \"NOME\""
         },
         "1.4": {
             "min_length": 20,
@@ -88,7 +89,7 @@ class ResponseValidator:
         # Validação customizada para data/hora (1.1)
         if rules.get("custom_check") == "datetime":
             import re
-            from datetime import datetime as dt
+            from datetime import datetime as dt, timedelta
             
             # Verificar se tem formato de data (números e barras OU palavras como "março")
             has_date = "/" in answer or any(mes in answer.lower() for mes in [
@@ -129,9 +130,14 @@ class ResponseValidator:
                 
                 # Validar dia usando datetime (valida dias por mês automaticamente)
                 try:
-                    dt(year, month, day)
+                    input_date = dt(year, month, day, hour, minute)
                 except ValueError:
                     return False, f"Data inválida ({day}/{month:02d}/{year}). Verifique o dia para este mês."
+                
+                # Validar se data/hora não é futura (com margem de 5 minutos)
+                now = dt.now() + timedelta(minutes=5)
+                if input_date > now:
+                    return False, "Data/hora futura não permitida. A ocorrência deve ter acontecido no passado."
             
             # Verificar se tem ano (aviso, mas não bloqueia)
             has_year = bool(re.search(r'20\d{2}', answer))

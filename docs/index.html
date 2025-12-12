@@ -996,6 +996,19 @@
             sendButton.disabled = false;
             userInput.focus();
             isWaitingResponse = false;
+            
+            // Sugerir data/hora atual para pergunta 1.1
+            if (currentQuestionStep === '1.1' && userInput.value === '') {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                const hour = String(now.getHours()).padStart(2, '0');
+                const minute = String(now.getMinutes()).padStart(2, '0');
+                
+                userInput.value = `${day}/${month}/${year}, ${hour}h${minute}`;
+                userInput.select(); // Seleciona o texto para facilitar edição
+            }
         }
 
         async function startSession() {

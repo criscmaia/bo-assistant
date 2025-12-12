@@ -1,34 +1,34 @@
-# 📋 BO Assistant - Assistente para Boletins de Ocorrência
+# 📋 BO Inteligente
 
-Sistema de auxílio à elaboração de Boletins de Ocorrência policiais de tráfico de drogas, utilizando IA para gerar textos seguindo as normas técnicas e jurídicas estabelecidas.
+Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utilizando IA para gerar textos técnicos seguindo as normas jurídicas estabelecidas.
 
 ---
 
 ## 🚀 Acessar Sistema
 
-- **🌐 Frontend (Interface):** https://criscmaia.github.io/bo-assistant/
-- **⚙️ Backend (API):** https://bo-assistant-backend.onrender.com
+| Ambiente | URL |
+|----------|-----|
+| 🌐 **Frontend** | https://criscmaia.github.io/bo-assistant/ |
+| ⚙️ **Backend API** | https://bo-assistant-backend.onrender.com |
+| 📊 **Dashboard de Logs** | https://criscmaia.github.io/bo-assistant/logs.html |
 
 ---
 
 ## 📊 Status Atual
 
-### ✅ **v0.1.6** - POC (Proof of Concept)
+### ✅ v0.4.0 - Sistema de Logs e Dashboard
 
-**Funcionalidades Implementadas:**
+**Funcionalidades:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas)
 - ✅ Validação inteligente de respostas
 - ✅ Enriquecimento automático de data (dia da semana + ano)
 - ✅ Geração de texto usando Gemini 2.5 Flash
-- ✅ Interface de chat responsiva
-- ✅ Não inventa informações (usa apenas dados fornecidos)
-
-**Em Desenvolvimento:**
-- 🔄 Seções 2-8 (Abordagem Veicular, Campana, etc.)
-- 🔄 Comparação de múltiplos LLMs (Claude, GPT-4, etc.)
-- 🔄 Edição de respostas anteriores
-- 🔄 Salvamento de rascunhos
-- 🔄 Exportação em formato Word/PDF
+- ✅ Edição de respostas anteriores
+- ✅ Sistema completo de logs (PostgreSQL/SQLite)
+- ✅ Sistema de feedback (👍👎) em todas as mensagens
+- ✅ Dashboard de logs para validação
+- ✅ Sidebar com progresso visual (1/6, 2/6...)
+- ✅ Interface responsiva (desktop e mobile)
 
 ---
 
@@ -42,29 +42,36 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais de trá
 
 ### ⏰ Nota sobre Performance
 
-O backend está hospedado no plano gratuito do Render e "dorme" após 15 minutos de inatividade.  
-**A primeira requisição pode demorar 30-60 segundos** enquanto o servidor acorda.  
-Requisições subsequentes são instantâneas.
+O backend está hospedado no plano gratuito do Render e "dorme" após 15 minutos de inatividade. A primeira requisição pode demorar 30-60 segundos enquanto o servidor acorda. Requisições subsequentes são instantâneas.
 
 ---
 
 ## 🛠️ Tecnologias
 
 ### Backend
-- **FastAPI** - Framework web Python
-- **Python 3.13** - Linguagem
-- **Gemini 2.5 Flash** - LLM para geração de texto
-- **Uvicorn** - Servidor ASGI
+| Tecnologia | Uso |
+|------------|-----|
+| **FastAPI** | Framework web Python |
+| **Python 3.13** | Linguagem |
+| **Gemini 2.5 Flash** | LLM para geração de texto |
+| **SQLAlchemy** | ORM para banco de dados |
+| **PostgreSQL** | Banco de dados em produção |
+| **SQLite** | Banco de dados local |
+| **Uvicorn** | Servidor ASGI |
 
 ### Frontend
-- **HTML5 + JavaScript Vanilla** - Interface
-- **Tailwind CSS** - Estilização (via CDN)
-- **GitHub Pages** - Hospedagem
+| Tecnologia | Uso |
+|------------|-----|
+| **HTML5** | Estrutura |
+| **JavaScript Vanilla** | Lógica |
+| **Tailwind CSS** | Estilização (via CDN) |
 
 ### Infraestrutura
-- **Render** - Hospedagem do backend (free tier)
-- **GitHub Pages** - Hospedagem do frontend
-- **Git/GitHub** - Controle de versão
+| Serviço | Uso |
+|---------|-----|
+| **Render** | Backend + PostgreSQL (free tier) |
+| **GitHub Pages** | Frontend estático |
+| **GitHub** | Controle de versão |
 
 ---
 
@@ -73,17 +80,75 @@ Requisições subsequentes são instantâneas.
 ```
 bo-assistant/
 ├── backend/
-│   ├── main.py              # API FastAPI
-│   ├── state_machine.py     # Gerenciamento de perguntas
-│   ├── llm_service.py       # Integração com LLMs
+│   ├── main.py              # API FastAPI (endpoints)
+│   ├── state_machine.py     # Gerenciamento de fluxo de perguntas
+│   ├── llm_service.py       # Integração com Gemini
 │   ├── validator.py         # Validação de respostas
-│   ├── requirements.txt     # Dependências Python
+│   ├── logger.py            # Sistema de logs (SQLite/PostgreSQL)
+│   ├── requirements.txt     # Dependências de produção
+│   ├── requirements-dev.txt # Dependências de desenvolvimento
+│   ├── automate_release.py  # Automação de screenshots/vídeo
+│   ├── test_scenarios.json  # Cenários de teste automatizado
+│   ├── README_AUTOMACAO.md  # Documentação da automação
+│   ├── env.example          # Template de variáveis de ambiente
 │   └── .env                 # Variáveis de ambiente (não versionado)
-├── docs/                    # Frontend (GitHub Pages)
-│   └── index.html           # Interface do chat
-├── .gitignore
+├── docs/
+│   ├── index.html           # Interface principal do chat
+│   ├── logs.html            # Dashboard de logs
+│   └── screenshots/         # Screenshots por versão
+├── .gitignore               # Arquivos ignorados
+├── CHANGELOG.md             # Histórico de versões
+├── README.md                # Este arquivo
 ├── render.yaml              # Configuração do Render
-└── README.md
+└── deploy_instructions_Render.md  # Guia de deploy
+```
+
+---
+
+## 🔌 API Endpoints
+
+### Principais
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/health` | Status do servidor |
+| `POST` | `/new_session` | Inicia nova sessão de BO |
+| `POST` | `/chat` | Processa resposta do usuário |
+| `PUT` | `/chat/{session_id}/answer/{step}` | Edita resposta anterior |
+| `POST` | `/feedback` | Registra feedback (👍👎) |
+| `DELETE` | `/session/{session_id}` | Deleta sessão |
+| `GET` | `/session/{session_id}/status` | Status da sessão |
+
+### Logs e Estatísticas
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/api/stats` | Estatísticas gerais |
+| `GET` | `/api/logs` | Lista todas as sessões |
+| `GET` | `/api/logs/{bo_id}` | Detalhes de uma sessão |
+| `GET` | `/api/feedbacks` | Lista feedbacks |
+
+### Exemplos de Uso
+
+**Iniciar sessão:**
+```bash
+curl -X POST https://bo-assistant-backend.onrender.com/new_session
+```
+
+**Resposta:**
+```json
+{
+  "session_id": "uuid",
+  "bo_id": "BO-20251211-abc123",
+  "first_question": "Dia, data e hora do acionamento."
+}
+```
+
+**Enviar resposta:**
+```bash
+curl -X POST https://bo-assistant-backend.onrender.com/chat \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "uuid", "message": "22/03/2025, às 19h03", "llm_provider": "gemini"}'
 ```
 
 ---
@@ -100,10 +165,9 @@ bo-assistant/
 ```bash
 # Clonar repositório
 git clone https://github.com/criscmaia/bo-assistant.git
-cd bo-assistant
+cd bo-assistant/backend
 
 # Criar ambiente virtual
-cd backend
 python -m venv venv
 
 # Ativar ambiente virtual
@@ -112,12 +176,12 @@ venv\Scripts\activate
 # Mac/Linux:
 source venv/bin/activate
 
-# Instalar dependências
-pip install -r requirements.txt
+# Instalar dependências de desenvolvimento
+pip install -r requirements-dev.txt
 
 # Configurar API key
-# Criar arquivo .env na pasta backend com:
-GEMINI_API_KEY=sua_chave_aqui
+cp env.example .env
+# Editar .env e adicionar: GEMINI_API_KEY=sua_chave_aqui
 
 # Rodar servidor
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
@@ -126,74 +190,33 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ### Setup Frontend
 
 ```bash
-# Em outro terminal, na pasta frontend
+# Em outro terminal, na pasta docs
 cd ../docs
 python -m http.server 3000
 
 # Acessar: http://localhost:3000
 ```
 
----
+### Automação de Screenshots
 
-## 📖 Documentação Técnica
+```bash
+# No terminal do backend (venv ativado)
+python automate_release.py --version v0.4.0
 
-### API Endpoints
-
-**GET** `/health`  
-Retorna status do servidor
-```json
-{"status": "ok"}
+# Sem vídeo (mais rápido)
+python automate_release.py --version v0.4.0 --no-video
 ```
-
-**POST** `/new_session`  
-Inicia nova sessão de BO
-```json
-{
-  "session_id": "uuid",
-  "first_question": "Dia, data e hora do acionamento."
-}
-```
-
-**POST** `/chat`  
-Processa resposta do usuário
-```json
-{
-  "session_id": "uuid",
-  "message": "22/03/2025, às 19h03",
-  "llm_provider": "gemini"
-}
-```
-
----
-
-## 🤝 Contribuindo
-
-Este projeto está em desenvolvimento ativo. Contribuições são bem-vindas!
-
-### Como Contribuir
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/NovaFuncionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
-5. Abra um Pull Request
 
 ---
 
 ## 📝 Roadmap
 
-### Sprint 2 - Comparação de LLMs
-- [ ] Adicionar Claude (Anthropic)
-- [ ] Adicionar GPT-4 (OpenAI)
-- [ ] Dashboard de comparação
-- [ ] Métricas de qualidade (BLEU, ROUGE, etc.)
+### Fase 1 - Validação e Polish
+- [ ] Validação com casos reais
+- [ ] Salvar rascunho (localStorage)
+- [ ] Nova identidade visual
 
-### Sprint 3 - Funcionalidades UX
-- [ ] Editar resposta anterior
-- [ ] Salvar rascunho
-- [ ] Histórico de BOs gerados
-- [ ] Exportar para Word/PDF
-
-### Sprint 4 - Seções Restantes
+### Fase 2 - Seções Restantes
 - [ ] Seção 2: Abordagem a Veículo
 - [ ] Seção 3: Campana
 - [ ] Seção 4: Entrada em Domicílio
@@ -202,32 +225,28 @@ Este projeto está em desenvolvimento ativo. Contribuições são bem-vindas!
 - [ ] Seção 7: Apreensões
 - [ ] Seção 8: Condução
 
-### Futuro
-- [ ] Sistema de login/autenticação
-- [ ] Múltiplos tipos de BO (furto, roubo, homicídio)
+### Fase 3 - Autenticação e Qualidade
+- [ ] Sistema de autenticação
+- [ ] Comparação de LLMs
+- [ ] Exportação PDF
+
+### Fase 4 - Expansão
+- [ ] Múltiplos tipos de BO
 - [ ] Integração com sistemas da PM
 - [ ] Aplicativo mobile
 
 ---
 
-## 👥 Autores
+## 👥 Equipe
 
-- **Cristiano Maia** - Delivery Manager & Tech Lead - [@criscmaia](https://github.com/criscmaia)
-- **Claudio Moreira** - Especialista em Redação de BOs & Product Owner
+- **Cristiano Maia** - Delivery Manager & Tech Lead
+- **Claudio Moreira** - Especialista em Redação de BOs & Comercial
 
 ---
 
 ## 📄 Licença
 
 Este projeto está sob licença privada. Todos os direitos reservados.
-
----
-
-## 🙏 Agradecimentos
-
-- Documentação técnica e modelos de redação: Claudio Moreira
-- Suporte técnico em IA: Claude (Anthropic)
-- Comunidade FastAPI e Google Gemini
 
 ---
 
@@ -239,6 +258,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.1.6  
-**Última atualização:** 01/12/2025  
-**Status:** 🟢 Em desenvolvimento ativo
+**Versão:** 0.4.0  
+**Última atualização:** 12/12/2025  
+**Status:** 🟢 Em produção

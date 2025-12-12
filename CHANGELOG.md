@@ -1,146 +1,76 @@
-# Changelog
+# Changelog v0.4.1
 
-Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
-
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
-e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
-
----
-
-## [0.3.2] - 2024-12-05
+## [0.4.1] - 2025-12-12
 
 ### ✨ Adicionado
-- **Sidebar com histórico visual de perguntas/respostas**
-  - Status colorido: ⏳ Atual (azul) | ✓ Respondida (verde) | 🔢 Pendente (cinza)
-  - Preview de respostas (truncadas em 60 chars, clique para expandir)
-  - Progresso visual "X/6 perguntas" com barra de progresso
-  - Layout responsivo: drawer lateral no mobile com overlay
+- **Sistema de Rascunho Automático (localStorage)**
+  - Salva automaticamente após cada resposta válida
+  - Modal ao carregar página perguntando se deseja continuar rascunho
+  - Preview do rascunho mostrando respostas salvas e data
+  - Expira automaticamente após 7 dias
+  - Limpa automaticamente ao completar o BO
+  - Indicador visual "💾 Rascunho salvo!" na sidebar
+  - Salva também ao fechar aba (beforeunload)
 
-- **Sistema de automação completo**
-  - Script `automate_release.py` para gerar screenshots e vídeos automaticamente
-  - 9 screenshots automáticos (6 desktop + 3 mobile)
-  - Vídeo real com interações gravadas via Playwright (não slideshow)
-  - Digitação visível com delay de 50ms/caractere
-  - Screenshots full-page nos resultados finais
-  - README.md gerado automaticamente com metadados
-  - Documentação completa em `README_AUTOMACAO.md`
-  - Arquivo de configuração `test_scenarios.json`
+- **Melhorias de UX**
+  - Footer atualizado com indicador de salvamento automático
+  - Toast de confirmação ao restaurar rascunho
+  - Sincronização automática com backend ao restaurar
 
-### 🐛 Corrigido
-- **Bug crítico de sincronização:** Perguntas do frontend estavam diferentes do backend
-  - Frontend tinha perguntas antigas e incorretas
-  - Agora sincronizado com `state_machine.py`
-- **Bug da última pergunta:** Pergunta 6/6 não ficava verde após responder
-  - Lógica de atualização de status corrigida
-  - Agora todas as 6 perguntas ficam verdes quando respondidas
+### 🛠 Corrigido
+- Versão atualizada para v0.4.1 no header e footer
 
-### 📸 Screenshots
-- 01-desktop-sidebar-empty.png - Estado inicial
-- 02-desktop-sidebar-progress.png - Progresso 3/6
-- 03-desktop-editando.png - Campo de edição aberto
-- 04-desktop-editando-erro.png - Erro de validação
-- 05-desktop-editando-sucesso.png - Edição salva com sucesso
-- 06-desktop-final.png - Texto gerado (full page)
-- 07-mobile-empty.png - Layout mobile inicial
-- 08-mobile-sidebar-open.png - Sidebar mobile aberta
-- 09-mobile-final.png - Resultado mobile (full page)
-- demo.webm - Vídeo demonstrativo (~70s)
-
-### 🎯 Melhorias
-- Interface mais profissional e intuitiva
-- Feedback visual claro do progresso
-- Facilita revisão de respostas anteriores
-- Automação economiza tempo em futuras releases
+### 🎯 Benefícios
+- **Reduz frustração**: Usuário não perde respostas se fechar aba acidentalmente
+- **Tolerância a falhas**: Se servidor Render "dormir", rascunho permanece local
+- **Experiência contínua**: Pode parar e continuar depois sem perder progresso
 
 ---
 
-## [0.2.1] - 2024-12-05
+## Implementação Técnica
 
-### ✨ Adicionado
-- **Funcionalidade de edição de respostas anteriores**
-  - Botão "✏️ Editar" em cada resposta do usuário
-  - Validação em tempo real ao editar
-  - Feedback visual: "✅ Salvo!" após sucesso
-  - Endpoint `PUT /chat/{session_id}/answer/{step}`
+### Estrutura do Rascunho (localStorage)
+```javascript
+{
+  sessionId: "uuid",           // ID da sessão (referência)
+  boId: "BO-YYYYMMDD-xxxxx",   // ID do BO
+  currentStep: "1.3",          // Próximo step a responder
+  answers: {                    // Respostas salvas
+    "1.1": "22/03/2025, 19h03",
+    "1.2": "Sgt João, prefixo 1234"
+  },
+  savedAt: "2025-12-12T10:30:00Z",  // Timestamp
+  version: "0.4.1"             // Versão do sistema
+}
+```
 
-### 🐛 Corrigido
-- **Imports compatíveis com Render e desenvolvimento local**
-  - Try/except para imports relativos e absolutos
-  - Funciona tanto rodando `main.py` direto quanto via uvicorn
+### Chave no localStorage
+```
+bo_inteligente_draft
+```
 
-### 🔒 Segurança
-- Rotação de API key do Gemini após vazamento
-- `.gitignore` atualizado e verificado
+### Fluxo de Restauração
+1. Ao carregar página, verifica `loadDraft()`
+2. Se existe rascunho válido (< 7 dias), mostra modal
+3. Usuário escolhe "Continuar" ou "Começar Novo"
+4. Se continuar: cria nova sessão no backend, restaura respostas localmente
+5. Sincroniza cada resposta com backend via `/chat`
+6. Mostra próxima pergunta
 
----
-
-## [0.1.6] - 2024-12-02
-
-### ✨ Adicionado
-- **Seção 1 completa:** Contexto da Ocorrência (6 perguntas)
-- **Sistema de validação inteligente**
-  - Valida data/hora com verificação de dia, mês e horário
-  - Valida composição da guarnição (mínimo 15 chars)
-  - Valida natureza do empenho (mais específico que só "tráfico")
-  - Valida endereço completo (logradouro + número + bairro)
-  - Valida contexto do local (mínimo 20 chars)
-  - Valida histórico/facção (30 chars ou "NÃO")
-- **Enriquecimento automático de datas**
-  - Adiciona dia da semana automaticamente
-  - Completa ano atual se omitido
-  - Exemplo: "22/03, 19h03" → "sexta-feira, 22 de março de 2025, às 19h03"
-- **Geração de texto com Gemini 2.5 Flash**
-  - Prompt especializado baseado em documentação do Sgt. Claudio
-  - Nunca inventa informações não fornecidas
-  - Formatação técnica e jurídica correta
-- **Interface de chat responsiva**
-  - Design limpo com Tailwind CSS
-  - Barra de progresso visual
-  - Input com placeholder e botão de enviar
-  - Feedback de loading
-  - Botão de copiar texto gerado
-
-### 🚀 Deploy
-- Backend no Render (free tier): https://bo-assistant-backend.onrender.com
-- Frontend no GitHub Pages: https://criscmaia.github.io/bo-assistant/
-- Build automático via GitHub Actions
-
-### 📚 Documentação
-- README.md completo com instruções de uso
-- Roadmap detalhado com próximas features
-- Documentação da API
-- Guia de desenvolvimento local
+### Arquivos Modificados
+- `docs/index.html` - Frontend com lógica de localStorage
 
 ---
 
-## [0.1.0] - 2024-12-01
+## Como Testar
 
-### ✨ Inicial
-- Setup do projeto
-- Estrutura básica backend (FastAPI) + frontend (HTML/JS)
-- State machine para gerenciar fluxo de perguntas
-- Integração inicial com Gemini API
-- Deploy inicial no Render
-
----
-
-## Tipos de Mudanças
-- **✨ Adicionado** - para novas funcionalidades
-- **🔄 Modificado** - para mudanças em funcionalidades existentes
-- **❌ Depreciado** - para funcionalidades que serão removidas
-- **🗑️ Removido** - para funcionalidades removidas
-- **🐛 Corrigido** - para correção de bugs
-- **🔒 Segurança** - para correções de vulnerabilidades
+1. Responda 2-3 perguntas
+2. Feche a aba do navegador
+3. Abra novamente - deve aparecer modal de rascunho
+4. Clique "Continuar" - deve restaurar respostas
+5. Complete o BO - rascunho deve ser limpo automaticamente
 
 ---
 
-## Links
-- [Repositório](https://github.com/criscmaia/bo-assistant)
-- [Frontend](https://criscmaia.github.io/bo-assistant/)
-- [Backend](https://bo-assistant-backend.onrender.com)
-- [Issues](https://github.com/criscmaia/bo-assistant/issues)
-
----
-
-**Mantido por:** [@criscmaia](https://github.com/criscmaia)  
-**Validação técnica:** Sgt. Claudio Moreira
+**Desenvolvido por:** Claude + Cristiano Maia  
+**Data:** 12/12/2025

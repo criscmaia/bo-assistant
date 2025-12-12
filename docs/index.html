@@ -96,6 +96,16 @@
                 font-size: 24px;
             }
         }
+
+        /* Modal de rascunho */
+        .draft-modal {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -104,7 +114,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.4.0</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.4.1</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -116,6 +126,34 @@
 
         <!-- Overlay para mobile -->
         <div id="sidebar-overlay"></div>
+
+        <!-- Modal de Rascunho Encontrado -->
+        <div id="draft-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="draft-modal bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="text-center mb-4">
+                    <div class="text-4xl mb-2">📄</div>
+                    <h2 class="text-xl font-bold text-gray-800">Rascunho Encontrado!</h2>
+                    <p class="text-gray-600 mt-2">Você tem um BO em andamento. Deseja continuar de onde parou?</p>
+                </div>
+                
+                <div id="draft-preview" class="bg-gray-50 rounded-lg p-3 mb-4 text-sm text-gray-600">
+                    <!-- Preview do rascunho será inserido aqui -->
+                </div>
+                
+                <div class="flex gap-3">
+                    <button id="draft-continue" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors">
+                        ✅ Continuar
+                    </button>
+                    <button id="draft-discard" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold transition-colors">
+                        🗑️ Começar Novo
+                    </button>
+                </div>
+                
+                <p class="text-xs text-gray-400 text-center mt-3">
+                    O rascunho é salvo automaticamente a cada resposta
+                </p>
+            </div>
+        </div>
 
         <!-- Main Content com Sidebar -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 flex gap-4">
@@ -135,6 +173,11 @@
                 <!-- Lista de Perguntas -->
                 <div id="questions-list" class="space-y-3">
                     <!-- Perguntas serão inseridas aqui via JS -->
+                </div>
+
+                <!-- Indicador de salvamento automático -->
+                <div id="autosave-indicator" class="mt-4 text-xs text-gray-400 text-center hidden">
+                    💾 Rascunho salvo automaticamente
                 </div>
 
                 <!-- Botão fechar (apenas mobile) -->
@@ -194,7 +237,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.4.0 | Sistema de Logs Ativo 📊</p>
+            <p>BO Inteligente v0.4.1 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -203,6 +246,9 @@
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:8000' 
             : 'https://bo-assistant-backend.onrender.com';
+        
+        // Chave do localStorage
+        const DRAFT_STORAGE_KEY = 'bo_inteligente_draft';
         
         // Perguntas da Seção 1
         const QUESTIONS = {
@@ -237,6 +283,215 @@
         const questionsList = document.getElementById('questions-list');
         const sidebarProgressBar = document.getElementById('sidebar-progress-bar');
         const sidebarProgressText = document.getElementById('sidebar-progress-text');
+        const autosaveIndicator = document.getElementById('autosave-indicator');
+        
+        // Draft modal elements
+        const draftModal = document.getElementById('draft-modal');
+        const draftPreview = document.getElementById('draft-preview');
+        const draftContinueBtn = document.getElementById('draft-continue');
+        const draftDiscardBtn = document.getElementById('draft-discard');
+
+        // ================================================================
+        // FUNÇÕES DE RASCUNHO (localStorage)
+        // ================================================================
+
+        function saveDraft() {
+            /**
+             * Salva o estado atual no localStorage
+             */
+            const draft = {
+                sessionId: sessionId,
+                boId: currentBoId,
+                currentStep: currentQuestionStep,
+                answers: answersState,
+                savedAt: new Date().toISOString(),
+                version: '0.4.1'
+            };
+            
+            try {
+                localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+                showAutosaveIndicator();
+                console.log('[Draft] Rascunho salvo:', draft);
+            } catch (e) {
+                console.error('[Draft] Erro ao salvar:', e);
+            }
+        }
+
+        function loadDraft() {
+            /**
+             * Carrega rascunho do localStorage
+             * Returns: draft object ou null
+             */
+            try {
+                const draftJson = localStorage.getItem(DRAFT_STORAGE_KEY);
+                if (!draftJson) return null;
+                
+                const draft = JSON.parse(draftJson);
+                
+                // Verificar se tem dados válidos
+                if (!draft.answers || Object.keys(draft.answers).length === 0) {
+                    return null;
+                }
+                
+                // Verificar se não é muito antigo (7 dias)
+                const savedAt = new Date(draft.savedAt);
+                const now = new Date();
+                const diffDays = (now - savedAt) / (1000 * 60 * 60 * 24);
+                
+                if (diffDays > 7) {
+                    console.log('[Draft] Rascunho expirado (> 7 dias)');
+                    clearDraft();
+                    return null;
+                }
+                
+                return draft;
+            } catch (e) {
+                console.error('[Draft] Erro ao carregar:', e);
+                return null;
+            }
+        }
+
+        function clearDraft() {
+            /**
+             * Remove rascunho do localStorage
+             */
+            try {
+                localStorage.removeItem(DRAFT_STORAGE_KEY);
+                console.log('[Draft] Rascunho removido');
+            } catch (e) {
+                console.error('[Draft] Erro ao remover:', e);
+            }
+        }
+
+        function showAutosaveIndicator() {
+            /**
+             * Mostra indicador de salvamento por 2 segundos
+             */
+            autosaveIndicator.classList.remove('hidden');
+            autosaveIndicator.textContent = '💾 Rascunho salvo!';
+            
+            setTimeout(() => {
+                autosaveIndicator.textContent = '💾 Rascunho salvo automaticamente';
+            }, 1500);
+        }
+
+        function formatDraftPreview(draft) {
+            /**
+             * Formata preview do rascunho para o modal
+             */
+            const answeredCount = Object.keys(draft.answers).length;
+            const savedDate = new Date(draft.savedAt);
+            const formattedDate = savedDate.toLocaleDateString('pt-BR') + ' às ' + 
+                                  savedDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            let preview = `<div class="mb-2"><strong>${answeredCount}/6</strong> perguntas respondidas</div>`;
+            preview += `<div class="text-xs text-gray-500 mb-2">Salvo em: ${formattedDate}</div>`;
+            preview += `<div class="border-t pt-2 mt-2">`;
+            
+            // Mostrar respostas salvas (truncadas)
+            for (const [step, answer] of Object.entries(draft.answers)) {
+                const truncated = answer.length > 40 ? answer.substring(0, 40) + '...' : answer;
+                preview += `<div class="text-xs mb-1"><span class="text-gray-500">${step}:</span> ${truncated}</div>`;
+            }
+            
+            preview += `</div>`;
+            return preview;
+        }
+
+        function showDraftModal(draft) {
+            /**
+             * Exibe modal perguntando se quer continuar rascunho
+             */
+            draftPreview.innerHTML = formatDraftPreview(draft);
+            draftModal.classList.remove('hidden');
+        }
+
+        function hideDraftModal() {
+            draftModal.classList.add('hidden');
+        }
+
+        async function restoreFromDraft(draft) {
+            /**
+             * Restaura sessão a partir do rascunho
+             */
+            console.log('[Draft] Restaurando rascunho...');
+            
+            // Restaurar estado
+            answersState = draft.answers;
+            
+            // Iniciar nova sessão no backend (o rascunho é só local)
+            try {
+                const response = await fetch(`${API_URL}/new_session`, { method: 'POST' });
+                if (!response.ok) throw new Error('Erro ao iniciar sessão');
+                
+                const data = await response.json();
+                sessionId = data.session_id;
+                currentBoId = data.bo_id;
+                
+                // Determinar próximo step baseado nas respostas salvas
+                const answeredSteps = Object.keys(answersState).sort();
+                const lastAnsweredStep = answeredSteps[answeredSteps.length - 1];
+                const stepNum = parseInt(lastAnsweredStep.split('.')[1]);
+                
+                if (stepNum >= 6) {
+                    currentQuestionStep = 'complete';
+                } else {
+                    currentQuestionStep = `1.${stepNum + 1}`;
+                }
+                
+                // Mensagem inicial
+                addMessage('Olá! Restaurei seu rascunho. Vou continuar de onde você parou.', true, false, null, 'welcome_restored');
+                
+                // Reconstruir histórico de mensagens no chat
+                for (const [step, answer] of Object.entries(answersState)) {
+                    const question = QUESTIONS[step];
+                    addMessage(question, true, false, step, `evt_restored_q_${step}`);
+                    addMessage(answer, false, false, step);
+                    
+                    // Atualizar sidebar
+                    updateSidebarAnswer(step, answer);
+                    updateSidebarStatus(step, 'answered');
+                    
+                    // Enviar resposta ao backend para sincronizar estado
+                    try {
+                        await fetch(`${API_URL}/chat`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                session_id: sessionId,
+                                message: answer,
+                                llm_provider: 'gemini'
+                            })
+                        });
+                    } catch (e) {
+                        console.warn('[Draft] Erro ao sincronizar resposta:', step, e);
+                    }
+                }
+                
+                // Atualizar progresso
+                const answeredCount = Object.keys(answersState).length;
+                updateSidebarProgress(answeredCount, 6);
+                
+                // Mostrar próxima pergunta se não estiver completo
+                if (currentQuestionStep !== 'complete') {
+                    const nextQuestion = QUESTIONS[currentQuestionStep];
+                    updateSidebarStatus(currentQuestionStep, 'current');
+                    
+                    setTimeout(() => {
+                        addMessage(nextQuestion, true, false, currentQuestionStep, `evt_next_${currentQuestionStep}`);
+                        enableInput();
+                    }, 500);
+                }
+                
+                showToast('✅ Rascunho restaurado com sucesso!');
+                
+            } catch (error) {
+                console.error('[Draft] Erro ao restaurar:', error);
+                showToast('❌ Erro ao restaurar rascunho. Iniciando novo BO.');
+                clearDraft();
+                startSession();
+            }
+        }
 
         // ================================================================
         // FUNÇÕES DA SIDEBAR
@@ -651,6 +906,9 @@
                     updateSidebarAnswer(step, newText);
                     updateSidebarStatus(step, 'answered');
                     
+                    // ✅ SALVAR RASCUNHO após edição
+                    saveDraft();
+                    
                     const successDiv = document.createElement('div');
                     successDiv.className = 'text-sm text-green-300 mt-1';
                     successDiv.textContent = '✅ Salvo!';
@@ -862,7 +1120,13 @@
                 updateSidebarStatus(displayStep, 'answered');
                 updateSidebarProgress(progress, 6);
                 
+                // ✅ SALVAR RASCUNHO após resposta válida
+                saveDraft();
+                
                 if (data.is_section_complete) {
+                    // ✅ LIMPAR RASCUNHO ao completar
+                    clearDraft();
+                    
                     addMessage('✅ Todas as perguntas respondidas! Gerando texto...', true, false, null, 'evt_generating');
                     setTimeout(() => {
                         generatedText.textContent = data.generated_text;
@@ -937,10 +1201,47 @@
             setTimeout(() => copyButton.textContent = '📋 Copiar', 2000);
         });
 
-        // Inicializar
+        // Draft modal event listeners
+        draftContinueBtn.addEventListener('click', async () => {
+            hideDraftModal();
+            const draft = loadDraft();
+            if (draft) {
+                await restoreFromDraft(draft);
+            } else {
+                startSession();
+            }
+        });
+
+        draftDiscardBtn.addEventListener('click', () => {
+            hideDraftModal();
+            clearDraft();
+            startSession();
+        });
+
+        // ================================================================
+        // INICIALIZAÇÃO
+        // ================================================================
+        
         window.addEventListener('load', () => {
             initializeSidebar();
-            startSession();
+            
+            // Verificar se existe rascunho salvo
+            const draft = loadDraft();
+            
+            if (draft) {
+                // Mostrar modal perguntando se quer continuar
+                showDraftModal(draft);
+            } else {
+                // Iniciar nova sessão normalmente
+                startSession();
+            }
+        });
+
+        // Salvar rascunho antes de fechar página
+        window.addEventListener('beforeunload', () => {
+            if (sessionId && Object.keys(answersState).length > 0) {
+                saveDraft();
+            }
         });
     </script>
 </body>

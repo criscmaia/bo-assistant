@@ -16,10 +16,15 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 
 ## 📊 Status Atual
 
-### ✅ v0.4.0 - Sistema de Logs e Dashboard
+### ✅ v0.5.1 - UX Multi-Seção
 
 **Funcionalidades:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas)
+- ✅ Seção 2: Abordagem a Veículo (8 perguntas)
+- ✅ Container persistente de textos gerados (todas seções visíveis)
+- ✅ Numeração completa de perguntas ([1.1], [2.3])
+- ✅ Sidebar com todas 8 seções (completadas, atual, futuras)
+- ✅ Botão "Copiar BO Completo" quando há 2+ seções
 - ✅ Validação inteligente de respostas
 - ✅ Enriquecimento automático de data (dia da semana + ano)
 - ✅ Geração de texto usando Gemini 2.5 Flash
@@ -27,18 +32,19 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 - ✅ Sistema completo de logs (PostgreSQL/SQLite)
 - ✅ Sistema de feedback (👍👎) em todas as mensagens
 - ✅ Dashboard de logs para validação
-- ✅ Sidebar com progresso visual (1/6, 2/6...)
-- ✅ Interface responsiva (desktop e mobile)
+- ✅ Interface responsiva (desktop, tablet e mobile)
 
 ---
 
 ## 🎯 Como Usar
 
 1. Acesse: https://criscmaia.github.io/bo-assistant/
-2. Responda as 6 perguntas sobre a ocorrência
+2. Responda as 6 perguntas da Seção 1 (Contexto da Ocorrência)
 3. O sistema valida cada resposta e pede mais detalhes se necessário
-4. Ao final, o texto da Seção 1 é gerado automaticamente
-5. Clique em "Copiar" para usar o texto no BO oficial
+4. Ao final da Seção 1, o texto é gerado automaticamente
+5. Clique em "Iniciar Seção 2" para continuar (Abordagem a Veículo - 8 perguntas)
+6. Ao final da Seção 2, outro texto é gerado
+7. Use "Copiar BO Completo" para copiar todas as seções de uma vez
 
 ### ⏰ Nota sobre Performance
 
@@ -211,29 +217,14 @@ python automate_release.py --version v0.4.0 --no-video
 
 ## 📝 Roadmap
 
-### Fase 1 - Validação e Polish
-- [ ] Validação com casos reais
-- [ ] Salvar rascunho (localStorage)
-- [ ] Nova identidade visual
+Veja o roadmap completo e detalhado em **[ROADMAP.md](ROADMAP.md)**.
 
-### Fase 2 - Seções Restantes
-- [ ] Seção 2: Abordagem a Veículo
-- [ ] Seção 3: Campana
-- [ ] Seção 4: Entrada em Domicílio
-- [ ] Seção 5: Fundada Suspeita
-- [ ] Seção 6: Reação e Uso da Força
-- [ ] Seção 7: Apreensões
-- [ ] Seção 8: Condução
-
-### Fase 3 - Autenticação e Qualidade
-- [ ] Sistema de autenticação
-- [ ] Comparação de LLMs
-- [ ] Exportação PDF
-
-### Fase 4 - Expansão
-- [ ] Múltiplos tipos de BO
-- [ ] Integração com sistemas da PM
-- [ ] Aplicativo mobile
+### Resumo das próximas fases:
+- ✅ **Fase 1** - Validação e Polimento (v0.4.1 - v0.5.1)
+- 🔄 **Fase 2** - Seções 3-8: Campana, Entrada Domicílio, Fundada Suspeita, Reação, Apreensões, Condução
+- 🔐 **Fase 3** - Autenticação e Qualidade (PDF, múltiplos LLMs)
+- 📊 **Fase 4** - Analytics e Relatórios para Gestores
+- 📱 **Fase 5** - Expansão (múltiplos BOs, mobile)
 
 ---
 
@@ -258,6 +249,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.4.0  
-**Última atualização:** 12/12/2025  
+**Versão:** 0.5.1
+**Última atualização:** 19/12/2025
 **Status:** 🟢 Em produção

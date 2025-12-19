@@ -114,7 +114,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.4.1</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.5.0</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -237,7 +237,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.4.1 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.5.0 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -251,7 +251,7 @@
         const DRAFT_STORAGE_KEY = 'bo_inteligente_draft';
         
         // Perguntas da Seção 1
-        const QUESTIONS = {
+        const SECTION1_QUESTIONS = {
             '1.1': 'Dia, data e hora do acionamento.',
             '1.2': 'Composição da guarnição e prefixo.',
             '1.3': 'Natureza do empenho.',
@@ -259,12 +259,28 @@
             '1.5': 'Local exato da ocorrência (logradouro, número, bairro).',
             '1.6': 'O local é ponto de tráfico? Quais evidências anteriores? Há facção?'
         };
-        
+
+        // Perguntas da Seção 2 (Abordagem a Veículo)
+        const SECTION2_QUESTIONS = {
+            '2.0': 'Havia veículo?',
+            '2.1': 'Marca/modelo/cor/placa.',
+            '2.2': 'Onde foi visto?',
+            '2.3': 'Qual policial percebeu e o que viu?',
+            '2.4': 'Como foi dada a ordem de parada?',
+            '2.5': 'Parou ou houve perseguição?',
+            '2.6': 'Como foi a abordagem e busca?',
+            '2.7': 'Haviam irregularidades? Veículo furtado/roubado/clonado?'
+        };
+
+        // Manter compatibilidade com código existente (Seção 1)
+        const QUESTIONS = SECTION1_QUESTIONS;
+
         // Estado da aplicação
         let sessionId = null;
         let currentBoId = null;
         let isWaitingResponse = false;
         let currentQuestionStep = '1.1';
+        let currentSection = 1; // Nova variável para controlar seção atual
         let answersState = {}; // Para armazenar respostas localmente
 
         // Elementos DOM
@@ -305,7 +321,7 @@
                 currentStep: currentQuestionStep,
                 answers: answersState,
                 savedAt: new Date().toISOString(),
-                version: '0.4.1'
+                version: '0.5.0'
             };
             
             try {
@@ -585,6 +601,49 @@
             const percentage = (answered / total) * 100;
             sidebarProgressBar.style.width = `${percentage}%`;
             sidebarProgressText.textContent = `${answered}/${total}`;
+        }
+
+        // Atualizar sidebar para Seção 2
+        function updateSidebarForSection2() {
+            // Atualizar título da sidebar
+            const sidebarTitle = sidebar.querySelector('h2');
+            if (sidebarTitle) {
+                sidebarTitle.textContent = '🚗 Seção 2';
+            }
+
+            // Limpar perguntas antigas
+            questionsList.innerHTML = '';
+
+            // Adicionar perguntas da Seção 2
+            Object.entries(SECTION2_QUESTIONS).forEach(([step, question]) => {
+                const questionItem = document.createElement('div');
+                questionItem.id = `question-item-${step}`;
+                questionItem.className = 'border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors';
+                questionItem.dataset.step = step;
+
+                questionItem.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold mt-0.5" id="icon-${step}">
+                            ${step.split('.')[1]}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-700 mb-1">${question}</p>
+                            <p class="text-xs text-gray-500 truncate" id="answer-${step}">
+                                <span class="italic">Aguardando...</span>
+                            </p>
+                        </div>
+                    </div>
+                `;
+
+                questionItem.addEventListener('click', () => toggleQuestionExpand(step));
+                questionsList.appendChild(questionItem);
+            });
+
+            // Resetar progresso para Seção 2 (8 perguntas: 2.0 a 2.7)
+            updateSidebarProgress(0, 8);
+
+            // Marcar primeira pergunta como current
+            updateSidebarStatus('2.0', 'current');
         }
 
         // Toggle sidebar mobile
@@ -1015,48 +1074,123 @@
             try {
                 const response = await fetch(`${API_URL}/new_session`, { method: 'POST' });
                 if (!response.ok) throw new Error('Erro ao iniciar sessão');
-                
+
                 const data = await response.json();
                 sessionId = data.session_id;
                 currentBoId = data.bo_id;
                 currentQuestionStep = '1.1';
-                
+                currentSection = 1;
+
                 console.log('Sessão iniciada:', { sessionId, currentBoId });
-                
+
                 addMessage('Olá! Vou te ajudar a fazer o BO de tráfico de drogas, simples, técnico e dentro da lei. Vou perguntar uma coisa por vez. Responda com o que você viu, sem arredondar. Se algo não se aplicar, escreva "NÃO".', true, false, null, 'welcome');
-                
+
                 setTimeout(() => {
                     addMessage(data.first_question, true, false, '1.1', 'evt_first_question');
                     enableInput();
                     updateSidebarProgress(0, 6);
                 }, 500);
-                
+
             } catch (error) {
                 addMessage('❌ Erro ao conectar com o servidor. Verifique se o backend está rodando.');
                 console.error(error);
             }
         }
 
+        function updateHeaderSection() {
+            const headerSubtitle = document.querySelector('header p');
+            if (headerSubtitle) {
+                if (currentSection === 1) {
+                    headerSubtitle.textContent = 'Seção 1 - Contexto da Ocorrência';
+                } else if (currentSection === 2) {
+                    headerSubtitle.textContent = 'Seção 2 - Abordagem a Veículo';
+                }
+            }
+        }
+
+        async function startSection2() {
+            try {
+                // Desabilitar botão para evitar cliques duplicados
+                const button = document.getElementById('btn-start-section2');
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = '⏳ Iniciando...';
+                }
+
+                const response = await fetch(`${API_URL}/start_section/2`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao iniciar Seção 2');
+                }
+
+                const data = await response.json();
+
+                // Atualizar estado da aplicação
+                currentSection = 2;
+                currentQuestionStep = data.current_step;
+                answersState = {}; // Resetar respostas para nova seção
+
+                console.log('Seção 2 iniciada:', data);
+
+                // Atualizar header
+                updateHeaderSection();
+
+                // Esconder result-container da Seção 1
+                resultContainer.classList.add('hidden');
+
+                // Limpar botão de Seção 2
+                const buttonDiv = document.getElementById('btn-start-section2').parentElement;
+                if (buttonDiv) buttonDiv.remove();
+
+                // Mensagem de início da Seção 2
+                addMessage('📋 Iniciando Seção 2 - Abordagem a Veículo', true, false, null, 'evt_section2_start');
+
+                // Adicionar primeira pergunta da Seção 2
+                setTimeout(() => {
+                    addMessage(data.question, true, false, data.current_step, 'evt_section2_first_q');
+                    enableInput();
+
+                    // Atualizar sidebar para Seção 2
+                    updateSidebarForSection2();
+                }, 500);
+
+            } catch (error) {
+                console.error('Erro ao iniciar Seção 2:', error);
+                addMessage('❌ Erro ao iniciar Seção 2. Tente novamente.', true, true);
+
+                // Reabilitar botão em caso de erro
+                const button = document.getElementById('btn-start-section2');
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = '▶️ Iniciar Seção 2';
+                }
+            }
+        }
+
         async function sendMessage() {
 			const message = userInput.value.trim();
 			if (!message || isWaitingResponse) return;
-			
+
 			// Capturar step ANTES de enviar
 			const displayStep = currentQuestionStep;
-			
+
 			// ✅ ADICIONAR AQUI (depois da linha 774, antes do addMessage):
 			// Auto-completar ano se faltando (step 1.1)
 			let finalMessage = message;
 			if (displayStep === '1.1' && !/20\d{2}/.test(message)) {
 				finalMessage = message + ` de ${new Date().getFullYear()}`;
 			}
-			
+
 			addMessage(finalMessage, false, false, displayStep);  // ← USAR finalMessage
 			userInput.value = '';
-			
+
 			disableInput();
 			showLoading();
-			
+
 			try {
 				const response = await fetch(`${API_URL}/chat`, {
 					method: 'POST',
@@ -1064,6 +1198,7 @@
 					body: JSON.stringify({
 						session_id: sessionId,
 						message: finalMessage,  // ← USAR finalMessage AQUI TAMBÉM
+						current_section: currentSection,  // ✅ NOVO: Enviar seção atual
 						llm_provider: 'gemini'
 					})
 				});
@@ -1126,12 +1261,20 @@
                     enableInput();
                     return;
                 }
-                
-                const progress = data.current_step === 'complete' ? 6 : parseInt(data.current_step.split('.')[1]);
-                
+
+                // Calcular progresso baseado na seção atual
+                let progress, totalQuestions;
+                if (currentSection === 1) {
+                    progress = data.current_step === 'complete' ? 6 : parseInt(data.current_step.split('.')[1]);
+                    totalQuestions = 6;
+                } else if (currentSection === 2) {
+                    progress = data.current_step === 'complete' ? 8 : parseInt(data.current_step.split('.')[1]);
+                    totalQuestions = 8;
+                }
+
                 // Atualizar sidebar com step que FOI VALIDADO (displayStep)
                 updateSidebarStatus(displayStep, 'answered');
-                updateSidebarProgress(progress, 6);
+                updateSidebarProgress(progress, totalQuestions);
                 
                 // ✅ SALVAR RASCUNHO após resposta válida
                 saveDraft();
@@ -1139,12 +1282,16 @@
                 if (data.is_section_complete) {
                     // ✅ LIMPAR RASCUNHO ao completar
                     clearDraft();
-                    
-                    addMessage('✅ Todas as perguntas respondidas! Gerando texto...', true, false, null, 'evt_generating');
+
+                    const completionMessage = currentSection === 1
+                        ? '✅ Seção 1 completa! Gerando texto...'
+                        : '✅ Todas as perguntas respondidas! Gerando texto...';
+
+                    addMessage(completionMessage, true, false, null, 'evt_generating');
                     setTimeout(() => {
                         generatedText.textContent = data.generated_text;
                         resultContainer.classList.remove('hidden');
-                        
+
                         // Criar botões de feedback DENTRO do result-container
                         const finalEventId = 'evt_text_generated_' + Date.now();
                         
@@ -1186,7 +1333,29 @@
                             
                             resultContainer.appendChild(feedbackDiv);
                         }
-                        
+
+                        // ✅ NOVO: Botão para iniciar Seção 2 (apenas se completou Seção 1)
+                        if (currentSection === 1) {
+                            const section2ButtonDiv = document.createElement('div');
+                            section2ButtonDiv.className = 'mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center';
+                            section2ButtonDiv.innerHTML = `
+                                <h3 class="font-bold text-blue-900 mb-2">🚗 Seção 2 - Abordagem a Veículo</h3>
+                                <p class="text-sm text-blue-700 mb-3">
+                                    Havia veículo envolvido na ocorrência? Continue para a próxima seção.
+                                </p>
+                                <button
+                                    id="btn-start-section2"
+                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                                    ▶️ Iniciar Seção 2
+                                </button>
+                            `;
+
+                            resultContainer.parentElement.appendChild(section2ButtonDiv);
+
+                            // Event listener para o botão
+                            document.getElementById('btn-start-section2').addEventListener('click', startSection2);
+                        }
+
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }, 1000);
                 } else {

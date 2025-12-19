@@ -215,3 +215,144 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
             "claude": False,  # TODO
             "openai": False   # TODO
         }
+
+    # ========== SEÇÃO 2: ABORDAGEM A VEÍCULO ==========
+
+    def _build_prompt_section2(self, section_data: Dict[str, str]) -> str:
+        """
+        Constrói prompt para Seção 2 baseado no material do Claudio.
+
+        Fonte:
+        - materiais-claudio/_03_busca_veicular.txt
+        - materiais-claudio/_regras_gerais_-_gpt_trafico.txt (linhas 29-40)
+        - materiais-claudio/_pacotao_1.txt (linhas 24-26)
+        """
+
+        # Verifica se seção foi pulada (não havia veículo)
+        if section_data.get("2.0", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""  # Não gerar texto
+
+        # Extrair respostas
+        veiculo_desc = section_data.get("2.1", "Não informado")
+        local_visto = section_data.get("2.2", "Não informado")
+        policial_viu = section_data.get("2.3", "Não informado")
+        ordem_parada = section_data.get("2.4", "Não informado")
+        reacao_veiculo = section_data.get("2.5", "Não informado")
+        abordagem_busca = section_data.get("2.6", "Não informado")
+        irregularidades = section_data.get("2.7", "Não informado")
+
+        # Construir prompt baseado no material do Claudio
+        prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 2 (Abordagem a Veículo) do BO de tráfico de drogas.
+
+REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
+
+1. NUNCA invente informações não fornecidas pelo usuário
+2. Use APENAS os dados das respostas fornecidas abaixo
+3. Escreva em terceira pessoa, tempo passado
+4. Use linguagem técnica, objetiva e norma culta
+5. Descreva PASSO A PASSO: visualização → comportamento → ordem de parada → reação → busca
+6. Siga jurisprudência do STF HC 261029 (fundada suspeita requer descrição concreta)
+7. Gere texto em parágrafo único, fluido, SEM quebras de linha
+8. NÃO use juridiquês, gerúndio ou termos vagos como "atitude suspeita"
+
+DADOS FORNECIDOS PELO USUÁRIO:
+
+- Marca/modelo/cor/placa: {veiculo_desc}
+- Local onde foi visto: {local_visto}
+- Policial que viu e o que observou: {policial_viu}
+- Ordem de parada: {ordem_parada}
+- Reação do veículo: {reacao_veiculo}
+- Abordagem e busca: {abordagem_busca}
+- Irregularidades: {irregularidades}
+
+EXEMPLOS CORRETOS (do material do Claudio):
+
+✅ Exemplo 1 – Conduta atípica observada:
+"Durante patrulhamento pelo Bairro Pinhalzinho, a equipe visualizou um veículo VW/Fox prata, placa DWL9I93, transitando em alta velocidade e mudando repentinamente o sentido de direção ao notar a aproximação da viatura. O Sargento Lucas determinou a perseguição, sendo o carro alcançado na Rodovia IMG-880, onde foi procedida a abordagem. O condutor apresentava visível nervosismo e mantinha o olhar fixo no banco traseiro. Diante da fundada suspeita de transporte de ilícitos, foi realizada busca no interior do veículo, sendo localizados cinco tabletes de substância análoga à cocaína no porta-malas, além de duas buchas de maconha no bolso traseiro da calça do motorista."
+
+✅ Exemplo 2 – Denúncia corroborada + comportamento evasivo:
+"Durante operação de combate ao tráfico, a guarnição recebeu via COPOM denúncia informando que um veículo Fiat Palio, cor preta, placa ABC-1234, estaria sendo utilizado para transporte de drogas entre os bairros Esperança e São João. Ao transitar pela Rua das Acácias, o Cabo Almeida visualizou o veículo denunciado. O condutor, ao perceber a viatura, reduziu a velocidade, olhou diversas vezes para o retrovisor e tentou entrar em um beco lateral. Foi dada ordem de parada, prontamente atendida. Durante a vistoria, foi localizado um invólucro contendo substância análoga à maconha sob o banco do passageiro, além de valores fracionados no console central."
+
+✅ Exemplo 3 – Apoio da inteligência:
+"Em patrulhamento com o objetivo de combater o tráfico de drogas, após levantamento do setor de inteligência da PM indicando o uso de um Chevrolet Onix branco, placa RST-8899, no transporte de drogas, a equipe visualizou o veículo estacionado em frente à Rua das Oliveiras, local apontado como ponto de entrega. Durante a observação, o condutor recebeu rapidamente um pacote de um motociclista e o colocou no porta-malas. Diante da fundada suspeita de crime de tráfico, o Sargento Marcos determinou a abordagem, sendo o pacote arrecadado e constatado tratar-se de substância análoga à cocaína embalada para comércio."
+
+❌ ERROS A EVITAR (do material do Claudio):
+
+• "O veículo foi abordado por suspeita" (genérico, sem fatos concretos)
+• "Condutor nervoso" (sem descrever COMO estava nervoso - tremores? olhar fixo? tentou esconder algo?)
+• "Local conhecido por tráfico" (sem base factual - qual informação prévia? qual relatório?)
+• "Foi feita revista no veículo" (sem dizer O MOTIVO da busca - qual fundada suspeita?)
+
+ESTRUTURA NARRATIVA (seguir esta ordem):
+
+1. Contexto inicial: onde e quando o veículo foi visualizado
+2. Descrição do veículo: marca, modelo, cor, placa
+3. Comportamento observado: o que chamou atenção (CONCRETO, não vago)
+4. Identificação: qual policial viu primeiro
+5. Ordem de parada: como foi dada
+6. Reação: veículo parou ou fugiu? Se fugiu, descrever trajeto e distância
+7. Fundada suspeita: conectar comportamento observado com decisão de buscar
+8. Busca: quem fez, onde procurou, o que encontrou
+9. Irregularidades (se houver): veículo furtado/roubado/clonado
+
+IMPORTANTE:
+
+- Se alguma resposta estiver como "Não informado", simplesmente OMITA aquela informação (não invente)
+- Descreva SEMPRE: motivo da atenção → conduta observada → decisão pela busca
+- Use conectivos para fluidez: "ao notar", "diante de", "sendo que", "durante", "onde"
+- Mantenha coerência temporal: visualização → ordem → reação → abordagem
+- Se houver irregularidade no veículo (REDS, furto, etc.), mencionar ao final
+
+Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
+
+        return prompt
+
+    def generate_section2_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+        """
+        Gera texto narrativo da Seção 2 (Abordagem a Veículo).
+
+        Args:
+            section_data: Dicionário com respostas {step: answer}
+            provider: "gemini", "claude" ou "openai"
+
+        Returns:
+            Texto gerado ou string vazia se seção foi pulada
+        """
+        # Se não havia veículo, retorna vazio
+        if section_data.get("2.0", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""
+
+        # Gerar com provider selecionado
+        if provider == "gemini":
+            return self._generate_section2_with_gemini(section_data)
+        elif provider == "claude":
+            raise NotImplementedError("Claude ainda não implementado para Seção 2")
+        elif provider == "openai":
+            raise NotImplementedError("OpenAI ainda não implementado para Seção 2")
+        else:
+            raise ValueError(f"Provider {provider} não suportado")
+
+    def _generate_section2_with_gemini(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 2 usando Gemini.
+        """
+        if not self.gemini_model:
+            raise ValueError("Gemini API key não configurada. Configure GEMINI_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section2(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.gemini_model.generate_content(prompt)
+
+            # Extrair texto
+            generated_text = response.text.strip()
+
+            return generated_text
+
+        except Exception as e:
+            raise Exception(f"Erro ao gerar texto da Seção 2 com Gemini: {str(e)}")

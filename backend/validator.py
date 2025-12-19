@@ -17,9 +17,9 @@ class ResponseValidator:
         },
         "1.2": {
             "min_length": 15,
-            "required_keywords": ["prefixo"],
-            "examples": ["Sgt João Silva e Cb Pedro Santos, prefixo 1234"],
-            "error_message": "Informe graduação + nome completo de TODOS os policiais + prefixo. Ex: 'Sgt João Silva e Cb Pedro Santos, prefixo 1234'"
+            "required_keywords": ["prefixo", "viatura"],
+            "examples": ["Sgt João Silva e Cb Pedro Santos, prefixo 1234", "Sargento Silva, Cabo Almeida e Soldado Faria, viatura 2234"],
+            "error_message": "Informe graduação + nome completo de TODOS os policiais + prefixo/viatura. Ex: 'Sgt João Silva e Cb Pedro Santos, prefixo 1234'"
         },
         "1.3": {
             "min_length": 10,
@@ -162,9 +162,16 @@ class ResponseValidator:
                 return False, rules.get("error_message")
         else:
             # Para outras perguntas, verificar palavras-chave normalmente
-            missing_keywords = [kw for kw in required if kw not in answer_lower]
-            if missing_keywords:
-                return False, rules.get("error_message")
+            # Se step é 1.2, aceitar QUALQUER uma das keywords (prefixo OU viatura)
+            if step == "1.2":
+                has_any_keyword = any(kw in answer_lower for kw in required)
+                if not has_any_keyword:
+                    return False, rules.get("error_message")
+            else:
+                # Para outras perguntas, exigir TODAS as keywords
+                missing_keywords = [kw for kw in required if kw not in answer_lower]
+                if missing_keywords:
+                    return False, rules.get("error_message")
         
         # Validar palavras proibidas (respostas muito vagas)
         forbidden = rules.get("forbidden_words", [])

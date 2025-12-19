@@ -44,3 +44,6 @@ build/
 
 # Backup files
 *.bak
+
+# Materiais internos (não publicar)
+materiais-claudio/

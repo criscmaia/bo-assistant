@@ -1,6 +1,7 @@
 import os
 from typing import Dict
 import google.generativeai as genai
+from groq import Groq
 from dotenv import load_dotenv
 from datetime import datetime
 import re
@@ -12,14 +13,15 @@ load_dotenv()
 class LLMService:
     """
     Serviço para integração com diferentes LLMs.
-    Por enquanto: Gemini apenas.
-    Depois: adicionar Claude, OpenAI.
+    Suportados: Gemini, Groq.
+    Planejados: Claude, OpenAI.
     """
-    
+
     def __init__(self):
         # Carregar API keys do ambiente
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
-        
+        self.groq_api_key = os.getenv("GROQ_API_KEY")
+
         # Configurar Gemini
         if self.gemini_api_key:
             genai.configure(api_key=self.gemini_api_key)
@@ -28,6 +30,13 @@ class LLMService:
             self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
         else:
             self.gemini_model = None
+
+        # Configurar Groq
+        if self.groq_api_key:
+            # Usar llama-3.3-70b-versatile (14.400 req/dia no free tier)
+            self.groq_client = Groq(api_key=self.groq_api_key)
+        else:
+            self.groq_client = None
     
     def _enrich_datetime(self, datetime_str: str) -> str:
         """
@@ -176,6 +185,8 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
         
         if provider == "gemini":
             return self._generate_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_with_groq(section_data)
         elif provider == "claude":
             # TODO: implementar depois
             raise NotImplementedError("Claude ainda não implementado")
@@ -211,7 +222,47 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
                 raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
 
             raise Exception(f"Erro ao gerar texto com Gemini: {error_msg}")
-    
+
+    def _generate_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 1 usando Groq (Llama 3.3 70B).
+        14.400 req/dia no free tier vs 20 do Gemini.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt(section_data)
+
+            # Groq usa formato OpenAI chat completions
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",  # Melhor modelo do Groq
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,  # Baixa criatividade (importante para BOs)
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit do Groq
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto com Groq: {error_msg}")
+
     def validate_api_keys(self) -> Dict[str, bool]:
         """
         Verifica quais API keys estão configuradas.
@@ -219,6 +270,7 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
         """
         return {
             "gemini": self.gemini_api_key is not None,
+            "groq": self.groq_api_key is not None,
             "claude": False,  # TODO
             "openai": False   # TODO
         }
@@ -332,6 +384,8 @@ Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
         # Gerar com provider selecionado
         if provider == "gemini":
             return self._generate_section2_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_section2_with_groq(section_data)
         elif provider == "claude":
             raise NotImplementedError("Claude ainda não implementado para Seção 2")
         elif provider == "openai":
@@ -369,3 +423,46 @@ Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
                 raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
 
             raise Exception(f"Erro ao gerar texto da Seção 2 com Gemini: {error_msg}")
+
+    def _generate_section2_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 2 (Abordagem a Veículo) usando Groq.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section2(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 2 com Groq: {error_msg}")

@@ -517,7 +517,7 @@
                             body: JSON.stringify({
                                 session_id: sessionId,
                                 message: answer,
-                                llm_provider: 'gemini'
+                                llm_provider: 'groq'
                             })
                         });
                     } catch (e) {
@@ -1146,7 +1146,7 @@
                     const response = await fetch(`${API_URL}/chat/${sessionId}/answer/${step}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: newText, llm_provider: 'gemini' })
+                        body: JSON.stringify({ message: newText, llm_provider: 'groq' })
                     });
                     
                     const data = await response.json();
@@ -1405,7 +1405,7 @@
 						session_id: sessionId,
 						message: finalMessage,  // ← USAR finalMessage AQUI TAMBÉM
 						current_section: currentSection,  // ✅ NOVO: Enviar seção atual
-						llm_provider: 'gemini'
+						llm_provider: 'groq'
 					})
 				});
                 

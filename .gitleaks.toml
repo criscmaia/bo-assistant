@@ -1,0 +1,49 @@
+# Gitleaks configuration for BO Assistant
+# https://github.com/gitleaks/gitleaks
+
+title = "BO Assistant Security Configuration"
+
+[extend]
+# Use default rules
+useDefault = true
+
+[allowlist]
+description = "Allowlist for known false positives"
+paths = [
+    '''env\.example$''',
+    '''README\.md$''',
+    '''CLAUDE\.md$''',
+    '''TECHNICAL_DOCS\.md$''',
+]
+
+regexes = [
+    '''sua_chave_aqui''',
+    '''your_key_here''',
+    '''SENHA''',
+    '''PASSWORD''',
+    '''SEU_USUARIO''',
+]
+
+[[rules]]
+id = "gemini-api-key"
+description = "Google Gemini API Key"
+regex = '''AIzaSy[A-Za-z0-9_-]{33}'''
+tags = ["key", "google", "gemini"]
+
+[[rules]]
+id = "postgresql-connection"
+description = "PostgreSQL connection string with credentials"
+regex = '''postgresql://[^:]+:[^@]+@[^/]+/'''
+tags = ["database", "postgresql"]
+
+[[rules]]
+id = "github-token"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[A-Za-z0-9]{36}'''
+tags = ["token", "github"]
+
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI API Key"
+regex = '''sk-[A-Za-z0-9]{48}'''
+tags = ["key", "openai"]

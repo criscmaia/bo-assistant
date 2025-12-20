@@ -1,5 +1,5 @@
 {
-  "version": "v0.3.2",
+  "version": "0.5.1",
   "backend_url": "http://localhost:8000",
   "frontend_url": "http://localhost:3000",
   "browser": "chromium",
@@ -7,140 +7,132 @@
     "desktop": {"width": 1280, "height": 720},
     "mobile": {"width": 430, "height": 932}
   },
-  "test_flow": [
+  "sections": [
     {
-      "step": 1,
-      "question": "Dia, data e hora do acionamento.",
-      "answer": "21:11, dia 22/03",
-      "should_pass": true,
-      "screenshot": "after_answer"
+      "section_number": 1,
+      "name": "Contexto da Ocorrência",
+      "emoji": "📝",
+      "total_questions": 6,
+      "steps": [
+        {
+          "step": "1.1",
+          "answer": "19/12/2025, 14h30min",
+          "expect": "pass",
+          "screenshot": "01-section1-empty"
+        },
+        {
+          "step": "1.2",
+          "answer": "Sargento Silva, Cabo Almeida e Soldado Faria, viatura 2234",
+          "expect": "pass"
+        },
+        {
+          "step": "1.3",
+          "answer": "Patrulhamento preventivo de combate ao tráfico de drogas",
+          "expect": "pass",
+          "screenshot": "02-section1-progress-3-of-6"
+        },
+        {
+          "step": "edit_1.1",
+          "action": "edit",
+          "answer": "data inválida",
+          "expect": "fail",
+          "screenshot": "03-section1-edit-error"
+        },
+        {
+          "step": "edit_1.1_success",
+          "action": "edit",
+          "answer": "19/12/2025, às 14h30min",
+          "expect": "pass",
+          "screenshot": "04-section1-edit-success"
+        },
+        {
+          "step": "1.4",
+          "answer": "Ordem de serviço nº 145/2025 determinava patrulhamento no Bairro Santa Rita. COPOM informou denúncia anônima de veículo transportando drogas na região.",
+          "expect": "pass"
+        },
+        {
+          "step": "1.5",
+          "answer": "Rua das Acácias, altura do número 789, Bairro Santa Rita, Contagem/MG",
+          "expect": "pass"
+        },
+        {
+          "step": "1.6",
+          "answer": "Sim, local consta em 12 registros anteriores de tráfico de drogas. Há denúncias recorrentes de comercialização de entorpecentes. Área sob influência da facção Comando Vermelho segundo relatórios de inteligência.",
+          "expect": "pass",
+          "screenshot": "05-section1-final-with-button"
+        }
+      ]
     },
     {
-      "step": 2,
-      "question": "Composição da guarnição e prefixo.",
-      "answer": "prefixo 1234, Sargentos João Silva e Pedro Santos",
-      "should_pass": true,
-      "screenshot": "after_answer"
-    },
-    {
-      "step": "edit_1",
-      "edit_question_step": "1.1",
-      "description": "Editar pergunta 1 com resposta inválida",
-      "answer": "asd",
-      "should_pass": false,
-      "expected_error": "Por favor, informe dia, data E hora completos",
-      "screenshot": "05-desktop-editando-erro.png"
-    },
-    {
-      "step": "edit_2",
-      "edit_question_step": "1.1",
-      "description": "Editar pergunta 1 com resposta válida",
-      "answer": "21:11, dia 23/03",
-      "should_pass": true,
-      "screenshot": "04-desktop-editando.png"
-    },
-    {
-      "step": 3,
-      "question": "Natureza do empenho.",
-      "answer": "Tráfico",
-      "should_pass": false,
-      "expected_error": "Seja mais específico",
-      "screenshot": "03-desktop-erro.png"
-    },
-    {
-      "step": "3_retry",
-      "question": "Natureza do empenho.",
-      "answer": "Tráfico de drogas",
-      "should_pass": true,
-      "screenshot": "02-desktop-sidebar-progress.png"
-    },
-    {
-      "step": 4,
-      "question": "O que constava na ordem de serviço, informações do COPOM, DDU.",
-      "answer": "Denúncia anônima",
-      "should_pass": false,
-      "expected_error": "Descreva o que constava na ordem"
-    },
-    {
-      "step": "4_retry",
-      "question": "O que constava na ordem de serviço, informações do COPOM, DDU.",
-      "answer": "Denúncia anônima via COPOM reportando venda de drogas na esquina",
-      "should_pass": true
-    },
-    {
-      "step": 5,
-      "question": "Local exato da ocorrência (logradouro, número, bairro).",
-      "answer": "Rua das Acácias",
-      "should_pass": false,
-      "expected_error": "Informe logradouro + número + bairro"
-    },
-    {
-      "step": "5_retry",
-      "question": "Local exato da ocorrência (logradouro, número, bairro).",
-      "answer": "Rua das Acácias, sem número, apt 12, bairro Jardins",
-      "should_pass": true
-    },
-    {
-      "step": 6,
-      "question": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?",
-      "answer": "Sim",
-      "should_pass": false,
-      "expected_error": "Se sim, forneça detalhes"
-    },
-    {
-      "step": "6_retry",
-      "question": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?",
-      "answer": "Local com histórico de operações em 2024. Facção ABC atua na região",
-      "should_pass": true,
-      "wait_for_generation": true,
-      "screenshot": "08-desktop-final.png"
+      "section_number": 2,
+      "name": "Abordagem a Veículo",
+      "emoji": "🚗",
+      "total_questions": 8,
+      "steps": [
+        {
+          "step": "2.0",
+          "answer": "SIM",
+          "expect": "pass",
+          "screenshot": "06-section2-start"
+        },
+        {
+          "step": "2.1",
+          "answer": "ABC123",
+          "expect": "fail",
+          "reason": "Placa inválida (sem formato Mercosul)",
+          "screenshot": "07-section2-plate-error"
+        },
+        {
+          "step": "2.1_retry",
+          "answer": "VW Gol branco, placa ABC-1D23, ano 2018",
+          "expect": "pass"
+        },
+        {
+          "step": "2.2",
+          "answer": "Na Rua das Acácias, esquina com Avenida Brasil, próximo ao Bar do João, Bairro Santa Rita",
+          "expect": "pass"
+        },
+        {
+          "step": "2.3",
+          "answer": "Policial viu o veículo transitando",
+          "expect": "fail",
+          "reason": "Sem graduação do policial",
+          "screenshot": "08-section2-rank-error"
+        },
+        {
+          "step": "2.3_retry",
+          "answer": "O Sargento Silva visualizou o veículo transitando em alta velocidade pela Rua das Acácias. O condutor mudou bruscamente o sentido de direção ao notar a viatura e acelerou tentando fugir.",
+          "expect": "pass",
+          "screenshot": "09-section2-progress-4-of-8"
+        },
+        {
+          "step": "2.4",
+          "answer": "Foi acionada a sirene da viatura e o Sargento Silva utilizou o megafone ordenando \"Parado, Polícia Militar! Encoste o veículo imediatamente!\"",
+          "expect": "pass"
+        },
+        {
+          "step": "2.5",
+          "answer": "O condutor acelerou tentando fugir pela Avenida Brasil, percorreu aproximadamente 300 metros em alta velocidade, desobedeceu dois semáforos vermelhos e só parou após cercar o veículo em um beco sem saída.",
+          "expect": "pass"
+        },
+        {
+          "step": "2.6",
+          "answer": "O Cabo Almeida procedeu a abordagem ao motorista determinando que saísse do veículo com as mãos na cabeça. O Soldado Faria realizou busca no interior do veículo, revistando porta-luvas, painel, banco traseiro e porta-malas. No banco do motorista, embaixo do assento, foram localizados 28 invólucros plásticos contendo substância análoga à cocaína.",
+          "expect": "pass"
+        },
+        {
+          "step": "2.7",
+          "answer": "Consultado o sistema REDS, consta registro de furto do veículo em Betim/MG, REDS nº 45678/2024 de 10/11/2024. Placa original BCD-5E67.",
+          "expect": "pass",
+          "screenshot": "10-section2-final-both-sections"
+        }
+      ]
     }
   ],
-  "screenshots": {
-    "01-desktop-sidebar-empty.png": {
-      "timing": "initial_load",
-      "viewport": "desktop",
-      "description": "Estado inicial com sidebar vazia"
-    },
-    "02-desktop-sidebar-progress.png": {
-      "timing": "after_step_3",
-      "viewport": "desktop",
-      "description": "Progresso 3/6 perguntas respondidas"
-    },
-    "03-desktop-erro.png": {
-      "timing": "error_validation",
-      "viewport": "desktop",
-      "description": "Mensagem de erro de validação"
-    },
-    "04-desktop-editando.png": {
-      "timing": "edit_mode_success",
-      "viewport": "desktop",
-      "description": "Modo de edição com sucesso"
-    },
-    "05-desktop-editando-erro.png": {
-      "timing": "edit_mode_error",
-      "viewport": "desktop",
-      "description": "Erro de validação ao editar"
-    },
-    "06-mobile-empty.png": {
-      "timing": "initial_load",
-      "viewport": "mobile",
-      "description": "Layout mobile inicial"
-    },
-    "07-mobile-sidebar-open.png": {
-      "timing": "sidebar_open",
-      "viewport": "mobile",
-      "description": "Drawer lateral aberto no mobile"
-    },
-    "08-desktop-final.png": {
-      "timing": "text_generated",
-      "viewport": "desktop",
-      "description": "Texto final gerado com sucesso"
-    },
-    "09-mobile-final.png": {
-      "timing": "text_generated",
-      "viewport": "mobile",
-      "description": "Resultado final no mobile"
-    }
+  "metadata": {
+    "total_screenshots": 17,
+    "desktop_screenshots": 11,
+    "mobile_screenshots": 6,
+    "video_duration_estimate": "4 minutes"
   }
 }

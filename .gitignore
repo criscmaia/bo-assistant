@@ -16,6 +16,7 @@ __pycache__/
 # IDEs
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
@@ -44,3 +45,6 @@ build/
 
 # Backup files
 *.bak
+
+# Materiais internos (não publicar)
+materiais-claudio/

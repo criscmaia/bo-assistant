@@ -201,16 +201,16 @@ class ReleaseAutomation:
         """Executa fluxo completo da Seção 2"""
         print("\n🚗 Iniciando fluxo DESKTOP Seção 2...")
 
-        # Scroll para o topo da página antes de iniciar Seção 2 (para vídeo)
-        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
-        await page.wait_for_timeout(1000)  # Aguardar scroll suave
-
         # 1. Clicar em "Iniciar Seção 2"
         btn_start = page.locator('#btn-start-section2')
         await btn_start.wait_for(state='visible', timeout=5000)
         await page.wait_for_timeout(1000)  # Pausa dramática antes de clicar
         await btn_start.click()
-        await page.wait_for_timeout(1500)
+        await page.wait_for_timeout(500)
+
+        # Scroll para o topo DEPOIS do click (para garantir que header da Seção 2 apareça no vídeo)
+        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
+        await page.wait_for_timeout(1500)  # Aguardar scroll e animação
 
         # 06. Screenshot logo após iniciar Seção 2
         await self.take_screenshot(page, '06-section2-start.png',
@@ -381,13 +381,13 @@ class ReleaseAutomation:
         """Fluxo mobile da Seção 2 (simplificado, sem screenshots de erros)"""
         print("\n🚗 Iniciando fluxo MOBILE Seção 2...")
 
-        # Scroll para o topo antes de iniciar Seção 2 (para vídeo)
-        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
-        await page.wait_for_timeout(1000)
-
         # 1. Clicar em "Iniciar Seção 2"
         await page.wait_for_timeout(1000)
         await page.click('#btn-start-section2')
+        await page.wait_for_timeout(500)
+
+        # Scroll para o topo DEPOIS do click
+        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
         await page.wait_for_timeout(1500)
 
         # 14. Screenshot início Seção 2 mobile

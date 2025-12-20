@@ -342,9 +342,9 @@
                     });
                     questions[step].finalAnswer = event.data.new_answer;
                 }
-                else if (event.event_type === 'text_generated') {
-                    // Determinar qual seção baseado no contexto ou timestamp
-                    const section = event.data.section || (Object.keys(generatedTexts).length === 0 ? 1 : 2);
+                else if (event.event_type === 'section1_completed' || event.event_type === 'section2_completed') {
+                    // Extrair número da seção do event_type (section1_completed → 1, section2_completed → 2)
+                    const section = event.event_type === 'section1_completed' ? 1 : 2;
                     generatedTexts[section] = {
                         text: event.data.generated_text,
                         time: event.data.generation_time_ms,

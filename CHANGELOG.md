@@ -1,4 +1,51 @@
-# Changelog v0.6.1
+# Changelog v0.6.3
+
+## [0.6.3] - 2025-12-20
+
+### 🐛 Corrigido - Restauração de Rascunhos com Múltiplas Seções
+- **CRÍTICO: Respostas restauradas fora de ordem**
+  - Problema: `Object.entries()` não garante ordem, causava respostas da Seção 2 aparecerem na Seção 1
+  - Exemplo: Resposta de 2.1 aparecia em 1.1, resposta de 2.2 aparecia em 1.2
+  - Solução: Implementado sort customizado que ordena por seção e step numericamente:
+    ```javascript
+    const sortedSteps = Object.keys(answersState).sort((a, b) => {
+        const [sectionA, stepA] = a.split('.').map(Number);
+        const [sectionB, stepB] = b.split('.').map(Number);
+        if (sectionA !== sectionB) return sectionA - sectionB;
+        return stepA - stepB;
+    });
+    ```
+  - Arquivos: `docs/index.html` linhas 519-524
+
+- **CRÍTICO: Backend não iniciava Seção 2 ao restaurar rascunho**
+  - Problema: Ao restaurar rascunho da Seção 2, backend continuava na Seção 1
+  - Solução: Adicionada chamada `POST /start_section/2` antes de sincronizar respostas da Seção 2
+  - Arquivos: `docs/index.html` linhas 532-543
+
+---
+
+## [0.6.2] - 2025-12-20
+
+### 🐛 Corrigido - Sistema de Rascunhos (LocalStorage)
+- **CRÍTICO: Sistema de rascunhos quebrado com Seção 2**
+  - Problema 1: `saveDraft()` não salvava `currentSection`, causando erro ao restaurar
+  - Problema 2: `formatDraftPreview()` sempre mostrava "X/6" mesmo na Seção 2 (deveria mostrar "X/14")
+  - Problema 3: `restoreFromDraft()` assumia apenas Seção 1, quebrava com perguntas 2.x
+  - Solução:
+    - `saveDraft()` agora salva `currentSection` e atualiza version para '0.6.2'
+    - `formatDraftPreview()` detecta automaticamente Seção 2 via `step.startsWith('2.')`
+    - `restoreFromDraft()` refatorado para suportar ambas seções:
+      - Restaura `currentSection` com fallback para v0.5.x
+      - Busca perguntas de `SECTION1_QUESTIONS` ou `SECTION2_QUESTIONS` conforme step
+      - Calcula progresso dinamicamente (6 ou 8 perguntas)
+      - Determina próxima pergunta baseada em `sectionNum` e `stepNum`
+  - Arquivos: `docs/index.html` linhas 359, 436-461, 475-583
+
+### 🧪 Testes
+- Adicionado script `test_draft_recovery.py` com Playwright para validar restauração de rascunhos
+- Cobertura: Seção 1 (3 perguntas) e Seção 2 (8 perguntas da S1 + 2 da S2)
+
+---
 
 ## [0.6.1] - 2025-12-20
 

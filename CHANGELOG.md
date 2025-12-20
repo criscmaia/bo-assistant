@@ -1,4 +1,37 @@
-# Changelog v0.4.1
+# Changelog v0.6.0
+
+## [0.6.0] - 2025-12-20
+
+### ✨ Adicionado
+- **Suporte ao Groq API (Llama 3.3 70B)**
+  - Integração completa com Groq para Seção 1 e Seção 2
+  - 14.400 requisições/dia (720x mais que Gemini 2.5 Flash)
+  - Modelo llama-3.3-70b-versatile com temperature 0.3
+  - Tratamento de erro específico para rate limits do Groq
+
+- **Arquitetura Multi-Provider Consolidada**
+  - Backend suporta múltiplos providers: Gemini, Groq
+  - Preparado para Claude e OpenAI (TODOs documentados)
+  - Método `validate_api_keys()` inclui Groq
+  - Fácil troca de provider no frontend (1 linha)
+
+### 🔧 Técnico
+- **Backend**: `groq==1.0.0` adicionado ao requirements.txt
+- **Backend**: Novos métodos `_generate_with_groq()` e `_generate_section2_with_groq()`
+- **Backend**: Provider routing atualizado em ambas seções
+- **Frontend**: `llm_provider` alterado de 'gemini' para 'groq' (linhas 520, 1149, 1408)
+
+### 🎯 Benefícios
+- **Testes intensivos**: 14.4k req/dia permite iterações rápidas na fase de desenvolvimento
+- **Flexibilidade**: Arquitetura permite voltar para Gemini ou testar outros providers facilmente
+- **Custo zero**: Groq free tier sem necessidade de cartão de crédito
+- **Performance**: Groq é 2-3x mais rápido que Gemini em média
+
+### 🐛 Corrigido
+- Atualizado Groq de 0.11.0 para 1.0.0 (compatibilidade com httpx 0.28.1)
+- Erro de quota do Gemini agora tem mensagem específica (429 vs 500)
+
+---
 
 ## [0.4.1] - 2025-12-12
 

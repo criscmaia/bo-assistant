@@ -2,27 +2,71 @@
 
 ## [0.6.1] - 2025-12-20
 
-### 🐛 Corrigido
+### 🐛 Corrigido - Backend
 - **CRÍTICO: Arquivo .env não estava sendo carregado**
   - Problema: Backend rodando de `backend/` não carregava `.env` corretamente
   - Solução: `.env` movido para raiz do projeto (`C:\AI\bo-assistant\.env`)
   - Backend deve ser iniciado do diretório raiz: `python -m uvicorn backend.main:app`
   - GROQ_API_KEY agora é carregado corretamente na inicialização
-  - Documentação CLAUDE.md atualizada com instruções corretas
+
+- **Endpoint de edição quebrado após refatoração multi-seção**
+  - Problema: `PUT /chat/{session_id}/answer/{step}` tentava desempacotar `sessions[session_id]` como tupla
+  - Causa: Estrutura mudou de tupla `(bo_id, state_machine)` para dict `{"bo_id": ..., "sections": {...}}`
+  - Solução: Acessa `session_data["bo_id"]` e determina state_machine baseado no prefixo do step (1.x ou 2.x)
+  - Commits: `f5bc007`
+
+### 🐛 Corrigido - Automação de Release
+- **Script de automação falhando na edição**
+  - Problema: Seletor de input não aguardava elemento ficar visível
+  - Solução: Adicionado `wait_for_selector('input.px-2', state='visible')` antes de interagir
+  - Commits: `ef0b723`
+
+- **Vídeo não capturando início da Seção 2**
+  - Problema: Scroll para topo acontecia ANTES do click, depois página voltava
+  - Solução: Movido scroll para DEPOIS do click no botão "Iniciar Seção 2"
+  - Commits: `bd1b569`
+
+- **Screenshot mobile da sidebar com sobreposição visual**
+  - Problema: `full_page=True` fazia scroll e conteúdo aparecia através da sidebar fixed
+  - Solução: Mudado para `full_page=False` (captura apenas viewport 430x932px)
+  - Commits: `9041dfc`
 
 ### 🔧 Técnico
 - **Frontend**: Suporte para `127.0.0.1` além de `localhost` na detecção de ambiente local
+- **Frontend**: Versão atualizada para v0.6.1 em 3 locais (header, footer, JS)
 - **Backend**: Removidos prints de debug temporários usados no diagnóstico
-- **Documentação**: CLAUDE.md atualizado com comandos corretos de startup
+- **Backend**: Validação correta por seção no endpoint de edição (ResponseValidator vs ResponseValidatorSection2)
+- **Documentação**: CLAUDE.md atualizado com comandos corretos de startup e troubleshooting
 
 ### ⚠️ Breaking Changes
 - Arquivo `.env` DEVE estar na raiz do projeto, não mais em `backend/.env`
 - Comando de startup mudou de `cd backend && uvicorn main:app` para `python -m uvicorn backend.main:app` (do diretório raiz)
 
+### 📚 Lições Aprendidas
+1. **python-dotenv carrega .env do CWD (current working directory)**
+   - Se backend roda de `backend/`, procura `.env` em `backend/.env`
+   - Se backend roda da raiz, procura `.env` na raiz
+   - Solução: Sempre rodar de um diretório fixo e documentar
+
+2. **Estruturas de dados em APIs devem ser imutáveis ou bem documentadas**
+   - Mudança de tupla para dict quebrou endpoint de edição
+   - Testes automatizados pegaram o bug imediatamente
+
+3. **Screenshots full_page com elementos fixed/absolute**
+   - `full_page=True` faz scroll virtual da página toda
+   - Elementos `position: fixed` (como sidebar mobile) podem ter problemas
+   - Usar `full_page=False` para capturar overlays/modals
+
+4. **Ordem de operações em automação importa**
+   - Scroll antes de click pode ser revertido pelo próprio click
+   - Sempre testar a ordem: ação → efeito → captura
+
 ### ✅ Validado
-- Groq API funcionando corretamente em localhost
-- Seção 1 e Seção 2 gerando textos com sucesso
-- `.env` está no `.gitignore` (linha 12) - seguro para commit
+- ✅ Groq API funcionando corretamente em localhost
+- ✅ Seção 1 e Seção 2 gerando textos com sucesso
+- ✅ Edição de respostas funcionando (ambas seções)
+- ✅ Automação de release completa (screenshots + vídeo)
+- ✅ `.env` está no `.gitignore` (linha 12) - seguro para commit
 
 ---
 

@@ -126,13 +126,12 @@ DATABASE_URL=postgresql://...  # Apenas em produção
 
 ## Versão Atual
 
-**v0.6.3** (20/12/2025)
-- ✅ Sistema de rascunhos funcional com múltiplas seções
-- Correção: Ordenação de respostas ao restaurar (sort customizado)
-- Correção: Backend inicia Seção 2 corretamente ao restaurar
-- Correção: Sidebar atualiza para Seção 2 ao restaurar
+**v0.6.4** (20/12/2025)
+- ✅ Correção crítica: Sincronização backend durante restauração de rascunhos
+- ✅ Sistema de rascunhos 100% funcional para Seção 1 e Seção 2
+- Backend atualiza `currentQuestionStep` durante loop de sincronização
+- Validação de respostas alinhada com pergunta apresentada
 - Suporte ao Groq API (Llama 3.3 70B) - 14.400 req/dia
-- Frontend suporta 127.0.0.1 além de localhost
 - Arquitetura multi-provider (Gemini + Groq)
 
 ## Equipe

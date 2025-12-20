@@ -491,25 +491,9 @@
                 sessionId = data.session_id;
                 currentBoId = data.bo_id;
 
-                // Determinar próximo step baseado nas respostas salvas
-                const answeredSteps = Object.keys(answersState).sort();
-                const lastAnsweredStep = answeredSteps[answeredSteps.length - 1];
-                const [sectionNum, stepNum] = lastAnsweredStep.split('.').map(Number);
-
-                // Lógica para determinar próxima pergunta
-                if (sectionNum === 1) {
-                    if (stepNum >= 6) {
-                        currentQuestionStep = 'section1_complete';
-                    } else {
-                        currentQuestionStep = `1.${stepNum + 1}`;
-                    }
-                } else if (sectionNum === 2) {
-                    if (stepNum >= 7) {
-                        currentQuestionStep = 'section2_complete';
-                    } else {
-                        currentQuestionStep = `2.${stepNum + 1}`;
-                    }
-                }
+                // currentQuestionStep será atualizado pelo backend durante a sincronização
+                // Começar do passo 1.1 e deixar o backend avançar para o passo correto
+                currentQuestionStep = '1.1';
 
                 // Mensagem inicial
                 addMessage('Olá! Restaurei seu rascunho. Vou continuar de onde você parou.', true, false, null, 'welcome_restored');
@@ -567,7 +551,7 @@
 
                     // Enviar resposta ao backend para sincronizar estado
                     try {
-                        await fetch(`${API_URL}/chat`, {
+                        const syncResponse = await fetch(`${API_URL}/chat`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -576,6 +560,16 @@
                                 llm_provider: 'groq'
                             })
                         });
+                        const syncData = await syncResponse.json();
+
+                        // Atualizar currentQuestionStep com resposta do backend
+                        if (syncData.current_step && !syncData.is_section_complete) {
+                            currentQuestionStep = syncData.current_step;
+                            console.log(`[Draft] Backend avançou para: ${currentQuestionStep}`);
+                        } else if (syncData.is_section_complete) {
+                            currentQuestionStep = step.startsWith('1.') ? 'section1_complete' : 'section2_complete';
+                            console.log(`[Draft] Seção ${currentSection} completa`);
+                        }
                     } catch (e) {
                         console.warn('[Draft] Erro ao sincronizar resposta:', step, e);
                     }
@@ -703,7 +697,7 @@
 
             // Adicionar footer
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-            fullBO += "Gerado por: BO Inteligente v0.6.3\n";
+            fullBO += "Gerado por: BO Inteligente v0.6.4\n";
             fullBO += "Data: " + new Date().toLocaleDateString('pt-BR') + "\n";
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 

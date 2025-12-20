@@ -1,4 +1,27 @@
-# Changelog v0.6.3
+# Changelog v0.6.4
+
+## [0.6.4] - 2025-12-20
+
+### 🐛 Corrigido - Sincronização Backend Durante Restauração
+- **CRÍTICO: Backend não atualizava currentQuestionStep durante restauração**
+  - Problema: Loop de sincronização em `restoreFromDraft()` enviava respostas ao backend mas não capturava `current_step` retornado
+  - Sintoma: Após restaurar rascunho, próxima resposta era validada como pergunta errada
+  - Exemplo: Usuário respondeu 1.1-1.3, recarregou, sistema mostrava pergunta 1.4 mas validava como 1.1
+  - Solução: Atualizar `currentQuestionStep` com valor retornado pelo backend após cada sincronização:
+    ```javascript
+    const syncData = await syncResponse.json();
+    if (syncData.current_step && !syncData.is_section_complete) {
+        currentQuestionStep = syncData.current_step;
+    }
+    ```
+  - Arquivos: `docs/index.html` linhas 568-591
+
+- **Removida lógica de cálculo manual de currentQuestionStep**
+  - Problema: Código calculava próximo passo manualmente antes do loop de sincronização, causando inconsistências
+  - Solução: Inicializar em '1.1' e deixar backend atualizar para passo correto durante sincronização
+  - Arquivos: `docs/index.html` linhas 494-496
+
+---
 
 ## [0.6.3] - 2025-12-20
 

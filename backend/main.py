@@ -395,15 +395,29 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
     """Atualiza resposta com logging"""
     if session_id not in sessions:
         raise HTTPException(status_code=404, detail="Sessão não encontrada")
-    
-    bo_id, state_machine = sessions[session_id]
-    
+
+    session_data = sessions[session_id]
+    bo_id = session_data["bo_id"]
+
+    # Determinar qual seção baseado no step
+    if step.startswith("1."):
+        state_machine = session_data["sections"][1]
+    elif step.startswith("2."):
+        state_machine = session_data["sections"][2]
+    else:
+        raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
+
     if step not in state_machine.QUESTIONS:
         raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
-    
-    # Validar nova resposta
-    is_valid, error_message = ResponseValidator.validate(step, update_request.message)
-    
+
+    # Validar nova resposta usando validator correto
+    if step.startswith("1."):
+        is_valid, error_message = ResponseValidator.validate(step, update_request.message)
+    elif step.startswith("2."):
+        is_valid, error_message = ResponseValidatorSection2.validate(step, update_request.message)
+    else:
+        raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
+
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_message)
     

@@ -960,7 +960,7 @@ response = self.gemini_model.generate_content(prompt)
 **Configuração do modelo Gemini (linhas 24-27):**
 ```python
 genai.configure(api_key=self.gemini_api_key)
-# API Key do .env: [GEMINI_API_KEY_REDACTED]
+# API Key carregada do arquivo .env
 
 self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
 ```
@@ -969,7 +969,7 @@ self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
 ```
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
 Headers:
-  - Authorization: Bearer [GEMINI_API_KEY_REDACTED]
+  - Authorization: Bearer [GEMINI_API_KEY]
   - Content-Type: application/json
 
 Body:
@@ -1259,7 +1259,7 @@ sessions = {
 │               ↓ Monta prompt completo (3000+ chars)             │
 │           ↓ genai.GenerativeModel.generate_content(prompt)      │
 │               ↓ POST https://generativelanguage.googleapis.com  │
-│               ↓ API Key: [GEMINI_API_KEY_REDACTED]│
+│               ↓ API Key: [GEMINI_API_KEY do .env]               │
 │               ↓ Gemini processa + retorna texto                 │
 │           ↓ return generated_text                               │
 │   ↓ INSERT INTO bo_events (text_generated, generation_time_ms)  │

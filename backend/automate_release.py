@@ -394,11 +394,11 @@ class ReleaseAutomation:
         await self.take_screenshot(page, '14-mobile-section2-start.png',
                                   'Início Seção 2 mobile', full_page=True)
 
-        # 2. Abrir sidebar e capturar estado
+        # 2. Abrir sidebar e capturar estado (viewport apenas, não full page)
         await page.click('#sidebar-toggle')
         await page.wait_for_timeout(500)  # Animação
         await self.take_screenshot(page, '15-mobile-section2-sidebar.png',
-                                  'Sidebar - Seção 1 completa + Seção 2 em progresso', full_page=True)
+                                  'Sidebar - Seção 1 completa + Seção 2 em progresso', full_page=False)
 
         # Fechar sidebar usando JavaScript (mais confiável)
         await page.evaluate("""

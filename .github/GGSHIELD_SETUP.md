@@ -2,110 +2,101 @@
 
 ## Status Atual
 
-✅ **ggshield instalado:** v1.45.0 (standalone)
-⚠️ **Pre-commit hook:** Modo manual (reminder apenas)
+✅ **ggshield instalado:** v1.45.0 (via pipx)
+✅ **Pre-commit hook:** Ativo e funcionando
 ✅ **GitHub Actions:** Configurado ([security-scan.yml](workflows/security-scan.yml))
+✅ **Autenticação:** Configurada
 
 ---
 
-## Por que o Hook Não Está Ativo?
+## Instalação Atual (pipx)
 
-O ggshield foi instalado via **standalone installer** (não via pip), então o Git Bash não consegue encontrá-lo no PATH durante o pre-commit.
-
-### Soluções:
-
-#### **Opção 1: Reinstalar via pip (Recomendado)**
+O ggshield foi instalado via **pipx**, que é a forma recomendada:
 
 ```bash
-# Desinstalar versão standalone
-# (via Painel de Controle → Programas)
-
-# Instalar via pip
-pip install ggshield
-
-# Configurar autenticação
+py -m pip install --user pipx
+py -m pipx ensurepath
+py -m pipx install ggshield
 ggshield auth login
-
-# Instalar hook
-ggshield install -m local
 ```
 
-**Vantagens:**
-- ✅ Pre-commit hook automático
-- ✅ Bloqueio de commits com secrets
-- ✅ Melhor integração com Git
+**Localização:** `C:\Users\user\.local\bin\ggshield.exe`
+
+### Pre-commit Hook Configurado
+
+O hook está em `.git/hooks/pre-commit` e usa o caminho absoluto para o ggshield:
+
+```bash
+/c/Users/user/.local/bin/ggshield.exe secret scan pre-commit
+```
+
+**Funciona automaticamente!** Escaneia cada commit antes de permitir.
 
 ---
 
-#### **Opção 2: Usar manualmente antes de cada push**
+## Comandos Úteis
+
+### Escanear manualmente
 
 ```bash
-# Sempre rodar antes de push:
+# Escanear staged changes (antes de commit)
 ggshield secret scan pre-commit
 
-# Ou escanear commits específicos:
+# Escanear commits específicos
 ggshield secret scan commit-range HEAD~5..HEAD
+
+# Escanear repositório inteiro
+ggshield secret scan repo .
+
+# Escanear arquivo específico
+ggshield secret scan path arquivo.txt
 ```
 
-**Vantagens:**
-- ✅ Mais controle
-- ✅ Não precisa reinstalar
+### Ignorar falsos positivos
 
----
+Adicione ao `.gitguardian.yaml` na raiz do projeto:
 
-#### **Opção 3: Confiar apenas no GitHub Actions**
+```yaml
+version: 2
+paths-ignore:
+  - "**/*.md"  # Ignorar markdown
+  - "**/test_*.py"  # Ignorar arquivos de teste
 
-O workflow `.github/workflows/security-scan.yml` já está configurado para escanear automaticamente em cada push/PR.
-
-**Vantagens:**
-- ✅ Nenhuma configuração local necessária
-- ✅ Funciona para toda a equipe
-
-**Desvantagens:**
-- ⚠️ Só detecta secrets DEPOIS do push
-
----
-
-## Configuração Atual do Hook
-
-O arquivo `.git/hooks/pre-commit` atual apenas exibe um lembrete:
-
-```bash
-🔍 Security reminder: Run 'ggshield secret scan pre-commit' before pushing
-   (Optional - GitGuardian will scan on GitHub Actions)
+matches-ignore:
+  - name: "False positive example"
+    match: "sua_chave_aqui"  # Placeholder
 ```
-
-Isso **não bloqueia** commits, apenas lembra de escanear manualmente.
 
 ---
 
 ## Como Testar
 
 ```bash
-# Criar arquivo com secret fake
-echo "API_KEY=ghp_1234567890abcdefghijklmnopqrstuvwxyz12" > test_secret.txt
+# O hook roda automaticamente a cada commit
+git commit -m "test: security check"
+# Output esperado: "No secrets have been found"
 
-# Tentar commitar
-git add test_secret.txt
-git commit -m "test: secret detection"
-
-# Se o hook estiver ativo, deve bloquear
-# Se não, deve apenas mostrar o lembrete
+# Para testar detecção (NÃO COMMITAR DE VERDADE):
+echo "test_key=ghp_1234567890abcdefghijklmnopqrstuvwxyz12" > test.txt
+git add test.txt
+git commit -m "test"  # Deve detectar e bloquear (se for uma key válida)
 
 # Limpar teste
-git reset HEAD~1
-rm test_secret.txt
+git reset HEAD
+rm test.txt
 ```
 
 ---
 
-## Recomendação Final
+## Camadas de Proteção Ativas
 
-Para **máxima segurança**, use **Opção 1** (reinstalar via pip) + **GitHub Actions** (já configurado).
+✅ **3 Camadas de Segurança:**
 
-Isso cria **duas camadas de proteção**:
-1. **Local:** ggshield bloqueia commits com secrets
-2. **Cloud:** GitHub Actions escaneia PRs automaticamente
+1. **Local (Pre-commit):** ggshield escaneia antes de cada commit
+2. **CI/CD (GitHub Actions):** Escaneia automaticamente em push/PR
+3. **Cloud (GitGuardian):** Monitoramento contínuo 24/7
+
+**Status:** 🟢 Proteção máxima ativa!
 
 ---
 

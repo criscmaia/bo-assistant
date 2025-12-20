@@ -42,18 +42,21 @@ bo-assistant/
 ## Comandos para Desenvolvimento Local
 
 ```bash
-# Terminal 1 - Backend
-cd backend
-.\venv\Scripts\activate      # Windows
-source venv/bin/activate     # Mac/Linux
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# Terminal 1 - Backend (rodar do diretório RAIZ do projeto)
+cd C:\AI\bo-assistant  # ou caminho do seu projeto
+.\backend\venv\Scripts\activate      # Windows
+source backend/venv/bin/activate     # Mac/Linux
+python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 
 # Terminal 2 - Frontend
 cd docs
-python -m http.server 3000
+python -m http.server 3000 --bind 127.0.0.1
 
-# Acessar: http://localhost:3000
+# Acessar: http://127.0.0.1:3000 ou http://localhost:3000
+# (Se localhost não funcionar, use 127.0.0.1 diretamente)
 ```
+
+**IMPORTANTE:** O backend DEVE ser rodado do diretório raiz do projeto para que o arquivo `.env` seja carregado corretamente.
 
 ## Fluxo da Aplicação
 
@@ -87,10 +90,13 @@ python -m http.server 3000
 ## Variáveis de Ambiente
 
 ```bash
-# backend/.env
+# .env (na RAIZ do projeto, não em backend/)
 GEMINI_API_KEY=sua_chave_aqui
+GROQ_API_KEY=sua_chave_groq_aqui
 DATABASE_URL=postgresql://...  # Apenas em produção
 ```
+
+**IMPORTANTE:** O arquivo `.env` deve estar na raiz do projeto (`C:\AI\bo-assistant\.env`) para ser carregado corretamente pelo backend.
 
 ## Princípios de Desenvolvimento
 
@@ -101,11 +107,11 @@ DATABASE_URL=postgresql://...  # Apenas em produção
 
 ## Versão Atual
 
-**v0.4.1** (12/12/2025)
-- Rascunho automático (localStorage)
-- Sugestão de data/hora atual na pergunta 1.1
-- Validação de data/hora futura
-- Correção de encoding UTF-8
+**v0.6.1** (20/12/2025)
+- Suporte ao Groq API (Llama 3.3 70B) - 14.400 req/dia
+- Correção: `.env` deve estar na raiz do projeto
+- Frontend suporta 127.0.0.1 além de localhost
+- Arquitetura multi-provider (Gemini + Groq)
 
 ## Equipe
 

@@ -1,4 +1,30 @@
-# Changelog v0.6.0
+# Changelog v0.6.1
+
+## [0.6.1] - 2025-12-20
+
+### 🐛 Corrigido
+- **CRÍTICO: Arquivo .env não estava sendo carregado**
+  - Problema: Backend rodando de `backend/` não carregava `.env` corretamente
+  - Solução: `.env` movido para raiz do projeto (`C:\AI\bo-assistant\.env`)
+  - Backend deve ser iniciado do diretório raiz: `python -m uvicorn backend.main:app`
+  - GROQ_API_KEY agora é carregado corretamente na inicialização
+  - Documentação CLAUDE.md atualizada com instruções corretas
+
+### 🔧 Técnico
+- **Frontend**: Suporte para `127.0.0.1` além de `localhost` na detecção de ambiente local
+- **Backend**: Removidos prints de debug temporários usados no diagnóstico
+- **Documentação**: CLAUDE.md atualizado com comandos corretos de startup
+
+### ⚠️ Breaking Changes
+- Arquivo `.env` DEVE estar na raiz do projeto, não mais em `backend/.env`
+- Comando de startup mudou de `cd backend && uvicorn main:app` para `python -m uvicorn backend.main:app` (do diretório raiz)
+
+### ✅ Validado
+- Groq API funcionando corretamente em localhost
+- Seção 1 e Seção 2 gerando textos com sucesso
+- `.env` está no `.gitignore` (linha 12) - seguro para commit
+
+---
 
 ## [0.6.0] - 2025-12-20
 

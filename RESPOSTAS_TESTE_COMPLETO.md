@@ -15,8 +15,9 @@
 
 ### 1.2 - Composição da guarnição e prefixo
 ```
-Sargento Silva, Cabo Almeida e Soldado Faria, viatura 2234
+Sargento João Silva, Cabo Pedro Almeida e Soldado Carlos Faria, viatura 2234
 ```
+**Nota:** Validador exige nome completo (primeiro + último nome) de todos os policiais.
 
 ### 1.3 - Natureza do empenho
 ```

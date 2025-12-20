@@ -175,14 +175,13 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
         return prompt
     
     async def generate_section_text(
-        self, 
+        self,
         section_data: Dict[str, str],
         provider: str = "gemini"
     ) -> str:
         """
         Gera o texto da seção usando o LLM escolhido.
         """
-        
         if provider == "gemini":
             return self._generate_with_gemini(section_data)
         elif provider == "groq":
@@ -195,7 +194,7 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
             raise NotImplementedError("OpenAI ainda não implementado")
         else:
             raise ValueError(f"Provider {provider} não suportado")
-    
+
     def _generate_with_gemini(self, section_data: Dict[str, str]) -> str:
         """
         Gera texto usando Gemini.

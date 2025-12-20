@@ -2,12 +2,14 @@
 
 Sistema automatizado para capturar screenshots e vídeos de releases do BO Assistant.
 
+**Versão:** 2.1 (com suporte a Seção 2)
+
 ---
 
 ## 📦 Arquivos
 
-1. **`test_scenarios.json`** - Configuração de cenários de teste
-2. **`automate_release.py`** - Script principal
+1. **`test_scenarios.json`** - Configuração hierárquica de cenários de teste (Seção 1 + 2)
+2. **`automate_release.py`** - Script principal (Playwright async)
 3. **`README_AUTOMACAO.md`** - Este arquivo
 
 ---
@@ -33,63 +35,105 @@ python -m http.server 3000
 cd backend
 
 # Executar (modo visual - você vê o navegador)
-python automate_release.py --version v0.3.2
+python automate_release.py --version v0.5.1
 
-# Executar em background (headless)
-python automate_release.py --version v0.3.2 --headless
-
-# Executar sem gerar vídeo (mais rápido)
-python automate_release.py --version v0.3.2 --no-video
+# Executar sem gerar vídeo (mais rápido - ~3 minutos)
+python automate_release.py --version v0.5.1 --no-video
 
 # Com URLs customizadas
-python automate_release.py --version v0.3.2 \
-    --backend http://localhost:8000 \
-    --frontend http://localhost:3000
+python automate_release.py --version v0.5.1 \
+    --backend http://localhost:8000
 ```
+
+**Nota:** O navegador sempre abre em modo visível (não há mais modo headless). Isso permite acompanhar o teste em tempo real.
 
 ### Resultado
 
-Após ~2-3 minutos, você terá:
+Após ~4-5 minutos, você terá:
 
 ```
-docs/screenshots/v0.3.2/
-├── 01-desktop-sidebar-empty.png
-├── 02-desktop-sidebar-progress.png
-├── 03-desktop-erro.png
-├── 04-desktop-editando.png
-├── 05-desktop-editando-erro.png
-├── 06-mobile-empty.png
-├── 07-mobile-sidebar-open.png
-├── 08-desktop-final.png
-├── 09-mobile-final.png
-├── demo.mp4
+docs/screenshots/v0.5.1/
+├── 01-section1-empty.png
+├── 02-section1-progress-3-of-6.png
+├── 03-section1-edit-error.png
+├── 04-section1-edit-success.png
+├── 05-section1-final-with-button.png
+├── 06-section2-start.png
+├── 07-section2-plate-error.png
+├── 08-section2-rank-error.png
+├── 09-section2-progress-4-of-8.png
+├── 10-section2-final-both-sections.png
+├── 11-mobile-section1-empty.png
+├── 12-mobile-section1-sidebar.png
+├── 13-mobile-section1-final.png
+├── 14-mobile-section2-start.png
+├── 15-mobile-section2-sidebar.png
+├── 16-mobile-section2-final.png
+├── demo.webm
 └── README.md
 ```
+
+**Total:** 16 screenshots + vídeo de ~4 minutos
 
 ---
 
 ## 🎬 O Que o Script Faz
 
-### Desktop (1280x720)
-1. Abre página inicial → Screenshot `01`
-2. Responde 2 perguntas
-3. Edita pergunta 1 com erro → Screenshot `05`
-4. Edita pergunta 1 com sucesso → Screenshot `04`
-5. Responde pergunta 3 com erro → Screenshot `03`
-6. Responde pergunta 3 corretamente → Screenshot `02` (progresso 3/6)
-7. Responde perguntas 4, 5, 6
-8. Aguarda geração de texto → Screenshot `08`
-9. **Grava vídeo MP4** de todo o fluxo
+### Desktop (1280x720) - Seção 1 + Seção 2
+1. **Seção 1 (Contexto da Ocorrência):**
+   - Abre página inicial → Screenshot `01`
+   - Responde perguntas 1.1, 1.2, 1.3 → Screenshot `02` (progresso 3/6)
+   - Testa edição com erro → Screenshot `03`
+   - Testa edição válida → Screenshot `04`
+   - Responde perguntas 1.4, 1.5, 1.6
+   - Aguarda geração de texto → Screenshot `05` (com botão "Iniciar Seção 2")
 
-### Mobile (430x932 - iPhone 14 Pro Max)
-1. Abre página inicial → Screenshot `06`
-2. Abre sidebar/drawer → Screenshot `07`
-3. Responde todas as 6 perguntas rapidamente
-4. Aguarda texto gerado → Screenshot `09`
+2. **Seção 2 (Abordagem a Veículo):**
+   - Clica em "Iniciar Seção 2" → Screenshot `06`
+   - Testa placa inválida (ABC123) → Screenshot `07`
+   - Envia placa válida (ABC-1D23)
+   - Testa resposta sem graduação → Screenshot `08`
+   - Envia resposta válida com graduação → Screenshot `09` (progresso 4/8)
+   - Responde perguntas 2.4, 2.5, 2.6, 2.7
+   - Aguarda geração de texto → Screenshot `10` (ambas seções visíveis)
+   - **Grava vídeo WebM** de todo o fluxo (~4 minutos)
+
+### Mobile (430x932 - iPhone 14 Pro Max) - Seção 1 + Seção 2
+1. **Seção 1:**
+   - Abre página inicial → Screenshot `11`
+   - Abre sidebar → Screenshot `12`
+   - Responde todas as 6 perguntas
+   - Aguarda texto gerado → Screenshot `13`
+
+2. **Seção 2:**
+   - Clica em "Iniciar Seção 2" → Screenshot `14`
+   - Abre sidebar (mostra Seção 1 ✓) → Screenshot `15`
+   - Responde 8 perguntas válidas (sem testar erros)
+   - Aguarda texto gerado → Screenshot `16` (ambas seções visíveis)
 
 ---
 
 ## ⚙️ Configuração (test_scenarios.json)
+
+O arquivo `test_scenarios.json` agora usa **estrutura hierárquica** com array `sections`:
+
+```json
+{
+  "version": "0.5.1",
+  "sections": [
+    {
+      "section_number": 1,
+      "name": "Contexto da Ocorrência",
+      "steps": [...]
+    },
+    {
+      "section_number": 2,
+      "name": "Abordagem a Veículo",
+      "steps": [...]
+    }
+  ]
+}
+```
 
 ### Alterar Resoluções
 
@@ -107,9 +151,25 @@ docs/screenshots/v0.3.2/
 "frontend_url": "https://criscmaia.github.io/bo-assistant/"
 ```
 
-### Alterar Cenários de Teste
+### Adicionar Nova Seção (futuro)
 
-Edite o array `test_flow` para adicionar/remover passos.
+Adicione novo objeto ao array `sections`:
+
+```json
+{
+  "section_number": 3,
+  "name": "Campana e Vigilância",
+  "emoji": "🔍",
+  "total_questions": 5,
+  "steps": [
+    {
+      "step": "3.0",
+      "answer": "Resposta...",
+      "expect": "pass"
+    }
+  ]
+}
+```
 
 ---
 
@@ -171,11 +231,18 @@ await self.take_screenshot(page, 'novo-screenshot.png', 'Descrição')
 
 ## 📊 Performance
 
-- **Tempo total:** ~2-3 minutos
-- **Desktop flow:** ~90 segundos
-- **Mobile flow:** ~30 segundos
-- **Geração de vídeo:** ~10 segundos
-- **Tamanho total:** ~5-8 MB
+- **Tempo total:** ~4-5 minutos (com vídeo) / ~3 minutos (sem vídeo)
+- **Desktop Seção 1:** ~90 segundos
+- **Desktop Seção 2:** ~120 segundos
+- **Mobile Seção 1:** ~30 segundos
+- **Mobile Seção 2:** ~60 segundos
+- **Tamanho total:** ~10-15 MB (16 screenshots + vídeo)
+
+**Breakdown do tempo:**
+- Espera de API por resposta: ~1s cada (14 perguntas = ~14s)
+- Espera de geração LLM: ~15-25s por seção (2 seções = ~40s)
+- Typing lento (para vídeo natural): ~10-30s por pergunta
+- Screenshots e scrolls: ~5s
 
 ---
 
@@ -195,19 +262,42 @@ Após gerar screenshots:
 
 ```bash
 # 1. Revisar screenshots geradas
-cd docs/screenshots/v0.3.2
-# Abrir e verificar cada imagem
+cd docs/screenshots/v0.5.1
+# Abrir e verificar cada imagem (16 screenshots)
 
-# 2. Commit
-git add docs/screenshots/v0.3.2/
-git commit -m "docs: adicionar screenshots automáticas da v0.3.2"
+# 2. Verificar vídeo
+# Abrir demo.webm e assistir fluxo completo (~4 minutos)
+
+# 3. Commit
+git add docs/screenshots/v0.5.1/
+git commit -m "docs: adicionar screenshots automáticas da v0.5.1 (Seção 1 + 2)"
 git push
 
-# 3. Atualizar CHANGELOG.md (manual)
+# 4. Atualizar CHANGELOG.md (manual)
 ```
 
 ---
 
-**Criado por:** Claude + Cristiano Maia  
-**Data:** 05/12/2024  
-**Versão:** 1.0
+## 🔄 Changelog da Automação
+
+### v2.1 (19/12/2025) - Suporte a Seção 2
+- ✅ Adicionada Seção 2 (Abordagem a Veículo - 8 perguntas)
+- ✅ Estrutura hierárquica em `test_scenarios.json`
+- ✅ 16 screenshots (10 desktop + 6 mobile)
+- ✅ Validações: placa Mercosul, graduação
+- ✅ Vídeo ampliado para ~4 minutos
+
+### v2.0 (05/12/2024) - Gravação de Vídeo Nativa
+- ✅ Gravação de vídeo WebM via Playwright nativo
+- ✅ Suporte a Seção 1 (6 perguntas)
+- ✅ 9 screenshots (6 desktop + 3 mobile)
+
+### v1.0 (Inicial) - Screenshots Básicos
+- ✅ Screenshots manuais
+- ✅ Sem vídeo
+
+---
+
+**Criado por:** Claude Sonnet 4.5 + Cristiano Maia
+**Última atualização:** 19/12/2025
+**Versão:** 2.1

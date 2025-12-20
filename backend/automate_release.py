@@ -107,21 +107,23 @@ class ReleaseAutomation:
         # 03-05. Fluxo de edição
         print("\n  ✏️  Testando edição...")
         edit_buttons = await page.query_selector_all('button:has-text("Editar")')
-        if edit_buttons:
+        if edit_buttons and len(edit_buttons) > 0:
             # 03. Clicar em editar - mostrar campo aberto
             await edit_buttons[0].click()
-            await page.wait_for_timeout(500)
+            await page.wait_for_timeout(800)
 
-            # Não precisa de screenshot aqui - vamos para erro direto
+            # Aguardar input aparecer
+            await page.wait_for_selector('input.px-2', state='visible', timeout=3000)
 
             # 04. Colocar erro de validação
-            edit_input = await page.query_selector('input.px-2')
             if slow_mode:
+                await page.fill('input.px-2', '')  # Limpar primeiro
                 await self.type_slowly(page, 'input.px-2', 'asd', delay=50)
             else:
-                await edit_input.fill('asd')
+                await page.fill('input.px-2', 'asd')
 
-            save_button = await page.query_selector('button:has-text("Salvar")')
+            # Clicar em Salvar
+            save_button = await page.wait_for_selector('button:has-text("Salvar")', state='visible')
             await save_button.click()
             await page.wait_for_timeout(1500)
 
@@ -129,17 +131,24 @@ class ReleaseAutomation:
                                       'Erro de validação ao editar - Seção 1', full_page=True)
 
             # 05. Corrigir e salvar com sucesso
+            # Input ainda deve estar visível
+            await page.wait_for_selector('input.px-2', state='visible', timeout=3000)
+
             if slow_mode:
-                await page.fill('input.px-2', '')
+                await page.fill('input.px-2', '')  # Limpar
                 await self.type_slowly(page, 'input.px-2', section1_steps[4]['answer'], delay=50)
             else:
-                await edit_input.fill(section1_steps[4]['answer'])
+                await page.fill('input.px-2', section1_steps[4]['answer'])
 
+            # Clicar em Salvar novamente
+            save_button = await page.wait_for_selector('button:has-text("Salvar")', state='visible')
             await save_button.click()
             await page.wait_for_timeout(1500)
 
             await self.take_screenshot(page, '04-section1-edit-success.png',
                                       'Edição salva com sucesso - Seção 1', full_page=True)
+        else:
+            print("  ⚠️  Nenhum botão Editar encontrado - pulando teste de edição")
 
         # Responder perguntas 4-6
         await self.fill_and_send(page, section1_steps[5]['answer'], slow_typing=slow_mode)
@@ -191,6 +200,10 @@ class ReleaseAutomation:
     async def run_section2_flow(self, page: Page, slow_mode: bool = False):
         """Executa fluxo completo da Seção 2"""
         print("\n🚗 Iniciando fluxo DESKTOP Seção 2...")
+
+        # Scroll para o topo da página antes de iniciar Seção 2 (para vídeo)
+        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
+        await page.wait_for_timeout(1000)  # Aguardar scroll suave
 
         # 1. Clicar em "Iniciar Seção 2"
         btn_start = page.locator('#btn-start-section2')
@@ -367,6 +380,10 @@ class ReleaseAutomation:
     async def run_mobile_section2_flow(self, page: Page, slow_mode: bool = False):
         """Fluxo mobile da Seção 2 (simplificado, sem screenshots de erros)"""
         print("\n🚗 Iniciando fluxo MOBILE Seção 2...")
+
+        # Scroll para o topo antes de iniciar Seção 2 (para vídeo)
+        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
+        await page.wait_for_timeout(1000)
 
         # 1. Clicar em "Iniciar Seção 2"
         await page.wait_for_timeout(1000)

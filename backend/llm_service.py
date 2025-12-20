@@ -23,7 +23,8 @@ class LLMService:
         # Configurar Gemini
         if self.gemini_api_key:
             genai.configure(api_key=self.gemini_api_key)
-            # Usar gemini-2.5-flash (rápido, barato, boa quota)
+            # Usar gemini-2.5-flash (20 req/dia no free tier)
+            # NOTA: Se atingir limite diário, aguardar reset às 00:00 UTC ou upgrade para tier pago
             self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
         else:
             self.gemini_model = None
@@ -203,7 +204,13 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
             return generated_text
             
         except Exception as e:
-            raise Exception(f"Erro ao gerar texto com Gemini: {str(e)}")
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto com Gemini: {error_msg}")
     
     def validate_api_keys(self) -> Dict[str, bool]:
         """
@@ -355,4 +362,10 @@ Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
             return generated_text
 
         except Exception as e:
-            raise Exception(f"Erro ao gerar texto da Seção 2 com Gemini: {str(e)}")
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 2 com Gemini: {error_msg}")

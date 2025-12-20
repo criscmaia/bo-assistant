@@ -292,16 +292,27 @@ async def chat(request_body: ChatRequest, request: Request):
             )
             
         except Exception as e:
+            error_msg = str(e)
+
             # Log: erro na geração
             BOLogger.log_event(
                 bo_id=bo_id,
                 event_type="generation_error",
                 data={
-                    "error": str(e),
+                    "error": error_msg,
                     "llm_provider": request_body.llm_provider
                 }
             )
-            raise HTTPException(status_code=500, detail=f"Erro ao gerar texto: {str(e)}")
+
+            # Mensagens mais amigáveis baseadas no tipo de erro
+            if "quota" in error_msg.lower() or "429" in error_msg:
+                user_msg = "⏳ Limite diário da API Gemini atingido. Aguarde ou troque de modelo."
+                status_code = 429
+            else:
+                user_msg = f"❌ Erro ao gerar texto: {error_msg}"
+                status_code = 500
+
+            raise HTTPException(status_code=status_code, detail=user_msg)
     
     # Próxima pergunta
     next_question = state_machine.get_current_question()

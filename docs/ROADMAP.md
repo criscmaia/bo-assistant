@@ -1,39 +1,29 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.5.1
-**Última atualização**: 19/12/2025
+## Versão Atual: v0.6.4
+**Última atualização**: 20/12/2025
 
 ---
 
-## 🎯 Fase 1 - Validação e Polimento
+## ✅ Status da Fase 1
 
-### ✅ Concluído (v0.4.1)
-- [x] Salvamento automático de rascunho (localStorage, 7 dias)
-- [x] Validação de data/hora futura
-- [x] Sugestão de data/hora atual
-- [x] Correção de encoding UTF-8
-- [x] Dashboard de logs
-- [x] Sistema de feedback (👍👎)
+A **Fase 1 (Validação e Polimento)** foi **100% concluída** na v0.6.4.
 
-### ✅ Concluído (v0.5.0)
-- [x] **Seção 2: Abordagem a Veículo** - 8 perguntas (2.0-2.7)
-- [x] Validação de placa Mercosul (ABC1D23, ABC-1D23)
-- [x] Lógica condicional (pular seção se não houve veículo)
-- [x] Geração de texto via LLM para Seção 2
-- [x] Endpoint `/start_section/{section_number}`
-- [x] Refatoração de sessions para suportar múltiplas seções
+**Marcos alcançados:**
+- ✅ Seção 1 (Contexto da Ocorrência) + Seção 2 (Abordagem a Veículo) implementadas e funcionais
+- ✅ Sistema de rascunhos com sincronização em bloco (endpoint `/sync_session`)
+- ✅ Validação inteligente de respostas + logs completos + sistema de feedback
+- ✅ Interface responsiva (desktop/tablet/mobile)
+- ✅ Integração Groq Llama 3.3 70B (14.4k req/dia)
 
-### ✅ Concluído (v0.5.1)
-- [x] **UX Multi-Seção** - Melhorias críticas de experiência do usuário
-- [x] Container persistente de textos gerados (todas seções visíveis)
-- [x] Numeração completa de perguntas ([1.1], [2.3])
-- [x] Sidebar com todas 8 seções (completadas, atual, futuras)
-- [x] Botão "Copiar BO Completo" quando há 2+ seções
-- [x] Layout responsivo (mobile/tablet/desktop)
-- [x] Accordion nativo (`<details>`) para performance
+**Histórico detalhado:** Ver [CHANGELOG.md](../CHANGELOG.md#-histórico-de-features-por-fase)
 
-### 📋 Backlog - Melhorias Fase 1
-- [ ] **Mini resumo ao iniciar seção** (v0.5.2)
+---
+
+## 📋 Backlog - Melhorias Incrementais
+
+### Melhorias UX (Prioridade Baixa)
+- [ ] **Mini resumo ao iniciar seção**
   - Mostrar 3-4 respostas-chave da seção anterior
   - Card amarelo colapsável em mobile
 - [ ] **Templates de locais frequentes**
@@ -48,7 +38,7 @@
 
 ---
 
-## 🚀 Fase 2 - Seções 3-8 (Futuro)
+## 🚀 Fase 2 - Seções 3-8 (Próxima)
 
 ### Objetivo
 Implementar as 6 seções restantes do BO completo baseadas no material do Sgt. Claudio Moreira.
@@ -264,12 +254,6 @@ Implementar as 6 seções restantes do BO completo baseadas no material do Sgt. 
 
 ## 🎯 Métricas de Sucesso
 
-### KPIs v0.5.1:
-- ✅ Zero perda de dados ao navegar entre seções
-- ✅ Referência clara a perguntas específicas (IDs completos)
-- ✅ Interface responsiva em todos dispositivos
-- ✅ Tempo de desenvolvimento: 3-4 dias (conforme estimado)
-
 ### KPIs Fase 2 (Seções 3-8):
 - 50+ BOs com todas 8 seções gerados no primeiro mês
 - Tempo médio de conclusão < 15 minutos
@@ -303,34 +287,12 @@ Implementar as 6 seções restantes do BO completo baseadas no material do Sgt. 
 
 ---
 
-## 🔍 Lições Aprendidas (v0.5.0 → v0.5.1)
-
-### O que funcionou bem:
-- ✅ Uso de `<details>` nativo (acessibilidade + performance)
-- ✅ Accordion collapse/expand sem JavaScript
-- ✅ Inline `onclick` handlers (simplicidade)
-- ✅ Mobile-first design com collapsed por padrão
-- ✅ IDs completos nas badges (comunicação clara)
-
-### Desafios enfrentados:
-- ⚠️ Layout hierarchy (completed card placement) - Resolvido com `insertBefore()`
-- ⚠️ Duplicate section headers - Resolvido removendo redundância
-- ⚠️ Mobile space constraints - Resolvido com responsive CSS
-
-### Próximas melhorias:
-- Adicionar mini resumo ao iniciar seção (v0.5.2)
-- Melhorar feedback visual ao copiar texto
-- Adicionar animações suaves de transição
-
----
-
 ## 📚 Referências
 
 - **Material Base**: Claudio Moreira (Sargento PM)
 - **Jurisprudência**: STF HC 261029 (fundada suspeita)
 - **Design System**: Tailwind CSS v3
-- **LLM**: Google Gemini 2.5 Flash
-- **Plan Mode**: `C:\Users\user\.claude\plans\piped-tickling-hickey.md`
+- **LLM**: Google Gemini 2.5 Flash + Groq Llama 3.3 70B
 
 ---
 

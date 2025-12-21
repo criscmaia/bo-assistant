@@ -1,0 +1,321 @@
+# 🛠️ Guia de Desenvolvimento - BO Inteligente
+
+**Versão:** v0.6.4
+**Última atualização:** 20/12/2025
+
+Este documento serve como memória institucional do projeto, documentando decisões arquiteturais, comandos essenciais e guias de debugging para desenvolvedores.
+
+---
+
+## 🚀 Quick Start
+
+### Ambiente Local
+
+```bash
+# Terminal 1 - Backend (rodar do diretório RAIZ do projeto)
+cd C:\AI\bo-assistant  # ou caminho do seu projeto
+.\backend\venv\Scripts\activate      # Windows
+source backend/venv/bin/activate     # Mac/Linux
+python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+
+# Terminal 2 - Frontend
+cd docs
+python -m http.server 3000 --bind 127.0.0.1
+
+# Acessar: http://127.0.0.1:3000 ou http://localhost:3000
+```
+
+**⚠️ CRÍTICO:** O backend DEVE ser rodado do diretório raiz do projeto para que o arquivo `.env` seja carregado corretamente pelo `python-dotenv`.
+
+### Links de Produção
+
+| Ambiente | URL |
+|----------|-----|
+| Frontend | https://criscmaia.github.io/bo-assistant/ |
+| Backend API | https://bo-assistant-backend.onrender.com |
+| Dashboard Logs | https://criscmaia.github.io/bo-assistant/logs.html |
+| Repositório | https://github.com/criscmaia/bo-assistant |
+
+---
+
+## 🏗️ Princípios de Desenvolvimento
+
+1. **Nunca inventar informações** - O LLM só usa dados fornecidos pelo usuário
+2. **Validação inteligente** - Rejeita respostas vagas sem ser excessivamente rígido
+3. **Encoding UTF-8** - Sempre usar UTF-8 em arquivos Python (acentos!)
+4. **Código simples** - JavaScript vanilla, sem frameworks complexos
+5. **Testar localmente ANTES** - Não fazer push direto para produção
+
+---
+
+## 📐 Decisões Arquiteturais (ADRs)
+
+**Nota:** ADRs complementam o CHANGELOG.md:
+- **CHANGELOG.md** = **O QUÊ** mudou e **QUANDO** (timeline de mudanças)
+- **ADRs** = **POR QUÊ** as decisões foram tomadas (contexto arquitetural para futuras decisões)
+
+### ADR-001: Sessões como Dict (v0.5.0)
+
+**Contexto:** Na v0.4.x, sessões eram armazenadas como tuplas `(bo_id, state_machine)`.
+
+**Decisão:** Migrar para dicionários estruturados para suportar múltiplas seções.
+
+**Estrutura:**
+```python
+sessions[session_id] = {
+    "bo_id": "BO-20251220-xxxxx",
+    "sections": {
+        1: BOStateMachine(),           # Seção 1: Contexto (1.1-1.6)
+        2: BOStateMachineSection2()    # Seção 2: Veículo (2.1-2.8)
+    },
+    "current_section": 1,
+    "section1_text": "",
+    "section2_text": ""
+}
+```
+
+**Impacto:** Facilita expansão para Seções 3-8 sem refatoração adicional.
+
+---
+
+### ADR-002: Groq como LLM Secundário (v0.6.0)
+
+**Contexto:** Gemini 2.5 Flash tem limite de 20 req/dia (free tier), insuficiente para testes.
+
+**Decisão:** Adicionar Groq Llama 3.3 70B (14.400 req/dia) como provider alternativo.
+
+**Implementação:**
+- `llm_service.py` suporta ambos os providers
+- Frontend permite escolher via parâmetro `llm_provider: 'gemini'` ou `'groq'`
+- Fallback automático se um provider falhar
+
+**Razão:** Permite desenvolvimento e testes intensivos sem limite de quota.
+
+---
+
+### ADR-003: localStorage para Rascunhos (v0.6.2)
+
+**Contexto:** Usuários perdiam progresso ao fechar o navegador.
+
+**Decisão:** Implementar salvamento automático de rascunhos com localStorage (7 dias de expiração).
+
+**Estrutura:**
+```javascript
+{
+    "sessionId": "uuid",
+    "boId": "BO-20251220-xxxxx",
+    "sections": {
+        "1": {
+            "answers": { "1.1": "resposta1", ... },
+            "currentStep": "1.3",
+            "completed": false,
+            "generatedText": ""
+        },
+        "2": { ... }
+    },
+    "timestamp": 1703000000000
+}
+```
+
+**Trade-off:** Dados ficam apenas no navegador (sem sincronização cross-device), mas implementação é trivial e não requer backend adicional.
+
+---
+
+### ADR-004: Endpoint `/sync_session` (v0.6.4)
+
+**Contexto:** Restaurar rascunhos com múltiplas chamadas `/chat` era lento (10+ requisições).
+
+**Decisão:** Criar endpoint dedicado que aceita estado completo da sessão e reconstrói backend atomicamente.
+
+**Vantagem:** Restauração 10x mais rápida (1 requisição vs 10+).
+
+**Payload:**
+```json
+{
+    "session_id": "uuid",
+    "bo_id": "BO-20251220-xxxxx",
+    "sections": {
+        "1": {
+            "answers": { ... },
+            "current_step": "complete",
+            "generated_text": "texto gerado"
+        }
+    },
+    "current_section": 1
+}
+```
+
+---
+
+### ADR-005: Renumeração IDs Seção 2 (v0.6.4)
+
+**Contexto:** Seção 1 usava IDs 1.1-1.6, mas Seção 2 usava 2.0-2.7 (inconsistente).
+
+**Decisão:** Renumerar Seção 2 para 2.1-2.8 (8 perguntas).
+
+**Razão:** Consistência visual e facilita expansão para Seções 3-8.
+
+**Migração:** Frontend detecta rascunhos antigos e converte automaticamente.
+
+---
+
+## 🐛 Guia de Debugging
+
+### Problema 1: Backend não gera texto (Erro 500)
+
+**Sintoma:** Erro 500 ao clicar "Gerar texto".
+
+**Diagnóstico:**
+1. Verificar se API keys estão carregadas:
+   ```python
+   # Adicionar em llm_service.py.__init__()
+   print(f"DEBUG: gemini_key = {os.getenv('GEMINI_API_KEY')[:10]}...")
+   print(f"DEBUG: groq_key = {os.getenv('GROQ_API_KEY')[:10]}...")
+   ```
+   - Se retornar `None`, arquivo `.env` não está sendo carregado.
+
+2. Verificar CWD (current working directory):
+   - `python-dotenv` carrega `.env` do diretório onde o comando foi executado.
+   - **ERRADO:** `cd backend && uvicorn main:app` (procura `.env` em `backend/`)
+   - **CORRETO:** `python -m uvicorn backend.main:app` (procura `.env` na raiz)
+
+3. Verificar se porta 8000 está livre:
+   ```bash
+   # Windows
+   netstat -ano | findstr :8000
+   taskkill /F /IM python.exe
+
+   # Mac/Linux
+   lsof -i :8000
+   kill -9 <PID>
+   ```
+
+---
+
+### Problema 2: Frontend conecta ao Render em vez de localhost
+
+**Sintoma:** DevTools mostra requisições indo para `bo-assistant-backend.onrender.com` mesmo rodando localmente.
+
+**Causa:** Código JavaScript detectava apenas `localhost`, não `127.0.0.1`.
+
+**Solução (já implementada na v0.6.1):**
+```javascript
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000'
+    : 'https://bo-assistant-backend.onrender.com';
+```
+
+---
+
+### Problema 3: Endpoint de edição retornando erro 500
+
+**Sintoma:** `ValueError: too many values to unpack (expected 2)`
+
+**Causa:** Sessões foram refatoradas de tupla para dict (v0.5.0), mas endpoint de edição não foi atualizado.
+
+**Como debugar:**
+1. Verificar estrutura em [main.py](backend/main.py):
+   ```python
+   print(f"DEBUG: sessions[session_id] = {sessions[session_id]}")
+   ```
+2. Estrutura correta (v0.5.0+):
+   ```python
+   {
+       "bo_id": "BO-20251220-xxxxx",
+       "sections": {
+           1: StateMachine(),
+           2: StateMachineSection2()
+       }
+   }
+   ```
+
+---
+
+### Problema 4: Automação de screenshots com problemas
+
+**Problema 1:** Element não é clicável
+- **Solução:** Usar `wait_for_selector(..., state='visible')` antes de interagir.
+
+**Problema 2:** Screenshot mostra área errada
+- **Causa:** Scroll executado antes de ação que também causa scroll.
+- **Solução:** Executar ações → aguardar efeitos → scroll → screenshot.
+
+**Problema 3:** Sidebar/modal com conteúdo sobreposto
+- **Causa:** `full_page=True` faz scroll virtual, elementos fixed aparecem através.
+- **Solução:** Usar `full_page=False` para overlays.
+
+---
+
+### Problema 5: Quota do LLM excedida
+
+**Sintoma:** Erro 429 ou "rate_limit" na mensagem.
+
+**Soluções:**
+- Gemini 2.5 Flash: 20 req/dia (free tier)
+- Groq Llama 3.3 70B: 14.400 req/dia (free tier) - **Recomendado para testes**
+- Trocar provider no frontend ([index.html](docs/index.html) linhas 520, 1149, 1408): `llm_provider: 'groq'`
+
+---
+
+## 📝 Boas Práticas
+
+### Logs de Debug Temporários
+
+1. Sempre adicionar comentário `# DEBUG - remover antes do commit`
+2. Usar prefixo claro: `print(f"DEBUG GROQ ERROR: {error}")`
+3. Limpar antes de fazer merge para main
+4. Evitar deixar prints em produção (poluem logs do Render)
+
+### Fluxo de Deploy
+
+1. Testar localmente com Groq (provider principal - 14.4k req/dia)
+   - Gemini existe como fallback mas não é testado rotineiramente
+2. Verificar se nenhum print de debug foi esquecido
+3. Atualizar versão em 3 locais:
+   - [backend/main.py](backend/main.py) linha 30: `APP_VERSION`
+   - [README.md](README.md) linhas 19, 235: versão e data
+   - [CHANGELOG.md](CHANGELOG.md): adicionar nova versão no topo
+4. Atualizar [docs/ROADMAP.md](docs/ROADMAP.md) se houver features concluídas
+5. Adicionar ADR em DEVELOPMENT.md se houver decisões arquiteturais relevantes
+6. Fazer commit e push para main
+7. Backend no Render faz deploy automático (~2 min)
+8. Frontend no GitHub Pages atualiza instantaneamente
+9. Testar em produção com casos de teste reais
+
+### Variáveis de Ambiente
+
+```bash
+# .env (na RAIZ do projeto, não em backend/)
+GEMINI_API_KEY=sua_chave_aqui
+GROQ_API_KEY=sua_chave_groq_aqui
+DATABASE_URL=postgresql://...  # Apenas em produção (Render)
+```
+
+**Nota:** O arquivo `.env` já está no `.gitignore` e não será versionado.
+
+---
+
+## 🔗 Documentação Relacionada
+
+- [README.md](README.md) - Visão geral e instruções de uso
+- [docs/SETUP.md](docs/SETUP.md) - Guia completo de setup e deploy
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Arquitetura técnica detalhada
+- [docs/API.md](docs/API.md) - Referência completa de endpoints
+- [docs/ROADMAP.md](docs/ROADMAP.md) - Planejamento de features futuras
+- [CHANGELOG.md](CHANGELOG.md) - Histórico completo de versões
+
+---
+
+## 👥 Equipe
+
+- **Cristiano Maia** - Delivery Manager & Tech Lead
+- **Claudio Moreira** - Especialista em Redação de BOs (Sargento PM)
+
+---
+
+## ⚠️ Notas Importantes
+
+- O backend no Render (free tier) "dorme" após 15 min de inatividade
+- Primeira requisição pode demorar 30-60s para "acordar"
+- Frontend é estático no GitHub Pages (deploy automático no push)
+- Render usa PostgreSQL em produção, SQLite localmente

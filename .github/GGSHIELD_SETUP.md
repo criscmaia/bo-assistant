@@ -1,90 +1,21 @@
-# 🛡️ Configuração do ggshield
+# 🛡️ Configuração do ggshield - BO Inteligente
 
-## Status Atual
+## Status
 
-✅ **ggshield instalado:** v1.45.0 (via pipx)
-✅ **Pre-commit hook:** Ativo e funcionando
-✅ **GitHub Actions:** Configurado ([security-scan.yml](workflows/security-scan.yml))
-✅ **Autenticação:** Configurada
-
----
-
-## Instalação Atual (pipx)
-
-O ggshield foi instalado via **pipx**, que é a forma recomendada:
-
-```bash
-py -m pip install --user pipx
-py -m pipx ensurepath
-py -m pipx install ggshield
-ggshield auth login
-```
+✅ **ggshield v1.45.0** instalado via pipx
+✅ **Pre-commit hook** ativo e funcionando
+✅ **GitHub Actions** configurado ([security-scan.yml](workflows/security-scan.yml))
+✅ **Autenticação** configurada
 
 **Localização:** `C:\Users\user\.local\bin\ggshield.exe`
 
-### Pre-commit Hook Configurado
-
-O hook está em `.git/hooks/pre-commit` e usa o caminho absoluto para o ggshield:
-
-```bash
-/c/Users/user/.local/bin/ggshield.exe secret scan pre-commit
-```
-
-**Funciona automaticamente!** Escaneia cada commit antes de permitir.
-
 ---
 
-## Comandos Úteis
+## ⚠️ Nota Importante
 
-### Escanear manualmente
+**Este documento é para referência histórica.**
 
-```bash
-# Escanear staged changes (antes de commit)
-ggshield secret scan pre-commit
-
-# Escanear commits específicos
-ggshield secret scan commit-range HEAD~5..HEAD
-
-# Escanear repositório inteiro
-ggshield secret scan repo .
-
-# Escanear arquivo específico
-ggshield secret scan path arquivo.txt
-```
-
-### Ignorar falsos positivos
-
-Adicione ao `.gitguardian.yaml` na raiz do projeto:
-
-```yaml
-version: 2
-paths-ignore:
-  - "**/*.md"  # Ignorar markdown
-  - "**/test_*.py"  # Ignorar arquivos de teste
-
-matches-ignore:
-  - name: "False positive example"
-    match: "sua_chave_aqui"  # Placeholder
-```
-
----
-
-## Como Testar
-
-```bash
-# O hook roda automaticamente a cada commit
-git commit -m "test: security check"
-# Output esperado: "No secrets have been found"
-
-# Para testar detecção (NÃO COMMITAR DE VERDADE):
-echo "test_key=ghp_1234567890abcdefghijklmnopqrstuvwxyz12" > test.txt
-git add test.txt
-git commit -m "test"  # Deve detectar e bloquear (se for uma key válida)
-
-# Limpar teste
-git reset HEAD
-rm test.txt
-```
+A configuração já está completa e ativa desde 19/12/2025. Para consultar detalhes sobre segurança de secrets, ver [SECURITY.md](../SECURITY.md).
 
 ---
 
@@ -101,4 +32,4 @@ rm test.txt
 ---
 
 **Criado em:** 19/12/2025
-**Atualizado em:** 19/12/2025
+**Atualizado em:** 20/12/2025

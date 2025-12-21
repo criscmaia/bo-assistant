@@ -4,7 +4,7 @@
 
 Se você descobrir uma vulnerabilidade de segurança neste projeto, **NÃO crie uma issue pública**. Em vez disso:
 
-1. **Envie um email para:** [Seu Email de Segurança]
+1. **Envie um email para:** criscmaia@gmail.com
 2. **Ou use:** [GitHub Security Advisories](https://github.com/criscmaia/bo-assistant/security/advisories/new)
 
 Responderemos dentro de 48 horas.

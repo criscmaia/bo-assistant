@@ -1,5 +1,47 @@
 # Changelog v0.6.4
 
+## 📜 Histórico de Features por Fase
+
+### ✅ Fase 1 Concluída - Validação e Polimento (v0.4.1 - v0.6.4)
+
+#### v0.6.0-v0.6.4 (Dez 2025)
+- [x] **Groq API Integration** (v0.6.0) - Llama 3.3 70B com 14.400 req/dia
+- [x] **Arquitetura Multi-Provider** - Gemini + Groq com fallback automático
+- [x] **Sistema de Rascunhos** (v0.6.2) - Salvamento automático com localStorage (7 dias)
+- [x] **Endpoint `/sync_session`** (v0.6.4) - Restauração atômica de rascunhos (10x mais rápido)
+- [x] **Renumeração IDs Seção 2** (v0.6.4) - 2.0-2.7 → 2.1-2.8 para consistência
+- [x] **Correção crítica persistência** (v0.6.4) - Rascunho não persiste após BO completo
+- [x] **Migração automática** - Frontend detecta e converte rascunhos v0.6.3
+- [x] **Correções edição e validação** (v0.6.1-v0.6.3) - Endpoint PUT, estrutura dict
+- [x] **Suporte a múltiplas seções em rascunhos** - localStorage com Seção 1 + Seção 2
+
+#### v0.5.1 (Dez 2025) - UX Multi-Seção
+- [x] **UX Multi-Seção** - Melhorias críticas de experiência do usuário
+- [x] Container persistente de textos gerados (todas seções visíveis)
+- [x] Numeração completa de perguntas ([1.1], [2.3])
+- [x] Sidebar com todas 8 seções (completadas, atual, futuras)
+- [x] Botão "Copiar BO Completo" quando há 2+ seções
+- [x] Layout responsivo (mobile/tablet/desktop)
+- [x] Accordion nativo (`<details>`) para performance
+
+#### v0.5.0 (Dez 2025) - Seção 2
+- [x] **Seção 2: Abordagem a Veículo** - 8 perguntas (inicialmente 2.0-2.7)
+- [x] Validação de placa Mercosul (ABC1D23, ABC-1D23)
+- [x] Lógica condicional (pular seção se não houve veículo)
+- [x] Geração de texto via LLM para Seção 2
+- [x] Endpoint `/start_section/{section_number}`
+- [x] Refatoração de sessions para suportar múltiplas seções (tupla → dict)
+
+#### v0.4.1 (Dez 2025) - Validação e Logs
+- [x] Salvamento automático de rascunho (localStorage, 7 dias)
+- [x] Validação de data/hora futura
+- [x] Sugestão de data/hora atual
+- [x] Correção de encoding UTF-8
+- [x] Dashboard de logs
+- [x] Sistema de feedback (👍👎)
+
+---
+
 ## [0.6.4] - 2025-12-20 🎯 **CORREÇÃO CRÍTICA: Sistema de Rascunhos**
 
 ### ✨ Novo - Endpoint de Sincronização em Bloco

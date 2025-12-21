@@ -440,7 +440,7 @@ docs/screenshots/v0.6.4/
 
 ### Configuração de Cenários
 
-Edite [test_scenarios.json](../backend/test_scenarios.json) para adicionar novos cenários:
+Edite [test_scenarios.json](../tests/e2e/test_scenarios.json) para adicionar novos cenários:
 
 ```json
 {
@@ -517,7 +517,7 @@ Validar comportamento do sistema sob alta demanda.
 - [SETUP.md](SETUP.md) - Setup e deploy
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Arquitetura técnica
 - [API.md](API.md) - Referência de endpoints
-- [backend/README_AUTOMACAO.md](../backend/README_AUTOMACAO.md) - Documentação completa da automação
+- [tests/e2e/README.md](../tests/e2e/README.md) - Documentação completa da automação E2E
 
 ---
 
@@ -534,7 +534,7 @@ Validar comportamento do sistema sob alta demanda.
 
 ### Adicionar Novos Casos de Teste
 
-1. Adicione cenário em [test_scenarios.json](../backend/test_scenarios.json)
+1. Adicione cenário em [test_scenarios.json](../tests/e2e/test_scenarios.json)
 2. Execute automação para validar
 3. Documente caso de teste neste arquivo
 4. Abra Pull Request com mudanças

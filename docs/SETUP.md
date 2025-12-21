@@ -348,7 +348,7 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 
 ### Objetivo
 
-Script [automate_release.py](../backend/automate_release.py) captura screenshots e vídeo do frontend para documentação de releases.
+Script [automate_release.py](../tests/e2e/automate_release.py) captura screenshots e vídeo do frontend para documentação de releases.
 
 ### Setup
 
@@ -363,12 +363,11 @@ playwright install
 ### Uso
 
 ```bash
-# No terminal do backend (venv ativado)
-cd C:\AI\bo-assistant
-python backend/automate_release.py --version v0.6.4
+# No terminal (venv ativado)
+python tests/e2e/automate_release.py --version v0.6.4
 
 # Sem vídeo (mais rápido)
-python backend/automate_release.py --version v0.6.4 --no-video
+python tests/e2e/automate_release.py --version v0.6.4 --no-video
 ```
 
 ### Saída
@@ -381,9 +380,9 @@ Screenshots são salvos em `docs/screenshots/v0.6.4/`:
 
 ### Configuração
 
-Cenários de teste estão em [test_scenarios.json](../backend/test_scenarios.json). Para adicionar novos cenários, edite este arquivo.
+Cenários de teste estão em [test_scenarios.json](../tests/e2e/test_scenarios.json). Para adicionar novos cenários, edite este arquivo.
 
-**Documentação completa:** [backend/README_AUTOMACAO.md](../backend/README_AUTOMACAO.md)
+**Documentação completa:** [tests/e2e/README.md](../tests/e2e/README.md)
 
 ---
 

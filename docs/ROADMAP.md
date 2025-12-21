@@ -1,11 +1,15 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.6.4
-**Última atualização**: 20/12/2025
+## Versão Atual: v0.7.0
+**Última atualização**: 21/12/2025
 
 ---
 
-## ✅ Status da Fase 1
+## 🔄 Status da Fase 2
+
+**Fase 2 (Seções 3-8)** iniciada com **v0.7.0 - Seção 3: Campana** completamente implementada!
+
+### ✅ Status da Fase 1 (Concluída)
 
 A **Fase 1 (Validação e Polimento)** foi **100% concluída** na v0.6.4.
 

@@ -1,6 +1,19 @@
-# Changelog v0.6.4
+# Changelog v0.7.1
 
 ## 📜 Histórico de Features por Fase
+
+### 🔄 Fase 2 em Andamento - Seções 3-8 (v0.7.0+)
+
+#### v0.7.0 (Dez 2025) - Seção 3: Campana
+- [x] **Seção 3: Campana (Vigilância Velada)** - 8 perguntas (3.1 a 3.8)
+- [x] State machine com lógica condicional (pula se não houve campana)
+- [x] Validador com graduação militar obrigatória (3.3)
+- [x] Validador de atos concretos vs generalizações (3.6)
+- [x] Perguntas opcionais aceitam "NÃO" (3.7 e 3.8)
+- [x] Geração de texto via LLM (Gemini + Groq)
+- [x] Frontend completo (sidebar, cards, draft)
+- [x] Testes unitários e de integração
+- [x] Documentação (API, TESTING, README)
 
 ### ✅ Fase 1 Concluída - Validação e Polimento (v0.4.1 - v0.6.4)
 
@@ -39,6 +52,145 @@
 - [x] Correção de encoding UTF-8
 - [x] Dashboard de logs
 - [x] Sistema de feedback (👍👎)
+
+---
+
+## [0.7.1] - 2025-12-21 ⚡ **FAST-START PARA E2E TESTS**
+
+### ✨ Adicionado - Fast-Start Feature
+
+- **Flag `--start-section`** em `automate_release.py`
+  - Permite começar testes E2E a partir de uma seção específica (1, 2 ou 3)
+  - Seções anteriores são preenchidas via API `/sync_session` (não abre navegador)
+  - Economia de **70% no tempo de teste** (1.5 min vs 5 min)
+  - Sintaxe: `python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video`
+
+- **Método `prepare_sections_via_api()`** em `automate_release.py`
+  - Cria sessão via `/new_session` endpoint
+  - Preenche seções via `/sync_session` com respostas pré-validadas
+  - Usa httpx para requisições assíncronas (mais rápido)
+  - Extrai IDs reais do `test_scenarios.json` (trata `_retry`, `edit_X_success`)
+
+- **Método `inject_session_and_restore()`** em `automate_release.py`
+  - Injeta estado da sessão via JavaScript (sem draft modal)
+  - Cria botão "Iniciar Seção X" dinamicamente com CSS correto
+  - Atualiza sidebar com seções completadas
+  - Desabilita chat input para seções já preenchidas
+
+- **Documentação atualizada**
+  - [docs/TESTING.md](docs/TESTING.md) - Flag `--start-section` com exemplos e economia
+  - [docs/SETUP.md](docs/SETUP.md) - Setup de Playwright e uso de fast-start
+  - [README.md](README.md) - Novidades v0.7.1 e status atual
+
+### 📝 Casos de Uso
+
+```bash
+# Completo (Seção 1 → 2 → 3) - ~5 min com vídeo
+python tests/e2e/automate_release.py --version v0.7.1
+
+# Apenas Seção 3 - ~1.5 min (70% mais rápido!)
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video
+
+# Apenas Seção 2 - ~2 min (60% mais rápido)
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 2 --no-video
+```
+
+### 🔧 Detalhes Técnicos
+
+- **Integração com `/sync_session`** - Endpoint criado em v0.6.4, agora usado em automação
+- **JavaScript injection** - Abordagem limpa sem dependência de draft recovery modal
+- **httpx async** - Requisições HTTP assíncronas (não bloqueia Playwright)
+- **Respaldo total** - Se API falhar, script continua (trata exceções gracefully)
+
+### 🐛 Problemas Resolvidos
+
+- **Automação lenta** - Original preenchimento visual levava 5+ min
+- **Vídeo capturava tudo** - Agora video só começa da seção escolhida
+- **Múltiplos terminais** - Agora rápido o suficiente para testar em paralelo
+
+### 📚 Documentação
+
+**Adicionado:**
+- Seção "Flag `--start-section`" em [docs/TESTING.md](docs/TESTING.md)
+- Seção "Uso com Fast-Start" em [docs/SETUP.md](docs/SETUP.md)
+- Exemplos de economia de tempo em ambos os docs
+
+**Atualizado:**
+- Versão em [docs/TESTING.md](docs/TESTING.md) → v0.7.1
+- Versão em [docs/SETUP.md](docs/SETUP.md) → v0.7.1
+- Status em [README.md](README.md) → v0.7.1
+
+---
+
+## [0.7.0] - 2025-12-21 🎯 **SEÇÃO 3: CAMPANA (VIGILÂNCIA VELADA)**
+
+### ✨ Adicionado - Seção 3 Completa
+
+- **Backend: State Machine (`state_machine_section3.py`)**
+  - 8 perguntas (3.1 a 3.8) sobre campana/vigilância velada
+  - Lógica condicional: se 3.1 = "NÃO", pula toda a seção
+  - Métodos: `get_current_question()`, `store_answer()`, `next_step()`, etc.
+  - Flag `section_skipped` para controle de seção pulada
+
+- **Backend: Validador (`validator_section3.py`)**
+  - Validação de graduação militar em 3.3 (Sargento, Cabo, Soldado, Tenente, Capitão)
+  - Validação de atos concretos em 3.6 (mínimo 40 caracteres, rejeita generalizações)
+  - Perguntas 3.7 e 3.8 aceitam "NÃO" como resposta válida
+  - Comprimentos mínimos: 3.2 (30), 3.3 (30), 3.4 (20), 3.5 (10), 3.6 (40), 3.7/3.8 (3)
+
+- **Backend: Integração (`main.py`)**
+  - Endpoint `/start_section/3` para iniciar Seção 3
+  - Chat endpoint com validação para Section 3
+  - Endpoint `/sync_session` suporta steps 3.x
+  - Endpoint `/update_answer` suporta edição de respostas da Seção 3
+  - Geração de texto da Seção 3 integrada
+
+- **Backend: LLM Service (`llm_service.py`)**
+  - Método `generate_section3_text()` para gerar narrativa
+  - Implementação para Gemini e Groq
+  - Prompt enfatiza atos concretos e jurisprudência STF 2025
+
+- **Frontend (`index.html`)**
+  - Constante `SECTION3_QUESTIONS` com 8 perguntas
+  - Card roxo para Seção 3 no container de textos
+  - Função `startSection3()` para iniciar seção
+  - Função `updateSidebarForSection3()` para atualizar sidebar
+  - Botão "Iniciar Seção 3" após completar Seção 2
+  - Sistema de rascunhos suporta Seção 3
+  - "Copiar BO Completo" inclui Seção 3
+
+### 🐛 Corrigido
+
+- **Endpoint `/update_answer` não validava Seção 3**
+  - Bug: Respostas 3.x caíam em "Step inválido"
+  - Solução: Adicionado `elif step.startswith("3.")` na validação
+
+### 🧪 Testes
+
+- **Testes Unitários (`tests/unit/test_section3.py`)**
+  - 6 testes para state machine
+  - 8 testes para validador
+  - Cobertura: inicialização, skip logic, fluxo completo, validações
+
+- **Testes de Integração (`tests/integration/test_section3_flow.py`)**
+  - Sincronização Seção 3 incompleta
+  - Sincronização completa (3 seções)
+  - Sincronização com Seção 3 pulada
+  - Validação de graduação militar
+  - Validação de atos concretos
+  - Perguntas opcionais
+
+### 📚 Documentação
+
+- **TESTING.md**: Testes 9-12 para Seção 3
+- **API.md**: Endpoints e exemplos para Seção 3
+- **README.md**: Atualizado para v0.7.0
+
+### 🔍 Impacto
+
+- **12 arquivos criados/modificados**
+- **~650 linhas** de código
+- **22 respostas** no fluxo completo (6 + 8 + 8)
 
 ---
 

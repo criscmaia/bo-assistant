@@ -16,17 +16,29 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 
 ## 📊 Status Atual
 
-### ✅ v0.6.4 - Sistema de Rascunhos + Sincronização em Bloco
+### ✅ v0.7.1 - Fast-Start para E2E Tests
 
-**Novidades v0.6.4:**
-- ✅ Endpoint `/sync_session` para restauração atômica de rascunhos (10x mais rápido)
-- ✅ Renumeração de IDs da Seção 2: 2.0-2.7 → 2.1-2.8 (consistência com Seção 1)
-- ✅ Correção crítica: Rascunho não persiste após completar BO
-- ✅ Sistema de rascunhos 100% funcional para múltiplas seções
+**Novidades v0.7.1:**
+- ✅ **Flag `--start-section`** - Começar testes E2E de uma seção específica
+- ✅ **API `/sync_session`** - Preencher seções via API (70% mais rápido)
+- ✅ **Automação inteligente** - Preenche Seções 1-2 sem abrir navegador
+- ✅ **Injeção de estado** - JavaScript para restaurar UI sem modal
+- ✅ **Economia de tempo** - 1.5 min para Seção 3 (vs 5 min tudo)
+
+### v0.7.0 - Seção 3: Campana (Vigilância Velada)
+
+**Recursos v0.7.0:**
+- ✅ **Seção 3: Campana** - 8 perguntas (3.1 a 3.8)
+- ✅ Validação de graduação militar (pergunta 3.3)
+- ✅ Validação de atos concretos vs generalizações (pergunta 3.6)
+- ✅ Lógica condicional (pula seção se não houve campana)
+- ✅ Geração de texto via LLM para Seção 3
+- ✅ Suporte a 3 seções no sistema de rascunhos
 
 **Funcionalidades:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas - 1.1 a 1.6)
 - ✅ Seção 2: Abordagem a Veículo (8 perguntas - 2.1 a 2.8)
+- ✅ Seção 3: Campana - Vigilância Velada (8 perguntas - 3.1 a 3.8)
 - ✅ Container persistente de textos gerados (todas seções visíveis)
 - ✅ Sidebar com todas 8 seções (completadas, atual, futuras)
 - ✅ Botão "Copiar BO Completo" quando há 2+ seções
@@ -47,8 +59,10 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 4. Ao final da Seção 1, o texto é gerado automaticamente
 5. Clique em "Iniciar Seção 2" para continuar (perguntas 2.1 a 2.8 - Abordagem a Veículo)
 6. Ao final da Seção 2, outro texto é gerado
-7. Use "Copiar BO Completo" para copiar todas as seções de uma vez
-8. 💾 Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
+7. Clique em "Iniciar Seção 3" para continuar (perguntas 3.1 a 3.8 - Campana)
+8. Ao final da Seção 3, o BO está completo
+9. Use "Copiar BO Completo" para copiar todas as seções de uma vez
+10. Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
 
 ### ⏰ Nota sobre Performance
 
@@ -97,9 +111,11 @@ bo-assistant/
 │   ├── main.py                    # API FastAPI (endpoints)
 │   ├── state_machine.py           # Fluxo Seção 1 (6 perguntas)
 │   ├── state_machine_section2.py  # Fluxo Seção 2 (8 perguntas)
+│   ├── state_machine_section3.py  # Fluxo Seção 3 (8 perguntas)
 │   ├── llm_service.py             # Integração Gemini + Groq
 │   ├── validator.py               # Validação Seção 1
 │   ├── validator_section2.py      # Validação Seção 2
+│   ├── validator_section3.py      # Validação Seção 3
 │   ├── logger.py                  # Sistema de logs
 │   ├── automate_release.py        # Automação screenshots/vídeo
 │   ├── test_scenarios.json        # Cenários de teste
@@ -204,7 +220,13 @@ Veja o roadmap completo e detalhado em [docs/ROADMAP.md](docs/ROADMAP.md).
 ### Resumo das próximas fases:
 
 - ✅ **Fase 1** - Validação e Polimento (v0.4.1 - v0.6.4) ← **CONCLUÍDA**
-- 🔄 **Fase 2** - Seções 3-8: Campana, Entrada Domicílio, Fundada Suspeita, Reação, Apreensões, Condução
+- 🔄 **Fase 2** - Seções 3-8 (v0.7.0+)
+  - ✅ Seção 3: Campana (Vigilância Velada) - v0.7.0
+  - ⏳ Seção 4: Entrada em Domicílio
+  - ⏳ Seção 5: Fundada Suspeita
+  - ⏳ Seção 6: Reação e Uso da Força
+  - ⏳ Seção 7: Apreensões
+  - ⏳ Seção 8: Condução e Ocorrências
 - 🔐 **Fase 3** - Autenticação e Qualidade (PDF, múltiplos LLMs)
 - 📊 **Fase 4** - Analytics e Relatórios para Gestores
 - 📱 **Fase 5** - Expansão (múltiplos BOs, mobile)
@@ -232,6 +254,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.6.4
-**Última atualização:** 20/12/2025
-**Status:** 🟢 Em produção
+**Versão:** 0.7.0
+**Última atualização:** 21/12/2025
+**Status:** Em produção

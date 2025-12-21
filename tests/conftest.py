@@ -45,6 +45,20 @@ def section2_answers() -> Dict:
     }
 
 @pytest.fixture
+def section3_answers() -> Dict:
+    """Respostas válidas para Seção 3 (todas as 8 perguntas)"""
+    return {
+        "3.1": "SIM",
+        "3.2": "Esquina da Rua das Flores com Avenida Brasil, atrás do muro da casa 145, a aproximadamente 30 metros do bar do João",
+        "3.3": "O Sargento Silva tinha visão desobstruída da porta do bar. O Cabo Almeida observava a lateral do estabelecimento pela janela da viatura.",
+        "3.4": "Denúncia anônima recebida via COPOM informando comercialização de drogas no local há pelo menos 3 meses",
+        "3.5": "15 minutos de vigilância contínua atrás do muro da casa 145",
+        "3.6": "Foi observado um homem de camiseta vermelha retirando pequenos invólucros de uma mochila preta e entregando a dois indivíduos que chegaram de motocicleta. Após receberem os invólucros, os indivíduos entregaram dinheiro ao homem de vermelho.",
+        "3.7": "Sim, foi abordado um usuário que estava saindo do local. Ele portava 2 porções de substância análoga à cocaína e relatou ter comprado do 'cara de vermelho' por R$ 50,00.",
+        "3.8": "Sim, ao perceber a movimentação policial, o homem de vermelho correu para o beco ao lado do bar, tentando fugir em direção à Rua Sete."
+    }
+
+@pytest.fixture
 def send_answer(api_base_url):
     """Helper para enviar resposta ao endpoint /chat"""
     def _send(session_id: str, message: str, current_section: int, llm_provider: str = "gemini"):

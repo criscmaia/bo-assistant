@@ -1,7 +1,7 @@
 # 🏗️ Arquitetura Técnica - BO Inteligente
 
-**Versão:** v0.6.4
-**Última atualização:** 20/12/2025
+**Versão:** v0.7.1
+**Última atualização:** 21/12/2025
 
 Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de dados e estruturas internas.
 
@@ -16,6 +16,7 @@ Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de
 - [Fluxos de Dados](#-fluxos-de-dados)
 - [Banco de Dados](#-banco-de-dados)
 - [Integração LLM](#-integração-llm)
+- [Fast-Start para E2E Tests](#-fast-start-para-e2e-tests)
 
 ---
 
@@ -375,7 +376,7 @@ sessions: Dict[str, Dict] = {
     },
     "currentSection": 1,
     "timestamp": 1703000000000,  // Para expiração (7 dias)
-    "version": "0.6.4"
+    "version": "0.7.0"
 }
 ```
 
@@ -526,7 +527,7 @@ sessions: Dict[str, Dict] = {
 | `created_at` | DateTime | Data/hora de criação (timezone Brasília) |
 | `completed_at` | DateTime | Data/hora de conclusão (nullable) |
 | `status` | String(20) | `active`, `completed`, `abandoned` |
-| `app_version` | String(20) | Versão do app (ex: "0.6.4") |
+| `app_version` | String(20) | Versão do app (ex: "0.7.0") |
 | `ip_address` | String(50) | IP do cliente |
 | `user_agent` | Text | User-Agent do navegador |
 
@@ -676,13 +677,199 @@ def generate_text(self, answers, section=1, provider="gemini"):
 
 ---
 
+## ⚡ Fast-Start para E2E Tests
+
+### Motivação (v0.7.1)
+
+A automação E2E original (`automate_release.py`) preenchia seções visualmente via Playwright, levando **~5 minutos**. Com a adição da Seção 3, isso se tornou impraticável para testes iterativos. A solução implementa um "fast-start" que:
+
+1. **Preenche seções anteriores via API** (`/sync_session`) - sem abrir navegador
+2. **Injeta estado via JavaScript** - sem modal de draft recovery
+3. **Economiza 70% do tempo** - apenas 1.5 min para Seção 3
+
+### Arquitetura
+
+```
+┌──────────────────────────────────────────────────────┐
+│  automate_release.py --start-section 3 --no-video    │
+└───────────────────┬──────────────────────────────────┘
+                    │
+        ┌───────────▼────────────────┐
+        │ prepare_sections_via_api() │
+        │ (sem navegador, apenas API)│
+        └────┬──────────────────┬────┘
+             │                  │
+             ▼                  ▼
+        /new_session      /sync_session
+        (cria sessão)     (Seção 1 + 2)
+             │                  │
+             └───────┬──────────┘
+                     ▼
+            Backend: estado completo
+            (sessions em memória/BD)
+                     │
+                     │ Navegador abre aqui (inicia vídeo)
+                     ▼
+        ┌──────────────────────────────┐
+        │ inject_session_and_restore() │
+        │ (JavaScript injection)        │
+        └──────────────┬───────────────┘
+                       │
+              ┌────────┴────────┐
+              ▼                 ▼
+        Cria botão         Atualiza
+        "Iniciar Seção 3"  sidebar
+              │                 │
+              └────────┬────────┘
+                       ▼
+            UI pronta para Seção 3
+            (screenshots começam aqui)
+```
+
+### Componentes
+
+#### 1. `prepare_sections_via_api(up_to_section: int)`
+
+```python
+async def prepare_sections_via_api(self, up_to_section: int):
+    """
+    Preenche Seções 1 até up_to_section via API.
+    - Chama /new_session para criar nova sessão
+    - Extrai respostas do test_scenarios.json
+    - Chama /sync_session com todas as respostas
+    - Não abre navegador
+    """
+```
+
+**Fluxo:**
+1. Lê `test_scenarios.json` e extrai steps até `up_to_section`
+2. Trata IDs especiais: `_retry`, `edit_X_success` → extrai ID real
+3. Filtra apenas respostas com `expect: "pass"`
+4. Cria nova sessão via `/new_session` (retorna `session_id`)
+5. Chama `/sync_session` com todas as respostas
+6. Retorna `session_id` para próxima etapa
+
+**Economia:**
+- Seção 1: 2 min → 0 seg (não abre navegador)
+- Seção 2: 2 min → 0 seg (não abre navegador)
+- Total: 4 min → 0 seg ✅
+
+#### 2. `inject_session_and_restore(page: Page, session_id: str, up_to_section: int)`
+
+```python
+async def inject_session_and_restore(self, page: Page, session_id: str, up_to_section: int):
+    """
+    Injeta estado da sessão via JavaScript.
+    - Chama /sync_session no contexto do navegador
+    - Cria botão "Iniciar Seção X" dinamicamente
+    - Atualiza sidebar com seções completadas
+    - Desabilita chat input para seções preenchidas
+    """
+```
+
+**Fluxo:**
+1. Abre página (`page.goto()`) - inicia vídeo neste ponto
+2. Aguarda elemento principal carregar
+3. Executa JavaScript para:
+   - Chamar `/sync_session` internamente
+   - Limpar chat messages
+   - Criar botão "Iniciar Seção X"
+   - Atualizar classes `.sidebar-section` com `.completed`
+   - Desabilitar `#chat-input`
+4. Aguarda botão aparecer
+5. Clica em botão para iniciar seção alvo
+
+**Implementação JavaScript:**
+```javascript
+// Executado no contexto do navegador
+const response = await fetch('/sync_session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id, answers })
+});
+// Limpa UI, cria botão, atualiza sidebar...
+```
+
+### Fluxos de Dados
+
+#### Fluxo Completo (--start-section 3 --no-video)
+
+```
+Test Scenario JSON
+     │
+     ├─ Section 1 (steps 1.1-1.6)
+     ├─ Section 2 (steps 2.1-2.8)
+     └─ Section 3 (steps 3.1-3.8) ← alvo
+
+            │
+            ▼ prepare_sections_via_api(3)
+
+    POST /new_session
+    └─ Response: { session_id: "abc123" }
+
+    POST /sync_session
+    ├─ Body: { session_id, answers: { "1.1": "...", "2.1": "...", ... } }
+    └─ Response: { status: "ok" }
+
+            │
+            ▼ inject_session_and_restore(page, "abc123", 3)
+
+    page.goto(http://localhost:3000)
+    │ ← inicia vídeo aqui
+    ├─ JavaScript injection
+    ├─ POST /sync_session (no browser context)
+    ├─ Cria botão "Iniciar Seção 3"
+    ├─ Click botão
+    │
+    └─ Seção 3 começa
+       ├─ Screenshot 1: 3.1
+       ├─ Screenshot 2: 3.2
+       └─ ... até 3.8
+```
+
+### Tempo de Execução
+
+| Etapa | Tempo | Notas |
+|-------|-------|-------|
+| `prepare_sections_via_api(3)` | 5-10s | Apenas API, sem navegador |
+| `page.goto()` | 3s | Abre navegador, inicia vídeo |
+| `inject_session_and_restore()` | 2-3s | JavaScript + restauração |
+| **Seção 3 screenshots** | 60-90s | User interactions |
+| **Total (--start-section 3)** | **~2 min** | **70% mais rápido** |
+
+### Fallbacks e Erro Handling
+
+- Se `prepare_sections_via_api()` falhar:
+  - Loga erro mas continua
+  - Abre navegador mesmo assim (pode estar vazio)
+  - User pode preencher manualmente
+
+- Se `inject_session_and_restore()` falhar:
+  - Continua automação normal (sem fast-start)
+  - Trata como seção nova
+
+### Limitações
+
+1. **Sem vídeo de seções anteriores** - Vídeo começa apenas na seção alvo
+   - Caso de uso: Testar apenas nova seção
+   - Se precisar vídeo completo: usar `--start-section 1` (padrão)
+
+2. **Sem screenshots de seções anteriores** - Screenshots começam apenas na seção alvo
+   - Caso de uso: Iteração rápida em nova feature
+   - Se precisar all screenshots: usar `--start-section 1` (padrão)
+
+3. **Requer `/sync_session` endpoint** - Não funciona sem este endpoint
+   - Implementado em v0.6.4
+
+---
+
 ## 🔗 Documentação Relacionada
 
 - [README.md](../README.md) - Visão geral do projeto
 - [DEVELOPMENT.md](../DEVELOPMENT.md) - Guia de desenvolvimento
 - [SETUP.md](SETUP.md) - Setup e deploy
 - [API.md](API.md) - Referência de endpoints
-- [TESTING.md](TESTING.md) - Guia de testes
+- [TESTING.md](TESTING.md) - Guia de testes (inclui flag `--start-section`)
 - [ROADMAP.md](ROADMAP.md) - Planejamento futuro
 
 ---

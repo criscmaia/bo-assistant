@@ -1,7 +1,7 @@
 # 🛠️ Setup e Deploy - BO Inteligente
 
-**Versão:** v0.6.4
-**Última atualização:** 20/12/2025
+**Versão:** v0.7.1
+**Última atualização:** 21/12/2025
 
 Este documento cobre setup de desenvolvimento local e deploy em produção (Render + GitHub Pages).
 
@@ -42,8 +42,11 @@ python -m venv venv
 # Mac/Linux:
 source venv/bin/activate
 
-# 4. Instalar dependências de desenvolvimento
+# 4. Instalar dependências de desenvolvimento (inclui Playwright para E2E)
 pip install -r requirements-dev.txt
+
+# 4b. Instalar navegadores do Playwright (necessário para automação E2E)
+playwright install
 
 # 5. Configurar API keys - IMPORTANTE: .env deve estar na RAIZ do projeto
 cd ..
@@ -344,45 +347,71 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 
 ---
 
-## 📸 Automação de Screenshots
+## 📸 Automação de Screenshots e Vídeos
 
 ### Objetivo
 
-Script [automate_release.py](../tests/e2e/automate_release.py) captura screenshots e vídeo do frontend para documentação de releases.
+Script [automate_release.py](../tests/e2e/automate_release.py) captura screenshots e vídeo do frontend para documentação de releases com suporte a fast-start.
 
 ### Setup
 
 ```bash
-# Instalar dependências de dev (já inclui Playwright)
+# Instalar dependências de dev (já inclui Playwright e httpx)
 pip install -r backend/requirements-dev.txt
 
 # Instalar navegadores do Playwright
 playwright install
 ```
 
-### Uso
+### Uso Básico
 
 ```bash
 # No terminal (venv ativado)
-python tests/e2e/automate_release.py --version v0.6.4
 
-# Sem vídeo (mais rápido)
-python tests/e2e/automate_release.py --version v0.6.4 --no-video
+# Modo completo (Seção 1 → 2 → 3)
+python tests/e2e/automate_release.py --version v0.7.1
+
+# Sem vídeo (mais rápido - ~2 min)
+python tests/e2e/automate_release.py --version v0.7.1 --no-video
 ```
+
+### Uso com Fast-Start (Novo em v0.7.1)
+
+```bash
+# Apenas Seção 3 (Seções 1-2 preenchidas via API)
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video
+
+# Apenas Seção 2 (Seção 1 preenchida via API)
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 2 --no-video
+
+# Apenas Seção 3 com vídeo
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 3
+```
+
+**Economia de Tempo:**
+- Seção 1 (completa): ~5 min
+- Seção 2 (start-section 2): ~3 min (40% mais rápido)
+- Seção 3 (start-section 3): ~1.5 min (70% mais rápido)
 
 ### Saída
 
-Screenshots são salvos em `docs/screenshots/v0.6.4/`:
-- `01_initial_screen.png`
-- `02_section1_question1.png`
-- ...
-- `final_demo.mp4` (se vídeo habilitado)
+Screenshots são salvos em `docs/screenshots/v0.7.1/`:
+```
+docs/screenshots/v0.7.1/
+├── 01-section1-empty.png
+├── 02-section1-progress.png
+├── ...
+├── 17-section3-start.png
+├── ...
+├── 20-section3-final.png
+└── demo.webm (se vídeo habilitado)
+```
 
 ### Configuração
 
 Cenários de teste estão em [test_scenarios.json](../tests/e2e/test_scenarios.json). Para adicionar novos cenários, edite este arquivo.
 
-**Documentação completa:** [tests/e2e/README.md](../tests/e2e/README.md)
+**Documentação completa:** [tests/e2e/README.md](../tests/e2e/README.md) e [docs/TESTING.md](TESTING.md)
 
 ---
 

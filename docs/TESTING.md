@@ -1,6 +1,6 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.6.4
+**Versão:** v0.7.1
 **Última atualização:** 21/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
@@ -58,8 +58,18 @@ pytest tests/unit
 # Integration tests (médio - ~30s, precisa de backend rodando)
 pytest tests/integration
 
-# E2E screenshots (longo - ~4min, precisa backend + frontend)
-python tests/e2e/automate_release.py --version v0.6.4
+# E2E screenshots - MODO COMPLETO (longo - ~5min, precisa backend + frontend)
+python tests/e2e/automate_release.py --version v0.7.1
+
+# E2E screenshots - MODO RÁPIDO (começar da Seção 3)
+# Preenche Seções 1 e 2 via API, tira screenshots apenas da Seção 3
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video
+
+# E2E screenshots - Começar da Seção 2
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 2 --no-video
+
+# E2E screenshots - Com vídeo (precisa MAIS tempo)
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 3
 
 # Todos os testes pytest juntos
 pytest
@@ -249,6 +259,92 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 
 ---
 
+### Teste 9: Fluxo Completo (Seção 1 + 2 + 3)
+
+**Objetivo:** Validar fluxo completo com todas as três seções.
+
+**Passos:**
+1. Completar Seção 1 (perguntas 1.1 a 1.6)
+2. Clicar em "Iniciar Seção 2"
+3. Responder pergunta 2.1 com "SIM"
+4. Completar Seção 2 (perguntas 2.2 a 2.8)
+5. Clicar em "Iniciar Seção 3"
+6. Responder pergunta 3.1 com "SIM"
+7. Completar Seção 3 (perguntas 3.2 a 3.8)
+
+**Resultado Esperado:**
+- Todas as três seções aparecem no container de textos gerados
+- Seções 1, 2 completadas aparecem como cards com checkmark na sidebar
+- Texto gerado em 3ª pessoa para cada seção
+- Botão "Copiar BO Completo" copia todas as três seções
+- BO marcado como completo
+
+---
+
+### Teste 10: Pular Seção 3 (Sem Campana)
+
+**Objetivo:** Validar lógica condicional da Seção 3.
+
+**Passos:**
+1. Completar Seção 1 e 2
+2. Clicar em "Iniciar Seção 3"
+3. Responder pergunta 3.1 com "NÃO"
+
+**Resultado Esperado:**
+- Texto gerado imediatamente
+- Mensagem: "Não se aplica (não houve campana antes da abordagem)"
+- Seção 3 marcada como completa
+- Sem perguntas adicionais (3.2-3.8)
+- BO marcado como completo
+
+---
+
+### Teste 11: Validação de Graduação Militar (Seção 3)
+
+**Objetivo:** Validar obrigatoriedade de graduação militar em pergunta 3.3.
+
+**Passos:**
+1. Completar Seção 1 e 2
+2. Iniciar Seção 3 e responder 3.1 com "SIM"
+3. Responder perguntas 3.2, 3.4, 3.5, 3.6 com respostas válidas
+4. Ao chegar em 3.3, responder sem graduação:
+   - "Silva tinha visão da porta"
+   - "O policial viu a entrega"
+
+**Resultado Esperado:**
+- Mensagem de erro: "Informe qual policial (graduação + nome) tinha visão direta..."
+- Resposta não aceita
+- Pergunta permanece ativa
+
+**Respostas Válidas:**
+- "O Sargento Silva tinha visão desobstruída"
+- "O Cabo Almeida observava pelo portão"
+- "O Soldado Faria conseguia ver a entrada"
+
+---
+
+### Teste 12: Validação de Atos Concretos (Seção 3, Pergunta 3.6)
+
+**Objetivo:** Validar descrição de atos específicos vs generalizações.
+
+**Passos:**
+1. Chegar na pergunta 3.6
+2. Tentar responder com generalização:
+   - "Atitude suspeita"
+   - "Movimentação estranha"
+   - "Comportamento duvidoso"
+
+**Resultado Esperado:**
+- Mensagem de erro: "Descreva atos CONCRETOS observados (trocas, entregas, esconderijos). NÃO use generalizações..."
+- Resposta rejeitada
+
+**Respostas Válidas:**
+- "O homem tirou invólucros da mochila e entregou para dois rapazes de moto"
+- "Recebia dinheiro e retirava substância do bolso, entregando aos compradores"
+- "Pegava porções de um pote escondido atrás do poste"
+
+---
+
 ## ✅ Respostas de Teste Validadas
 
 ### Respostas Validadas - Seção 1
@@ -332,6 +428,59 @@ Sim. Consulta ao sistema indicou que o veículo possuía restrição de roubo/fu
 
 ---
 
+### Respostas Validadas - Seção 3
+
+**3.1 - A equipe realizou campana?**
+```
+SIM
+```
+**Aceita:** SIM, SÃO, sim, Sim, Sim, houve campana, etc.
+**Pulará seção se:** NÃO, NAO, NÃO houve, Não realizou, etc.
+
+**3.2 - Onde foi feita a campana?**
+```
+Esquina da Rua das Flores com Avenida Brasil, atrás do muro da casa 145, a aproximadamente 30 metros do bar do João
+```
+**Obrigatório:** Local específico, ponto de observação, distância aproximada (mín. 30 caracteres)
+
+**3.3 - Qual policial tinha visão direta?**
+```
+O Sargento Silva tinha visão desobstruída da porta do bar. O Cabo Almeida observava a lateral do estabelecimento pela janela da viatura.
+```
+**Obrigatório:** Incluir graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome (mín. 30 caracteres)
+
+**3.4 - O que motivou a campana?**
+```
+Denúncia anônima recebida via COPOM informando comercialização de drogas no local há pelo menos 3 meses
+```
+**Obrigatório:** Motivo específico (denúncia, inteligência, histórico, etc.) - mín. 20 caracteres
+
+**3.5 - Quanto tempo durou a campana?**
+```
+15 minutos de vigilância contínua atrás do muro da casa 145
+```
+**Obrigatório:** Duração + especificar se foi contínua ou alternada - mín. 10 caracteres
+
+**3.6 - O que foi observado?**
+```
+Foi observado um homem de camiseta vermelha retirando pequenos invólucros de uma mochila preta e entregando a dois indivíduos que chegaram de motocicleta. Após receberem os invólucros, os indivíduos entregaram dinheiro ao homem de vermelho.
+```
+**Obrigatório:** Atos CONCRETOS observados (trocas, entregas, esconderijos, movimentações, etc.). **NÃO aceita generalizações** ("atitude suspeita", "comportamento duvidoso", "movimentação estranha") - mín. 40 caracteres
+
+**3.7 - Houve abordagem de usuários?**
+```
+Sim, foi abordado um usuário que estava saindo do local. Ele portava 2 porções de substância análoga à cocaína e relatou ter comprado do 'cara de vermelho' por R$ 50,00.
+```
+**Aceita:** Respostas detalhadas OU simplesmente "NÃO" (mín. 3 caracteres para "NÃO")
+
+**3.8 - Houve fuga ao notar a equipe?**
+```
+Sim, ao perceber a movimentação policial, o homem de vermelho correu para o beco ao lado do bar, tentando fugir em direção à Rua Sete.
+```
+**Aceita:** Respostas detalhadas OU simplesmente "NÃO" (mín. 3 caracteres para "NÃO")
+
+---
+
 ## 🤖 Automação de Screenshots
 
 ### Objetivo
@@ -342,9 +491,61 @@ Capturar screenshots e vídeo do frontend automaticamente para documentação de
 
 | Arquivo | Função |
 |---------|--------|
-| [automate_release.py](../tests/e2e/automate_release.py) | Script principal (Playwright) |
-| [test_scenarios.json](../tests/e2e/test_scenarios.json) | Configuração de cenários |
+| [automate_release.py](../tests/e2e/automate_release.py) | Script principal (Playwright) com flag `--start-section` |
+| [test_scenarios.json](../tests/e2e/test_scenarios.json) | Configuração de cenários e respostas |
 | [tests/e2e/README.md](../tests/e2e/README.md) | Documentação detalhada |
+
+### Flag `--start-section` (Novo em v0.7.1)
+
+Permite começar a automação a partir de uma seção específica, economizando tempo e gerando screenshots apenas das seções desejadas.
+
+**Sintaxe:**
+```bash
+python tests/e2e/automate_release.py --version v0.7.1 --start-section <numero> [--no-video]
+```
+
+**Parâmetros:**
+- `--start-section <numero>` - Número da seção (1, 2 ou 3)
+  - `1`: Começa no zero (padrão)
+  - `2`: Preenche Seção 1 via API, começa screenshots da Seção 2
+  - `3`: Preenche Seções 1 e 2 via API, começa screenshots da Seção 3
+- `--no-video` - Não grava vídeo (mais rápido)
+- `--version v0.7.1` - Versão para nomear pasta de screenshots
+
+**Exemplos de Uso:**
+
+```bash
+# Começa do zero (Seção 1) - COMPLETO (~5 min com vídeo)
+python tests/e2e/automate_release.py --version v0.7.1
+
+# Apenas Seção 3 (~2 min sem vídeo) - MAIS RÁPIDO
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video
+
+# Seções 2 e 3 (~3 min sem vídeo)
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 2 --no-video
+
+# Apenas Seção 3 com vídeo (~3 min)
+python tests/e2e/automate_release.py --version v0.7.1 --start-section 3
+```
+
+**Como Funciona:**
+
+1. Se `--start-section > 1`:
+   - Chama API `/new_session` para criar nova sessão
+   - Chama API `/sync_session` com respostas pré-preenchidas das seções anteriores
+   - Não abre navegador nem grava vídeo durante esse tempo
+
+2. Abre navegador (inicia vídeo se habilitado)
+3. Injeta estado da sessão via JavaScript
+4. Começa screenshots a partir da seção solicitada
+
+**Economia de Tempo:**
+
+| Cenário | Tempo | Economia |
+|---------|-------|----------|
+| `--start-section 1` (tudo) | ~5 min | - |
+| `--start-section 2` (sem vídeo) | ~2 min | 60% ⚡ |
+| `--start-section 3` (sem vídeo) | ~1.5 min | 70% ⚡ |
 
 ---
 

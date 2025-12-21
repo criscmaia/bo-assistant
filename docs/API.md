@@ -1,6 +1,6 @@
 # 📡 Referência de API - BO Inteligente
 
-**Versão:** v0.6.4
+**Versão:** v0.7.0
 **Base URL (Produção):** `https://bo-assistant-backend.onrender.com`
 **Base URL (Local):** `http://localhost:8000`
 
@@ -53,7 +53,7 @@ GET /
 ```json
 {
   "name": "BO Inteligente API",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "description": "API para geração de Boletins de Ocorrência usando IA",
   "endpoints": ["/new_session", "/chat", "..."]
 }
@@ -193,12 +193,12 @@ curl -X POST https://bo-assistant-backend.onrender.com/chat \
 POST /start_section/{section_number}
 ```
 
-**Descrição:** Inicia uma nova seção do BO (ex: Seção 2 - Abordagem a Veículo).
+**Descrição:** Inicia uma nova seção do BO (ex: Seção 2 - Abordagem a Veículo, Seção 3 - Campana).
 
 **Path Parameters:**
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
-| `section_number` | int | Número da seção (2-8) |
+| `section_number` | int | Número da seção (2-3) |
 
 **Request Body:**
 ```json
@@ -207,7 +207,7 @@ POST /start_section/{section_number}
 }
 ```
 
-**Resposta:**
+**Resposta (Seção 2):**
 ```json
 {
   "message": "Seção 2 iniciada",
@@ -218,9 +218,27 @@ POST /start_section/{section_number}
 }
 ```
 
-**Exemplo (curl):**
+**Resposta (Seção 3):**
+```json
+{
+  "message": "Seção 3 iniciada",
+  "section": 3,
+  "question": "A equipe realizou campana antes da abordagem?",
+  "step": "3.1",
+  "total_steps": 8
+}
+```
+
+**Exemplo (curl - Seção 2):**
 ```bash
 curl -X POST https://bo-assistant-backend.onrender.com/start_section/2 \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "uuid"}'
+```
+
+**Exemplo (curl - Seção 3):**
+```bash
+curl -X POST https://bo-assistant-backend.onrender.com/start_section/3 \
   -H "Content-Type: application/json" \
   -d '{"session_id": "uuid"}'
 ```
@@ -265,6 +283,12 @@ POST /sync_session
         "2.2": "Gol preto, placa ABC1D23"
       },
       "current_step": "2.3",
+      "completed": false,
+      "generated_text": ""
+    },
+    "3": {
+      "answers": {},
+      "current_step": "3.1",
       "completed": false,
       "generated_text": ""
     }
@@ -435,11 +459,13 @@ GET /session/{session_id}/status
 {
   "session_id": "3e4f5a6b-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
   "bo_id": "BO-20251220-a3f8c2e1",
-  "current_section": 1,
+  "current_section": 2,
   "section1_complete": true,
   "section2_complete": false,
+  "section3_complete": false,
   "section1_text": "No dia 22 de março...",
-  "section2_text": ""
+  "section2_text": "",
+  "section3_text": ""
 }
 ```
 
@@ -474,7 +500,7 @@ GET /api/logs?limit=20&offset=0
       "created_at": "2025-12-20T19:03:45",
       "completed_at": "2025-12-20T19:15:32",
       "status": "completed",
-      "app_version": "0.6.4",
+      "app_version": "0.7.0",
       "ip_address": "177.12.34.56"
     },
     {
@@ -482,7 +508,7 @@ GET /api/logs?limit=20&offset=0
       "created_at": "2025-12-20T18:45:12",
       "completed_at": null,
       "status": "abandoned",
-      "app_version": "0.6.4",
+      "app_version": "0.7.0",
       "ip_address": "189.23.45.67"
     }
   ],
@@ -519,7 +545,7 @@ GET /api/logs/{bo_id}
   "created_at": "2025-12-20T19:03:45",
   "completed_at": "2025-12-20T19:15:32",
   "status": "completed",
-  "app_version": "0.6.4",
+  "app_version": "0.7.0",
   "ip_address": "177.12.34.56",
   "events": [
     {

@@ -465,3 +465,191 @@ Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
                 raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
 
             raise Exception(f"Erro ao gerar texto da Seção 2 com Groq: {error_msg}")
+
+    # ==================== SEÇÃO 3: CAMPANA ====================
+
+    def _build_prompt_section3(self, section_data: Dict[str, str]) -> str:
+        """
+        Constrói prompt para Seção 3 (Campana - Vigilância Velada).
+
+        Fonte:
+        - materiais-claudio/_secao_-_campana.txt
+        - materiais-claudio/_regras_gerais_-_gpt_trafico.txt (linhas 42-52)
+        """
+
+        # Verifica se seção foi pulada (não houve campana)
+        if section_data.get("3.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""  # Não gerar texto
+
+        # Extrair respostas
+        local_campana = section_data.get("3.2", "Não informado")
+        policial_visao = section_data.get("3.3", "Não informado")
+        motivacao = section_data.get("3.4", "Não informado")
+        duracao = section_data.get("3.5", "Não informado")
+        observacoes = section_data.get("3.6", "Não informado")
+        usuarios = section_data.get("3.7", "Não informado")
+        fuga = section_data.get("3.8", "Não informado")
+
+        # Construir prompt baseado no material do Claudio
+        prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 3 (Campana - Vigilância Velada) do BO de tráfico de drogas.
+
+REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
+
+1. NUNCA invente informações não fornecidas pelo usuário
+2. Use APENAS os dados das respostas fornecidas abaixo
+3. Escreva em terceira pessoa, tempo passado
+4. Use linguagem técnica, objetiva e norma culta
+5. Descreva ATOS CONCRETOS observados, NÃO impressões subjetivas
+6. Conecte observações à fundada suspeita conforme STF 2025
+7. Gere texto em 2-3 parágrafos fluidos
+8. NÃO use juridiquês, gerúndio ou termos vagos como "atitude suspeita"
+
+DADOS FORNECIDOS PELO USUÁRIO:
+
+- Local da campana: {local_campana}
+- Policial com visão direta: {policial_visao}
+- Motivação para campana: {motivacao}
+- Duração: {duracao}
+- O que foi observado (atos concretos): {observacoes}
+- Abordagem de usuários: {usuarios}
+- Tentativa de fuga: {fuga}
+
+ESTRUTURA NARRATIVA (seguir esta ordem):
+
+1. Motivação: por que foi realizada a campana (denúncia, inteligência, histórico)
+2. Local e posicionamento: onde a equipe se posicionou, quem tinha visão
+3. Duração: quanto tempo durou (contínua ou alternada)
+4. Observações concretas: descrever ATOS específicos (não generalizações)
+   - Exemplo correto: "tirou invólucros da mochila e entregou a dois rapazes de moto"
+   - Exemplo errado: "estava em atitude suspeita"
+5. Usuários (se houver): quantos, o que tinham, o que disseram
+6. Fuga (se houver): como tentou fugir ao perceber a equipe
+7. Fundada suspeita: conectar observações com decisão de abordar
+
+EXEMPLOS CORRETOS:
+
+✅ Exemplo 1:
+"Motivados por denúncia anônima recebida via COPOM informando comercialização de drogas na esquina da Rua das Flores com Avenida Brasil, a guarnição posicionou-se atrás do muro da casa nº 145, a aproximadamente 30 metros do local denunciado. O Sargento Silva tinha visão desobstruída da porta do bar do João, enquanto o Cabo Almeida observava a lateral do estabelecimento. Durante 15 minutos de vigilância contínua, foi observado um homem de camiseta vermelha retirando pequenos invólucros de uma mochila preta e entregando a dois indivíduos que chegaram de motocicleta. Após receberem os invólucros, os indivíduos entregaram dinheiro ao homem de vermelho. Durante a campana, foi abordado um usuário que saía do local. Ele portava 2 porções de substância análoga à cocaína e relatou ter comprado do 'cara de vermelho' por R$ 50,00. Ao perceber a movimentação policial, o homem de vermelho correu para o beco ao lado do bar, tentando fugir em direção à Rua Sete. Diante das observações concretas e do relato do usuário, caracterizou-se fundada suspeita para a abordagem."
+
+✅ Exemplo 2:
+"Com base em informações da inteligência policial sobre comercialização de drogas no Beco da Rua Principal, a equipe realizou campana posicionada dentro da viatura estacionada no nº 233 da Rua Sete, a um quarteirão do ponto. Durante 20 minutos de vigilância alternada, o Soldado Faria conseguia ver a entrada do beco de sua posição. Foi observada uma mulher que recebia dinheiro de diversas pessoas e retirava algo do bolso esquerdo, entregando aos compradores. As trocas eram rápidas e ocorriam em sequência. Diante do comportamento compatível com comercialização de entorpecentes, a equipe decidiu realizar a abordagem."
+
+❌ ERROS A EVITAR:
+
+• "Local conhecido por tráfico" (sem informação prévia específica)
+• "Comportamento suspeito" (vago - descrever O QUE exatamente fez)
+• "Vários usuários" (quantificar - 2? 5? 10?)
+• "Comercializando drogas" (descrever OS ATOS - entregou invólucros? recebeu dinheiro?)
+
+IMPORTANTE:
+
+- Se alguma resposta estiver como "Não informado", OMITA aquela informação (não invente)
+- Se resposta for "NÃO" para usuários ou fuga, não mencione no texto
+- Sempre conectar observações concretas → fundada suspeita
+- Dois espaços entre frases
+- Manter coerência temporal e espacial
+
+Gere APENAS o texto da Seção 3 agora (2-3 parágrafos fluidos):"""
+
+        return prompt
+
+    def generate_section3_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+        """
+        Gera texto narrativo da Seção 3 (Campana - Vigilância Velada).
+
+        Args:
+            section_data: Dicionário com respostas {step: answer}
+            provider: "gemini", "groq", "claude" ou "openai"
+
+        Returns:
+            Texto gerado ou string vazia se seção foi pulada
+        """
+        # Se não houve campana, retorna vazio
+        if section_data.get("3.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""
+
+        # Gerar com provider selecionado
+        if provider == "gemini":
+            return self._generate_section3_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_section3_with_groq(section_data)
+        elif provider == "claude":
+            raise NotImplementedError("Claude ainda não implementado para Seção 3")
+        elif provider == "openai":
+            raise NotImplementedError("OpenAI ainda não implementado para Seção 3")
+        else:
+            raise ValueError(f"Provider {provider} não suportado")
+
+    def _generate_section3_with_gemini(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 3 usando Gemini.
+        """
+        if not self.gemini_model:
+            raise ValueError("Gemini API key não configurada. Configure GEMINI_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section3(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.gemini_model.generate_content(prompt)
+
+            # Extrair texto
+            generated_text = response.text.strip()
+
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 3 com Gemini: {error_msg}")
+
+    def _generate_section3_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 3 (Campana - Vigilância Velada) usando Groq.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section3(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 3 com Groq: {error_msg}")

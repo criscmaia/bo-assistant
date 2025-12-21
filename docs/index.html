@@ -131,7 +131,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.6.3</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.6.4</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -280,7 +280,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.6.3 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.6.4 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -305,14 +305,14 @@
 
         // Perguntas da Seção 2 (Abordagem a Veículo)
         const SECTION2_QUESTIONS = {
-            '2.0': 'Havia veículo?',
-            '2.1': 'Marca/modelo/cor/placa.',
-            '2.2': 'Onde foi visto?',
-            '2.3': 'Qual policial percebeu e o que viu?',
-            '2.4': 'Como foi dada a ordem de parada?',
-            '2.5': 'Parou ou houve perseguição?',
-            '2.6': 'Como foi a abordagem e busca?',
-            '2.7': 'Haviam irregularidades? Veículo furtado/roubado/clonado?'
+            '2.1': 'Havia veículo?',
+            '2.2': 'Marca/modelo/cor/placa.',
+            '2.3': 'Onde foi visto?',
+            '2.4': 'Qual policial percebeu e o que viu?',
+            '2.5': 'Como foi dada a ordem de parada?',
+            '2.6': 'Parou ou houve perseguição?',
+            '2.7': 'Como foi a abordagem e busca?',
+            '2.8': 'Haviam irregularidades? Veículo furtado/roubado/clonado?'
         };
 
         // Manter compatibilidade com código existente (Seção 1)
@@ -325,6 +325,7 @@
         let currentQuestionStep = '1.1';
         let currentSection = 1; // Nova variável para controlar seção atual
         let answersState = {}; // Para armazenar respostas localmente
+        let boCompleted = false; // Flag para indicar se BO foi completado
 
         // Elementos DOM
         const chatContainer = document.getElementById('chat-container');
@@ -352,20 +353,83 @@
         // FUNÇÕES DE RASCUNHO (localStorage)
         // ================================================================
 
+        function migrateOldDraftIDs(answers) {
+            /**
+             * Migra IDs antigos (2.0-2.7) para novos (2.1-2.8)
+             * Garante compatibilidade com rascunhos v0.6.3
+             */
+            const migrated = {};
+            const migrationMap = {
+                '2.0': '2.1',
+                '2.1': '2.2',
+                '2.2': '2.3',
+                '2.3': '2.4',
+                '2.4': '2.5',
+                '2.5': '2.6',
+                '2.6': '2.7',
+                '2.7': '2.8'
+            };
+
+            for (const [step, answer] of Object.entries(answers)) {
+                const newStep = migrationMap[step] || step;
+                migrated[newStep] = answer;
+            }
+
+            return migrated;
+        }
+
         function saveDraft() {
             /**
              * Salva o estado atual no localStorage
+             * v0.6.4: Agora salva chatHistory + generatedTexts + sectionStatuses
              */
+            // Capturar chatHistory completo
+            const chatMessages = [];
+            const messageContainers = chatContainer.querySelectorAll('.message-container');
+
+            messageContainers.forEach(msgDiv => {
+                const isBot = msgDiv.classList.contains('justify-start');
+                const step = msgDiv.dataset.step || null;
+                const eventId = msgDiv.dataset.eventId || null;
+                const text = msgDiv.dataset.currentText || msgDiv.querySelector('span')?.textContent || '';
+
+                chatMessages.push({
+                    text: text,
+                    isBot: isBot,
+                    step: step,
+                    eventId: eventId,
+                    timestamp: new Date().toISOString()
+                });
+            });
+
+            // Capturar textos gerados
+            const generatedTexts = {};
+            if (document.getElementById('section1-text')?.textContent) {
+                generatedTexts['section1'] = document.getElementById('section1-text').textContent;
+            }
+            if (document.getElementById('section2-text')?.textContent) {
+                generatedTexts['section2'] = document.getElementById('section2-text').textContent;
+            }
+
+            // Capturar status das seções
+            const sectionStatuses = {
+                1: currentSection > 1 ? 'COMPLETED' : 'IN_PROGRESS',
+                2: currentSection === 2 ? 'IN_PROGRESS' : 'PENDING'
+            };
+
             const draft = {
                 sessionId: sessionId,
                 boId: currentBoId,
                 currentStep: currentQuestionStep,
                 currentSection: currentSection,
                 answers: answersState,
+                chatHistory: chatMessages,
+                generatedTexts: generatedTexts,
+                sectionStatuses: sectionStatuses,
                 savedAt: new Date().toISOString(),
-                version: '0.6.3'
+                version: '0.6.4'
             };
-            
+
             try {
                 localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
                 showAutosaveIndicator();
@@ -436,24 +500,52 @@
         function formatDraftPreview(draft) {
             /**
              * Formata preview do rascunho para o modal
+             * Formato: Status por seção + timestamp + lista de respostas
              */
-            const answeredCount = Object.keys(draft.answers).length;
             const savedDate = new Date(draft.savedAt);
             const formattedDate = savedDate.toLocaleDateString('pt-BR') + ' às ' +
                                   savedDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            // Detectar se tem perguntas da Seção 2
-            const hasSection2 = Object.keys(draft.answers).some(step => step.startsWith('2.'));
-            const totalQuestions = hasSection2 ? 14 : 6; // 6 da Seção 1 + 8 da Seção 2
+            // Contar respostas por seção
+            const section1Answers = Object.keys(draft.answers).filter(s => s.startsWith('1.')).length;
+            const section2Answers = Object.keys(draft.answers).filter(s => s.startsWith('2.')).length;
 
-            let preview = `<div class="mb-2"><strong>${answeredCount}/${totalQuestions}</strong> perguntas respondidas</div>`;
-            preview += `<div class="text-xs text-gray-500 mb-2">Salvo em: ${formattedDate}</div>`;
-            preview += `<div class="border-t pt-2 mt-2">`;
+            let preview = '';
 
-            // Mostrar respostas salvas (truncadas)
-            for (const [step, answer] of Object.entries(draft.answers)) {
-                const truncated = answer.length > 40 ? answer.substring(0, 40) + '...' : answer;
-                preview += `<div class="text-xs mb-1"><span class="text-gray-500">${step}:</span> ${truncated}</div>`;
+            // Status da Seção 1
+            if (section1Answers === 6) {
+                preview += `<div class="mb-1 text-sm">Seção 1: ✅ Completa</div>`;
+            } else if (section1Answers > 0) {
+                preview += `<div class="mb-1 text-sm">Seção 1: ${section1Answers}/6 perguntas respondidas</div>`;
+            }
+
+            // Status da Seção 2 (se iniciada)
+            if (section2Answers > 0) {
+                if (section2Answers === 8) {
+                    preview += `<div class="mb-1 text-sm">Seção 2: ✅ Completa</div>`;
+                } else {
+                    preview += `<div class="mb-1 text-sm">Seção 2: ${section2Answers}/8 perguntas respondidas</div>`;
+                }
+            }
+
+            // Linha em branco + timestamp
+            preview += `<div class="text-xs text-gray-500 mt-3 mb-2">Salvo em: ${formattedDate}</div>`;
+
+            // Container de respostas
+            preview += `<div class="border-t pt-2 mt-2 max-h-32 overflow-y-auto">`;
+
+            // Mostrar respostas salvas (truncadas), ordenadas
+            const sortedEntries = Object.entries(draft.answers).sort((a, b) => {
+                const [sectionA, stepA] = a[0].split('.').map(Number);
+                const [sectionB, stepB] = b[0].split('.').map(Number);
+                if (sectionA !== sectionB) return sectionA - sectionB;
+                return stepA - stepB;
+            });
+
+            for (const [step, answer] of sortedEntries) {
+                const truncated = answer.length > 50 ? answer.substring(0, 50) + '...' : answer;
+                const sectionLabel = step.startsWith('1.') ? '📝' : '🚗';
+                preview += `<div class="text-xs mb-1"><span class="text-gray-500">${sectionLabel} ${step}:</span> ${truncated}</div>`;
             }
 
             preview += `</div>`;
@@ -475,15 +567,22 @@
         async function restoreFromDraft(draft) {
             /**
              * Restaura sessão a partir do rascunho
+             * v0.6.4: Usa sincronização em bloco via /sync_session + migração de IDs antigos
              */
             console.log('[Draft] Restaurando rascunho...');
 
-            // Restaurar estado
-            answersState = draft.answers;
-            currentSection = draft.currentSection || 1; // Fallback para v0.5.x
-
-            // Iniciar nova sessão no backend (o rascunho é só local)
             try {
+                // Migrar IDs antigos se necessário (v0.6.3 → v0.6.4)
+                if (draft.version === '0.6.3' || !draft.version) {
+                    console.log('[Draft] Detectado rascunho v0.6.3. Migrando IDs...');
+                    answersState = migrateOldDraftIDs(draft.answers);
+                } else {
+                    answersState = draft.answers;
+                }
+
+                currentSection = draft.currentSection || 1;
+
+                // 1. Iniciar nova sessão no backend
                 const response = await fetch(`${API_URL}/new_session`, { method: 'POST' });
                 if (!response.ok) throw new Error('Erro ao iniciar sessão');
 
@@ -491,89 +590,85 @@
                 sessionId = data.session_id;
                 currentBoId = data.bo_id;
 
-                // currentQuestionStep será atualizado pelo backend durante a sincronização
-                // Começar do passo 1.1 e deixar o backend avançar para o passo correto
-                currentQuestionStep = '1.1';
-
-                // Mensagem inicial
+                // 2. Mensagem inicial
                 addMessage('Olá! Restaurei seu rascunho. Vou continuar de onde você parou.', true, false, null, 'welcome_restored');
 
-                // Reconstruir histórico de mensagens no chat
-                // IMPORTANTE: Ordenar steps corretamente (1.1, 1.2, ..., 2.0, 2.1, ...)
-                const sortedSteps = Object.keys(answersState).sort((a, b) => {
-                    const [sectionA, stepA] = a.split('.').map(Number);
-                    const [sectionB, stepB] = b.split('.').map(Number);
-                    if (sectionA !== sectionB) return sectionA - sectionB;
-                    return stepA - stepB;
-                });
+                // 3. Restaurar chatHistory (ou reconstruir se não existir)
+                if (draft.chatHistory && draft.chatHistory.length > 0) {
+                    // Restaurar mensagens salvas
+                    draft.chatHistory.forEach(msg => {
+                        addMessage(msg.text, msg.isBot, false, msg.step, msg.eventId);
+                    });
+                } else {
+                    // Fallback: reconstruir a partir de answers (compatibilidade v0.6.3)
+                    const sortedSteps = Object.keys(answersState).sort((a, b) => {
+                        const [sectionA, stepA] = a.split('.').map(Number);
+                        const [sectionB, stepB] = b.split('.').map(Number);
+                        if (sectionA !== sectionB) return sectionA - sectionB;
+                        return stepA - stepB;
+                    });
 
-                // Detectar se tem respostas da Seção 2
-                const section1Count = Object.keys(answersState).filter(s => s.startsWith('1.')).length;
-                const section2Count = Object.keys(answersState).filter(s => s.startsWith('2.')).length;
+                    for (const step of sortedSteps) {
+                        const answer = answersState[step];
+                        const question = step.startsWith('1.')
+                            ? SECTION1_QUESTIONS[step]
+                            : SECTION2_QUESTIONS[step];
 
-                // Se está na Seção 2, atualizar sidebar ANTES de processar respostas
+                        if (question) {
+                            addMessage(question, true, false, step, `evt_restored_q_${step}`);
+                            addMessage(answer, false, false, step);
+                        }
+                    }
+                }
+
+                // 4. Restaurar textos gerados
+                if (draft.generatedTexts) {
+                    if (draft.generatedTexts.section1) {
+                        addGeneratedSectionText(1, draft.generatedTexts.section1);
+                    }
+                    if (draft.generatedTexts.section2) {
+                        addGeneratedSectionText(2, draft.generatedTexts.section2);
+                    }
+                }
+
+                // 5. Atualizar sidebar se estiver na Seção 2
                 if (currentSection === 2) {
                     updateSidebarForSection2();
                 }
 
-                let section2Started = false;
+                // 6. SINCRONIZAÇÃO EM BLOCO (1 requisição única)
+                console.log('[Draft] Sincronizando respostas em bloco...');
 
-                for (const step of sortedSteps) {
-                    const answer = answersState[step];
+                const syncResponse = await fetch(`${API_URL}/sync_session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        answers: answersState,
+                        llm_provider: 'groq'
+                    })
+                });
 
-                    // Se entrou na Seção 2, iniciar backend na Seção 2
-                    if (step.startsWith('2.') && !section2Started) {
-                        try {
-                            await fetch(`${API_URL}/start_section/2`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ session_id: sessionId })
-                            });
-                            section2Started = true;
-                        } catch (e) {
-                            console.warn('[Draft] Erro ao iniciar Seção 2 no backend:', e);
-                        }
-                    }
-
-                    // Buscar pergunta correta (Seção 1 ou 2)
-                    const question = step.startsWith('1.')
-                        ? SECTION1_QUESTIONS[step]
-                        : SECTION2_QUESTIONS[step];
-
-                    if (question) {
-                        addMessage(question, true, false, step, `evt_restored_q_${step}`);
-                        addMessage(answer, false, false, step);
-
-                        // Atualizar sidebar
-                        updateSidebarAnswer(step, answer);
-                        updateSidebarStatus(step, 'answered');
-                    }
-
-                    // Enviar resposta ao backend para sincronizar estado
-                    try {
-                        const syncResponse = await fetch(`${API_URL}/chat`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                session_id: sessionId,
-                                message: answer,
-                                llm_provider: 'groq'
-                            })
-                        });
-                        const syncData = await syncResponse.json();
-
-                        // Atualizar currentQuestionStep com resposta do backend
-                        if (syncData.current_step && !syncData.is_section_complete) {
-                            currentQuestionStep = syncData.current_step;
-                            console.log(`[Draft] Backend avançou para: ${currentQuestionStep}`);
-                        } else if (syncData.is_section_complete) {
-                            currentQuestionStep = step.startsWith('1.') ? 'section1_complete' : 'section2_complete';
-                            console.log(`[Draft] Seção ${currentSection} completa`);
-                        }
-                    } catch (e) {
-                        console.warn('[Draft] Erro ao sincronizar resposta:', step, e);
-                    }
+                if (!syncResponse.ok) {
+                    throw new Error('Erro na sincronização em bloco');
                 }
+
+                const syncData = await syncResponse.json();
+
+                // CRÍTICO: Atualizar estado com resposta do backend
+                currentQuestionStep = syncData.current_step;
+                currentSection = syncData.current_section;
+
+                console.log(`[Draft] Sincronização completa. Próximo: ${currentQuestionStep}`);
+
+                // 7. Atualizar sidebar (apenas uma vez, no final)
+                const section1Count = Object.keys(answersState).filter(s => s.startsWith('1.')).length;
+                const section2Count = Object.keys(answersState).filter(s => s.startsWith('2.')).length;
+
+                Object.keys(answersState).forEach(step => {
+                    updateSidebarAnswer(step, answersState[step]);
+                    updateSidebarStatus(step, 'answered');
+                });
 
                 // Atualizar progresso
                 if (currentSection === 2) {
@@ -582,7 +677,7 @@
                     updateSidebarProgress(section1Count, 6);
                 }
 
-                // Mostrar próxima pergunta se não estiver completo
+                // 8. Mostrar próxima pergunta OU desabilitar se completo
                 if (!currentQuestionStep.includes('complete')) {
                     const nextQuestion = currentSection === 1
                         ? SECTION1_QUESTIONS[currentQuestionStep]
@@ -591,10 +686,55 @@
                     if (nextQuestion) {
                         updateSidebarStatus(currentQuestionStep, 'current');
 
-                        setTimeout(() => {
-                            addMessage(nextQuestion, true, false, currentQuestionStep, `evt_next_${currentQuestionStep}`);
+                        // ⚠️ Verificar se pergunta já está no chat (evitar duplicação)
+                        const lastBotMessage = Array.from(chatContainer.querySelectorAll('.message-container.justify-start'))
+                            .pop()?.dataset.step;
+
+                        if (lastBotMessage !== currentQuestionStep) {
+                            // Pergunta ainda não foi mostrada, adicionar agora
+                            setTimeout(() => {
+                                addMessage(nextQuestion, true, false, currentQuestionStep, `evt_next_${currentQuestionStep}`);
+                                enableInput();
+                            }, 500);
+                        } else {
+                            // Pergunta já está no chat, apenas habilitar input
                             enableInput();
-                        }, 500);
+                        }
+                    }
+                } else {
+                    // Seção completa
+
+                    // ⚠️ Se Seção 1 completa e ainda não iniciou Seção 2, mostrar botão
+                    if (currentSection === 1 && !document.getElementById('btn-start-section2')) {
+                        disableInput();
+
+                        // Criar botão para iniciar Seção 2
+                        const section2ButtonDiv = document.createElement('div');
+                        section2ButtonDiv.id = 'section2-button-container';
+                        section2ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl text-center';
+                        section2ButtonDiv.innerHTML = `
+                            <h3 class="text-xl font-bold text-blue-900 mb-2">🚗 Próxima Etapa: Abordagem a Veículo</h3>
+                            <p class="text-gray-700 mb-4">
+                                Havia veículo envolvido na ocorrência? Continue para a próxima seção.
+                            </p>
+                            <button
+                                id="btn-start-section2"
+                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                                ▶️ Iniciar Seção 2
+                            </button>
+                        `;
+
+                        // Inserir após o container de textos gerados
+                        generatedSectionsContainer.parentElement.appendChild(section2ButtonDiv);
+
+                        // Event listener para o botão
+                        document.getElementById('btn-start-section2').addEventListener('click', startSection2);
+
+                        showToast('✅ Rascunho restaurado! Seção 1 completa.');
+                    } else {
+                        // Outras seções completas
+                        disableInput();
+                        showToast('✅ Rascunho restaurado! Esta seção já está completa.');
                     }
                 }
 
@@ -906,11 +1046,11 @@
                 questionsList.appendChild(sectionPreview);
             }
 
-            // Resetar progresso para Seção 2 (8 perguntas: 2.0 a 2.7)
+            // Resetar progresso para Seção 2 (8 perguntas: 2.1 a 2.8)
             updateSidebarProgress(0, 8);
 
             // Marcar primeira pergunta como current
-            updateSidebarStatus('2.0', 'current');
+            updateSidebarStatus('2.1', 'current');
         }
 
         // Toggle sidebar mobile
@@ -1347,6 +1487,8 @@
                 currentBoId = data.bo_id;
                 currentQuestionStep = '1.1';
                 currentSection = 1;
+                answersState = {}; // Resetar respostas
+                boCompleted = false; // Resetar flag de BO completo
 
                 console.log('Sessão iniciada:', { sessionId, currentBoId });
 
@@ -1399,7 +1541,7 @@
                 // Atualizar estado da aplicação
                 currentSection = 2;
                 currentQuestionStep = data.current_step;
-                answersState = {}; // Resetar respostas para nova seção
+                // NÃO resetar answersState! Ele deve manter todas as respostas (Seção 1 + 2)
 
                 console.log('Seção 2 iniciada:', data);
 
@@ -1539,17 +1681,42 @@
                 // Atualizar sidebar com step que FOI VALIDADO (displayStep)
                 updateSidebarStatus(displayStep, 'answered');
                 updateSidebarProgress(progress, totalQuestions);
-                
-                // ✅ SALVAR RASCUNHO após resposta válida
-                saveDraft();
-                
+
                 if (data.is_section_complete) {
-                    // ✅ LIMPAR RASCUNHO ao completar
+                    // ✅ LIMPAR RASCUNHO ao completar (ANTES de qualquer outra ação)
                     clearDraft();
+
+                    // ⚠️ VERIFICAR SE SEÇÃO FOI PULADA (v0.6.4)
+                    if (data.section_skipped) {
+                        addMessage('✅ Seção 2 não se aplica.', true, false, null, 'evt_section_skipped');
+
+                        // Adicionar texto explicativo ao container (em estilo diferente)
+                        const skipText = document.createElement('div');
+                        skipText.className = 'mt-4 p-4 bg-gray-100 border border-gray-300 rounded-lg text-center italic text-gray-600';
+                        skipText.innerHTML = `
+                            <h3 class="font-semibold text-gray-700 mb-1">🚗 Seção 2 - Abordagem a Veículo</h3>
+                            <p class="text-sm">${data.generated_text}</p>
+                        `;
+                        generatedSectionsContainer.appendChild(skipText);
+                        generatedSectionsContainer.classList.remove('hidden');
+
+                        // Desabilitar inputs (BO finalizado)
+                        disableInput();
+
+                        addMessage('📋 BO finalizado. Você pode copiar o texto da Seção 1 acima.', true, false, null, 'evt_bo_complete');
+
+                        return;
+                    }
 
                     const completionMessage = currentSection === 1
                         ? '✅ Seção 1 completa! Gerando texto...'
                         : '✅ Todas as perguntas respondidas! Gerando texto...';
+
+                    // ⚠️ MARCAR BO COMO COMPLETO se finalizou Seção 2
+                    if (currentSection === 2) {
+                        boCompleted = true;
+                        console.log('[BO] BO marcado como completo');
+                    }
 
                     addMessage(completionMessage, true, false, null, 'evt_generating');
                     setTimeout(() => {
@@ -1589,11 +1756,14 @@
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }, 1000);
                 } else {
+                    // ✅ SALVAR RASCUNHO após resposta válida (apenas se seção NÃO está completa)
+                    saveDraft();
+
                     updateSidebarStatus(currentQuestionStep, 'current');
                     addMessage(data.question, true, false, currentQuestionStep, data.event_id);
                     enableInput();
                 }
-                
+
             } catch (error) {
                 removeLoading();
                 addMessage('❌ Erro ao processar sua resposta. Tente novamente.');
@@ -1646,8 +1816,15 @@
 
         // Salvar rascunho antes de fechar página
         window.addEventListener('beforeunload', () => {
-            if (sessionId && Object.keys(answersState).length > 0) {
+            // Apenas salvar rascunho se:
+            // 1. Sessão existe
+            // 2. Há respostas salvas
+            // 3. BO NÃO foi marcado como completo
+            if (sessionId && Object.keys(answersState).length > 0 && !boCompleted) {
+                console.log('[Draft] Salvando rascunho antes de fechar...');
                 saveDraft();
+            } else if (boCompleted) {
+                console.log('[Draft] BO completo, não salvando rascunho');
             }
         });
     </script>

@@ -1,25 +1,82 @@
 # Changelog v0.6.4
 
-## [0.6.4] - 2025-12-20
+## [0.6.4] - 2025-12-20 🎯 **CORREÇÃO CRÍTICA: Sistema de Rascunhos**
 
-### 🐛 Corrigido - Sincronização Backend Durante Restauração
-- **CRÍTICO: Backend não atualizava currentQuestionStep durante restauração**
-  - Problema: Loop de sincronização em `restoreFromDraft()` enviava respostas ao backend mas não capturava `current_step` retornado
-  - Sintoma: Após restaurar rascunho, próxima resposta era validada como pergunta errada
-  - Exemplo: Usuário respondeu 1.1-1.3, recarregou, sistema mostrava pergunta 1.4 mas validava como 1.1
-  - Solução: Atualizar `currentQuestionStep` com valor retornado pelo backend após cada sincronização:
-    ```javascript
-    const syncData = await syncResponse.json();
-    if (syncData.current_step && !syncData.is_section_complete) {
-        currentQuestionStep = syncData.current_step;
-    }
-    ```
-  - Arquivos: `docs/index.html` linhas 568-591
+### ✨ Novo - Endpoint de Sincronização em Bloco
+- **CRÍTICO: Implementado `/sync_session` para restauração de rascunhos**
+  - Problema anterior: `restoreFromDraft()` fazia 1 requisição HTTP por resposta (14 requests para BO completo)
+  - Tempo anterior: 14-20 segundos (1-1.5s por request)
+  - Risco: Estado inconsistente se requisição falhasse no meio
+  - Solução: Endpoint que processa todas as respostas atomicamente em 1 requisição
+  - Performance: **10-14x mais rápido** (1-2s vs 14-20s)
+  - Garantia: Sincronização atômica (ou processa tudo, ou falha tudo)
+  - Arquivos: `backend/main.py` linhas 422-508
 
-- **Removida lógica de cálculo manual de currentQuestionStep**
-  - Problema: Código calculava próximo passo manualmente antes do loop de sincronização, causando inconsistências
-  - Solução: Inicializar em '1.1' e deixar backend atualizar para passo correto durante sincronização
-  - Arquivos: `docs/index.html` linhas 494-496
+### 🔧 Refatorado - Sistema de Rascunhos v0.6.4
+- **Enhanced saveDraft() - Estrutura completa**
+  - Agora salva: `chatHistory` + `generatedTexts` + `sectionStatuses`
+  - Permite restauração exata da interface visual
+  - Arquivos: `docs/index.html` linhas 380-439
+
+- **Reescrito restoreFromDraft() - Sincronização em bloco**
+  - Usa `/sync_session` em vez de loop serial de 14 requests
+  - Migração automática de IDs v0.6.3 (2.0-2.7 → 2.1-2.8)
+  - Fallback para rascunhos sem `chatHistory`
+  - Estado sincronizado atomicamente com backend
+  - Arquivos: `docs/index.html` linhas 475-679
+
+### 🔄 Alterado - Renumeração de IDs da Seção 2
+- **BREAKING CHANGE: IDs renumerados para consistência**
+  - Antes: 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7
+  - Agora: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8
+  - Motivação: Padrão consistente com Seção 1 (que usa 1.1-1.6)
+  - Compatibilidade: Migração automática para rascunhos v0.6.3
+  - Arquivos:
+    - Backend: `state_machine_section2.py` (linhas 14-24)
+    - Backend: `validator_section2.py` (linhas 17-87)
+    - Frontend: `index.html` (linhas 307-316)
+
+### ✨ Novo - Lógica de Seção "Não Aplicável"
+- **Seção 2 pulada quando não há veículo**
+  - Pergunta 2.1: "Havia veículo?"
+  - Se resposta = "NÃO" → Seção marcada como `NOT_APPLICABLE`
+  - UI mostra texto explicativo em cinza/itálico
+  - BO finalizado (até Seção 3 ser implementada)
+  - Arquivos:
+    - Backend: `state_machine_section2.py` (linhas 59-67, 91-95)
+    - Backend: `main.py` (linhas 243-269)
+    - Frontend: `index.html` (linhas 1550-1570)
+
+### 🐛 Corrigido - Persistência de Rascunho Após Conclusão
+- **CRÍTICO: Rascunho aparecia após completar todas as seções**
+  - Bug #1: `answersState` resetado ao iniciar Seção 2 (linha 1541)
+    - Causava perda de respostas da Seção 1
+    - Solução: Removido reset, `answersState` agora mantém todas as respostas
+  - Bug #2: `beforeunload` salvava rascunho mesmo após BO completo
+    - Solução: Adicionada flag `boCompleted` [index.html:328](docs/index.html#L328)
+    - Flag marcada como `true` quando Seção 2 finaliza [index.html:1575](docs/index.html#L1575)
+    - `beforeunload` verifica `!boCompleted` antes de salvar [index.html:1653](docs/index.html#L1653)
+  - Bug #3: Flag não resetada em nova sessão
+    - Solução: `boCompleted = false` em `startSession()` [index.html:1351](docs/index.html#L1351)
+  - Arquivos: `docs/index.html` (linhas 328, 1351, 1402, 1575, 1653)
+
+### 🧪 Testes
+- **8 testes backend (test_backend_changes.py)**: ✅ 100% passando
+- **4 testes integração (test_integration_sync.py)**: ✅ 100% passando
+  - Sincronização Seção 1 incompleta
+  - Sincronização Seção 2 incompleta
+  - Sincronização completa (14 respostas)
+  - Seção 2 pulada (NÃO havia veículo)
+- **Teste manual persistência**: ✅ 100% passando
+  - Rascunho salvo até pergunta 2.7 → Recarrega → Modal aparece ✓
+  - Completa 2.8 → Recarrega → Modal NÃO aparece ✓
+
+### 🔍 Impacto
+- **4 arquivos modificados** (3 backend, 1 frontend)
+- **~500 linhas** alteradas/adicionadas
+- **Compatibilidade retroativa** com v0.6.3 (migração automática)
+- **Performance**: Restauração de rascunho 10x mais rápida
+- **Consistência**: IDs alinhados, estado sincronizado atomicamente
 
 ---
 

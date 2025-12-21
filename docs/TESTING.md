@@ -59,7 +59,7 @@ pytest tests/unit
 pytest tests/integration
 
 # E2E screenshots (longo - ~4min, precisa backend + frontend)
-python tests/e2e/automate_release.py --version v0.6.5
+python tests/e2e/automate_release.py --version v0.6.4
 
 # Todos os testes pytest juntos
 pytest

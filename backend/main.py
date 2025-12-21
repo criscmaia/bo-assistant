@@ -27,7 +27,7 @@ except ImportError:
     from backend.logger import BOLogger, now_brasilia
 
 # Versão do sistema
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.6.4"
 
 app = FastAPI(title="BO Inteligente API", version=APP_VERSION)
 
@@ -69,7 +69,8 @@ class ChatResponse(BaseModel):
     generated_text: Optional[str] = None
     is_section_complete: bool = False
     current_step: str
-    current_section: Optional[int] = 1  # Novo campo
+    current_section: Optional[int] = 1
+    section_skipped: Optional[bool] = False  # NOVO: True se seção foi pulada
     validation_error: Optional[str] = None
     event_id: Optional[str] = None
 
@@ -107,7 +108,7 @@ async def root():
     return {
         "message": "BO Inteligente API",
         "version": APP_VERSION,
-        "endpoints": ["/new_session", "/chat", "/feedback", "/api/logs"]
+        "endpoints": ["/new_session", "/chat", "/sync_session", "/feedback", "/api/logs"]
     }
 
 @app.get("/health")
@@ -239,6 +240,34 @@ async def chat(request_body: ChatRequest, request: Request):
 
     # Verificar se seção está completa
     if state_machine.is_section_complete():
+        # Se seção foi pulada (Seção 2 com "NÃO")
+        if current_section == 2 and hasattr(state_machine, 'was_section_skipped') and state_machine.was_section_skipped():
+            skip_reason = state_machine.get_skip_reason()
+
+            # Log: seção pulada
+            BOLogger.log_event(
+                bo_id=bo_id,
+                event_type="section_skipped",
+                data={
+                    "section": current_section,
+                    "reason": skip_reason
+                }
+            )
+
+            # Atualizar status como finalizado (por enquanto)
+            BOLogger.update_session_status(bo_id, "completed")
+
+            return ChatResponse(
+                session_id=session_id,
+                bo_id=bo_id,
+                generated_text=skip_reason,  # Texto explicativo
+                is_section_complete=True,
+                current_step="complete",
+                current_section=current_section,
+                section_skipped=True,  # NOVO CAMPO
+                event_id=event_id
+            )
+
         # Gerar texto com método correto baseado na seção
         try:
             start_time = datetime.now()
@@ -390,6 +419,94 @@ async def start_section(section_number: int, request_body: dict):
 
     raise HTTPException(status_code=400, detail="Seção inválida")
 
+@app.post("/sync_session")
+async def sync_session(request_body: dict):
+    """
+    Sincroniza sessão inteira de uma vez (restauração de rascunho).
+
+    Body: {
+        "session_id": "uuid",
+        "answers": {"1.1": "...", "1.2": "...", "2.1": "..."},
+        "llm_provider": "groq"
+    }
+
+    Returns: {
+        "success": true,
+        "current_step": "2.5",
+        "current_section": 2,
+        "section1_complete": true,
+        "section2_complete": false
+    }
+    """
+    session_id = request_body.get("session_id")
+    answers = request_body.get("answers", {})
+
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id é obrigatório")
+
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+
+    session_data = sessions[session_id]
+    bo_id = session_data["bo_id"]
+
+    # Ordenar steps (1.1, 1.2, ..., 2.1, 2.2, ...)
+    sorted_steps = sorted(answers.keys(), key=lambda s: tuple(map(int, s.split('.'))))
+
+    current_section = 1
+
+    for step in sorted_steps:
+        answer = answers[step]
+
+        # Detectar mudança de seção
+        step_section = int(step.split('.')[0])
+        if step_section != current_section:
+            # Inicializar nova seção
+            if step_section not in session_data["sections"]:
+                if step_section == 2:
+                    session_data["sections"][2] = BOStateMachineSection2()
+                # Adicionar outras seções aqui no futuro
+
+            current_section = step_section
+            session_data["current_section"] = current_section
+
+        # Obter state machine da seção
+        state_machine = session_data["sections"][current_section]
+
+        # Validar resposta
+        if current_section == 1:
+            is_valid, error_message = ResponseValidator.validate(step, answer)
+        elif current_section == 2:
+            is_valid, error_message = ResponseValidatorSection2.validate(step, answer)
+        else:
+            continue  # Seção não suportada, pular
+
+        if not is_valid:
+            # Log: erro de validação durante sincronização
+            BOLogger.log_event(
+                bo_id=bo_id,
+                event_type="sync_validation_error",
+                data={"step": step, "error": error_message}
+            )
+            continue  # Pular resposta inválida
+
+        # Armazenar e avançar
+        state_machine.store_answer(answer)
+        state_machine.next_step()
+
+    # Retornar estado final
+    final_section = current_section
+    final_state_machine = session_data["sections"][final_section]
+
+    return {
+        "success": True,
+        "current_step": final_state_machine.current_step,
+        "current_section": final_section,
+        "section1_complete": session_data["sections"][1].is_section_complete(),
+        "section2_complete": session_data["sections"].get(2, None) and session_data["sections"][2].is_section_complete(),
+        "bo_id": bo_id
+    }
+
 @app.put("/chat/{session_id}/answer/{step}")
 async def update_answer(session_id: str, step: str, update_request: UpdateAnswerRequest):
     """Atualiza resposta com logging"""
@@ -402,12 +519,16 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
     # Determinar qual seção baseado no step
     if step.startswith("1."):
         state_machine = session_data["sections"][1]
+        valid_steps = state_machine.QUESTIONS
     elif step.startswith("2."):
         state_machine = session_data["sections"][2]
+        # Importar SECTION2_QUESTIONS para validação
+        from backend.state_machine_section2 import SECTION2_QUESTIONS
+        valid_steps = SECTION2_QUESTIONS
     else:
         raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
 
-    if step not in state_machine.QUESTIONS:
+    if step not in valid_steps:
         raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
 
     # Validar nova resposta usando validator correto

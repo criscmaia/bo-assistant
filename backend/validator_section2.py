@@ -14,12 +14,12 @@ from typing import Tuple
 
 # Regras de validação para cada pergunta da Seção 2
 VALIDATION_RULES_SECTION2 = {
-    "2.0": {
+    "2.1": {
         "valid_responses": ["SIM", "NÃO", "NAO", "S", "N", "NENHUM", "NEGATIVO"],
         "examples": ["SIM", "NÃO"],
         "error_message": "Responda com SIM ou NÃO. Havia veículo envolvido na ocorrência?"
     },
-    "2.1": {
+    "2.2": {
         "min_length": 15,
         "custom_check": "vehicle_plate",
         "examples": [
@@ -29,7 +29,7 @@ VALIDATION_RULES_SECTION2 = {
         ],
         "error_message": "Informe marca, modelo, cor e placa do veículo. Ex: 'VW Gol branco, placa ABC-1D23'"
     },
-    "2.2": {
+    "2.3": {
         "min_length": 20,
         "examples": [
             "Rua das Flores, altura do nº 123, Bairro Centro",
@@ -38,7 +38,7 @@ VALIDATION_RULES_SECTION2 = {
         ],
         "error_message": "Onde o veículo foi visto? Informe o local com detalhes (rua, número, referências)."
     },
-    "2.3": {
+    "2.4": {
         "min_length": 30,
         "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
         "examples": [
@@ -48,7 +48,7 @@ VALIDATION_RULES_SECTION2 = {
         ],
         "error_message": "Informe qual policial viu (graduação + nome) E o que exatamente observou. Ex: 'O Sargento Lucas viu...'"
     },
-    "2.4": {
+    "2.5": {
         "min_length": 20,
         "examples": [
             "Foi gritado 'Parado, Polícia Militar!' pelo megafone",
@@ -57,7 +57,7 @@ VALIDATION_RULES_SECTION2 = {
         ],
         "error_message": "Descreva como foi dada a ordem de parada (megafone, sirene, sinal, etc.)."
     },
-    "2.5": {
+    "2.6": {
         "min_length": 15,
         "examples": [
             "Parou imediatamente",
@@ -66,7 +66,7 @@ VALIDATION_RULES_SECTION2 = {
         ],
         "error_message": "O veículo parou ou houve perseguição? Descreva o que aconteceu."
     },
-    "2.6": {
+    "2.7": {
         "min_length": 30,
         "examples": [
             "O Cabo Nogueira revistou o porta-luvas e encontrou dois tabletes de substância análoga à cocaína",
@@ -75,7 +75,7 @@ VALIDATION_RULES_SECTION2 = {
         ],
         "error_message": "Descreva a abordagem e a busca no veículo (quem fez, onde procurou, o que encontrou)."
     },
-    "2.7": {
+    "2.8": {
         "min_length": 3,
         "examples": [
             "NÃO",
@@ -126,8 +126,8 @@ class ResponseValidatorSection2:
 
         rules = VALIDATION_RULES_SECTION2[step]
 
-        # Validação especial para pergunta 2.0 (condicional)
-        if step == "2.0":
+        # Validação especial para pergunta 2.1 (condicional)
+        if step == "2.1":
             return ResponseValidatorSection2._validate_yes_no(answer, rules)
 
         # Validação de comprimento mínimo
@@ -150,8 +150,8 @@ class ResponseValidatorSection2:
                 return False, rules["error_message"]
 
         # Validações específicas por pergunta
-        if step == "2.7":
-            # Pergunta 2.7 aceita "NÃO" como resposta válida curta
+        if step == "2.8":
+            # Pergunta 2.8 aceita "NÃO" como resposta válida curta
             if answer.upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO", "NENHUMA"]:
                 return True, ""
 

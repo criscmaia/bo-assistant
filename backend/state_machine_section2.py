@@ -11,17 +11,17 @@ from typing import Dict, Optional
 
 # Perguntas da Seção 2 (fonte: REGRAS GERAIS - GPT Tráfico, material do Claudio)
 SECTION2_QUESTIONS = {
-    "2.0": "Havia veículo?",
-    "2.1": "Marca/modelo/cor/placa.",
-    "2.2": "Onde foi visto?",
-    "2.3": "Qual policial percebeu e o que viu?",
-    "2.4": "Como foi dada a ordem de parada?",
-    "2.5": "Parou ou houve perseguição?",
-    "2.6": "Como foi a abordagem e busca?",
-    "2.7": "Haviam irregularidades? Veículo furtado/roubado/clonado?"
+    "2.1": "Havia veículo?",
+    "2.2": "Marca/modelo/cor/placa.",
+    "2.3": "Onde foi visto?",
+    "2.4": "Qual policial percebeu e o que viu?",
+    "2.5": "Como foi dada a ordem de parada?",
+    "2.6": "Parou ou houve perseguição?",
+    "2.7": "Como foi a abordagem e busca?",
+    "2.8": "Haviam irregularidades? Veículo furtado/roubado/clonado?"
 }
 
-SECTION2_STEPS = ["2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "complete"]
+SECTION2_STEPS = ["2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "complete"]
 
 
 class BOStateMachineSection2:
@@ -34,10 +34,10 @@ class BOStateMachineSection2:
     """
 
     def __init__(self):
-        self.current_step = "2.0"
+        self.current_step = "2.1"
         self.answers: Dict[str, str] = {}
         self.step_index = 0
-        self.section_skipped = False  # True se responder "NÃO" na pergunta 2.0
+        self.section_skipped = False  # True se responder "NÃO" na pergunta 2.1
 
     def get_current_question(self) -> str:
         """Retorna o texto da pergunta atual"""
@@ -55,13 +55,13 @@ class BOStateMachineSection2:
         """
         answer_clean = answer.strip()
 
-        # Pergunta 2.0 condicional - verifica se houve veículo
-        if self.current_step == "2.0":
+        # Pergunta 2.1 condicional - verifica se houve veículo
+        if self.current_step == "2.1":
             answer_upper = answer_clean.upper()
             # Aceita variações: NÃO, NAO, N, NENHUM, etc.
             if answer_upper in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
                 self.section_skipped = True
-                self.answers["2.0"] = "NÃO"
+                self.answers["2.1"] = "NÃO"
                 self.current_step = "complete"
                 self.step_index = len(SECTION2_STEPS) - 1
                 return
@@ -87,6 +87,12 @@ class BOStateMachineSection2:
     def was_section_skipped(self) -> bool:
         """Retorna True se a seção foi pulada (não havia veículo)"""
         return self.section_skipped
+
+    def get_skip_reason(self) -> Optional[str]:
+        """Retorna texto explicativo se seção foi pulada"""
+        if self.section_skipped:
+            return "Não se aplica (não havia veículo envolvido na ocorrência)"
+        return None
 
     def get_all_answers(self) -> Dict[str, str]:
         """Retorna todas as respostas coletadas"""
@@ -157,18 +163,18 @@ class BOStateMachineSection2:
             return False
 
         # Não permite editar se seção foi pulada
-        if self.section_skipped and step != "2.0":
+        if self.section_skipped and step != "2.1":
             return False
 
-        # Se editando 2.0 de "NÃO" para "SIM", precisa resetar seção
-        if step == "2.0" and self.section_skipped:
+        # Se editando 2.1 de "NÃO" para "SIM", precisa resetar seção
+        if step == "2.1" and self.section_skipped:
             answer_upper = new_answer.strip().upper()
             if answer_upper not in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
                 # Resetar seção
                 self.section_skipped = False
-                self.current_step = "2.1"
+                self.current_step = "2.2"
                 self.step_index = 1
-                self.answers = {"2.0": new_answer.strip()}
+                self.answers = {"2.1": new_answer.strip()}
                 return True
 
         self.answers[step] = new_answer.strip()
@@ -176,7 +182,7 @@ class BOStateMachineSection2:
 
     def reset(self):
         """Reseta a state machine para o início da seção"""
-        self.current_step = "2.0"
+        self.current_step = "2.1"
         self.answers = {}
         self.step_index = 0
         self.section_skipped = False

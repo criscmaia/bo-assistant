@@ -185,13 +185,76 @@
           "screenshot": "20-section3-final-all-sections"
         }
       ]
+    },
+    {
+      "section_number": 4,
+      "name": "Entrada em Domicílio",
+      "emoji": "🏠",
+      "total_questions": 5,
+      "steps": [
+        {
+          "step": "4.1",
+          "answer": "SIM",
+          "expect": "pass",
+          "screenshot": "21-section4-start"
+        },
+        {
+          "step": "4.2",
+          "answer": "Vimos algo",
+          "expect": "fail",
+          "reason": "Justa causa insuficiente (< 40 caracteres)",
+          "screenshot": "22-section4-justa-causa-error"
+        },
+        {
+          "step": "4.2_retry",
+          "answer": "Vimos o suspeito arremessando uma sacola branca para dentro da casa enquanto corria em direção ao imóvel nº 120 da Rua das Acácias",
+          "expect": "pass"
+        },
+        {
+          "step": "4.3",
+          "answer": "João viu o suspeito entrando na casa",
+          "expect": "fail",
+          "reason": "Sem graduação militar",
+          "screenshot": "23-section4-graduation-error"
+        },
+        {
+          "step": "4.3_retry",
+          "answer": "O Sargento Silva viu o suspeito entrando na casa com a sacola e manteve contato visual ininterrupto com o alvo",
+          "expect": "pass"
+        },
+        {
+          "step": "4.4",
+          "answer": "Perseguiu",
+          "expect": "fail",
+          "reason": "Descrição insuficiente (< 30 caracteres)",
+          "screenshot": "24-section4-ingresso-error"
+        },
+        {
+          "step": "4.4_retry",
+          "answer": "Perseguição contínua: a equipe iniciou acompanhamento no final da Rua das Acácias e manteve contato visual ininterrupto até o interior da residência",
+          "expect": "pass"
+        },
+        {
+          "step": "4.5",
+          "answer": "Entraram",
+          "expect": "fail",
+          "reason": "Ações não detalhadas (< 50 caracteres)",
+          "screenshot": "25-section4-acoes-error"
+        },
+        {
+          "step": "4.5_retry",
+          "answer": "O Sargento Silva entrou primeiro pela porta principal que estava aberta. O Cabo Almeida ficou na contenção do portão monitorando saídas. O Soldado Faria entrou em seguida pela cozinha e localizou a sacola branca embaixo da pia contendo invólucros de cocaína.",
+          "expect": "pass",
+          "screenshot": "24-section4-final-all-sections"
+        }
+      ]
     }
   ],
   "metadata": {
-    "total_screenshots": 24,
-    "desktop_screenshots": 15,
-    "mobile_screenshots": 9,
-    "video_duration_estimate": "6 minutes",
-    "note": "Seção 3 adicionada: 4 screenshots desktop + 3 mobile"
+    "total_screenshots": 28,
+    "desktop_screenshots": 17,
+    "mobile_screenshots": 11,
+    "video_duration_estimate": "8 minutes",
+    "note": "Seção 4 adicionada: 4 screenshots desktop + 2 mobile. Total: Seções 1-4 completas (4 seções)"
   }
 }

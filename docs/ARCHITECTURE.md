@@ -1,6 +1,6 @@
 # 🏗️ Arquitetura Técnica - BO Inteligente
 
-**Versão:** v0.7.1
+**Versão:** v0.8.0
 **Última atualização:** 21/12/2025
 
 Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de dados e estruturas internas.
@@ -376,7 +376,7 @@ sessions: Dict[str, Dict] = {
     },
     "currentSection": 1,
     "timestamp": 1703000000000,  // Para expiração (7 dias)
-    "version": "0.7.0"
+    "version": "0.8.0"
 }
 ```
 
@@ -527,7 +527,7 @@ sessions: Dict[str, Dict] = {
 | `created_at` | DateTime | Data/hora de criação (timezone Brasília) |
 | `completed_at` | DateTime | Data/hora de conclusão (nullable) |
 | `status` | String(20) | `active`, `completed`, `abandoned` |
-| `app_version` | String(20) | Versão do app (ex: "0.7.0") |
+| `app_version` | String(20) | Versão do app (ex: "0.8.0") |
 | `ip_address` | String(50) | IP do cliente |
 | `user_agent` | Text | User-Agent do navegador |
 

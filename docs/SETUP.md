@@ -1,6 +1,6 @@
 # 🛠️ Setup e Deploy - BO Inteligente
 
-**Versão:** v0.7.1
+**Versão:** v0.8.0
 **Última atualização:** 21/12/2025
 
 Este documento cobre setup de desenvolvimento local e deploy em produção (Render + GitHub Pages).
@@ -369,23 +369,23 @@ playwright install
 # No terminal (venv ativado)
 
 # Modo completo (Seção 1 → 2 → 3)
-python tests/e2e/automate_release.py --version v0.7.1
+python tests/e2e/automate_release.py --version v0.8.0
 
 # Sem vídeo (mais rápido - ~2 min)
-python tests/e2e/automate_release.py --version v0.7.1 --no-video
+python tests/e2e/automate_release.py --version v0.8.0 --no-video
 ```
 
-### Uso com Fast-Start (Novo em v0.7.1)
+### Uso com Fast-Start (v0.7.1+)
 
 ```bash
 # Apenas Seção 3 (Seções 1-2 preenchidas via API)
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 3 --no-video
 
 # Apenas Seção 2 (Seção 1 preenchida via API)
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 2 --no-video
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 2 --no-video
 
 # Apenas Seção 3 com vídeo
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 3
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 3
 ```
 
 **Economia de Tempo:**
@@ -395,15 +395,17 @@ python tests/e2e/automate_release.py --version v0.7.1 --start-section 3
 
 ### Saída
 
-Screenshots são salvos em `docs/screenshots/v0.7.1/`:
+Screenshots são salvos em `docs/screenshots/v0.8.0/`:
 ```
-docs/screenshots/v0.7.1/
+docs/screenshots/v0.8.0/
 ├── 01-section1-empty.png
 ├── 02-section1-progress.png
 ├── ...
 ├── 17-section3-start.png
 ├── ...
-├── 20-section3-final.png
+├── 24-section4-start.png
+├── ...
+├── 26-section4-final.png
 └── demo.webm (se vídeo habilitado)
 ```
 

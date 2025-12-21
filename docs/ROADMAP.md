@@ -1,13 +1,15 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.7.0
+## Versão Atual: v0.8.0
 **Última atualização**: 21/12/2025
 
 ---
 
 ## 🔄 Status da Fase 2
 
-**Fase 2 (Seções 3-8)** iniciada com **v0.7.0 - Seção 3: Campana** completamente implementada!
+**Fase 2 (Seções 3-8)** em andamento:
+- ✅ **v0.7.0 - Seção 3: Campana** - Completamente implementada
+- ✅ **v0.8.0 - Seção 4: Entrada em Domicílio** - Completamente implementada
 
 ### ✅ Status da Fase 1 (Concluída)
 
@@ -49,17 +51,17 @@ Implementar as 6 seções restantes do BO completo baseadas no material do Sgt. 
 
 ### Seções Planejadas
 
-#### 🔍 Seção 3: Campana e Vigilância
-- Objetivos da campana
-- Duração e equipe envolvida
-- Observações e comportamentos suspeitos
-- Decisão pela abordagem
+#### ✅ Seção 3: Campana e Vigilância (v0.7.0 - CONCLUÍDA)
+- ✅ Objetivos da campana
+- ✅ Duração e equipe envolvida
+- ✅ Observações e comportamentos suspeitos
+- ✅ Decisão pela abordagem
 
-#### 🏠 Seção 4: Entrada em Domicílio
-- Autorização (mandado, consentimento, flagrante)
-- Procedimentos de segurança adotados
-- Localização dos ilícitos
-- Resistência ou reação
+#### ✅ Seção 4: Entrada em Domicílio (v0.8.0 - CONCLUÍDA)
+- ✅ Justa causa ANTES da entrada (sensorial)
+- ✅ Tipo de ingresso (perseguição, autorização, flagrante)
+- ✅ Ações detalhadas de cada policial
+- ✅ Fundamento jurídico STF
 
 #### 🎯 Seção 5: Fundada Suspeita
 - Fatos concretos observados

@@ -14,24 +14,28 @@ try:
     from state_machine import BOStateMachine
     from state_machine_section2 import BOStateMachineSection2
     from state_machine_section3 import BOStateMachineSection3
+    from state_machine_section4 import BOStateMachineSection4
     from llm_service import LLMService
     from validator import ResponseValidator
     from validator_section2 import ResponseValidatorSection2
     from validator_section3 import ResponseValidatorSection3
+    from validator_section4 import ResponseValidatorSection4
     from logger import BOLogger, now_brasilia
 except ImportError:
     # Fallback quando roda de fora da pasta backend/ (Render)
     from backend.state_machine import BOStateMachine
     from backend.state_machine_section2 import BOStateMachineSection2
     from backend.state_machine_section3 import BOStateMachineSection3
+    from backend.state_machine_section4 import BOStateMachineSection4
     from backend.llm_service import LLMService
     from backend.validator import ResponseValidator
     from backend.validator_section2 import ResponseValidatorSection2
     from backend.validator_section3 import ResponseValidatorSection3
+    from backend.validator_section4 import ResponseValidatorSection4
     from backend.logger import BOLogger, now_brasilia
 
 # Versão do sistema
-APP_VERSION = "0.7.0"
+APP_VERSION = "0.8.0"
 
 app = FastAPI(title="BO Inteligente API", version=APP_VERSION)
 
@@ -52,11 +56,13 @@ app.add_middleware(
 #             1: BOStateMachine(),
 #             2: BOStateMachineSection2(),  # Inicializado quando usuário avançar
 #             3: BOStateMachineSection3(),  # Inicializado quando usuário avançar
+#             4: BOStateMachineSection4(),  # Inicializado quando usuário avançar
 #         },
 #         "current_section": 1,
 #         "section1_text": str,
 #         "section2_text": str,
-#         "section3_text": str
+#         "section3_text": str,
+#         "section4_text": str
 #     }
 # }
 sessions: Dict[str, Dict] = {}
@@ -143,12 +149,13 @@ async def new_session(request: Request):
         "bo_id": bo_id,
         "sections": {
             1: BOStateMachine(),
-            # Seção 2 e 3 serão inicializadas quando usuário clicar em "Iniciar Seção X"
+            # Seções 2, 3 e 4 serão inicializadas quando usuário clicar em "Iniciar Seção X"
         },
         "current_section": 1,
         "section1_text": "",
         "section2_text": "",
-        "section3_text": ""
+        "section3_text": "",
+        "section4_text": ""
     }
 
     state_machine = sessions[session_id]["sections"][1]
@@ -190,7 +197,8 @@ async def chat(request_body: ChatRequest, request: Request):
             },
             "section1_text": "",
             "section2_text": "",
-            "section3_text": ""
+            "section3_text": "",
+            "section4_text": ""
         }
         BOLogger.log_event(
             bo_id=bo_id,
@@ -209,6 +217,8 @@ async def chat(request_body: ChatRequest, request: Request):
             session_data["sections"][2] = BOStateMachineSection2()
         elif current_section == 3:
             session_data["sections"][3] = BOStateMachineSection3()
+        elif current_section == 4:
+            session_data["sections"][4] = BOStateMachineSection4()
         else:
             raise HTTPException(status_code=400, detail=f"Seção {current_section} não suportada")
 
@@ -228,6 +238,11 @@ async def chat(request_body: ChatRequest, request: Request):
         )
     elif current_section == 3:
         is_valid, error_message = ResponseValidatorSection3.validate(
+            current_step,
+            request_body.message
+        )
+    elif current_section == 4:
+        is_valid, error_message = ResponseValidatorSection4.validate(
             current_step,
             request_body.message
         )
@@ -274,8 +289,8 @@ async def chat(request_body: ChatRequest, request: Request):
 
     # Verificar se seção está completa
     if state_machine.is_section_complete():
-        # Se seção foi pulada (Seção 2 ou 3 com "NÃO")
-        if current_section in [2, 3] and hasattr(state_machine, 'was_section_skipped') and state_machine.was_section_skipped():
+        # Se seção foi pulada (Seção 2, 3 ou 4 com "NÃO")
+        if current_section in [2, 3, 4] and hasattr(state_machine, 'was_section_skipped') and state_machine.was_section_skipped():
             skip_reason = state_machine.get_skip_reason()
 
             # Log: seção pulada
@@ -289,7 +304,7 @@ async def chat(request_body: ChatRequest, request: Request):
             )
 
             # Atualizar status como finalizado apenas se for a última seção
-            if current_section == 3:
+            if current_section == 4:
                 BOLogger.update_session_status(bo_id, "completed")
 
             return ChatResponse(
@@ -326,6 +341,12 @@ async def chat(request_body: ChatRequest, request: Request):
                     provider=request_body.llm_provider
                 )
                 session_data["section3_text"] = generated_text
+            elif current_section == 4:
+                generated_text = llm_service.generate_section4_text(
+                    section_data=state_machine.get_all_answers(),
+                    provider=request_body.llm_provider
+                )
+                session_data["section4_text"] = generated_text
             else:
                 raise ValueError(f"Seção {current_section} não suportada")
 
@@ -346,10 +367,12 @@ async def chat(request_body: ChatRequest, request: Request):
 
             # Atualizar status da sessão apenas se todas as seções foram concluídas
             if current_section == 1:
-                pass  # Não marca como "completed" ainda, pois tem Seção 2 e 3
+                pass  # Não marca como "completed" ainda, pois tem Seção 2, 3 e 4
             elif current_section == 2:
-                pass  # Não marca como "completed" ainda, pois tem Seção 3
+                pass  # Não marca como "completed" ainda, pois tem Seção 3 e 4
             elif current_section == 3:
+                pass  # Não marca como "completed" ainda, pois tem Seção 4
+            elif current_section == 4:
                 BOLogger.update_session_status(bo_id, "completed")
 
             return ChatResponse(
@@ -428,7 +451,7 @@ async def start_section(section_number: int, request_body: dict):
     bo_id = session_data["bo_id"]
 
     # Validar número da seção
-    if section_number not in [2, 3]:
+    if section_number not in [2, 3, 4]:
         raise HTTPException(status_code=400, detail=f"Seção {section_number} não disponível ainda")
 
     # Inicializar state machine da seção solicitada
@@ -465,6 +488,33 @@ async def start_section(section_number: int, request_body: dict):
 
         session_data["current_section"] = 3
         state_machine = session_data["sections"][3]
+
+        first_question = state_machine.get_current_question()
+
+        # Log: seção iniciada
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="section_started",
+            data={
+                "section": section_number,
+                "first_question": first_question
+            }
+        )
+
+        return {
+            "session_id": session_id,
+            "bo_id": bo_id,
+            "section": section_number,
+            "question": first_question,
+            "current_step": state_machine.current_step
+        }
+
+    elif section_number == 4:
+        if 4 not in session_data["sections"]:
+            session_data["sections"][4] = BOStateMachineSection4()
+
+        session_data["current_section"] = 4
+        state_machine = session_data["sections"][4]
 
         first_question = state_machine.get_current_question()
 
@@ -536,6 +586,8 @@ async def sync_session(request_body: dict):
                     session_data["sections"][2] = BOStateMachineSection2()
                 elif step_section == 3:
                     session_data["sections"][3] = BOStateMachineSection3()
+                elif step_section == 4:
+                    session_data["sections"][4] = BOStateMachineSection4()
 
             current_section = step_section
             session_data["current_section"] = current_section
@@ -550,6 +602,8 @@ async def sync_session(request_body: dict):
             is_valid, error_message = ResponseValidatorSection2.validate(step, answer)
         elif current_section == 3:
             is_valid, error_message = ResponseValidatorSection3.validate(step, answer)
+        elif current_section == 4:
+            is_valid, error_message = ResponseValidatorSection4.validate(step, answer)
         else:
             continue  # Seção não suportada, pular
 
@@ -577,6 +631,7 @@ async def sync_session(request_body: dict):
         "section1_complete": session_data["sections"][1].is_section_complete(),
         "section2_complete": session_data["sections"].get(2, None) and session_data["sections"][2].is_section_complete(),
         "section3_complete": session_data["sections"].get(3, None) and session_data["sections"][3].is_section_complete(),
+        "section4_complete": session_data["sections"].get(4, None) and session_data["sections"][4].is_section_complete(),
         "bo_id": bo_id
     }
 
@@ -593,7 +648,8 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
             },
             "section1_text": "",
             "section2_text": "",
-            "section3_text": ""
+            "section3_text": "",
+            "section4_text": ""
         }
 
     session_data = sessions[session_id]
@@ -613,6 +669,11 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
         # Importar SECTION3_QUESTIONS para validação
         from backend.state_machine_section3 import SECTION3_QUESTIONS
         valid_steps = SECTION3_QUESTIONS
+    elif step.startswith("4."):
+        state_machine = session_data["sections"][4]
+        # Importar SECTION4_QUESTIONS para validação
+        from backend.state_machine_section4 import SECTION4_QUESTIONS
+        valid_steps = SECTION4_QUESTIONS
     else:
         raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
 
@@ -626,6 +687,8 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
         is_valid, error_message = ResponseValidatorSection2.validate(step, update_request.message)
     elif step.startswith("3."):
         is_valid, error_message = ResponseValidatorSection3.validate(step, update_request.message)
+    elif step.startswith("4."):
+        is_valid, error_message = ResponseValidatorSection4.validate(step, update_request.message)
     else:
         raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
 

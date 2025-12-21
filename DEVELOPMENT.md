@@ -1,6 +1,6 @@
 # 🛠️ Guia de Desenvolvimento - BO Inteligente
 
-**Versão:** v0.7.0
+**Versão:** v0.8.0
 **Última atualização:** 21/12/2025
 
 Este documento serve como memória institucional do projeto, documentando decisões arquiteturais, comandos essenciais e guias de debugging para desenvolvedores.
@@ -275,44 +275,44 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 3. Rodar testes E2E com Playwright (gera screenshots + vídeo)
    ```bash
    # Terminal 3 (com backend + frontend rodando)
-   python tests/e2e/automate_release.py --version 0.7.0 --no-video
+   python tests/e2e/automate_release.py --version 0.8.0 --no-video
    # OU com vídeo (mais demorado, mas recomendado)
-   python tests/e2e/automate_release.py --version 0.7.0
+   python tests/e2e/automate_release.py --version 0.8.0
+   # Fast-start (apenas Seção 4)
+   python tests/e2e/automate_release.py --version 0.8.0 --start-section 4 --no-video
    ```
 
 #### Passo 2: Atualizar Versão (CRÍTICO!)
 Atualizar versão em **TODOS** estes locais (não é opcional):
 
 **Backend:**
-- `backend/main.py` linha 34: `APP_VERSION = "0.7.0"`
+- `backend/main.py` linha 34: `APP_VERSION = "0.8.0"`
 
 **Frontend:**
-- `docs/index.html` linha 134: `BO Inteligente v0.7.0` (buscar e substituir)
-- `docs/index.html` linha 461: `version: '0.7.0'`
+- `docs/index.html`: buscar por `version:` (constante no JS)
 
 **Documentação:**
-- `README.md` linhas 19, 248: versão
-- `CHANGELOG.md` linhas 1-45: versão e release notes
-- `DEVELOPMENT.md` linhas 3: versão
-- `docs/SETUP.md` linhas 3: versão
-- `docs/API.md` linhas 3, 56, 503, 511, 548: versão
-- `docs/ARCHITECTURE.md` linhas 1, etc: versão
-- `docs/ROADMAP.md` linhas 3, 10: versão e data
-- `SECAO3_IMPLEMENTATION_STATUS.md` linhas 1-4: versão e data
-- `docs/TESTING.md` linhas 3: versão
+- `README.md`: versão no rodapé
+- `CHANGELOG.md`: versão e release notes
+- `DEVELOPMENT.md` linha 3: versão
+- `docs/SETUP.md` linha 3: versão
+- `docs/API.md` linha 3: versão
+- `docs/ARCHITECTURE.md` linha 3: versão
+- `docs/ROADMAP.md` linha 3: versão
+- `docs/TESTING.md` linha 3: versão
 
 **Dica:** Use find/replace no editor:
 ```
-Buscar: v0.6.4
-Substituir: v0.7.0
-Buscar: 0\.6\.4 (em JSON)
-Substituir: 0.7.0
+Buscar: v0.7.x
+Substituir: v0.8.0
+Buscar: 0\.7\.x (em JSON)
+Substituir: 0.8.0
 ```
 
 #### Passo 3: Commit e Push
 ```bash
 git add -A
-git commit -m "Release v0.7.0: Seção 3 (Campana) com testes E2E"
+git commit -m "Release v0.8.0: Seção 4 (Entrada em Domicílio)"
 git push origin main
 ```
 
@@ -323,7 +323,7 @@ git push origin main
 #### Passo 5: Validação em Produção
 - Testar em produção com casos de teste reais
 - Verificar se backend acordou (primeira requisição pode demorar 30-60s)
-- Validar gerações de texto para as 3 seções
+- Validar gerações de texto para as 4 seções
 
 ### Variáveis de Ambiente
 

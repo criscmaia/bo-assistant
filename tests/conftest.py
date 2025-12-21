@@ -59,6 +59,17 @@ def section3_answers() -> Dict:
     }
 
 @pytest.fixture
+def section4_answers() -> Dict:
+    """Respostas válidas para Seção 4 (todas as 5 perguntas)"""
+    return {
+        "4.1": "SIM",
+        "4.2": "Vimos o suspeito arremessando uma sacola branca para dentro da casa enquanto corria em direção ao imóvel nº 120 da Rua das Acácias",
+        "4.3": "O Sargento Silva viu o suspeito entrando na casa com a sacola e manteve contato visual ininterrupto com o alvo",
+        "4.4": "Perseguição contínua: a equipe iniciou acompanhamento no final da Rua das Acácias e manteve contato visual ininterrupto até o interior da residência",
+        "4.5": "O Sargento Silva entrou primeiro pela porta principal que estava aberta. O Cabo Almeida ficou na contenção do portão monitorando saídas. O Soldado Faria entrou em seguida pela cozinha e localizou a sacola branca embaixo da pia contendo invólucros de cocaína."
+    }
+
+@pytest.fixture
 def send_answer(api_base_url):
     """Helper para enviar resposta ao endpoint /chat"""
     def _send(session_id: str, message: str, current_section: int, llm_provider: str = "gemini"):

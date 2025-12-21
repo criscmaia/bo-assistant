@@ -1,8 +1,28 @@
-# Changelog v0.7.1
+# Changelog v0.8.0
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 em Andamento - Seções 3-8 (v0.7.0+)
+
+#### v0.8.0 (Dez 2025) - Seção 4: Entrada em Domicílio
+- [x] **Seção 4: Entrada em Domicílio** - 5 perguntas (4.1 a 4.5)
+- [x] State machine com lógica condicional (pula se não houve entrada em domicílio)
+- [x] Validador com graduação militar obrigatória em 4.3 (mesma regra de 3.3)
+- [x] Validador de justa causa (4.2) - mínimo 40 caracteres com evidência sensorial ANTES da entrada
+- [x] Validador de tipo de ingresso (4.4) - perseguição contínua, autorização ou flagrante visual
+- [x] Validador de ações policiais (4.5) - mínimo 50 caracteres com descrição detalhada
+- [x] Geração de texto via LLM (Gemini + Groq) com fundamento jurídico STF
+- [x] Frontend completo com cor temática laranja (vs roxo da S3)
+- [x] Testes unitários (13 testes) e de integração (7 testes) - 100% passando
+- [x] E2E automation com --start-section 4 para fast-start testing
+- [x] Documentação (TESTING.md, API.md, CHANGELOG.md, README.md)
+- [x] Seção 4 marca BO como completo (mudado de Seção 3)
+
+#### v0.7.1 (Dez 2025) - Fast-Start para E2E Tests
+- [x] Flag `--start-section` para testes rápidos (economia de 70% de tempo)
+- [x] Método `prepare_sections_via_api()` para restaurar seções anteriores
+- [x] Método `inject_session_and_restore()` para injetar estado sem modal
+- [x] Suporte a --start-section 4 para teste direto da Seção 4
 
 #### v0.7.0 (Dez 2025) - Seção 3: Campana
 - [x] **Seção 3: Campana (Vigilância Velada)** - 8 perguntas (3.1 a 3.8)

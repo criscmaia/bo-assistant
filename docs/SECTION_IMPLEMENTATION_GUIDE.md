@@ -1,10 +1,12 @@
 # Guia de Implementação de Novas Seções
 
-**Versão:** 1.0
+**Versão:** 2.0
 **Última atualização:** 21/12/2025
-**Baseado em:** Experiência da implementação da Seção 3 (Campana)
+**Baseado em:** Experiência das implementações das Seções 3 (Campana) e 4 (Entrada em Domicílio)
 
 Este documento fornece instruções detalhadas para implementar qualquer nova seção do BO Inteligente, otimizado para uso com Claude Haiku (60% das tarefas) e Sonnet (40% das tarefas).
+
+> **Lição Aprendida (Seção 4):** A implementação da Seção 4 revelou que alguns pontos críticos no frontend (barra de progresso, restauração de rascunho) requerem modificações em MÚLTIPLOS locais. Este guia foi atualizado com checklists específicos para evitar esses bugs.
 
 ---
 
@@ -17,6 +19,7 @@ Este documento fornece instruções detalhadas para implementar qualquer nova se
 5. [Workflow de Testes E2E](#5-workflow-de-testes-e2e)
 6. [Bugs Comuns e Soluções](#6-bugs-comuns-e-soluções)
 7. [Validação Final](#7-validação-final)
+8. [Lições Aprendidas (Seção 4)](#8-lições-aprendidas-seção-4)
 
 ---
 
@@ -306,42 +309,111 @@ def _generate_sectionN_with_groq(self, section_data: Dict) -> str:
 
 ### 4.3 Modificar `docs/index.html`
 
-**Pontos de modificação:**
+> ⚠️ **ATENÇÃO:** O frontend possui MÚLTIPLOS locais que precisam ser atualizados. Use o checklist abaixo para garantir que nenhum seja esquecido. (Lição da Seção 4)
 
-1. **Constante de perguntas:**
+**Checklist Completo de Modificações no Frontend:**
+
+#### 4.3.1 Constantes e Estruturas (INÍCIO DO ARQUIVO)
+
+| # | O que modificar | Buscar por | Ação |
+|---|-----------------|------------|------|
+| 1 | Constante de perguntas | `SECTION4_QUESTIONS` | Criar `SECTIONN_QUESTIONS` logo após |
+| 2 | ALL_SECTIONS | `const ALL_SECTIONS` | Adicionar entrada para seção N |
+
 ```javascript
 const SECTIONN_QUESTIONS = {
     'N.1': 'Resumo da pergunta',
     'N.2': 'Resumo da pergunta',
     // ...
 };
+
+const ALL_SECTIONS = {
+    // ... seções anteriores
+    N: { emoji: '📋', name: '[Nome]', questions: SECTIONN_QUESTIONS }
+};
 ```
 
-2. **ALL_SECTIONS:**
-```javascript
-N: { emoji: '📋', name: '[Nome]', questions: SECTIONN_QUESTIONS }
-```
+#### 4.3.2 Funções Principais (CRIAR NOVAS)
 
-3. **Função startSectionN():**
-- Similar a startSection3()
-- Chamada após seção N-1 completa
+| # | Função | Modelo | Cor Sugerida |
+|---|--------|--------|--------------|
+| 3 | `startSectionN()` | `startSection4()` | Escolher cor diferente das anteriores |
+| 4 | `updateSidebarForSectionN()` | `updateSidebarForSection4()` | - |
 
-4. **Função updateSidebarForSectionN():**
-- Atualizar sidebar com steps N.x
+#### 4.3.3 Função `handleBotResponse()` - 4 LOCAIS
 
-5. **handleBotResponse:**
-- Adicionar lógica para exibir botão "Iniciar Seção N"
-- Adicionar container de texto gerado para seção N
+| # | Local | Buscar por | Ação |
+|---|-------|------------|------|
+| 5 | Cálculo de progresso | `"Calcular progresso baseado na seção atual"` | Adicionar `else if (currentSection === N)` |
+| 6 | Mensagem de conclusão | `"Seção 4 completa!"` | Adicionar mensagem para seção N |
+| 7 | Criação de card de transição | `"currentSection === 4 && !boCompleted"` | Adicionar card para seção N (SE não for última) |
+| 8 | Marcar boCompleted | `"boCompleted = true"` | MOVER para nova seção se ela for a última |
 
-6. **saveDraft/restoreDraft:**
-- Incluir answers N.x no draft
+#### 4.3.4 Função `restoreFromDraft()` - 5 LOCAIS
+
+| # | Local | Buscar por | Ação |
+|---|-------|------------|------|
+| 9 | Restaurar textos gerados | `"draft.generatedTexts.section4"` | Adicionar `section N` |
+| 10 | Atualizar sidebar | `"updateSidebarForSection4"` | Adicionar `else if (currentSection === N)` |
+| 11 | Contagem de respostas | `"section4Count"` | Criar `sectionNCount` |
+| 12 | Cálculo de progresso | `"updateSidebarProgress(section4Count"` | Adicionar `else if (currentSection === N)` |
+| 13 | Próxima pergunta | `"SECTION4_QUESTIONS[currentQuestionStep]"` | Adicionar `else if (currentSection === N)` |
+| 14 | Botão de transição | `"btn-start-section4"` | Criar botão para seção N |
+| 15 | Seção completa | `"currentSection === 4"` no bloco de "Seção completa" | Tratar caso seção N completa |
+
+#### 4.3.5 Funções de Draft
+
+| # | Local | Buscar por | Ação |
+|---|-------|------------|------|
+| 16 | saveDraft | `"section4"` em saveDraft | Adicionar `sectionN` |
+| 17 | restoreDraft | `"section4"` em restoreDraft | Adicionar tratamento para `sectionN` |
+
+#### 4.3.6 Função `updateHeaderSection()`
+
+| # | Local | Buscar por | Ação |
+|---|-------|------------|------|
+| 18 | Header | `"Seção 4 - Entrada em Domicílio"` | Adicionar `else if (currentSection === N)` |
+
+#### 4.3.7 Função `copyAllSections()`
+
+| # | Local | Buscar por | Ação |
+|---|-------|------------|------|
+| 19 | Copiar texto | `"section4-text"` | Adicionar seletor para seção N |
+
+**Total: 19 pontos de modificação no frontend**
 
 ### 4.4 Modificar `tests/e2e/automate_release.py`
 
 **Adicionar:**
 - `run_sectionN_flow()` - Fluxo de preenchimento da seção N
+- `run_mobile_sectionN_flow()` - Fluxo mobile (se aplicável)
 - Screenshots específicos da seção N
 - Suporte a `--start-section N`
+
+> ⚠️ **Lição da Seção 4:** O E2E pode falhar por timeout se o input estiver desabilitado. Sempre aguarde o input ficar habilitado antes de preencher:
+
+```python
+# Em fill_and_send() e em cada run_sectionN_flow()
+await page.wait_for_selector('#user-input:not([disabled])', timeout=30000)
+```
+
+### 4.5 Atualizar `prepare_sections_via_api()` (se usando --start-section)
+
+Se a nova seção suporta fast-start testing, atualizar o método que prepara seções anteriores via API:
+
+```python
+# Em prepare_sections_via_api()
+if start_section >= N:
+    # Preencher seção N-1 via API
+    response = requests.post(f"{api_url}/start_section/{N-1}", json={"session_id": session_id})
+    for step, answer in sectionN_minus_1_answers.items():
+        requests.post(f"{api_url}/chat", json={
+            "session_id": session_id,
+            "message": answer,
+            "current_section": N-1,
+            "llm_provider": "groq"
+        })
+```
 
 ---
 
@@ -466,6 +538,97 @@ if (data.section_complete && data.current_section === N-1) {
 document.getElementById('sectionN-text-container').innerHTML = data.sectionN_text;
 ```
 
+### Bug 6: Barra de progresso mostra "undefined/undefined" (NOVO - Seção 4)
+
+**Sintoma:** Durante a nova seção, a barra de progresso exibe "undefined/undefined"
+
+**Causa:** Faltam TRÊS pontos de atualização no frontend para cálculo de progresso
+
+**Solução - 3 locais obrigatórios em `index.html`:**
+
+```javascript
+// LOCAL 1: Em handleBotResponse() - Cálculo de progresso durante chat
+// Buscar: "Calcular progresso baseado na seção atual"
+} else if (currentSection === N) {
+    progress = data.current_step === 'complete' ? Y : parseInt(data.current_step.split('.')[1]);
+    totalQuestions = Y;  // Y = número de perguntas da seção N
+}
+
+// LOCAL 2: Em restoreFromDraft() - Cálculo de progresso ao restaurar
+// Buscar: "Atualizar progresso"
+const sectionNCount = Object.keys(answersState).filter(s => s.startsWith('N.')).length;
+if (currentSection === N) {
+    updateSidebarProgress(sectionNCount, Y);
+}
+
+// LOCAL 3: Em restoreFromDraft() - Obter próxima pergunta
+// Buscar: "Mostrar próxima pergunta"
+} else if (currentSection === N) {
+    nextQuestion = SECTIONN_QUESTIONS[currentQuestionStep];
+}
+```
+
+### Bug 7: Botão "Iniciando..." persiste após BO completo (NOVO - Seção 4)
+
+**Sintoma:** Ao completar a última seção implementada, o botão de transição da seção anterior permanece visível com texto "Iniciando..."
+
+**Causa:** Cards de transição são criados sem verificar se o BO já está completo
+
+**Solução:**
+```javascript
+// Em handleBotResponse() - Onde os cards de transição são criados
+// Adicionar verificação `&& !boCompleted` em TODAS as condições
+
+// ❌ ERRADO:
+if (currentSection === 2) {
+    // Criar card de transição para Seção 3
+}
+
+// ✅ CORRETO:
+if (currentSection === 2 && !boCompleted) {
+    // Criar card de transição para Seção 3
+}
+```
+
+### Bug 8: Restauração de rascunho não suporta nova seção (NOVO - Seção 4)
+
+**Sintoma:** Ao restaurar rascunho quando a seção N-1 está completa, não aparece o botão para iniciar a seção N
+
+**Causa:** Função `restoreFromDraft()` não inclui lógica para criar botão da nova seção
+
+**Solução:**
+```javascript
+// Em restoreFromDraft() - Na seção "Seção completa"
+// Adicionar APÓS o bloco da seção N-1:
+
+} else if (currentSection === N-1 && !document.getElementById('btn-start-sectionN')) {
+    disableInput();
+
+    // Criar botão para iniciar Seção N
+    const sectionNButtonDiv = document.createElement('div');
+    sectionNButtonDiv.id = 'sectionN-button-container';
+    sectionNButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-[COR]-50 to-[COR]-100 border-2 border-[COR]-200 rounded-xl text-center';
+    sectionNButtonDiv.innerHTML = `
+        <h3 class="text-xl font-bold text-[COR]-900 mb-2">[EMOJI] Próxima Etapa: [Nome]</h3>
+        <p class="text-gray-700 mb-4">[Descrição breve]</p>
+        <button id="btn-start-sectionN" class="px-6 py-2 bg-[COR]-600 hover:bg-[COR]-700 text-white font-semibold rounded-lg transition-colors">
+            ▶️ Iniciar Seção N
+        </button>
+    `;
+    generatedSectionsContainer.parentElement.appendChild(sectionNButtonDiv);
+    document.getElementById('btn-start-sectionN').addEventListener('click', startSectionN);
+
+    showToast('✅ Rascunho restaurado! Seção N-1 completa.');
+
+// E adicionar tratamento para quando a seção N está completa:
+} else if (currentSection === N) {
+    disableInput();
+    showToast('✅ Rascunho restaurado! BO completo.');
+    boCompleted = true;
+    console.log('[BO] BO marcado como completo (restaurado)');
+}
+```
+
 ---
 
 ## 7. Validação Final
@@ -525,6 +688,47 @@ document.getElementById('sectionN-text-container').innerHTML = data.sectionN_tex
 2. Adicionar entrada no `CHANGELOG.md`
 3. Atualizar status no `README.md`
 4. Commit com mensagem: `feat: Implementar Seção N - [Nome] (vX.Y.Z)`
+
+---
+
+## 8. Lições Aprendidas (Seção 4)
+
+### 8.1 O que funcionou bem
+
+1. **Estrutura modular do backend** - State machine e validator como arquivos separados facilitam copiar/adaptar
+2. **Testes unitários primeiro** - Rodar `pytest tests/unit/test_sectionN.py` antes de integrar pega erros cedo
+3. **Flag `--start-section`** - Economiza 70% do tempo de E2E testing ao pular seções anteriores
+4. **Cores temáticas** - Cada seção com cor diferente ajuda UX (azul→roxo→laranja→...)
+
+### 8.2 O que deu problema
+
+| Problema | Causa Raiz | Tempo Perdido | Prevenção |
+|----------|------------|---------------|-----------|
+| Barra de progresso "undefined/undefined" | Faltou adicionar seção em 3 locais do frontend | ~30 min | Usar checklist de 19 pontos |
+| Botão "Iniciando..." persistente | Criava card de transição sem verificar boCompleted | ~20 min | Sempre verificar `&& !boCompleted` |
+| Restauração de rascunho incompleta | Faltou tratar nova seção em restoreFromDraft | ~15 min | Verificar TODOS os casos de seção |
+| E2E timeout | Input desabilitado durante backend processing | ~45 min | Sempre aguardar `#user-input:not([disabled])` |
+
+### 8.3 Recomendações para Próximas Seções
+
+1. **Execute o checklist de 19 pontos** - Não confie na memória; marque cada item
+2. **Teste manualmente ANTES do E2E** - Inicie backend/frontend localmente e complete a seção
+3. **Verifique restauração de rascunho** - Complete parcialmente, recarregue a página, verifique
+4. **Mate processos Python antigos** - `taskkill /F /IM python.exe` antes de rodar E2E
+5. **Use --no-video para testes rápidos** - Vídeo é útil para debug, mas lento para iteração
+
+### 8.4 Esquema de Cores Sugerido
+
+| Seção | Cor | Tailwind Classes |
+|-------|-----|------------------|
+| 1 | Verde | `green-*` |
+| 2 | Azul | `blue-*` |
+| 3 | Roxo | `purple-*` |
+| 4 | Laranja | `orange-*` |
+| 5 | Rosa | `pink-*` ou `rose-*` |
+| 6 | Ciano | `cyan-*` ou `teal-*` |
+| 7 | Amarelo | `yellow-*` ou `amber-*` |
+| 8 | Vermelho | `red-*` |
 
 ---
 

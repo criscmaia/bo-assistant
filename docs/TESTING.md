@@ -1,6 +1,6 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.7.1
+**Versão:** v0.8.0
 **Última atualização:** 21/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
@@ -58,18 +58,21 @@ pytest tests/unit
 # Integration tests (médio - ~30s, precisa de backend rodando)
 pytest tests/integration
 
-# E2E screenshots - MODO COMPLETO (longo - ~5min, precisa backend + frontend)
-python tests/e2e/automate_release.py --version v0.7.1
+# E2E screenshots - MODO COMPLETO (longo - ~8min, precisa backend + frontend)
+python tests/e2e/automate_release.py --version v0.8.0
 
-# E2E screenshots - MODO RÁPIDO (começar da Seção 3)
-# Preenche Seções 1 e 2 via API, tira screenshots apenas da Seção 3
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video
+# E2E screenshots - MODO RÁPIDO (começar da Seção 4)
+# Preenche Seções 1, 2 e 3 via API, tira screenshots apenas da Seção 4
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 4 --no-video
+
+# E2E screenshots - Começar da Seção 3
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 3 --no-video
 
 # E2E screenshots - Começar da Seção 2
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 2 --no-video
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 2 --no-video
 
 # E2E screenshots - Com vídeo (precisa MAIS tempo)
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 3
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 4
 
 # Todos os testes pytest juntos
 pytest
@@ -96,12 +99,14 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 ### Cobertura de Testes
 
 **Áreas Críticas:**
-- ✅ Validação de respostas (Seção 1 e 2)
+- ✅ Validação de respostas (Seção 1, 2, 3 e 4)
 - ✅ Geração de texto (Gemini e Groq)
 - ✅ Sistema de rascunhos (localStorage)
-- ✅ Fluxo multi-seção (Seção 1 → Seção 2)
+- ✅ Fluxo multi-seção (Seção 1 → Seção 2 → Seção 3 → Seção 4)
 - ✅ Edição de respostas anteriores
 - ✅ Endpoint `/sync_session` (restauração de rascunhos)
+- ✅ Validação de graduação militar (Seções 3 e 4)
+- ✅ Validação de justa causa (Seção 4)
 - ⏳ Casos de erro (rate limit, timeout)
 - ⏳ Navegação mobile (responsividade)
 
@@ -259,9 +264,9 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 
 ---
 
-### Teste 9: Fluxo Completo (Seção 1 + 2 + 3)
+### Teste 9: Fluxo Completo (Seção 1 + 2 + 3 + 4)
 
-**Objetivo:** Validar fluxo completo com todas as três seções.
+**Objetivo:** Validar fluxo completo com todas as quatro seções.
 
 **Passos:**
 1. Completar Seção 1 (perguntas 1.1 a 1.6)
@@ -271,31 +276,79 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 5. Clicar em "Iniciar Seção 3"
 6. Responder pergunta 3.1 com "SIM"
 7. Completar Seção 3 (perguntas 3.2 a 3.8)
+8. Clicar em "Iniciar Seção 4"
+9. Responder pergunta 4.1 com "SIM"
+10. Completar Seção 4 (perguntas 4.2 a 4.5)
 
 **Resultado Esperado:**
-- Todas as três seções aparecem no container de textos gerados
-- Seções 1, 2 completadas aparecem como cards com checkmark na sidebar
+- Todas as quatro seções aparecem no container de textos gerados
+- Seções 1, 2, 3 completadas aparecem como cards com checkmark na sidebar
 - Texto gerado em 3ª pessoa para cada seção
-- Botão "Copiar BO Completo" copia todas as três seções
+- Botão "Copiar BO Completo" copia todas as quatro seções
 - BO marcado como completo
 
 ---
 
-### Teste 10: Pular Seção 3 (Sem Campana)
+### Teste 10: Pular Seção 4 (Sem Entrada em Domicílio)
 
-**Objetivo:** Validar lógica condicional da Seção 3.
+**Objetivo:** Validar lógica condicional da Seção 4.
 
 **Passos:**
-1. Completar Seção 1 e 2
-2. Clicar em "Iniciar Seção 3"
-3. Responder pergunta 3.1 com "NÃO"
+1. Completar Seções 1, 2 e 3
+2. Clicar em "Iniciar Seção 4"
+3. Responder pergunta 4.1 com "NÃO"
 
 **Resultado Esperado:**
 - Texto gerado imediatamente
-- Mensagem: "Não se aplica (não houve campana antes da abordagem)"
-- Seção 3 marcada como completa
-- Sem perguntas adicionais (3.2-3.8)
+- Mensagem: "Não se aplica (não houve entrada em domicílio)"
+- Seção 4 marcada como completa
+- Sem perguntas adicionais (4.2-4.5)
 - BO marcado como completo
+
+---
+
+### Teste 11: Validação de Justa Causa (Seção 4, Pergunta 4.2)
+
+**Objetivo:** Validar obrigatoriedade de descrição detalhada da justa causa.
+
+**Passos:**
+1. Completar Seções 1, 2 e 3
+2. Iniciar Seção 4 e responder 4.1 com "SIM"
+3. Ao chegar em 4.2, responder sem detalhes:
+   - "Viu algo"
+   - "Suspeito dentro"
+   - "Tinha droga lá"
+
+**Resultado Esperado:**
+- Mensagem de erro: "Descreva o que foi visto/ouvido/sentido ANTES da entrada..."
+- Resposta não aceita
+- Pergunta permanece ativa
+
+**Respostas Válidas:**
+- "Vimos o suspeito arremessando uma sacola branca para dentro da casa enquanto corria"
+- "Ouvimos sons de descarga no banheiro, compatíveis com eliminação de drogas"
+- "Sentimos forte odor de maconha vindo da janela aberta"
+
+---
+
+### Teste 12: Validação de Ações Policiais (Seção 4, Pergunta 4.5)
+
+**Objetivo:** Validar descrição detalhada das ações de cada policial.
+
+**Passos:**
+1. Chegar na pergunta 4.5
+2. Tentar responder com generalização:
+   - "Entraram"
+   - "Fizeram busca"
+   - "Encontraram drogas"
+
+**Resultado Esperado:**
+- Mensagem de erro: "Descreva ação por ação: quem entrou primeiro, por onde, quem ficou na contenção..."
+- Resposta rejeitada
+
+**Respostas Válidas:**
+- "O Sargento Silva entrou primeiro pela porta. O Cabo Almeida ficou na contenção. O Soldado Pires procurou dentro"
+- "O policial A entrou pela frente, B ficou observando a porta dos fundos, C revistou o interior localizando os entorpecentes"
 
 ---
 
@@ -481,6 +534,41 @@ Sim, ao perceber a movimentação policial, o homem de vermelho correu para o be
 
 ---
 
+### Respostas Validadas - Seção 4
+
+**4.1 - Houve entrada em domicílio?**
+```
+SIM
+```
+**Aceita:** SIM, SÃO, sim, Sim, houve entrada, etc.
+**Pulará seção se:** NÃO, NAO, NÃO houve, Não realizou, etc.
+
+**4.2 - O que foi visto/ouvido/sentido ANTES do ingresso?**
+```
+Vimos o suspeito arremessando uma sacola branca para dentro da casa enquanto corria em direção ao imóvel nº 120 da Rua das Acácias
+```
+**Obrigatório:** Descrição concreta da justa causa (sensorial: visualização, audição, olfato). **ANTES da entrada**. Mín. 40 caracteres.
+
+**4.3 - Qual policial presenciou e o que exatamente viu?**
+```
+O Sargento Silva viu o suspeito entrando na casa com a sacola e manteve contato visual ininterrupto com o alvo
+```
+**Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + o que viu/ouviu. Mín. 30 caracteres.
+
+**4.4 - Como ocorreu o ingresso?**
+```
+Perseguição contínua: a equipe iniciou acompanhamento no final da Rua das Acácias e manteve contato visual ininterrupto até o interior da residência
+```
+**Obrigatório:** Tipo de ingresso: perseguição contínua (sem perda de contato), autorização do morador, ou flagrante visual/auditivo. Mín. 30 caracteres.
+
+**4.5 - Descreva a ação de cada policial**
+```
+O Sargento Silva entrou primeiro pela porta principal que estava aberta. O Cabo Almeida ficou na contenção do portão monitorando saídas. O Soldado Faria entrou em seguida pela cozinha e localizou a sacola branca embaixo da pia contendo invólucros de cocaína.
+```
+**Obrigatório:** Ação por ação: quem entrou primeiro, por onde, quem ficou na contenção/fora, o que cada um visualizou ou fez. Mín. 50 caracteres.
+
+---
+
 ## 🤖 Automação de Screenshots
 
 ### Objetivo
@@ -495,37 +583,38 @@ Capturar screenshots e vídeo do frontend automaticamente para documentação de
 | [test_scenarios.json](../tests/e2e/test_scenarios.json) | Configuração de cenários e respostas |
 | [tests/e2e/README.md](../tests/e2e/README.md) | Documentação detalhada |
 
-### Flag `--start-section` (Novo em v0.7.1)
+### Flag `--start-section` (v0.7.1+)
 
 Permite começar a automação a partir de uma seção específica, economizando tempo e gerando screenshots apenas das seções desejadas.
 
 **Sintaxe:**
 ```bash
-python tests/e2e/automate_release.py --version v0.7.1 --start-section <numero> [--no-video]
+python tests/e2e/automate_release.py --version v0.8.0 --start-section <numero> [--no-video]
 ```
 
 **Parâmetros:**
-- `--start-section <numero>` - Número da seção (1, 2 ou 3)
+- `--start-section <numero>` - Número da seção (1, 2, 3 ou 4)
   - `1`: Começa no zero (padrão)
   - `2`: Preenche Seção 1 via API, começa screenshots da Seção 2
   - `3`: Preenche Seções 1 e 2 via API, começa screenshots da Seção 3
+  - `4`: Preenche Seções 1, 2 e 3 via API, começa screenshots da Seção 4
 - `--no-video` - Não grava vídeo (mais rápido)
-- `--version v0.7.1` - Versão para nomear pasta de screenshots
+- `--version v0.8.0` - Versão para nomear pasta de screenshots
 
 **Exemplos de Uso:**
 
 ```bash
-# Começa do zero (Seção 1) - COMPLETO (~5 min com vídeo)
-python tests/e2e/automate_release.py --version v0.7.1
+# Começa do zero (Seção 1) - COMPLETO (~8 min com vídeo)
+python tests/e2e/automate_release.py --version v0.8.0
 
-# Apenas Seção 3 (~2 min sem vídeo) - MAIS RÁPIDO
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 3 --no-video
+# Apenas Seção 4 (~1.5 min sem vídeo) - MAIS RÁPIDO
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 4 --no-video
 
-# Seções 2 e 3 (~3 min sem vídeo)
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 2 --no-video
+# Apenas Seção 3 (~2 min sem vídeo)
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 3 --no-video
 
-# Apenas Seção 3 com vídeo (~3 min)
-python tests/e2e/automate_release.py --version v0.7.1 --start-section 3
+# Seções 2, 3 e 4 (~4 min sem vídeo)
+python tests/e2e/automate_release.py --version v0.8.0 --start-section 2 --no-video
 ```
 
 **Como Funciona:**

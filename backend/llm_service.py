@@ -653,3 +653,197 @@ Gere APENAS o texto da Seção 3 agora (2-3 parágrafos fluidos):"""
                 raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
 
             raise Exception(f"Erro ao gerar texto da Seção 3 com Groq: {error_msg}")
+
+    # ============================================================================
+    # SEÇÃO 4: ENTRADA EM DOMICÍLIO
+    # ============================================================================
+
+    def _build_prompt_section4(self, section_data: Dict[str, str]) -> str:
+        """
+        Constrói prompt para Seção 4 (Entrada em Domicílio).
+
+        Fonte:
+        - materiais-claudio/_04_entrada_em_domicilio.txt
+        - materiais-claudio/_regras_gerais_-_gpt_trafico.txt (linhas 54-60)
+        """
+
+        # Verifica se seção foi pulada (não houve entrada em domicílio)
+        if section_data.get("4.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""  # Não gerar texto
+
+        # Extrair respostas
+        justa_causa = section_data.get("4.2", "Não informado")
+        policial_presenciou = section_data.get("4.3", "Não informado")
+        tipo_ingresso = section_data.get("4.4", "Não informado")
+        acoes_policiais = section_data.get("4.5", "Não informado")
+
+        # Construir prompt baseado no material do Claudio
+        prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 4 (Entrada em Domicílio) do BO de tráfico de drogas.
+
+REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
+
+1. NUNCA invente informações não fornecidas pelo usuário
+2. Use APENAS os dados das respostas fornecidas abaixo
+3. Escreva em terceira pessoa, tempo passado
+4. Use linguagem técnica, objetiva e norma culta
+5. A JUSTA CAUSA deve vir ANTES da entrada (STF - inviolabilidade de domicílio)
+6. Descreva FATOS CONCRETOS observados (não impressões subjetivas)
+7. Gere texto em 2-3 parágrafos fluidos
+8. NÃO use juridiquês, gerúndio ou termos vagos
+
+FUNDAMENTO JURÍDICO (STF):
+
+O ingresso em domicílio sem mandado judicial só é legítimo quando houver FUNDADAS RAZÕES, devidamente justificadas, de que ocorre flagrante delito no interior do imóvel. A justa causa deve existir ANTES da entrada. Não basta alegar que "encontrou drogas depois".
+
+ELEMENTOS CONCRETOS EXIGIDOS (pelo menos um):
+- Visualização de ilícito em andamento (pela janela, porta)
+- Perseguição contínua sem perda de contato visual
+- Flagrante auditivo (sons de embalagem, descargas)
+- Odor intenso característico
+- Autorização expressa do morador
+
+DADOS FORNECIDOS PELO USUÁRIO:
+
+- O que foi visto/ouvido/sentido ANTES do ingresso: {justa_causa}
+- Qual policial presenciou e o que viu: {policial_presenciou}
+- Como ocorreu o ingresso: {tipo_ingresso}
+- Ação de cada policial: {acoes_policiais}
+
+ESTRUTURA NARRATIVA (seguir esta ordem):
+
+1. Justa causa ANTERIOR: descrever O QUE foi visto/ouvido/sentido ANTES de entrar
+2. Quem presenciou: qual policial viu e o que exatamente observou
+3. Tipo de ingresso: perseguição contínua, autorização ou flagrante visual/auditivo
+4. Ações dos policiais: quem entrou primeiro, por onde, quem ficou na contenção, o que encontraram
+
+EXEMPLOS CORRETOS:
+
+✅ Exemplo 1 - Perseguição contínua:
+"Durante patrulhamento na Rua São Miguel, a equipe visualizou um indivíduo entregando pequenos invólucros a terceiros e recebendo dinheiro. Ao perceber a presença policial, o suspeito correu, adentrando o imóvel nº 120. O Sargento Silva manteve contato visual ininterrupto com o alvo desde a rua até o interior da residência. A guarnição iniciou perseguição imediata, acompanhando-o até a cozinha, onde o autor tentou esconder uma sacola embaixo da pia. O Sargento Silva entrou primeiro pela porta principal que estava aberta. O Cabo Almeida ficou na contenção do portão. No interior da sacola, foram localizadas diversas porções de substância análoga à cocaína."
+
+✅ Exemplo 2 - Flagrante visual/auditivo:
+"Durante incursão pelo Beco das Palmeiras, os militares perceberam forte odor característico de maconha vindo do interior do imóvel nº 88. O Sargento Almeida, ao olhar pela janela que dava para o beco, visualizou um homem embalando invólucros sobre a mesa da sala. Diante do flagrante delito observado antes da entrada, o Sargento Almeida determinou o ingresso imediato. O Sargento Almeida entrou primeiro pela porta lateral. O Soldado Pires permaneceu na contenção externa. Foram arrecadadas diversas porções de maconha, balança de precisão e dinheiro fracionado sobre a mesa."
+
+✅ Exemplo 3 - Autorização do morador:
+"No local, o suspeito franqueou voluntariamente a entrada dos militares após identificação da equipe, autorizando expressamente a vistoria no interior da residência. Na presença do morador, o Cabo Silva localizou uma mochila contendo tabletes de substância análoga à maconha sobre o guarda-roupa do quarto."
+
+❌ ERROS A EVITAR (causam NULIDADE):
+
+• "Entramos por ser local conhecido por tráfico" (sem justa causa anterior)
+• "O suspeito correu pra dentro" (sem ver ilícito antes da entrada)
+• "Havia denúncia de drogas" (denúncia não é justa causa sem constatação direta)
+• "Entramos e encontramos drogas" (justa causa posterior não vale)
+• "Comportamento nervoso" (sem fato concreto anterior)
+
+IMPORTANTE:
+
+- A justa causa (4.2) É O PONTO CENTRAL - deve ser CLARA e ANTERIOR à entrada
+- Sempre explicitar: viu O QUÊ, ouviu O QUÊ, sentiu O QUÊ (odor de quê)
+- Se alguma resposta estiver como "Não informado", OMITA aquela informação
+- Dois espaços entre frases
+- Manter coerência temporal: antes de entrar → ingresso → o que foi encontrado
+
+Gere APENAS o texto da Seção 4 agora (2-3 parágrafos fluidos):"""
+
+        return prompt
+
+    def generate_section4_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+        """
+        Gera texto narrativo da Seção 4 (Entrada em Domicílio).
+
+        Args:
+            section_data: Dicionário com respostas {step: answer}
+            provider: "gemini", "groq", "claude" ou "openai"
+
+        Returns:
+            Texto gerado ou string vazia se seção foi pulada
+        """
+        # Se não houve entrada em domicílio, retorna vazio
+        if section_data.get("4.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""
+
+        # Gerar com provider selecionado
+        if provider == "gemini":
+            return self._generate_section4_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_section4_with_groq(section_data)
+        elif provider == "claude":
+            raise NotImplementedError("Claude ainda não implementado para Seção 4")
+        elif provider == "openai":
+            raise NotImplementedError("OpenAI ainda não implementado para Seção 4")
+        else:
+            raise ValueError(f"Provider {provider} não suportado")
+
+    def _generate_section4_with_gemini(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 4 usando Gemini.
+        """
+        if not self.gemini_model:
+            raise ValueError("Gemini API key não configurada. Configure GEMINI_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section4(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.gemini_model.generate_content(prompt)
+
+            # Extrair texto
+            generated_text = response.text.strip()
+
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 4 com Gemini: {error_msg}")
+
+    def _generate_section4_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 4 (Entrada em Domicílio) usando Groq.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section4(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 4 com Groq: {error_msg}")

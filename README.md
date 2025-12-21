@@ -16,29 +16,23 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 
 ## 📊 Status Atual
 
-### ✅ v0.7.1 - Fast-Start para E2E Tests
+### ✅ v0.8.0 - Seção 4: Entrada em Domicílio
 
-**Novidades v0.7.1:**
-- ✅ **Flag `--start-section`** - Começar testes E2E de uma seção específica
-- ✅ **API `/sync_session`** - Preencher seções via API (70% mais rápido)
-- ✅ **Automação inteligente** - Preenche Seções 1-2 sem abrir navegador
-- ✅ **Injeção de estado** - JavaScript para restaurar UI sem modal
-- ✅ **Economia de tempo** - 1.5 min para Seção 3 (vs 5 min tudo)
+**Novidades v0.8.0:**
+- ✅ **Seção 4: Entrada em Domicílio** - 5 perguntas (4.1 a 4.5)
+- ✅ **Validação de justa causa** - Mínimo 40 caracteres com evidência sensorial ANTES da entrada
+- ✅ **Validação de graduação militar** - Obrigatório em 4.3 (mesma regra de 3.3)
+- ✅ **Validação de tipo de ingresso** - Perseguição contínua, autorização ou flagrante visual
+- ✅ **Geração de texto via LLM** - Com fundamento jurídico STF sobre domicílio
+- ✅ **Seção 4 marca BO como completo** - Antes era Seção 3, agora é a última
+- ✅ **E2E automation** - --start-section 4 para testes rápidos (1.5 min)
+- ✅ **4/8 seções implementadas** - Seções 1, 2, 3 e 4 estão prontas
 
-### v0.7.0 - Seção 3: Campana (Vigilância Velada)
-
-**Recursos v0.7.0:**
-- ✅ **Seção 3: Campana** - 8 perguntas (3.1 a 3.8)
-- ✅ Validação de graduação militar (pergunta 3.3)
-- ✅ Validação de atos concretos vs generalizações (pergunta 3.6)
-- ✅ Lógica condicional (pula seção se não houve campana)
-- ✅ Geração de texto via LLM para Seção 3
-- ✅ Suporte a 3 seções no sistema de rascunhos
-
-**Funcionalidades:**
+**Recursos v0.8.0:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas - 1.1 a 1.6)
 - ✅ Seção 2: Abordagem a Veículo (8 perguntas - 2.1 a 2.8)
 - ✅ Seção 3: Campana - Vigilância Velada (8 perguntas - 3.1 a 3.8)
+- ✅ Seção 4: Entrada em Domicílio (5 perguntas - 4.1 a 4.5)
 - ✅ Container persistente de textos gerados (todas seções visíveis)
 - ✅ Sidebar com todas 8 seções (completadas, atual, futuras)
 - ✅ Botão "Copiar BO Completo" quando há 2+ seções
@@ -54,15 +48,17 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 ## 🎯 Como Usar
 
 1. Acesse: https://criscmaia.github.io/bo-assistant/
-2. Responda as 6 perguntas da Seção 1 (perguntas 1.1 a 1.6 - Contexto da Ocorrência)
+2. Responda as 6 perguntas da Seção 1 (1.1 a 1.6 - Contexto da Ocorrência)
 3. O sistema valida cada resposta e pede mais detalhes se necessário
 4. Ao final da Seção 1, o texto é gerado automaticamente
-5. Clique em "Iniciar Seção 2" para continuar (perguntas 2.1 a 2.8 - Abordagem a Veículo)
+5. Clique em "Iniciar Seção 2" (perguntas 2.1 a 2.8 - Abordagem a Veículo)
 6. Ao final da Seção 2, outro texto é gerado
-7. Clique em "Iniciar Seção 3" para continuar (perguntas 3.1 a 3.8 - Campana)
-8. Ao final da Seção 3, o BO está completo
-9. Use "Copiar BO Completo" para copiar todas as seções de uma vez
-10. Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
+7. Clique em "Iniciar Seção 3" (perguntas 3.1 a 3.8 - Campana/Vigilância Velada)
+8. Ao final da Seção 3, mais um texto é gerado
+9. Clique em "Iniciar Seção 4" (perguntas 4.1 a 4.5 - Entrada em Domicílio)
+10. Ao final da Seção 4, o BO está completo
+11. Use "Copiar BO Completo" para copiar todas as seções de uma vez
+12. Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
 
 ### ⏰ Nota sobre Performance
 
@@ -112,10 +108,12 @@ bo-assistant/
 │   ├── state_machine.py           # Fluxo Seção 1 (6 perguntas)
 │   ├── state_machine_section2.py  # Fluxo Seção 2 (8 perguntas)
 │   ├── state_machine_section3.py  # Fluxo Seção 3 (8 perguntas)
+│   ├── state_machine_section4.py  # Fluxo Seção 4 (5 perguntas)
 │   ├── llm_service.py             # Integração Gemini + Groq
 │   ├── validator.py               # Validação Seção 1
 │   ├── validator_section2.py      # Validação Seção 2
 │   ├── validator_section3.py      # Validação Seção 3
+│   ├── validator_section4.py      # Validação Seção 4
 │   ├── logger.py                  # Sistema de logs
 │   ├── automate_release.py        # Automação screenshots/vídeo
 │   ├── test_scenarios.json        # Cenários de teste
@@ -222,7 +220,7 @@ Veja o roadmap completo e detalhado em [docs/ROADMAP.md](docs/ROADMAP.md).
 - ✅ **Fase 1** - Validação e Polimento (v0.4.1 - v0.6.4) ← **CONCLUÍDA**
 - 🔄 **Fase 2** - Seções 3-8 (v0.7.0+)
   - ✅ Seção 3: Campana (Vigilância Velada) - v0.7.0
-  - ⏳ Seção 4: Entrada em Domicílio
+  - ✅ Seção 4: Entrada em Domicílio - v0.8.0
   - ⏳ Seção 5: Fundada Suspeita
   - ⏳ Seção 6: Reação e Uso da Força
   - ⏳ Seção 7: Apreensões
@@ -254,6 +252,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.7.0
+**Versão:** 0.8.0
 **Última atualização:** 21/12/2025
 **Status:** Em produção

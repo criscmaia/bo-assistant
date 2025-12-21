@@ -16,7 +16,10 @@ pillow>=10.0.0
 # ============================================
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
-httpx>=0.25.0
+pytest-cov>=4.1.0           # Cobertura de código
+pytest-xdist>=3.5.0         # Paralelização de testes
+pytest-html>=4.1.0          # Relatórios HTML
+httpx>=0.25.0               # Cliente HTTP async
 
 # ============================================
 # DESENVOLVIMENTO

@@ -1,7 +1,7 @@
 # 🧪 Guia de Testes - BO Inteligente
 
 **Versão:** v0.6.4
-**Última atualização:** 20/12/2025
+**Última atualização:** 21/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
 
@@ -9,11 +9,63 @@ Este documento cobre estratégias de teste, casos de teste manuais, automação 
 
 ## 📋 Índice
 
+- [Estrutura de Testes](#-estrutura-de-testes)
 - [Estratégias de Teste](#-estratégias-de-teste)
 - [Casos de Teste Manuais](#-casos-de-teste-manuais)
 - [Respostas de Teste Validadas](#-respostas-de-teste-validadas)
 - [Automação de Screenshots](#-automação-de-screenshots)
 - [Testes de Carga](#-testes-de-carga)
+
+---
+
+## 📁 Estrutura de Testes
+
+**Versão:** v0.6.4+
+
+Os testes foram reorganizados em uma estrutura hierárquica por camada:
+
+```
+tests/
+├── README.md                # Guia rápido de como rodar testes
+├── conftest.py              # Fixtures pytest compartilhadas
+├── pytest.ini               # Configuração pytest
+│
+├── unit/                    # Testes unitários (sem I/O)
+│   └── test_backend_changes.py
+│
+├── integration/             # Testes de integração (com backend)
+│   ├── test_complete_flow.py
+│   ├── test_sync_session.py
+│   ├── test_draft_persistence.py
+│   ├── test_draft_recovery.py
+│   └── test_section1_isolated.py
+│
+├── e2e/                     # Testes E2E (Playwright)
+│   ├── README.md
+│   ├── automate_release.py
+│   └── test_scenarios.json
+│
+└── fixtures/                # Dados de teste
+    └── valid_payload.json
+```
+
+### Como Rodar
+
+```bash
+# Unit tests (rápido - ~5s, não precisa de backend)
+pytest tests/unit
+
+# Integration tests (médio - ~30s, precisa de backend rodando)
+pytest tests/integration
+
+# E2E screenshots (longo - ~4min, precisa backend + frontend)
+python tests/e2e/automate_release.py --version v0.6.5
+
+# Todos os testes pytest juntos
+pytest
+```
+
+Veja [tests/README.md](../tests/README.md) para detalhes completos.
 
 ---
 
@@ -290,9 +342,9 @@ Capturar screenshots e vídeo do frontend automaticamente para documentação de
 
 | Arquivo | Função |
 |---------|--------|
-| [automate_release.py](../backend/automate_release.py) | Script principal (Playwright) |
-| [test_scenarios.json](../backend/test_scenarios.json) | Configuração de cenários |
-| [backend/README_AUTOMACAO.md](../backend/README_AUTOMACAO.md) | Documentação detalhada |
+| [automate_release.py](../tests/e2e/automate_release.py) | Script principal (Playwright) |
+| [test_scenarios.json](../tests/e2e/test_scenarios.json) | Configuração de cenários |
+| [tests/e2e/README.md](../tests/e2e/README.md) | Documentação detalhada |
 
 ---
 
@@ -319,11 +371,10 @@ cd docs
 python -m http.server 3000 --bind 127.0.0.1
 
 # Executar automação (terminal 3)
-cd backend
-python automate_release.py --version v0.6.4
+python tests/e2e/automate_release.py --version v0.6.4
 
 # Sem vídeo (mais rápido - ~3 minutos)
-python automate_release.py --version v0.6.4 --no-video
+python tests/e2e/automate_release.py --version v0.6.4 --no-video
 ```
 
 ---

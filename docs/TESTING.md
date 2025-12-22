@@ -1,6 +1,6 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.9.0
+**Versão:** v0.10.0
 **Última atualização:** 22/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
@@ -61,18 +61,18 @@ pytest tests/integration
 # E2E screenshots - MODO COMPLETO (longo - ~8min, precisa backend + frontend)
 python tests/e2e/automate_release.py --version v0.8.0
 
-# E2E screenshots - MODO RÁPIDO (começar da Seção 4)
-# Preenche Seções 1, 2 e 3 via API, tira screenshots apenas da Seção 4
-python tests/e2e/automate_release.py --version v0.8.0 --start-section 4 --no-video
+# E2E screenshots - MODO RÁPIDO (começar da Seção 6)
+# Preenche Seções 1-5 via API, tira screenshots apenas da Seção 6
+python tests/e2e/automate_release.py --version v0.10.0 --start-section 6 --no-video
 
-# E2E screenshots - Começar da Seção 3
-python tests/e2e/automate_release.py --version v0.8.0 --start-section 3 --no-video
+# E2E screenshots - Começar da Seção 5
+python tests/e2e/automate_release.py --version v0.10.0 --start-section 5 --no-video
 
-# E2E screenshots - Começar da Seção 2
-python tests/e2e/automate_release.py --version v0.8.0 --start-section 2 --no-video
+# E2E screenshots - Começar da Seção 4
+python tests/e2e/automate_release.py --version v0.10.0 --start-section 4 --no-video
 
 # E2E screenshots - Com vídeo (precisa MAIS tempo)
-python tests/e2e/automate_release.py --version v0.8.0 --start-section 4
+python tests/e2e/automate_release.py --version v0.10.0
 
 # Todos os testes pytest juntos
 pytest
@@ -99,14 +99,16 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 ### Cobertura de Testes
 
 **Áreas Críticas:**
-- ✅ Validação de respostas (Seção 1, 2, 3 e 4)
+- ✅ Validação de respostas (Seções 1, 2, 3, 4, 5 e 6)
 - ✅ Geração de texto (Gemini e Groq)
 - ✅ Sistema de rascunhos (localStorage)
-- ✅ Fluxo multi-seção (Seção 1 → Seção 2 → Seção 3 → Seção 4)
+- ✅ Fluxo multi-seção (Seção 1 → Seção 2 → ... → Seção 6)
 - ✅ Edição de respostas anteriores
 - ✅ Endpoint `/sync_session` (restauração de rascunhos)
-- ✅ Validação de graduação militar (Seções 3 e 4)
+- ✅ Validação de graduação militar (Seções 3, 4 e 5)
 - ✅ Validação de justa causa (Seção 4)
+- ✅ Validação de frases proibidas (Seção 6) - NOVO
+- ✅ Validação condicional de hospital (Seção 6) - NOVO
 - ⏳ Casos de erro (rate limit, timeout)
 - ⏳ Navegação mobile (responsividade)
 
@@ -414,6 +416,130 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 
 ---
 
+### Teste 16: Fluxo Completo - Seção 6 (Reação e Uso da Força)
+
+**Objetivo:** Validar fluxo completo da Seção 6 com respostas válidas.
+
+**Passos:**
+1. Completar Seções 1 a 5
+2. Clicar em "Iniciar Seção 6"
+3. Responder pergunta 6.1 com "SIM"
+4. Completar perguntas 6.2 até 6.5 com respostas válidas
+5. Aguardar geração de texto (~3-5 segundos)
+6. Verificar texto gerado no card de Seção 6
+
+**Resultado Esperado:**
+- Todas as respostas aceitas
+- Texto gerado em 3ª pessoa, narrando a resistência, técnica aplicada, algemas e integridade física
+- BO marcado como "COMPLETO"
+- Card de Seção 6 permanece visível com texto narrativo
+- Botão "Copiar BO Completo" copia todas as 6 seções
+
+---
+
+### Teste 17: Validação de Frases Proibidas (Seção 6, Pergunta 6.2) - NOVO
+
+**Objetivo:** Validar rejeição de frases genéricas e obrigação de descrição concreta.
+
+**Passos:**
+1. Completar Seções 1-5 e iniciar Seção 6
+2. Responder 6.1 com "SIM"
+3. Ao chegar em 6.2, tentar responder com frases genéricas:
+   - "O autor resistiu ativamente"
+   - "Foi necessário uso moderado da força"
+   - "O autor estava exaltado"
+   - "Houve resistência"
+
+**Resultado Esperado:**
+- Mensagem de erro: "NÃO use a expressão '[frase]'. Descreva o que o autor FEZ..."
+- Resposta não aceita
+- Pergunta permanece ativa
+- Força descrição concreta (soco, empurrão, fuga, etc.)
+
+**Respostas Válidas:**
+- "O autor empurrou o Cabo Rezende com força no peito tentando fugir"
+- "O suspeito desferiu um soco em direção ao rosto do Sargento Silva"
+- "O indivíduo recusou-se a colocar as mãos na cabeça e tentou sacar objeto da cintura"
+
+---
+
+### Teste 18: Validação de Técnica e Graduação (Seção 6, Pergunta 6.3)
+
+**Objetivo:** Validar obrigatoriedade de graduação militar + técnica aplicada em 6.3.
+
+**Passos:**
+1. Completar Seções 1-5 e iniciar Seção 6
+2. Responder 6.1 com "SIM" e 6.2 com resposta válida
+3. Ao chegar em 6.3, responder sem graduação:
+   - "João aplicou chave de braço"
+   - "Técnica de imobilização foi utilizada"
+
+**Resultado Esperado:**
+- Mensagem de erro: "Informe: GRADUAÇÃO + nome do policial, qual técnica usou..."
+- Resposta não aceita
+- Pergunta permanece ativa
+
+**Respostas Válidas:**
+- "O Cabo Marcelo aplicou chave de braço no suspeito, imobilizando-o no chão sem lesões"
+- "O Sargento Silva desviou do soco e aplicou golpe defensivo no braço do agressor"
+- "O Soldado Pires empurrou o autor contra o muro, contendo a agressão"
+
+---
+
+### Teste 19: Validação Condicional de Hospital (Seção 6, Pergunta 6.5)
+
+**Objetivo:** Validar que se mencionar ferimentos, exige informações de hospital/UPA com número da ficha.
+
+**Passos:**
+1. Completar Seções 1-5 e iniciar Seção 6
+2. Responder 6.1 com "SIM" e completar 6.2, 6.3, 6.4
+3. Ao chegar em 6.5:
+
+   **Teste 19a - Sem ferimentos (válido):**
+   ```
+   Não houve ferimentos. A guarnição verificou a integridade física...
+   ```
+   - Resultado: ACEITO
+
+   **Teste 19b - Com ferimento mas SEM hospital (inválido):**
+   ```
+   O autor apresentou escoriação no joelho esquerdo
+   ```
+   - Resultado: REJEITADO (falta hospital/UPA)
+   - Mensagem: "Se SIM: descreva a lesão, onde foi atendido (hospital/UPA) e o número da ficha"
+
+   **Teste 19c - Com ferimento E hospital + ficha (válido):**
+   ```
+   O autor apresentou escoriação no joelho esquerdo. Foi atendido no Hospital João XXIII (ficha nº 2025-12345)
+   ```
+   - Resultado: ACEITO
+
+**Resultado Esperado:**
+- Seção 6.5 força informação de hospital quando há lesão
+- Número de ficha obrigatório (ficha nº, nº, número, etc.)
+- Respostas sem ferimentos são aceitas sem exigir hospital
+- BO marcado como completo
+
+---
+
+### Teste 20: Pular Seção 6 (Sem Resistência)
+
+**Objetivo:** Validar lógica condicional da Seção 6.
+
+**Passos:**
+1. Completar Seções 1 a 5
+2. Clicar em "Iniciar Seção 6"
+3. Responder pergunta 6.1 com "NÃO"
+
+**Resultado Esperado:**
+- Texto gerado imediatamente
+- Mensagem: "Não se aplica (não houve resistência durante a abordagem)"
+- Seção 6 marcada como completa
+- BO marcado como "COMPLETO"
+- Sem perguntas adicionais (6.2-6.5)
+
+---
+
 ### Teste 11: Validação de Graduação Militar (Seção 3)
 
 **Objetivo:** Validar obrigatoriedade de graduação militar em pergunta 3.3.
@@ -593,6 +719,88 @@ Sim, foi abordado um usuário que estava saindo do local. Ele portava 2 porçõe
 Sim, ao perceber a movimentação policial, o homem de vermelho correu para o beco ao lado do bar, tentando fugir em direção à Rua Sete.
 ```
 **Aceita:** Respostas detalhadas OU simplesmente "NÃO" (mín. 3 caracteres para "NÃO")
+
+---
+
+### Respostas Validadas - Seção 5
+
+**5.1 - Houve abordagem por fundada suspeita?**
+```
+SIM
+```
+**Aceita:** SIM, SÃO, sim, Sim, houve abordagem, etc.
+**Pulará seção se:** NÃO, NAO, NÃO houve, Não realizou, etc.
+
+**5.2 - O que a equipe viu ao chegar no local?**
+```
+Durante patrulhamento pela Rua das Palmeiras, região com registros anteriores de tráfico de drogas, visualizamos um homem de camisa vermelha e bermuda jeans retirando pequenos invólucros de um buraco no muro e entregando-os a motociclistas que paravam rapidamente
+```
+**Obrigatório:** Descrição concreta de comportamento observado (local, contexto, comportamento). Mín. 40 caracteres.
+
+**5.3 - Qual policial tinha visão direta e o que viu?**
+```
+O Sargento João, de dentro da viatura estacionada a aproximadamente 20 metros do local, visualizou o suspeito retirando invólucros do buraco no muro e realizando as entregas por cerca de dois minutos antes de perceber a aproximação policial
+```
+**Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + local + o que viu. Mín. 30 caracteres.
+
+**5.4 - Características individualizadas do abordado?**
+```
+Homem de camisa vermelha e bermuda jeans azul, porte atlético, aproximadamente 1,75m de altura. Ao perceber a aproximação da viatura, demonstrou nervosismo acentuado e tentou guardar parte do material no bolso. Posteriormente identificado como JOÃO DA SILVA SANTOS, vulgo 'Vermelho'.
+```
+**Obrigatório:** Roupa, porte físico, gestos/comportamento, e identificação completa (nome completo + vulgo). Mín. 50 caracteres.
+
+---
+
+### Respostas Validadas - Seção 6
+
+**6.1 - Houve resistência durante a abordagem?**
+```
+SIM
+```
+**Aceita:** SIM, SÃO, sim, Sim, houve resistência, etc.
+**Pulará seção se:** NÃO, NAO, NÃO houve, Não ocorreu, etc.
+
+**6.2 - Descreva a resistência com fatos concretos**
+```
+O autor empurrou o Cabo Rezende com força no peito tentando fugir em direção ao beco lateral, sendo alcançado após aproximadamente 10 metros de perseguição a pé
+```
+**Obrigatório:** Ações CONCRETAS (empurrão, soco, fuga, tentativa de fuga, recusa de comandos, etc.). **NÃO aceita generalizações** ("resistiu ativamente", "uso moderado da força", "estava exaltado"). Mín. 30 caracteres.
+
+**Respostas INVÁLIDAS (Proibidas):**
+- ❌ "O autor resistiu ativamente"
+- ❌ "Foi necessário uso moderado da força"
+- ❌ "O autor estava exaltado"
+- ❌ "Houve resistência"
+- ❌ "Em atitude suspeita"
+
+**6.3 - Qual técnica foi aplicada, por quem, e qual foi o resultado?**
+```
+O Soldado Pires aplicou chave de braço no suspeito, forçando o cotovelo esquerdo e o imobilizou no chão. O Cabo Rezende auxiliou na contenção segurando as pernas do autor até a completa imobilização sem lesões visíveis no momento
+```
+**Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + técnica (chave, cotovelada, empurrão, taser, etc.) + resultado. Mín. 40 caracteres.
+
+**6.4 - Por que foi necessário algemar?**
+```
+Diante da agressividade demonstrada ao tentar agredir os policiais e o risco de nova tentativa de agressão durante o deslocamento, o autor foi algemado para garantir a segurança da guarnição e evitar lesões a terceiros
+```
+**Obrigatório:** Justificativa OBJETIVA com fato concreto (risco de fuga, agressividade demonstrada, tentativa de agressão, comportamento ameaçador, etc.). Deve conter uma das palavras-chave: risco, fuga, agressiv, resistência, perigo, tentou, ameaça. Mín. 20 caracteres.
+
+**6.5 - Houve ferimentos?**
+
+**Resposta SEM ferimentos (válida):**
+```
+Não houve ferimentos. A guarnição verificou a integridade física do autor no local da abordagem, que não apresentou nenhuma lesão corporal decorrente da contenção, dispensando atendimento médico
+```
+
+**Resposta COM ferimentos (exige hospital/UPA com nº da ficha):**
+```
+O autor apresentou escoriação no joelho direito e hematoma no braço esquerdo, decorrentes da queda durante a imobilização. Foi encaminhado ao Hospital João XXIII (ficha nº 2025-78901), onde foi medicado e liberado sem restrições para apresentação na Delegacia
+```
+
+**Regras:**
+- Se resposta começa com "Não houve ferimentos": VÁLIDA (não exige hospital)
+- Se mencionar lesão/ferimento (ferimento, lesão, sangramento, escoriação, hematoma, fratura, contusão, etc.): EXIGE hospital/UPA com ficha
+- Ficha pode ser: "ficha nº", "nº", "número", "número da ficha", etc.
 
 ---
 

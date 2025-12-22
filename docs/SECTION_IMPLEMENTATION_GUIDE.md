@@ -1,12 +1,12 @@
 # Guia de Implementação de Novas Seções
 
-**Versão:** 2.0
-**Última atualização:** 21/12/2025
-**Baseado em:** Experiência das implementações das Seções 3 (Campana) e 4 (Entrada em Domicílio)
+**Versão:** 4.0
+**Última atualização:** 22/12/2025
+**Baseado em:** Experiência das implementações das Seções 3 (Campana), 4 (Entrada em Domicílio), 5 (Fundada Suspeita) e 6 (Reação e Uso da Força)
 
 Este documento fornece instruções detalhadas para implementar qualquer nova seção do BO Inteligente, otimizado para uso com Claude Haiku (60% das tarefas) e Sonnet (40% das tarefas).
 
-> **Lição Aprendida (Seção 4):** A implementação da Seção 4 revelou que alguns pontos críticos no frontend (barra de progresso, restauração de rascunho) requerem modificações em MÚLTIPLOS locais. Este guia foi atualizado com checklists específicos para evitar esses bugs.
+> **Lição Aprendida (Seções 4, 5 e 6):** As implementações das Seções 4, 5 e 6 revelaram que alguns pontos críticos no frontend (barra de progresso, restauração de rascunho, **limpeza de botões de transição**) requerem modificações em MÚLTIPLOS locais. A Seção 6 introduziu novas funcionalidades de validação (**frases proibidas** e **validação condicional de hospital**). Este guia foi atualizado com checklists específicos para evitar esses bugs.
 
 ---
 
@@ -20,6 +20,8 @@ Este documento fornece instruções detalhadas para implementar qualquer nova se
 6. [Bugs Comuns e Soluções](#6-bugs-comuns-e-soluções)
 7. [Validação Final](#7-validação-final)
 8. [Lições Aprendidas (Seção 4)](#8-lições-aprendidas-seção-4)
+9. [Lições Aprendidas (Seção 5)](#9-lições-aprendidas-seção-5)
+10. [Lições Aprendidas (Seção 6)](#10-lições-aprendidas-seção-6)
 
 ---
 
@@ -201,6 +203,9 @@ class BOStateMachineSectionN:
 "N.X": {
     "min_length": 30,
     "required_keywords": ["termo1", "termo2"],  # Se aplicável
+    "required_keywords_any": ["opcao1", "opcao2"],  # Qualquer uma (OR)
+    "forbidden_phrases": ["frase proibida 1", "frase proibida 2"],  # NOVO na Seção 6
+    "conditional_hospital": True,  # NOVO: Se True, exige hospital quando há lesão
     "examples": [
         "Exemplo bom 1...",
         "Exemplo bom 2..."
@@ -208,6 +213,14 @@ class BOStateMachineSectionN:
     "error_message": "Mensagem de erro com orientação..."
 }
 ```
+
+**Novas opções de validação (introduzidas na Seção 6):**
+
+| Campo | Descrição | Uso |
+|-------|-----------|-----|
+| `forbidden_phrases` | Lista de frases que **invalidam** a resposta | Rejeitar generalizações como "resistiu ativamente" |
+| `conditional_hospital` | Se True, exige hospital/UPA quando lesão mencionada | Perguntas sobre ferimentos |
+| `required_keywords_any` | Exige pelo menos UMA das keywords (OR) | Justificativas com múltiplas opções |
 
 ### 3.3 Criar `tests/unit/test_sectionN.py`
 
@@ -782,6 +795,353 @@ grep -r "0.8.0" docs/ backend/ --include="*.html" --include="*.py" --include="*.
 | 6 | Ciano | `cyan-*` ou `teal-*` |
 | 7 | Amarelo | `yellow-*` ou `amber-*` |
 | 8 | Vermelho | `red-*` |
+
+---
+
+## 9. Lições Aprendidas (Seção 5)
+
+### 9.1 Novo Bug Descoberto: IDs Inconsistentes de Containers
+
+**Sintoma:** Botão de transição para próxima seção permanece visível na tela após a seção ser iniciada
+
+**Causa Raiz:** O frontend usa dois IDs diferentes para containers de botões:
+- `section{N}-transition-card` - Criado durante fluxo normal via `handleBotResponse()`
+- `section{N}-button-container` - Criado durante restauração de rascunho via `restoreFromDraft()`
+
+As funções `startSection{N}()` só removiam UM dos IDs, deixando o outro visível.
+
+**Solução - Padrão obrigatório para TODAS as funções `startSection{N}()`:**
+
+```javascript
+async function startSectionN() {
+    // INÍCIO: Limpar AMBOS os possíveis containers de botão
+    const transitionCard = document.getElementById('sectionN-transition-card');
+    if (transitionCard) transitionCard.remove();
+    const buttonContainer = document.getElementById('sectionN-button-container');
+    if (buttonContainer) buttonContainer.remove();
+
+    // ... resto da função
+}
+```
+
+**Arquivos afetados:** Todas as 4 funções startSection (2, 3, 4, 5) precisaram dessa correção.
+
+### 9.2 Atualização do E2E: Criação de Botões para Seções 4 e 5
+
+O script `automate_release.py` precisa criar botões de transição quando usando `--start-section`. O código foi expandido para suportar:
+
+```javascript
+// Em prepare_sections_via_api() -> inject_session_and_restore()
+}} else if (upToSection === 3) {{
+    // Criar botão "Iniciar Seção 4" (laranja)
+    if (!document.getElementById('btn-start-section4')) {{
+        const section4ButtonDiv = document.createElement('div');
+        section4ButtonDiv.id = 'section4-button-container';
+        section4ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-orange-50 to-orange-100...';
+        // ... código de criação do botão
+    }}
+}} else if (upToSection === 4) {{
+    // Criar botão "Iniciar Seção 5" (pink)
+    if (!document.getElementById('btn-start-section5')) {{
+        const section5ButtonDiv = document.createElement('div');
+        section5ButtonDiv.id = 'section5-button-container';
+        section5ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-pink-50 to-pink-100...';
+        // ... código de criação do botão
+    }}
+}}
+```
+
+### 9.3 Checklist Expandido: 21 Pontos de Modificação no Frontend
+
+A Seção 5 revelou que o checklist de 19 pontos estava incompleto. **Adicionados 2 novos pontos:**
+
+| # | O que modificar | Ação |
+|---|-----------------|------|
+| 20 | `startSection{N}()` | Remover AMBOS os IDs de container (transition-card E button-container) |
+| 21 | `automate_release.py` | Se suporta `--start-section N-1`, criar botão para seção N |
+
+### 9.4 Validação de Fixtures em conftest.py
+
+Ao adicionar fixture para nova seção, garantir que as respostas são suficientemente detalhadas para passar na validação:
+
+```python
+@pytest.fixture
+def section5_answers() -> Dict:
+    """Respostas válidas para Seção 5 (todas as 4 perguntas)"""
+    return {
+        "5.1": "SIM",
+        "5.2": "Durante patrulhamento pela Rua das Palmeiras, região com registros anteriores de tráfico de drogas, visualizamos um homem de camisa vermelha e bermuda jeans retirando pequenos invólucros de um buraco no muro e entregando-os a motociclistas que paravam rapidamente",  # min 40 chars
+        "5.3": "O Sargento João, de dentro da viatura estacionada a aproximadamente 20 metros do local, visualizou o suspeito retirando invólucros do buraco no muro e realizando as entregas por cerca de dois minutos antes de perceber a aproximação policial",  # DEVE incluir graduação
+        "5.4": "Homem de camisa vermelha e bermuda jeans azul, porte atlético, aproximadamente 1,75m de altura. Ao perceber a aproximação da viatura, demonstrou nervosismo acentuado e tentou guardar parte do material no bolso. Posteriormente identificado como JOÃO DA SILVA SANTOS, vulgo 'Vermelho'."  # min 50 chars + nome + vulgo
+    }
+```
+
+### 9.5 Resumo de Commits da Seção 5
+
+| Commit | Descrição | Arquivos Modificados |
+|--------|-----------|---------------------|
+| a1dc3a7 | feat: Implementar Seção 5 - Fundada Suspeita (v0.9.0) | 16 arquivos backend/docs |
+| 149b981 | fix: Add Section 5 transition and completion logic | index.html |
+| 77d49cf | fix: Add complete Section 5 frontend support | index.html |
+| 32e4e0d | fix: Update E2E restore script for Section 4/5 buttons | automate_release.py |
+| 5da3cb6 | fix: Remove transition button containers when sections start | index.html |
+
+### 9.6 O que funcionou bem na Seção 5
+
+1. **Backend reutilizável** - Copiar state_machine_section4.py e validator_section4.py como base funcionou perfeitamente
+2. **Testes unitários primeiro** - 12 testes passando antes de integrar ao main.py
+3. **Cor temática (pink)** - Seguir esquema de cores evitou confusão visual
+4. **Seção mais curta (4 perguntas)** - Menos pontos de falha, implementação mais rápida
+
+### 9.7 O que deu problema na Seção 5
+
+| Problema | Causa Raiz | Tempo Perdido | Prevenção |
+|----------|------------|---------------|-----------|
+| Frontend incompleto | Faltou adicionar SECTION5_QUESTIONS e funções | ~45 min | Seguir checklist de 21 pontos |
+| E2E não criava botões S4/S5 | restore_script só tratava upToSection === 2 | ~30 min | Expandir script para todas seções |
+| Botão permanecia visível | IDs inconsistentes (transition-card vs button-container) | ~20 min | Remover AMBOS os IDs em startSection |
+
+### 9.8 Recomendações Atualizadas para Próximas Seções (6-8)
+
+1. **Use o checklist de 21 pontos** - Não confie na memória
+2. **Verifique `startSection{N}()` remove AMBOS os IDs de container** - Bug crítico descoberto na Seção 5
+3. **Atualize `automate_release.py`** se suportar `--start-section` para a nova seção
+4. **Teste restauração de rascunho** em TRÊS cenários:
+   - Seção N-1 completa → deve mostrar botão para seção N
+   - Seção N parcialmente preenchida → deve restaurar respostas
+   - Seção N completa → deve marcar BO como completo (se última)
+5. **Execute E2E com `--start-section N-1`** para validar transição
+
+---
+
+## 10. Lições Aprendidas (Seção 6)
+
+### 10.1 Novas Funcionalidades de Validação
+
+A Seção 6 (Reação e Uso da Força) introduziu **duas novas funcionalidades de validação** que podem ser reutilizadas em seções futuras:
+
+#### 10.1.1 Validação de Frases Proibidas (`forbidden_phrases`)
+
+**Problema:** Policiais usam expressões genéricas como "resistiu ativamente" ou "uso moderado da força" que são juridicamente problemáticas.
+
+**Solução:** Nova regra de validação que **rejeita** respostas contendo frases proibidas.
+
+```python
+# Em validator_section6.py
+VALIDATION_RULES_SECTION6 = {
+    "6.2": {
+        "min_length": 30,
+        "forbidden_phrases": [
+            "resistiu ativamente",
+            "resistência ativa",
+            "uso moderado da força",
+            "necessário uso da força",
+            "em atitude suspeita",
+            "estava exaltado",
+            "ficou agressivo",
+            "resistiu",  # sem complemento
+            "houve resistência"  # sem detalhar
+        ],
+        "error_message": "Descreva o que o autor FEZ (soco, empurrão, fuga, etc). NÃO use frases genéricas..."
+    }
+}
+```
+
+**Implementação do método:**
+```python
+@staticmethod
+def _check_forbidden_phrases(answer: str, forbidden_phrases: list) -> Tuple[bool, str]:
+    """
+    Verifica se a resposta contém frases proibidas (generalizações).
+
+    Returns:
+        Tupla (has_forbidden, matched_phrase)
+    """
+    answer_lower = answer.lower()
+
+    for phrase in forbidden_phrases:
+        if phrase.lower() in answer_lower:
+            return True, phrase
+
+    return False, ""
+```
+
+**Uso na validação:**
+```python
+if step == "6.2" and "forbidden_phrases" in rules:
+    has_forbidden, matched = self._check_forbidden_phrases(answer, rules["forbidden_phrases"])
+    if has_forbidden:
+        return False, f"NÃO use a expressão '{matched}'. {rules['error_message']}"
+```
+
+#### 10.1.2 Validação Condicional de Hospital (`conditional_hospital`)
+
+**Problema:** Se o autor sofreu ferimentos durante a abordagem, é obrigatório informar atendimento hospitalar e número da ficha.
+
+**Solução:** Validação condicional que detecta menção a ferimentos e exige hospital/UPA.
+
+```python
+# Em validator_section6.py
+"6.5": {
+    "min_length": 30,
+    "conditional_hospital": True,  # Ativa validação condicional
+    "error_message": "Informe se houve ou não ferimentos. Se SIM: descreva a lesão, onde foi atendido (hospital/UPA) e o número da ficha."
+}
+```
+
+**Implementação:**
+```python
+@staticmethod
+def _check_has_injury(answer: str) -> bool:
+    """Verifica se a resposta menciona ferimentos/lesões."""
+    injury_keywords = [
+        "ferimento", "lesão", "sangramento", "escoriação",
+        "hematoma", "fratura", "contusão", "ferido", "machucado"
+    ]
+    answer_lower = answer.lower()
+
+    # Se começa com "Não houve", considera sem ferimentos
+    if answer_lower.strip().startswith("não houve"):
+        return False
+
+    return any(keyword in answer_lower for keyword in injury_keywords)
+
+@staticmethod
+def _check_hospital_info(answer: str) -> bool:
+    """Verifica se menciona hospital/UPA com número da ficha."""
+    hospital_keywords = ["hospital", "upa", "pronto socorro", "ps"]
+    ficha_keywords = ["ficha", "nº", "numero", "número"]
+
+    answer_lower = answer.lower()
+    has_hospital = any(kw in answer_lower for kw in hospital_keywords)
+    has_ficha = any(kw in answer_lower for kw in ficha_keywords)
+
+    return has_hospital and has_ficha
+```
+
+### 10.2 Bug Corrigido: Numeração de Steps em test_scenarios.json
+
+**Sintoma:** Erros de validação apareciam em momentos errados durante o E2E.
+
+**Causa Raiz:** Steps no arquivo `test_scenarios.json` estavam com numeração incorreta (6.0, 6.1...) ao invés de (6.1, 6.2...).
+
+**Regra:** Steps SEMPRE começam em X.1, não X.0. Verificar com o arquivo `state_machine_sectionN.py`:
+
+```python
+# CORRETO - em state_machine_section6.py
+SECTION6_STEPS = ["6.1", "6.2", "6.3", "6.4", "6.5", "complete"]
+
+# CORRETO - em test_scenarios.json
+"steps": [
+    {"step": "6.1", "answer": "SIM", "expect": "pass"},
+    {"step": "6.2", "answer": "...", "expect": "pass"},
+    // ...
+]
+```
+
+### 10.3 Bug Corrigido: E2E Mobile "Execution context was destroyed"
+
+**Sintoma:** Erro durante testes E2E mobile: `playwright._impl._errors.Error: Page.evaluate: Execution context was destroyed`
+
+**Causa Raiz:** Uso de `wait_for_load_state('networkidle')` causava navegação que destruía o contexto JavaScript.
+
+**Solução em `automate_release.py`:**
+
+```python
+# ANTES (ERRADO):
+await page.wait_for_load_state('networkidle', timeout=10000)
+result = await page.evaluate(restore_script)
+
+# DEPOIS (CORRETO):
+try:
+    await page.wait_for_load_state('domcontentloaded', timeout=10000)
+    await page.wait_for_timeout(500)
+except:
+    pass
+
+try:
+    result = await page.evaluate(restore_script)
+except Exception as e:
+    print(f"    ⚠️  Erro na restauração: {str(e)}")
+    # Retry com fallback
+    try:
+        await page.wait_for_timeout(1000)
+        result = await page.evaluate(restore_script)
+    except:
+        print(f"    ⚠️  Restauração falhou - continuando sem restaurar")
+```
+
+**Padrão para fast-start de seções:**
+```python
+# Em cada seção (3, 4, 5, 6) no E2E mobile
+try:
+    await page.click('#btn-start-sectionN')
+    await page.wait_for_timeout(1000)
+except Exception as e:
+    print(f"    ⚠️  Erro ao iniciar seção N: {str(e)}")
+    # Tentar novamente
+    await page.wait_for_timeout(500)
+    await page.click('#btn-start-sectionN')
+```
+
+### 10.4 Resumo de Commits da Seção 6
+
+| Commit | Descrição | Arquivos Modificados |
+|--------|-----------|---------------------|
+| TBD | feat: Implementar Seção 6 - Reação e Uso da Força (v0.10.0) | 16 arquivos backend/docs |
+| TBD | fix: Corrigir numeração de steps em test_scenarios.json | test_scenarios.json |
+| TBD | fix: Adicionar tratamento de erro para E2E mobile | automate_release.py |
+
+### 10.5 O que funcionou bem na Seção 6
+
+1. **Plano detalhado antes de implementar** - Checklist de 21 pontos no frontend evitou muitos bugs
+2. **Novas validações reutilizáveis** - `forbidden_phrases` e `conditional_hospital` podem ser usadas em seções 7-8
+3. **Testes unitários incluem frases proibidas** - Garantiu que validação funciona antes de integrar
+4. **Cor temática (teal/cyan)** - Seguindo esquema de cores documentado
+
+### 10.6 O que deu problema na Seção 6
+
+| Problema | Causa Raiz | Tempo Perdido | Prevenção |
+|----------|------------|---------------|-----------|
+| Steps errados no test_scenarios.json | Usou 6.0 ao invés de 6.1 | ~20 min | Sempre verificar SECTION_STEPS no state_machine |
+| E2E mobile crash | `networkidle` destruindo contexto | ~30 min | Usar `domcontentloaded` + try-catch |
+| Validação 6.2 não rejeitava frases | Implementação inicial incorreta | ~15 min | Testar unitário com frases proibidas primeiro |
+
+### 10.7 Recomendações Atualizadas para Seções 7-8
+
+1. **Considere usar `forbidden_phrases`** se houver termos que devem ser evitados
+2. **Use `conditional_hospital`** se perguntas envolvem ferimentos/lesões
+3. **SEMPRE verifique numeração de steps** contra o arquivo `state_machine_sectionN.py`
+4. **Para E2E mobile:** Use `domcontentloaded` ao invés de `networkidle`
+5. **Envolva `page.evaluate()` em try-catch** especialmente em cenários de fast-start
+6. **Teste frases proibidas unitariamente** antes de integrar ao backend
+
+### 10.8 Padrão de Validação Negativa (Rejeitar ao invés de Exigir)
+
+A Seção 6 introduziu o conceito de **validação negativa** - rejeitar respostas que contêm termos proibidos, ao invés de apenas exigir termos obrigatórios.
+
+**Quando usar:**
+- Termos vagos que são juridicamente problemáticos
+- Generalizações que policiais tendem a usar por hábito
+- Expressões que não agregam informação objetiva
+
+**Template de implementação:**
+```python
+# No validator
+if "forbidden_phrases" in rules:
+    has_forbidden, matched = self._check_forbidden_phrases(answer, rules["forbidden_phrases"])
+    if has_forbidden:
+        return False, f"NÃO use a expressão '{matched}'. {rules['error_message']}"
+
+# No test_scenarios.json - cenário de erro esperado
+{
+    "step": "N.X",
+    "answer": "O autor resistiu ativamente",
+    "expect": "fail",
+    "test_forbidden": true,  # Marca como teste de frase proibida
+    "screenshot": "XX-sectionN-forbidden-error"
+}
+```
 
 ---
 

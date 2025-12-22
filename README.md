@@ -16,24 +16,27 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 
 ## 📊 Status Atual
 
-### ✅ v0.9.0 - Seção 5: Fundada Suspeita
+### ✅ v0.10.0 - Seção 6: Reação e Uso da Força
 
-**Novidades v0.9.0:**
-- ✅ **Seção 5: Fundada Suspeita** - 4 perguntas (5.1 a 5.4)
-- ✅ **Validação de observação detalhada** - Mínimo 40 caracteres (5.2)
-- ✅ **Validação de testemunha** - Graduação militar obrigatória (5.3) + posição + observação
-- ✅ **Validação de características individualizadas** - Mínimo 50 caracteres (5.4)
-- ✅ **Geração de texto via LLM** - Com fundamento jurídico STF HC 261029
-- ✅ **Seção 5 marca BO como completo** - É a última seção por agora (5/8)
-- ✅ **Testes completos** - 12 testes unitários passando
-- ✅ **5/8 seções implementadas** - Seções 1, 2, 3, 4 e 5 estão prontas
+**Novidades v0.10.0:**
+- ✅ **Seção 6: Reação e Uso da Força** - 5 perguntas (6.1 a 6.5)
+- ✅ **NOVA:** Validação de frases proibidas (6.2) - Rejeita "resistiu ativamente", "uso moderado da força", etc.
+- ✅ **NOVA:** Validação condicional de hospital (6.5) - Se lesão mencionada, exige hospital/UPA + nº da ficha
+- ✅ **Validação de técnica e graduação militar** - 6.3 obrigatório (mesma regra de seções anteriores)
+- ✅ **Validação de justificativa objetiva** - 6.4 com palavras-chave obrigatórias (risco, fuga, agressiv, etc.)
+- ✅ **Geração de texto via LLM** - Com fundamento jurídico Súmula Vinculante 11 (STF) + Decreto 8.858/2016
+- ✅ **Estrutura narrativa em 4 parágrafos** - Resistência → Técnica → Algemas → Integridade Física
+- ✅ **Seção 6 marca BO como completo** - É a última seção por agora (6/8)
+- ✅ **Testes completos** - 16 unitários + 6 integração passando
+- ✅ **6/8 seções implementadas** - Seções 1 a 6 estão prontas
 
-**Recursos v0.9.0:**
+**Recursos v0.10.0:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas - 1.1 a 1.6)
 - ✅ Seção 2: Abordagem a Veículo (8 perguntas - 2.1 a 2.8)
 - ✅ Seção 3: Campana - Vigilância Velada (8 perguntas - 3.1 a 3.8)
 - ✅ Seção 4: Entrada em Domicílio (5 perguntas - 4.1 a 4.5)
 - ✅ Seção 5: Fundada Suspeita (4 perguntas - 5.1 a 5.4)
+- ✅ Seção 6: Reação e Uso da Força (5 perguntas - 6.1 a 6.5)
 - ✅ Container persistente de textos gerados (todas seções visíveis)
 - ✅ Sidebar com todas 8 seções (completadas, atual, futuras)
 - ✅ Botão "Copiar BO Completo" quando há 2+ seções
@@ -59,9 +62,11 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 9. Clique em "Iniciar Seção 4" (perguntas 4.1 a 4.5 - Entrada em Domicílio)
 10. Ao final da Seção 4, outro texto é gerado
 11. Clique em "Iniciar Seção 5" (perguntas 5.1 a 5.4 - Fundada Suspeita)
-12. Ao final da Seção 5, o BO está completo
-13. Use "Copiar BO Completo" para copiar todas as 5 seções de uma vez
-14. Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
+12. Ao final da Seção 5, outro texto é gerado
+13. Clique em "Iniciar Seção 6" (perguntas 6.1 a 6.5 - Reação e Uso da Força)
+14. Ao final da Seção 6, o BO está completo
+15. Use "Copiar BO Completo" para copiar todas as 6 seções de uma vez
+16. Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
 
 ### ⏰ Nota sobre Performance
 

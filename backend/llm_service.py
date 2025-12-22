@@ -1060,3 +1060,217 @@ IMPORTANTE:
 GERE AGORA O TEXTO DA SEÇÃO 5, seguindo RIGOROSAMENTE as regras acima:"""
 
         return prompt
+
+    # ========================================================================
+    # SEÇÃO 6: REAÇÃO E USO DA FORÇA
+    # ========================================================================
+
+    def generate_section6_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+        """
+        Gera texto narrativo da Seção 6 (Reação e Uso da Força).
+
+        Args:
+            section_data: Dicionário com respostas {step: answer}
+            provider: "gemini", "groq", "claude" ou "openai"
+
+        Returns:
+            Texto gerado ou string vazia se seção foi pulada
+        """
+        # Se não houve resistência, retorna vazio
+        if section_data.get("6.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""
+
+        # Gerar com provider selecionado
+        if provider == "gemini":
+            return self._generate_section6_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_section6_with_groq(section_data)
+        elif provider == "claude":
+            raise NotImplementedError("Claude ainda não implementado para Seção 6")
+        elif provider == "openai":
+            raise NotImplementedError("OpenAI ainda não implementado para Seção 6")
+        else:
+            raise ValueError(f"Provider {provider} não suportado")
+
+    def _generate_section6_with_gemini(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 6 usando Gemini.
+        """
+        if not self.gemini_model:
+            raise ValueError("Gemini API key não configurada. Configure GEMINI_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section6(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.gemini_model.generate_content(prompt)
+
+            # Extrair texto
+            generated_text = response.text.strip()
+
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 6 com Gemini: {error_msg}")
+
+    def _generate_section6_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 6 (Reação e Uso da Força) usando Groq.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section6(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 6 com Groq: {error_msg}")
+
+    def _build_prompt_section6(self, section_data: Dict[str, str]) -> str:
+        """
+        Constrói prompt para Seção 6 (Reação e Uso da Força).
+
+        Fonte:
+        - materiais-claudio/_02_uso_da_forca_e_algemas.txt
+        - materiais-claudio/_08_atendimento_medico_e_integridade_fisica_do_autor.txt
+        - Súmula Vinculante 11 (STF) + Decreto 8.858/2016
+        """
+
+        # Verifica se seção foi pulada (não houve resistência)
+        if section_data.get("6.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""  # Não gerar texto
+
+        # Extrair respostas
+        descricao_resistencia = section_data.get("6.2", "Não informado")
+        tecnica_aplicada = section_data.get("6.3", "Não informado")
+        justificativa_algemas = section_data.get("6.4", "Não informado")
+        ferimentos = section_data.get("6.5", "Não informado")
+
+        # Construir prompt baseado no material do Claudio
+        prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 6 (Reação e Uso da Força) do BO de tráfico de drogas.
+
+REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
+
+1. NUNCA invente informações não fornecidas pelo usuário
+2. Use APENAS os dados das respostas fornecidas abaixo
+3. Escreva em terceira pessoa, tempo passado
+4. Use linguagem técnica, objetiva e norma culta
+5. Descreva AÇÕES CONCRETAS (não impressões subjetivas)
+6. Gere texto em 4 parágrafos fluidos e objetivos
+7. PROIBIDO usar expressões genéricas como "resistiu ativamente", "uso moderado da força", "ficou agressivo"
+
+FUNDAMENTO JURÍDICO - USO DA FORÇA E ALGEMAS:
+
+SÚMULA VINCULANTE 11 (STF):
+"Só é lícito o uso de algemas em caso de resistência, fundado receio de fuga ou perigo
+à integridade física própria ou alheia, devendo ser justificada por escrito,
+sob pena de responsabilidade."
+
+DECRETO 8.858/2016 - PRINCÍPIOS FUNDAMENTAIS:
+1. A força e as algemas são REAÇÕES, nunca decisões prévias
+2. Deve-se narrar comportamentos CONCRETOS que geraram a necessidade
+3. Sem clichês ou termos vagos
+
+ESTRUTURA NARRATIVA OBRIGATÓRIA (4 PARÁGRAFOS):
+
+PARÁGRAFO 1 - RESISTÊNCIA:
+- O que o autor fez? (empurrou, correu, desferiu soco, etc.)
+- Contra quem? (nome e graduação do policial)
+- Em que contexto? (durante abordagem, ao ser revistado, etc.)
+
+PARÁGRAFO 2 - TÉCNICA E RESULTADO:
+- Quem aplicou? (graduação + nome)
+- Qual técnica? (chave de braço, cotovelada, taser, etc.)
+- Qual resultado? (imobilizou, neutralizou, conteve)
+
+PARÁGRAFO 3 - ALGEMAS:
+- Por que foi necessário? (risco de fuga, agressividade, etc.)
+- Quem algemou?
+
+PARÁGRAFO 4 - INTEGRIDADE FÍSICA:
+- Houve lesão? (sim/não)
+- Se sim: qual lesão, como ocorreu, onde foi atendido, nº da ficha
+- Se não: mencionar que a guarnição verificou integridade
+
+ERROS A EVITAR (NULIDADE CERTA):
+❌ "Foi necessário uso moderado da força" (genérico)
+❌ "O autor resistiu" (sem descrever como)
+❌ "Foi algemado por segurança" (sem fato concreto)
+❌ "Houve resistência ativa" (linguagem policial vaga)
+❌ "O autor ficou agressivo" (subjetivo)
+❌ "Nada a relatar" sobre integridade (omissão legal)
+
+REGRA DE OURO: "Narrar AÇÕES, não IMPRESSÕES"
+
+---
+
+INFORMAÇÕES FORNECIDAS PELO USUÁRIO:
+
+Descrição da resistência (o que o autor FEZ):
+{descricao_resistencia}
+
+Técnica aplicada (quem, qual técnica, resultado):
+{tecnica_aplicada}
+
+Justificativa das algemas (fato objetivo):
+{justificativa_algemas}
+
+Ferimentos e integridade física:
+{ferimentos}
+
+---
+
+IMPORTANTE:
+
+- A força e as algemas são REAÇÕES a comportamentos concretos (nunca decisões arbitrárias)
+- Sempre descrever AÇÕES ESPECÍFICAS (correu, empurrou, desferiu soco, tentou fugir)
+- Cada policial mencionado deve ter graduação + nome
+- A integridade física é OBRIGATÓRIA (com ou sem ferimentos, deve-se relatar)
+- Se houver ferimentos, SEMPRE mencionar: lesão + causa + hospital/UPA + nº da ficha
+- Se alguma resposta estiver como "Não informado", OMITA aquela informação
+- Dois espaços entre frases
+- Manter coerência temporal: resistência → contenção → algemas → verificação de integridade
+
+GERE AGORA O TEXTO DA SEÇÃO 6, seguindo RIGOROSAMENTE as regras acima:"""
+
+        return prompt

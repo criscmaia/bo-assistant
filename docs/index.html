@@ -297,6 +297,36 @@
                         </div>
                     </details>
 
+                    <!-- Seção 5 - Fundada Suspeita -->
+                    <details id="section5-card" class="mb-2 border border-pink-200 rounded-lg hidden" open>
+                        <summary class="cursor-pointer bg-pink-50 p-3 font-semibold text-pink-900 rounded-t-lg hover:bg-pink-100 transition-colors">
+                            🎯 Seção 5 - Fundada Suspeita
+                        </summary>
+                        <div class="bg-white p-4 border-t border-pink-200">
+                            <pre id="section5-text" class="whitespace-pre-wrap text-sm text-gray-800 mb-3"></pre>
+                            <button
+                                onclick="copySection(5)"
+                                class="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                                📋 Copiar Seção 5
+                            </button>
+                        </div>
+                    </details>
+
+                    <!-- Seção 6 - Reação e Uso da Força -->
+                    <details id="section6-card" class="mb-2 border border-teal-200 rounded-lg hidden" open>
+                        <summary class="cursor-pointer bg-teal-50 p-3 font-semibold text-teal-900 rounded-t-lg hover:bg-teal-100 transition-colors">
+                            💪 Seção 6 - Reação e Uso da Força
+                        </summary>
+                        <div class="bg-white p-4 border-t border-teal-200">
+                            <pre id="section6-text" class="whitespace-pre-wrap text-sm text-gray-800 mb-3"></pre>
+                            <button
+                                onclick="copySection(6)"
+                                class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                                📋 Copiar Seção 6
+                            </button>
+                        </div>
+                    </details>
+
                     <!-- Botão para copiar BO completo -->
                     <button
                         onclick="copyAllSections()"
@@ -371,6 +401,14 @@
             '5.2': 'O que a equipe viu ao chegar no local da ocorrência?',
             '5.3': 'Quem viu, de onde viu, o que exatamente viu? (informe graduação e nome)',
             '5.4': 'Descreva as características e ações dos abordados (roupa, porte, gestos, nome completo e vulgo)'
+        };
+
+        const SECTION6_QUESTIONS = {
+            '6.1': 'Houve resistência durante a abordagem?',
+            '6.2': 'Descreva a resistência com fatos concretos (o que o autor fez exatamente?)',
+            '6.3': 'Qual técnica foi aplicada, por quem (graduação + nome), e qual foi o resultado?',
+            '6.4': 'Por que foi necessário algemar? (justificativa objetiva)',
+            '6.5': 'Houve ferimentos? Se sim, descreva: em quem, qual lesão, atendimento e nº da ficha hospitalar'
         };
 
         // Manter compatibilidade com código existente (Seção 1)
@@ -473,6 +511,12 @@
             }
             if (document.getElementById('section4-text')?.textContent) {
                 generatedTexts['section4'] = document.getElementById('section4-text').textContent;
+            }
+            if (document.getElementById('section5-text')?.textContent) {
+                generatedTexts['section5'] = document.getElementById('section5-text').textContent;
+            }
+            if (document.getElementById('section6-text')?.textContent) {
+                generatedTexts['section6'] = document.getElementById('section6-text').textContent;
             }
 
             // Capturar status das seções
@@ -720,15 +764,25 @@
                     if (draft.generatedTexts.section4) {
                         addGeneratedSectionText(4, draft.generatedTexts.section4);
                     }
+                    if (draft.generatedTexts.section5) {
+                        addGeneratedSectionText(5, draft.generatedTexts.section5);
+                    }
+                    if (draft.generatedTexts.section6) {
+                        addGeneratedSectionText(6, draft.generatedTexts.section6);
+                    }
                 }
 
-                // 5. Atualizar sidebar se estiver na Seção 2, 3 ou 4
+                // 5. Atualizar sidebar se estiver na Seção 2, 3, 4, 5 ou 6
                 if (currentSection === 2) {
                     updateSidebarForSection2();
                 } else if (currentSection === 3) {
                     updateSidebarForSection3();
                 } else if (currentSection === 4) {
                     updateSidebarForSection4();
+                } else if (currentSection === 5) {
+                    updateSidebarForSection5();
+                } else if (currentSection === 6) {
+                    updateSidebarForSection6();
                 }
 
                 // 6. SINCRONIZAÇÃO EM BLOCO (1 requisição única)
@@ -761,6 +815,8 @@
                 const section2Count = Object.keys(answersState).filter(s => s.startsWith('2.')).length;
                 const section3Count = Object.keys(answersState).filter(s => s.startsWith('3.')).length;
                 const section4Count = Object.keys(answersState).filter(s => s.startsWith('4.')).length;
+                const section5Count = Object.keys(answersState).filter(s => s.startsWith('5.')).length;
+                const section6Count = Object.keys(answersState).filter(s => s.startsWith('6.')).length;
 
                 Object.keys(answersState).forEach(step => {
                     updateSidebarAnswer(step, answersState[step]);
@@ -768,7 +824,11 @@
                 });
 
                 // Atualizar progresso
-                if (currentSection === 4) {
+                if (currentSection === 6) {
+                    updateSidebarProgress(section6Count, 5);
+                } else if (currentSection === 5) {
+                    updateSidebarProgress(section5Count, 4);
+                } else if (currentSection === 4) {
                     updateSidebarProgress(section4Count, 5);
                 } else if (currentSection === 3) {
                     updateSidebarProgress(section3Count, 8);
@@ -791,6 +851,8 @@
                         nextQuestion = SECTION4_QUESTIONS[currentQuestionStep];
                     } else if (currentSection === 5) {
                         nextQuestion = SECTION5_QUESTIONS[currentQuestionStep];
+                    } else if (currentSection === 6) {
+                        nextQuestion = SECTION6_QUESTIONS[currentQuestionStep];
                     }
 
                     if (nextQuestion) {
@@ -919,9 +981,35 @@
                         document.getElementById('btn-start-section5').addEventListener('click', startSection5);
 
                         showToast('✅ Rascunho restaurado! Seção 4 completa.');
-                    } else if (currentSection === 5) {
+                    } else if (currentSection === 5 && !document.getElementById('btn-start-section6')) {
                         disableInput();
-                        // Seção 5 é a última - BO completo
+
+                        // Criar botão para iniciar Seção 6
+                        const section6ButtonDiv = document.createElement('div');
+                        section6ButtonDiv.id = 'section6-button-container';
+                        section6ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-xl text-center';
+                        section6ButtonDiv.innerHTML = `
+                            <h3 class="text-xl font-bold text-teal-900 mb-2">💪 Próxima Etapa: Reação e Uso da Força</h3>
+                            <p class="text-gray-700 mb-4">
+                                Houve resistência ou uso de força durante a abordagem? Continue para a próxima seção.
+                            </p>
+                            <button
+                                id="btn-start-section6"
+                                class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
+                                ▶️ Iniciar Seção 6
+                            </button>
+                        `;
+
+                        // Inserir após o container de textos gerados
+                        generatedSectionsContainer.parentElement.appendChild(section6ButtonDiv);
+
+                        // Event listener para o botão
+                        document.getElementById('btn-start-section6').addEventListener('click', startSection6);
+
+                        showToast('✅ Rascunho restaurado! Seção 5 completa.');
+                    } else if (currentSection === 6) {
+                        disableInput();
+                        // Seção 6 é a última - BO completo
                         showToast('✅ Rascunho restaurado! BO completo.');
                         boCompleted = true;
                         console.log('[BO] BO marcado como completo (restaurado)');
@@ -1040,7 +1128,25 @@
                 fullBO += section4Text.textContent.trim() + "\n\n\n";
             }
 
-            // Adicionar mais seções futuras aqui (5-8)
+            // Seção 5
+            const section5Text = document.getElementById('section5-text');
+            if (section5Text && section5Text.textContent.trim()) {
+                fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                fullBO += "SEÇÃO 5 - FUNDADA SUSPEITA\n";
+                fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+                fullBO += section5Text.textContent.trim() + "\n\n\n";
+            }
+
+            // Seção 6
+            const section6Text = document.getElementById('section6-text');
+            if (section6Text && section6Text.textContent.trim()) {
+                fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                fullBO += "SEÇÃO 6 - REAÇÃO E USO DA FORÇA\n";
+                fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+                fullBO += section6Text.textContent.trim() + "\n\n\n";
+            }
+
+            // Adicionar mais seções futuras aqui (7-8)
 
             if (!fullBO) {
                 showToast('❌ Nenhum texto gerado para copiar');
@@ -1073,8 +1179,8 @@
             2: { emoji: '🚗', name: 'Abordagem a Veículo', questions: SECTION2_QUESTIONS },
             3: { emoji: '👁️', name: 'Campana', questions: SECTION3_QUESTIONS },
             4: { emoji: '🏠', name: 'Entrada em Domicílio', questions: SECTION4_QUESTIONS },
-            5: { emoji: '🎯', name: 'Fundada Suspeita', questions: {} },
-            6: { emoji: '⚠️', name: 'Reação e Uso da Força', questions: {} },
+            5: { emoji: '🎯', name: 'Fundada Suspeita', questions: SECTION5_QUESTIONS },
+            6: { emoji: '💪', name: 'Reação e Uso da Força', questions: SECTION6_QUESTIONS },
             7: { emoji: '📦', name: 'Apreensões', questions: {} },
             8: { emoji: '🚔', name: 'Condução e Ocorrências', questions: {} }
         };
@@ -1563,6 +1669,125 @@
             updateSidebarStatus('5.1', 'current');
         }
 
+        function updateSidebarForSection6() {
+            // Remover cards anteriores de seções completadas
+            const existingCompletedCards = sidebar.querySelectorAll('.section-completed-card');
+            existingCompletedCards.forEach(card => card.remove());
+
+            const sidebarHeaderDiv = sidebar.querySelector('.mb-4.pb-4.border-b');
+
+            // Adicionar cards de Seção 1, 2, 3, 4 e 5 completadas
+            if (sidebarHeaderDiv) {
+                const section1Completed = document.createElement('div');
+                section1Completed.className = 'section-completed-card mb-2';
+                section1Completed.innerHTML = `
+                    <div class="flex items-center gap-2 text-sm bg-green-50 border border-green-200 rounded-lg p-2">
+                        <span class="text-green-600 font-bold text-lg">✓</span>
+                        <span class="font-semibold text-green-800">📝 Seção 1 - Contexto</span>
+                    </div>
+                `;
+
+                const section2Completed = document.createElement('div');
+                section2Completed.className = 'section-completed-card mb-2';
+                section2Completed.innerHTML = `
+                    <div class="flex items-center gap-2 text-sm bg-blue-50 border border-blue-200 rounded-lg p-2">
+                        <span class="text-blue-600 font-bold text-lg">✓</span>
+                        <span class="font-semibold text-blue-800">🚗 Seção 2 - Abordagem</span>
+                    </div>
+                `;
+
+                const section3Completed = document.createElement('div');
+                section3Completed.className = 'section-completed-card mb-2';
+                section3Completed.innerHTML = `
+                    <div class="flex items-center gap-2 text-sm bg-purple-50 border border-purple-200 rounded-lg p-2">
+                        <span class="text-purple-600 font-bold text-lg">✓</span>
+                        <span class="font-semibold text-purple-800">👁️ Seção 3 - Campana</span>
+                    </div>
+                `;
+
+                const section4Completed = document.createElement('div');
+                section4Completed.className = 'section-completed-card mb-2';
+                section4Completed.innerHTML = `
+                    <div class="flex items-center gap-2 text-sm bg-orange-50 border border-orange-200 rounded-lg p-2">
+                        <span class="text-orange-600 font-bold text-lg">✓</span>
+                        <span class="font-semibold text-orange-800">🏠 Seção 4 - Entrada</span>
+                    </div>
+                `;
+
+                const section5Completed = document.createElement('div');
+                section5Completed.className = 'section-completed-card mb-4';
+                section5Completed.innerHTML = `
+                    <div class="flex items-center gap-2 text-sm bg-pink-50 border border-pink-200 rounded-lg p-2">
+                        <span class="text-pink-600 font-bold text-lg">✓</span>
+                        <span class="font-semibold text-pink-800">🎯 Seção 5 - Fundada Suspeita</span>
+                    </div>
+                `;
+
+                // Inserir ANTES do header
+                sidebarHeaderDiv.parentNode.insertBefore(section5Completed, sidebarHeaderDiv);
+                sidebarHeaderDiv.parentNode.insertBefore(section4Completed, sidebarHeaderDiv);
+                sidebarHeaderDiv.parentNode.insertBefore(section3Completed, sidebarHeaderDiv);
+                sidebarHeaderDiv.parentNode.insertBefore(section2Completed, sidebarHeaderDiv);
+                sidebarHeaderDiv.parentNode.insertBefore(section1Completed, sidebarHeaderDiv);
+            }
+
+            // Atualizar título do header para Seção 6
+            const sidebarTitle = sidebar.querySelector('h2');
+            if (sidebarTitle) {
+                sidebarTitle.textContent = '💪 Seção 6 - Reação e Uso da Força';
+            }
+
+            // Limpar perguntas antigas
+            questionsList.innerHTML = '';
+
+            // Adicionar perguntas da Seção 6
+            Object.entries(SECTION6_QUESTIONS).forEach(([step, question]) => {
+                const questionItem = document.createElement('div');
+                questionItem.id = `question-item-${step}`;
+                questionItem.className = 'border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors mb-2';
+                questionItem.dataset.step = step;
+
+                questionItem.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <div class="flex-shrink-0 w-8 h-6 rounded flex items-center justify-center text-xs font-bold bg-teal-100 text-teal-600 mt-0.5" id="icon-${step}">
+                            ${step}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-700 mb-1">${question}</p>
+                            <p class="text-xs text-gray-500 truncate" id="answer-${step}">
+                                <span class="italic">Aguardando...</span>
+                            </p>
+                        </div>
+                    </div>
+                `;
+
+                questionItem.addEventListener('click', () => toggleQuestionExpand(step));
+                questionsList.appendChild(questionItem);
+            });
+
+            // Seções futuras (7-8) - Apenas preview
+            for (let i = 7; i <= 8; i++) {
+                const section = ALL_SECTIONS[i];
+                const sectionPreview = document.createElement('div');
+                sectionPreview.className = 'mt-4 pt-3 border-t border-gray-200';
+                sectionPreview.id = `section-preview-${i}`;
+                sectionPreview.innerHTML = `
+                    <div class="flex items-center gap-2 text-sm text-gray-400">
+                        <span>${section.emoji}</span>
+                        <span class="font-medium">Seção ${i} - ${section.name}</span>
+                        <span class="ml-auto text-xs">🔒</span>
+                    </div>
+                `;
+                questionsList.appendChild(sectionPreview);
+            }
+
+            // Resetar progresso para Seção 6 (5 perguntas: 6.1 a 6.5)
+            updateSidebarProgress(0, 5);
+
+            // Marcar primeira pergunta como current
+            updateSidebarStatus('6.1', 'current');
+        }
+
         // Toggle sidebar mobile
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.add('open');
@@ -2029,6 +2254,8 @@
                     headerSubtitle.textContent = 'Seção 4 - Entrada em Domicílio';
                 } else if (currentSection === 5) {
                     headerSubtitle.textContent = 'Seção 5 - Fundada Suspeita';
+                } else if (currentSection === 6) {
+                    headerSubtitle.textContent = 'Seção 6 - Reação e Uso da Força';
                 }
             }
         }
@@ -2278,6 +2505,67 @@
             }
         }
 
+        async function startSection6() {
+            try {
+                // Desabilitar botão para evitar cliques duplicados
+                const button = document.getElementById('btn-start-section6');
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = '⏳ Iniciando...';
+                }
+
+                const response = await fetch(`${API_URL}/start_section/6`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao iniciar Seção 6');
+                }
+
+                const data = await response.json();
+
+                // Atualizar estado da aplicação
+                currentSection = 6;
+                currentQuestionStep = data.current_step;
+
+                console.log('Seção 6 iniciada:', data);
+
+                // Atualizar header
+                updateHeaderSection();
+
+                // Limpar card/botão de transição para Seção 6 (pode ter dois IDs possíveis)
+                const transitionCard = document.getElementById('section6-transition-card');
+                if (transitionCard) transitionCard.remove();
+                const buttonContainer = document.getElementById('section6-button-container');
+                if (buttonContainer) buttonContainer.remove();
+
+                // Mensagem de início da Seção 6
+                addMessage('💪 Iniciando Seção 6 - Reação e Uso da Força', true, false, null, 'evt_section6_start');
+
+                // Adicionar primeira pergunta da Seção 6
+                setTimeout(() => {
+                    addMessage(data.question, true, false, data.current_step, 'evt_section6_first_q');
+                    enableInput();
+
+                    // Atualizar sidebar para Seção 6
+                    updateSidebarForSection6();
+                }, 500);
+
+            } catch (error) {
+                console.error('Erro ao iniciar Seção 6:', error);
+                addMessage('❌ Erro ao iniciar Seção 6. Tente novamente.', true, true);
+
+                // Reabilitar botão em caso de erro
+                const button = document.getElementById('btn-start-section6');
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = '▶️ Iniciar Seção 6';
+                }
+            }
+        }
+
         async function sendMessage() {
 			const message = userInput.value.trim();
 			if (!message || isWaitingResponse) return;
@@ -2386,6 +2674,9 @@
                 } else if (currentSection === 5) {
                     progress = data.current_step === 'complete' ? 4 : parseInt(data.current_step.split('.')[1]);
                     totalQuestions = 4;
+                } else if (currentSection === 6) {
+                    progress = data.current_step === 'complete' ? 5 : parseInt(data.current_step.split('.')[1]);
+                    totalQuestions = 5;
                 }
 
                 // Atualizar sidebar com step que FOI VALIDADO (displayStep)
@@ -2429,7 +2720,9 @@
                         completionMessage = '✅ Seção 4 completa! Gerando texto...';
                     } else if (currentSection === 5) {
                         completionMessage = '✅ Seção 5 completa! Gerando texto...';
-                        boCompleted = true; // Seção 5 é a última implementada
+                    } else if (currentSection === 6) {
+                        completionMessage = '✅ Seção 6 completa! Gerando texto...';
+                        boCompleted = true; // Seção 6 é a última implementada
                         console.log('[BO] BO marcado como completo');
                     }
 
@@ -2529,8 +2822,29 @@
 
                             // Event listener para o botão
                             document.getElementById('btn-start-section5').addEventListener('click', startSection5);
-                        } else if (currentSection === 5 && boCompleted) {
-                            // Seção 5 completa - BO finalizado
+                        } else if (currentSection === 5 && !boCompleted) {
+                            const section6ButtonDiv = document.createElement('div');
+                            section6ButtonDiv.id = 'section6-transition-card';
+                            section6ButtonDiv.className = 'mt-4 p-4 bg-teal-50 border border-teal-200 rounded-lg text-center fade-in';
+                            section6ButtonDiv.innerHTML = `
+                                <h3 class="font-bold text-teal-900 mb-2">💪 Seção 6 - Reação e Uso da Força</h3>
+                                <p class="text-sm text-teal-700 mb-3">
+                                    Houve resistência ou uso de força durante a abordagem? Continue para a próxima seção.
+                                </p>
+                                <button
+                                    id="btn-start-section6"
+                                    class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
+                                    ▶️ Iniciar Seção 6
+                                </button>
+                            `;
+
+                            // Inserir após o container de textos gerados
+                            generatedSectionsContainer.parentElement.appendChild(section6ButtonDiv);
+
+                            // Event listener para o botão
+                            document.getElementById('btn-start-section6').addEventListener('click', startSection6);
+                        } else if (currentSection === 6 && boCompleted) {
+                            // Seção 6 completa - BO finalizado
                             console.log('[BO] Todas as seções implementadas foram concluídas');
                         }
 

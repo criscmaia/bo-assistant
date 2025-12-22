@@ -1,8 +1,26 @@
-# Changelog v0.9.0
+# Changelog v0.10.0
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 em Andamento - Seções 3-8 (v0.7.0+)
+
+#### v0.10.0 (Dez 2025) - Seção 6: Reação e Uso da Força
+- [x] **Seção 6: Reação e Uso da Força** - 5 perguntas (6.1 a 6.5)
+- [x] State machine com lógica condicional (pula se não houve resistência em 6.1)
+- [x] **NOVA FUNCIONALIDADE:** Validação de frases proibidas em 6.2 (rejeita "resistiu ativamente", "uso moderado da força", etc.)
+- [x] Validador de técnica e graduação militar obrigatória em 6.3
+- [x] Validador de justificativa objetiva para algemas em 6.4 (palavras-chave obrigatórias)
+- [x] **NOVA FUNCIONALIDADE:** Validação condicional de hospital em 6.5 (se mencionar ferimento, exige hospital/UPA + nº da ficha)
+- [x] Geração de texto via LLM (Gemini + Groq) com fundamento jurídico Súmula Vinculante 11 (STF) + Decreto 8.858/2016
+- [x] Estrutura narrativa obrigatória em 4 parágrafos (Resistência → Técnica → Algemas → Integridade Física)
+- [x] Testes unitários (16 testes) passando - state machine + validator com frases proibidas
+- [x] Testes de integração (6 testes) - validação de frases proibidas, graduação, hospital
+- [x] Test scenarios JSON atualizado com casos de teste da Seção 6 (erro de validação + retry)
+- [x] Documentação completa (TESTING.md com Testes 16-20, API.md com /start_section/6, CHANGELOG.md, README.md)
+- [x] Frontend com 21-point checklist completo (color teal, startSection6, updateSidebarForSection6, etc.)
+- [x] E2E automation com --start-section 6 para fast-start testing
+- [x] Seção 6 marca BO como "COMPLETO" (6/8 seções implementadas)
+- [x] Backend completamente integrado - versão v0.10.0
 
 #### v0.9.0 (Dez 2025) - Seção 5: Fundada Suspeita
 - [x] **Seção 5: Fundada Suspeita** - 4 perguntas (5.1 a 5.4)

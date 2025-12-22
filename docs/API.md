@@ -1,6 +1,6 @@
 # 📡 Referência de API - BO Inteligente
 
-**Versão:** v0.9.0
+**Versão:** v0.10.0
 **Base URL (Produção):** `https://bo-assistant-backend.onrender.com`
 **Base URL (Local):** `http://localhost:8000`
 
@@ -193,12 +193,12 @@ curl -X POST https://bo-assistant-backend.onrender.com/chat \
 POST /start_section/{section_number}
 ```
 
-**Descrição:** Inicia uma nova seção do BO (ex: Seção 2 - Abordagem a Veículo, Seção 3 - Campana, Seção 4 - Entrada em Domicílio, Seção 5 - Fundada Suspeita).
+**Descrição:** Inicia uma nova seção do BO (ex: Seção 2 - Abordagem a Veículo, Seção 3 - Campana, Seção 4 - Entrada em Domicílio, Seção 5 - Fundada Suspeita, Seção 6 - Reação e Uso da Força).
 
 **Path Parameters:**
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
-| `section_number` | int | Número da seção (2-5) |
+| `section_number` | int | Número da seção (2-6) |
 
 **Request Body:**
 ```json
@@ -251,6 +251,17 @@ POST /start_section/{section_number}
 }
 ```
 
+**Resposta (Seção 6):**
+```json
+{
+  "message": "Seção 6 iniciada",
+  "section": 6,
+  "question": "Houve resistência durante a abordagem?",
+  "step": "6.1",
+  "total_steps": 5
+}
+```
+
 **Exemplo (curl - Seção 2):**
 ```bash
 curl -X POST https://bo-assistant-backend.onrender.com/start_section/2 \
@@ -275,6 +286,13 @@ curl -X POST https://bo-assistant-backend.onrender.com/start_section/4 \
 **Exemplo (curl - Seção 5):**
 ```bash
 curl -X POST https://bo-assistant-backend.onrender.com/start_section/5 \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "uuid"}'
+```
+
+**Exemplo (curl - Seção 6):**
+```bash
+curl -X POST https://bo-assistant-backend.onrender.com/start_section/6 \
   -H "Content-Type: application/json" \
   -d '{"session_id": "uuid"}'
 ```

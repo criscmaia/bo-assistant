@@ -1,7 +1,7 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.9.0
-**Última atualização**: 21/12/2025
+## Versão Atual: v0.10.0
+**Última atualização**: 22/12/2025
 
 ---
 
@@ -9,8 +9,9 @@
 
 **Fase 2 (Seções 3-8)** em andamento:
 - ✅ **v0.7.0 - Seção 3: Campana** - Completamente implementada
-- ✅ **v0.9.0 - Seção 5: Fundada Suspeita** - Completamente implementada
 - ✅ **v0.8.0 - Seção 4: Entrada em Domicílio** - Completamente implementada
+- ✅ **v0.9.0 - Seção 5: Fundada Suspeita** - Completamente implementada
+- ✅ **v0.10.0 - Seção 6: Reação e Uso da Força** - Completamente implementada
 
 ### ✅ Status da Fase 1 (Concluída)
 
@@ -64,17 +65,22 @@ Implementar as 6 seções restantes do BO completo baseadas no material do Sgt. 
 - ✅ Ações detalhadas de cada policial
 - ✅ Fundamento jurídico STF
 
-#### 🎯 Seção 5: Fundada Suspeita
-- Fatos concretos observados
-- Jurisprudência aplicável (STF HC 261029)
-- Conduta atípica detalhada
-- Correlação com denúncias
+#### ✅ Seção 5: Fundada Suspeita (v0.9.0 - CONCLUÍDA)
+- ✅ Fatos concretos observados (4 perguntas: 5.1-5.4)
+- ✅ Jurisprudência aplicável (STF HC 261029, Art. 244 CPP)
+- ✅ Validação de graduação militar em 5.3
+- ✅ Validação de características individualizadas em 5.4
+- ✅ Seção 5 marca BO como completo (última seção por agora)
 
-#### ⚠️ Seção 6: Reação e Uso da Força
-- Tipo de reação dos envolvidos
-- Nível de força empregado
-- Procedimentos de segurança
-- Preservação da vida
+#### ✅ Seção 6: Reação e Uso da Força (v0.10.0 - CONCLUÍDA)
+- ✅ Resistência durante abordagem (5 perguntas: 6.1-6.5)
+- ✅ **NOVA FUNCIONALIDADE**: Validação de frases proibidas (rejeita "resistiu ativamente", etc.)
+- ✅ **NOVA FUNCIONALIDADE**: Validação condicional de hospital (6.5)
+- ✅ Validação de técnica e graduação militar obrigatória (6.3)
+- ✅ Validação de justificativa objetiva para algemas (6.4)
+- ✅ Jurisprudência: Súmula Vinculante 11 (STF) + Decreto 8.858/2016
+- ✅ Estrutura narrativa em 4 parágrafos (Resistência → Técnica → Algemas → Integridade Física)
+- ✅ Seção 6 marca BO como completo (última seção por agora - 6/8)
 
 #### 📦 Seção 7: Apreensões
 - Descrição detalhada dos ilícitos
@@ -235,18 +241,24 @@ Implementar as 6 seções restantes do BO completo baseadas no material do Sgt. 
 
 ## 📅 Sugestão de Priorização (próximos 6 meses)
 
-### Sprint 1-2 (Jan-Fev 2026): Fase 2 - Seções 3-4
-1. Definir perguntas com Sgt. Claudio
-2. Implementar Seção 3 (Campana)
-3. Implementar Seção 4 (Entrada Domicílio)
-4. Testar com casos reais
+### ✅ Sprint 1-4 (Dez 2025): Fase 2 - Seções 3-6 (CONCLUÍDO)
+1. ✅ Implementar Seção 3 (Campana) - v0.7.0
+2. ✅ Implementar Seção 4 (Entrada Domicílio) - v0.8.0
+3. ✅ Implementar Seção 5 (Fundada Suspeita) - v0.9.0
+4. ✅ Implementar Seção 6 (Reação e Uso da Força) - v0.10.0
+5. ✅ Testes com casos reais - 16 unitários + 6 integração passando
 
-### Sprint 3-4 (Mar-Abr 2026): Analytics Básico
+### Sprint 5-6 (Jan-Fev 2026): Fase 2 - Seções 7-8
+1. Implementar Seção 7 (Apreensões)
+2. Implementar Seção 8 (Condução e Ocorrências)
+3. Testar fluxo completo de 8 seções
+
+### Sprint 7-8 (Mar-Abr 2026): Analytics Básico
 1. Implementar métricas operacionais básicas
 2. Criar dashboard simples de uso do sistema
 3. Adicionar exportação CSV de logs
 
-### Sprint 5-6 (Mai-Jun 2026): Fase 3 - Qualidade
+### Sprint 9-10 (Mai-Jun 2026): Fase 3 - Qualidade
 1. Implementar exportação PDF
 2. Adicionar suporte a Claude/OpenAI como backup
 3. Sistema de autenticação simples
@@ -254,7 +266,6 @@ Implementar as 6 seções restantes do BO completo baseadas no material do Sgt. 
 ### Backlog Futuro (Jul+ 2026):
 - Relatórios avançados de qualidade
 - Integração com BI externo
-- Seções 5-8 do BO
 - App mobile
 
 ---

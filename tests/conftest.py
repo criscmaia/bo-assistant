@@ -80,6 +80,17 @@ def section5_answers() -> Dict:
     }
 
 @pytest.fixture
+def section6_answers() -> Dict:
+    """Respostas válidas para Seção 6 (todas as 5 perguntas)"""
+    return {
+        "6.1": "SIM",
+        "6.2": "Durante a abordagem, o autor empurrou o Cabo Rezende com força no peito e tentou correr em direção ao beco lateral, sendo alcançado após aproximadamente 10 metros",
+        "6.3": "O Soldado Pires aplicou chave de braço no suspeito, forçando o cotovelo esquerdo, e o imobilizou no chão. O Cabo Rezende auxiliou na contenção segurando as pernas do autor",
+        "6.4": "Diante da tentativa de fuga e da agressão física contra o Cabo Rezende, o autor foi algemado para evitar nova tentativa de evasão e garantir a segurança da guarnição",
+        "6.5": "O autor apresentou escoriação no joelho direito e hematoma no braço esquerdo. Foi encaminhado ao Hospital João XXIII (ficha nº 2025-78901), medicado e liberado"
+    }
+
+@pytest.fixture
 def send_answer(api_base_url):
     """Helper para enviar resposta ao endpoint /chat"""
     def _send(session_id: str, message: str, current_section: int, llm_provider: str = "gemini"):

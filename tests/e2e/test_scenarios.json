@@ -299,13 +299,63 @@
           "screenshot": "30-section5-final-all-sections"
         }
       ]
+    },
+    {
+      "section_number": 6,
+      "name": "Reação e Uso da Força",
+      "emoji": "💪",
+      "total_questions": 5,
+      "steps": [
+        {
+          "step": "6.1",
+          "answer": "SIM",
+          "expect": "pass",
+          "screenshot": "31-section6-start"
+        },
+        {
+          "step": "6.2",
+          "answer": "O autor resistiu ativamente",
+          "expect": "fail",
+          "reason": "Frase proibida: 'resistiu ativamente'",
+          "test_forbidden": true,
+          "screenshot": "32-section6-forbidden-phrase-error"
+        },
+        {
+          "step": "6.2_retry",
+          "answer": "O autor empurrou o Cabo Rezende com força no peito tentando fugir em direção ao beco lateral, sendo alcançado após aproximadamente 10 metros de perseguição a pé",
+          "expect": "pass"
+        },
+        {
+          "step": "6.3",
+          "answer": "O Soldado Pires aplicou chave de braço no suspeito, forçando o cotovelo esquerdo e o imobilizou no chão. O Cabo Rezende auxiliou na contenção segurando as pernas do autor até a completa imobilização sem lesões visíveis no momento",
+          "expect": "pass"
+        },
+        {
+          "step": "6.4",
+          "answer": "Algemas não foram necessárias",
+          "expect": "fail",
+          "reason": "Falta justificativa objetiva (min 20 caracteres e palavras-chave)",
+          "screenshot": "33-section6-justification-error"
+        },
+        {
+          "step": "6.4_retry",
+          "answer": "Diante da agressividade demonstrada ao tentar agredir os policiais e o risco de nova tentativa de agressão durante o deslocamento, o autor foi algemado para garantir a segurança da guarnição e evitar lesões a terceiros",
+          "expect": "pass"
+        },
+        {
+          "step": "6.5",
+          "answer": "Não houve ferimentos. A guarnição verificou a integridade física do autor no local da abordagem, que não apresentou nenhuma lesão corporal decorrente da contenção, dispensando atendimento médico",
+          "expect": "pass",
+          "screenshot": "34-section6-final-all-sections"
+        }
+      ]
     }
   ],
   "metadata": {
-    "total_screenshots": 30,
-    "desktop_screenshots": 19,
-    "mobile_screenshots": 11,
-    "video_duration_estimate": "10 minutes",
-    "note": "Seção 5 adicionada: 4 screenshots desktop + 2 mobile. Total: Seções 1-5 completas (5 seções, BO completo)"
+    "total_screenshots": 34,
+    "desktop_screenshots": 22,
+    "mobile_screenshots": 12,
+    "video_duration_estimate": "12 minutes",
+    "note": "Seção 6 adicionada: 4 screenshots desktop + 1 mobile. Total: Seções 1-6 completas (6 seções, BO completo com Reação e Uso da Força)"
   }
 }

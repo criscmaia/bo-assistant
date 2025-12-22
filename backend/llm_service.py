@@ -847,3 +847,216 @@ Gere APENAS o texto da Seção 4 agora (2-3 parágrafos fluidos):"""
                 raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
 
             raise Exception(f"Erro ao gerar texto da Seção 4 com Groq: {error_msg}")
+
+    # ========================================================================
+    # SEÇÃO 5: FUNDADA SUSPEITA
+    # ========================================================================
+
+    def generate_section5_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+        """
+        Gera texto narrativo da Seção 5 (Fundada Suspeita).
+
+        Args:
+            section_data: Dicionário com respostas {step: answer}
+            provider: "gemini", "groq", "claude" ou "openai"
+
+        Returns:
+            Texto gerado ou string vazia se seção foi pulada
+        """
+        # Se não houve abordagem por fundada suspeita, retorna vazio
+        if section_data.get("5.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""
+
+        # Gerar com provider selecionado
+        if provider == "gemini":
+            return self._generate_section5_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_section5_with_groq(section_data)
+        elif provider == "claude":
+            raise NotImplementedError("Claude ainda não implementado para Seção 5")
+        elif provider == "openai":
+            raise NotImplementedError("OpenAI ainda não implementado para Seção 5")
+        else:
+            raise ValueError(f"Provider {provider} não suportado")
+
+    def _generate_section5_with_gemini(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 5 usando Gemini.
+        """
+        if not self.gemini_model:
+            raise ValueError("Gemini API key não configurada. Configure GEMINI_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section5(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.gemini_model.generate_content(prompt)
+
+            # Extrair texto
+            generated_text = response.text.strip()
+
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 5 com Gemini: {error_msg}")
+
+    def _generate_section5_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 5 (Fundada Suspeita) usando Groq.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section5(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 5 com Groq: {error_msg}")
+
+    def _build_prompt_section5(self, section_data: Dict[str, str]) -> str:
+        """
+        Constrói prompt para Seção 5 (Fundada Suspeita).
+
+        Fonte:
+        - materiais-claudio/_01_fundada_suspeita.txt
+        - materiais-claudio/_regras_gerais_-_gpt_trafico.txt
+        """
+
+        # Verifica se seção foi pulada (não houve abordagem por fundada suspeita)
+        if section_data.get("5.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""  # Não gerar texto
+
+        # Extrair respostas
+        o_que_viu = section_data.get("5.2", "Não informado")
+        quem_viu = section_data.get("5.3", "Não informado")
+        caracteristicas = section_data.get("5.4", "Não informado")
+
+        # Construir prompt baseado no material do Claudio
+        prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 5 (Fundada Suspeita) do BO de tráfico de drogas.
+
+REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
+
+1. NUNCA invente informações não fornecidas pelo usuário
+2. Use APENAS os dados das respostas fornecidas abaixo
+3. Escreva em terceira pessoa, tempo passado
+4. Use linguagem técnica, objetiva e norma culta
+5. Descreva FATOS CONCRETOS observados (não impressões subjetivas)
+6. Gere texto em 2-3 parágrafos fluidos
+7. NÃO use juridiquês, gerúndio ou termos vagos como "em atitude suspeita"
+
+FUNDAMENTO JURÍDICO - FUNDADA SUSPEITA (STF HC 261029, Art. 244 CPP):
+
+A busca pessoal exige INDÍCIOS CONCRETOS E OBJETIVOS, não sendo suficiente:
+- Nervosismo isolado (sem contexto)
+- Mera presença em local de criminalidade
+- "Atitude suspeita" (termo vago e inadmissível)
+
+BASES LEGÍTIMAS PARA BUSCA PESSOAL (pelo menos uma):
+
+1. CONDUTA VISÍVEL E ANORMAL:
+   - Correr ou fugir ao avistar a viatura
+   - Desfazer-se de objetos (jogar sacola, arremessar algo)
+   - Vigiar terceiros de forma sistemática
+   - Simular transações comerciais (entrega rápida + dinheiro)
+
+2. INFORMAÇÃO PRÉVIA CONFIÁVEL:
+   - Denúncia anônima corroborada por observação direta
+   - BOs anteriores do local (registros de tráfico)
+   - Relatórios de inteligência
+   - Registros de monitoramento
+
+3. CONTEXTO SENSÍVEL RECONHECIDO:
+   - Ponto de tráfico comprovado (por registros ou investigações)
+   - Área com ocorrências recentes documentadas
+
+REQUISITOS DA ABORDAGEM:
+
+1. Sequência lógica dos fatos observados (o que vimos → comportamento anormal → abordagem)
+2. Individualização das percepções ("O Sgt. Silva viu X", "O Cb. Almeida observou Y")
+3. Conexão entre comportamento e suspeita de crime específico
+
+DADOS FORNECIDOS PELO USUÁRIO:
+
+- O que a equipe viu ao chegar: {o_que_viu}
+- Quem viu, de onde viu e o que exatamente observou: {quem_viu}
+- Características e ações dos abordados: {caracteristicas}
+
+ESTRUTURA NARRATIVA (seguir esta ordem):
+
+1. Contexto de chegada: o que a equipe visualizou ao chegar no local
+2. Observação específica: qual policial viu e o que exatamente observou
+3. Comportamento suspeito: reação dos abordados ao perceberem a viatura
+4. Identificação: características físicas, roupas e identificação completa (nome + vulgo)
+
+EXEMPLOS CORRETOS:
+
+✅ Exemplo 1 - Flagrante visual + reação suspeita:
+"Durante patrulhamento pela Rua das Palmeiras, região com registros anteriores de tráfico de drogas, a equipe visualizou um homem de camisa vermelha e bermuda jeans retirando pequenos invólucros de um buraco no muro e entregando-os a motociclistas que paravam rapidamente. O Sargento João, de dentro da viatura estacionada a aproximadamente 20 metros do local, observou o suspeito realizando pelo menos três entregas e recebendo dinheiro em troca. Ao perceber a aproximação da viatura, o indivíduo demonstrou nervosismo acentuado, guardou parte do material no bolso e tentou fugir em direção ao beco lateral. Foi realizada abordagem ao suspeito, posteriormente identificado como JOÃO DA SILVA SANTOS, vulgo 'Vermelho', CPF 123.456.789-00, residente na Rua das Palmeiras, nº 45."
+
+✅ Exemplo 2 - Local conhecido + comportamento anormal:
+"No local indicado pela denúncia, conhecido por registros de tráfico conforme BOs 2024-123 e 2024-456, a equipe observou um indivíduo de camiseta azul realizando contato rápido com motoristas que paravam por cerca de 10 segundos. O Cabo Almeida, posicionado na esquina oposta, viu o suspeito entregar pequenos pacotes e receber valores em espécie. Ao avistar a viatura, o indivíduo jogou uma pochete no chão e correu em direção ao Bar Central. Após cerco tático, foi abordado o indivíduo CARLOS SANTOS OLIVEIRA, alcunha 'Marreco', altura aproximada de 1,80m, trajando camiseta azul e bermuda preta."
+
+✅ Exemplo 3 - Vigilância + transação ilícita:
+"Na Rua Central, altura do número 200, durante operação de combate ao tráfico, o Soldado Pires visualizou um homem de boné preto realizando vigilância constante, olhando repetidamente para os dois lados da rua. Momentos depois, dois indivíduos se aproximaram, receberam algo das mãos do homem de boné e entregaram dinheiro. A troca durou menos de cinco segundos. Ao perceber a presença policial, o suspeito tentou esconder objetos na cintura e se desfez de uma sacola plástica. Foi abordado MARCOS VIEIRA DA COSTA, vulgo 'Marquinhos', morador da Rua Central, nº 220, trajando boné preto, camiseta branca e calça jeans."
+
+❌ ERROS A EVITAR (causam NULIDADE):
+
+• "Em atitude suspeita" (termo vago demais - INADMISSÍVEL)
+• "Demonstrou nervosismo" (sem descrever COMO demonstrou)
+• "Área conhecida pelo tráfico" (sem base objetiva - BOs, registros)
+• "Foi abordado por fundadas suspeitas" (conclusão jurídica, não é fato)
+• "Indivíduo suspeito" (sem descrever O QUE gerou suspeita)
+• Não individualizar as características físicas de cada abordado
+
+IMPORTANTE:
+
+- A observação ANTES da abordagem é crucial (o que vimos que motivou a abordagem)
+- Sempre descrever COMPORTAMENTOS CONCRETOS (correu, jogou, vigiava, entregava)
+- Cada abordado deve ter descrição individualizada (roupa + porte + gestos + nome completo + vulgo)
+- Se alguma resposta estiver como "Não informado", OMITA aquela informação
+- Dois espaços entre frases
+- Manter coerência temporal: observação → comportamento → abordagem → identificação
+
+GERE AGORA O TEXTO DA SEÇÃO 5, seguindo RIGOROSAMENTE as regras acima:"""
+
+        return prompt

@@ -248,13 +248,64 @@
           "screenshot": "24-section4-final-all-sections"
         }
       ]
+    },
+    {
+      "section_number": 5,
+      "name": "Fundada Suspeita",
+      "emoji": "🎯",
+      "total_questions": 4,
+      "steps": [
+        {
+          "step": "5.0",
+          "answer": "SIM",
+          "expect": "pass",
+          "screenshot": "26-section5-start"
+        },
+        {
+          "step": "5.1",
+          "answer": "viu algo",
+          "expect": "fail",
+          "reason": "Resposta muito curta (< 40 caracteres)",
+          "screenshot": "27-section5-observation-error"
+        },
+        {
+          "step": "5.1_retry",
+          "answer": "Durante patrulhamento pela Rua das Palmeiras, região com registros anteriores de tráfico de drogas, visualizamos um homem de camisa vermelha e bermuda jeans retirando pequenos invólucros de um buraco no muro e entregando-os a motociclistas que paravam rapidamente",
+          "expect": "pass"
+        },
+        {
+          "step": "5.2",
+          "answer": "João viu algo",
+          "expect": "fail",
+          "reason": "Sem graduação militar obrigatória (ex: Sargento, Cabo, Soldado)",
+          "screenshot": "28-section5-graduation-error"
+        },
+        {
+          "step": "5.2_retry",
+          "answer": "O Sargento João, de dentro da viatura estacionada a aproximadamente 20 metros do local, visualizou o suspeito retirando invólucros do buraco no muro e realizando as entregas por cerca de dois minutos antes de perceber a aproximação policial",
+          "expect": "pass"
+        },
+        {
+          "step": "5.3",
+          "answer": "Homem de camisa vermelha",
+          "expect": "fail",
+          "reason": "Características não individualizadas (< 50 caracteres)",
+          "screenshot": "29-section5-characteristics-error"
+        },
+        {
+          "step": "5.3_retry",
+          "answer": "Homem de camisa vermelha e bermuda jeans azul, porte atlético, aproximadamente 1,75m de altura. Ao perceber a aproximação da viatura, demonstrou nervosismo acentuado e tentou guardar parte do material no bolso. Posteriormente identificado como JOÃO DA SILVA SANTOS, vulgo 'Vermelho'.",
+          "expect": "pass",
+          "screenshot": "30-section5-final-all-sections"
+        }
+      ]
     }
   ],
   "metadata": {
-    "total_screenshots": 28,
-    "desktop_screenshots": 17,
+    "total_screenshots": 30,
+    "desktop_screenshots": 19,
     "mobile_screenshots": 11,
-    "video_duration_estimate": "8 minutes",
-    "note": "Seção 4 adicionada: 4 screenshots desktop + 2 mobile. Total: Seções 1-4 completas (4 seções)"
+    "video_duration_estimate": "10 minutes",
+    "note": "Seção 5 adicionada: 4 screenshots desktop + 2 mobile. Total: Seções 1-5 completas (5 seções, BO completo)"
   }
 }

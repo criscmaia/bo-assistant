@@ -1,6 +1,6 @@
 # 📡 Referência de API - BO Inteligente
 
-**Versão:** v0.8.0
+**Versão:** v0.9.0
 **Base URL (Produção):** `https://bo-assistant-backend.onrender.com`
 **Base URL (Local):** `http://localhost:8000`
 
@@ -53,7 +53,7 @@ GET /
 ```json
 {
   "name": "BO Inteligente API",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "API para geração de Boletins de Ocorrência usando IA",
   "endpoints": ["/new_session", "/chat", "..."]
 }
@@ -193,12 +193,12 @@ curl -X POST https://bo-assistant-backend.onrender.com/chat \
 POST /start_section/{section_number}
 ```
 
-**Descrição:** Inicia uma nova seção do BO (ex: Seção 2 - Abordagem a Veículo, Seção 3 - Campana, Seção 4 - Entrada em Domicílio).
+**Descrição:** Inicia uma nova seção do BO (ex: Seção 2 - Abordagem a Veículo, Seção 3 - Campana, Seção 4 - Entrada em Domicílio, Seção 5 - Fundada Suspeita).
 
 **Path Parameters:**
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
-| `section_number` | int | Número da seção (2-4) |
+| `section_number` | int | Número da seção (2-5) |
 
 **Request Body:**
 ```json
@@ -240,6 +240,17 @@ POST /start_section/{section_number}
 }
 ```
 
+**Resposta (Seção 5):**
+```json
+{
+  "message": "Seção 5 iniciada",
+  "section": 5,
+  "question": "Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)?",
+  "step": "5.1",
+  "total_steps": 4
+}
+```
+
 **Exemplo (curl - Seção 2):**
 ```bash
 curl -X POST https://bo-assistant-backend.onrender.com/start_section/2 \
@@ -257,6 +268,13 @@ curl -X POST https://bo-assistant-backend.onrender.com/start_section/3 \
 **Exemplo (curl - Seção 4):**
 ```bash
 curl -X POST https://bo-assistant-backend.onrender.com/start_section/4 \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "uuid"}'
+```
+
+**Exemplo (curl - Seção 5):**
+```bash
+curl -X POST https://bo-assistant-backend.onrender.com/start_section/5 \
   -H "Content-Type: application/json" \
   -d '{"session_id": "uuid"}'
 ```
@@ -520,7 +538,7 @@ GET /api/logs?limit=20&offset=0
       "created_at": "2025-12-20T19:03:45",
       "completed_at": "2025-12-20T19:15:32",
       "status": "completed",
-      "app_version": "0.8.0",
+      "app_version": "0.9.0",
       "ip_address": "177.12.34.56"
     },
     {
@@ -528,7 +546,7 @@ GET /api/logs?limit=20&offset=0
       "created_at": "2025-12-20T18:45:12",
       "completed_at": null,
       "status": "abandoned",
-      "app_version": "0.8.0",
+      "app_version": "0.9.0",
       "ip_address": "189.23.45.67"
     }
   ],
@@ -565,7 +583,7 @@ GET /api/logs/{bo_id}
   "created_at": "2025-12-20T19:03:45",
   "completed_at": "2025-12-20T19:15:32",
   "status": "completed",
-  "app_version": "0.8.0",
+  "app_version": "0.9.0",
   "ip_address": "177.12.34.56",
   "events": [
     {

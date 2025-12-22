@@ -684,10 +684,63 @@ if (currentSection === 2 && !boCompleted) {
 
 ### 7.3 Atualizar Versão
 
-1. Incrementar versão em `docs/index.html` (APP_VERSION)
-2. Adicionar entrada no `CHANGELOG.md`
-3. Atualizar status no `README.md`
-4. Commit com mensagem: `feat: Implementar Seção N - [Nome] (vX.Y.Z)`
+**Passo 1: Atualizar versão em todos os arquivos de interface**
+
+- [ ] `docs/index.html` - Atualizar 6 referências:
+  - Linha ~134: `<h1>...v0.X.Y</h1>` (header principal)
+  - Linha ~313: `<p>...v0.X.Y | 💾...` (footer)
+  - Linha ~435: Comentário em `saveDraft()` (versão changelog)
+  - Linha ~489: `version: '0.X.Y'` (em saveDraft JSON)
+  - Linha ~641: Comentário em `restoreFromDraft()`
+  - Linha ~1017: `Gerado por: BO Inteligente v0.X.Y` (footer do BO)
+  - Linha ~2183: Comentário em `handleBotResponse()` (verificação skip)
+
+**Passo 2: Atualizar documentação de API**
+
+- [ ] `docs/API.md` - 4 referências:
+  - Linha ~3: `**Versão:** vX.Y.Z` (header)
+  - Linha ~56: `"version": "0.X.Y"` (exemplo JSON /health)
+  - Linhas ~541, 549, 586: `"app_version": "0.X.Y"` (exemplos /new_session)
+
+**Passo 3: Atualizar documentação técnica**
+
+- [ ] `docs/ARCHITECTURE.md` - 2 referências:
+  - Linha ~3: `**Versão:** vX.Y.Z`
+  - Linha ~379: `"version": "0.X.Y"` (exemplo localStorage)
+
+**Passo 4: Atualizar roadmap e releases**
+
+- [ ] `docs/ROADMAP.md` - 2 referências:
+  - Linha ~3: `## Versão Atual: vX.Y.Z`
+  - Adicionar versão ao topo da lista de status
+
+- [ ] `CHANGELOG.md` - 1 adição:
+  - Adicionar seção `#### vX.Y.Z (Mês Ano) - Seção N: [Nome]` no topo
+
+- [ ] `README.md` - 3 referências:
+  - Linha ~19: `### ✅ vX.Y.Z - Seção N: [Nome]`
+  - Linha ~29: `- ✅ **N/8 seções implementadas**`
+  - Linha ~258: `**Versão:** 0.X.Y`
+
+- [ ] `docs/TESTING.md` - 2 referências:
+  - Linha ~3: `**Versão:** vX.Y.Z`
+  - Linha ~4: `**Última atualização:** 22/12/2025` (data atual)
+
+**Passo 5: Criar commit com versionamento**
+
+```bash
+git add -A
+git commit -m "feat: Implementar Seção N - [Nome] (vX.Y.Z)"
+```
+
+**Checklist automático de versionamento:**
+```bash
+# Buscar todas as ocorrências de versão anterior
+grep -r "0.8.0" docs/ backend/ --include="*.html" --include="*.py" --include="*.md" | grep -v ".git"
+
+# Após atualizar, verificar que não há mais referências antigas
+grep -r "0.8.0" docs/ backend/ --include="*.html" --include="*.py" --include="*.md" | wc -l  # Deve retornar 0
+```
 
 ---
 

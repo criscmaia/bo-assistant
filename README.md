@@ -16,23 +16,24 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 
 ## 📊 Status Atual
 
-### ✅ v0.8.0 - Seção 4: Entrada em Domicílio
+### ✅ v0.9.0 - Seção 5: Fundada Suspeita
 
-**Novidades v0.8.0:**
-- ✅ **Seção 4: Entrada em Domicílio** - 5 perguntas (4.1 a 4.5)
-- ✅ **Validação de justa causa** - Mínimo 40 caracteres com evidência sensorial ANTES da entrada
-- ✅ **Validação de graduação militar** - Obrigatório em 4.3 (mesma regra de 3.3)
-- ✅ **Validação de tipo de ingresso** - Perseguição contínua, autorização ou flagrante visual
-- ✅ **Geração de texto via LLM** - Com fundamento jurídico STF sobre domicílio
-- ✅ **Seção 4 marca BO como completo** - Antes era Seção 3, agora é a última
-- ✅ **E2E automation** - --start-section 4 para testes rápidos (1.5 min)
-- ✅ **4/8 seções implementadas** - Seções 1, 2, 3 e 4 estão prontas
+**Novidades v0.9.0:**
+- ✅ **Seção 5: Fundada Suspeita** - 4 perguntas (5.1 a 5.4)
+- ✅ **Validação de observação detalhada** - Mínimo 40 caracteres (5.2)
+- ✅ **Validação de testemunha** - Graduação militar obrigatória (5.3) + posição + observação
+- ✅ **Validação de características individualizadas** - Mínimo 50 caracteres (5.4)
+- ✅ **Geração de texto via LLM** - Com fundamento jurídico STF HC 261029
+- ✅ **Seção 5 marca BO como completo** - É a última seção por agora (5/8)
+- ✅ **Testes completos** - 12 testes unitários passando
+- ✅ **5/8 seções implementadas** - Seções 1, 2, 3, 4 e 5 estão prontas
 
-**Recursos v0.8.0:**
+**Recursos v0.9.0:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas - 1.1 a 1.6)
 - ✅ Seção 2: Abordagem a Veículo (8 perguntas - 2.1 a 2.8)
 - ✅ Seção 3: Campana - Vigilância Velada (8 perguntas - 3.1 a 3.8)
 - ✅ Seção 4: Entrada em Domicílio (5 perguntas - 4.1 a 4.5)
+- ✅ Seção 5: Fundada Suspeita (4 perguntas - 5.1 a 5.4)
 - ✅ Container persistente de textos gerados (todas seções visíveis)
 - ✅ Sidebar com todas 8 seções (completadas, atual, futuras)
 - ✅ Botão "Copiar BO Completo" quando há 2+ seções
@@ -56,9 +57,11 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 7. Clique em "Iniciar Seção 3" (perguntas 3.1 a 3.8 - Campana/Vigilância Velada)
 8. Ao final da Seção 3, mais um texto é gerado
 9. Clique em "Iniciar Seção 4" (perguntas 4.1 a 4.5 - Entrada em Domicílio)
-10. Ao final da Seção 4, o BO está completo
-11. Use "Copiar BO Completo" para copiar todas as seções de uma vez
-12. Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
+10. Ao final da Seção 4, outro texto é gerado
+11. Clique em "Iniciar Seção 5" (perguntas 5.1 a 5.4 - Fundada Suspeita)
+12. Ao final da Seção 5, o BO está completo
+13. Use "Copiar BO Completo" para copiar todas as 5 seções de uma vez
+14. Rascunhos são salvos automaticamente e podem ser restaurados ao reabrir a página
 
 ### ⏰ Nota sobre Performance
 
@@ -221,7 +224,7 @@ Veja o roadmap completo e detalhado em [docs/ROADMAP.md](docs/ROADMAP.md).
 - 🔄 **Fase 2** - Seções 3-8 (v0.7.0+)
   - ✅ Seção 3: Campana (Vigilância Velada) - v0.7.0
   - ✅ Seção 4: Entrada em Domicílio - v0.8.0
-  - ⏳ Seção 5: Fundada Suspeita
+  - ✅ Seção 5: Fundada Suspeita - v0.9.0
   - ⏳ Seção 6: Reação e Uso da Força
   - ⏳ Seção 7: Apreensões
   - ⏳ Seção 8: Condução e Ocorrências
@@ -252,6 +255,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.8.0
-**Última atualização:** 21/12/2025
+**Versão:** 0.9.0
+**Última atualização:** 22/12/2025
 **Status:** Em produção

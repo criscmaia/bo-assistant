@@ -1,7 +1,7 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.8.0
-**Última atualização:** 21/12/2025
+**Versão:** v0.9.0
+**Última atualização:** 22/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
 
@@ -349,6 +349,68 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 **Respostas Válidas:**
 - "O Sargento Silva entrou primeiro pela porta. O Cabo Almeida ficou na contenção. O Soldado Pires procurou dentro"
 - "O policial A entrou pela frente, B ficou observando a porta dos fundos, C revistou o interior localizando os entorpecentes"
+
+---
+
+### Teste 13: Fluxo Completo - Seção 5 (Fundada Suspeita)
+
+**Objetivo:** Validar fluxo completo da Seção 5 com respostas válidas.
+
+**Passos:**
+1. Completar Seções 1, 2, 3 e 4
+2. Clicar em "Iniciar Seção 5"
+3. Responder pergunta 5.1 com "SIM"
+4. Completar perguntas 5.2 até 5.4 com respostas válidas
+5. Aguardar geração de texto (~3-5 segundos)
+6. Verificar texto gerado no card de Seção 5
+
+**Resultado Esperado:**
+- Todas as respostas aceitas
+- Texto gerado em 3ª pessoa
+- BO marcado como "COMPLETO"
+- Card de Seção 5 permanece visível com texto narrativo
+- Botão "Copiar BO Completo" copia todas as 5 seções
+
+---
+
+### Teste 14: Pular Seção 5 (Sem Fundada Suspeita)
+
+**Objetivo:** Validar lógica condicional da Seção 5.
+
+**Passos:**
+1. Completar Seções 1, 2, 3 e 4
+2. Clicar em "Iniciar Seção 5"
+3. Responder pergunta 5.1 com "NÃO"
+
+**Resultado Esperado:**
+- Texto gerado imediatamente
+- Mensagem: "Não se aplica (não houve abordagem por fundada suspeita)"
+- Seção 5 marcada como completa
+- BO marcado como "COMPLETO"
+- Sem perguntas adicionais
+
+---
+
+### Teste 15: Validação de Graduação Militar (Seção 5, Pergunta 5.3)
+
+**Objetivo:** Validar obrigatoriedade de graduação militar em pergunta 5.3.
+
+**Passos:**
+1. Completar Seções 1-4 e iniciar Seção 5
+2. Responder 5.1 com "SIM" e 5.2 com resposta válida
+3. Ao chegar em 5.3, responder sem graduação:
+   - "João viu o suspeito retirando invólucros"
+   - "O policial viu do carro"
+
+**Resultado Esperado:**
+- Mensagem de erro: "Informe a GRADUAÇÃO + nome do policial, de onde viu e o que exatamente viu. Exemplo: 'O Sargento João viu...'"
+- Resposta não aceita
+- Pergunta permanece ativa
+
+**Respostas Válidas:**
+- "O Sargento João, de dentro da viatura estacionada a 20 metros, visualizou o suspeito retirando invólucros do buraco"
+- "O Cabo Almeida, posicionado na esquina oposta, viu o indivíduo entregar pacotes"
+- "O Soldado Pires, de pé próximo ao poste, observou todo o procedimento"
 
 ---
 

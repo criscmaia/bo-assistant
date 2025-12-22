@@ -1,8 +1,22 @@
-# Changelog v0.8.0
+# Changelog v0.9.0
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 em Andamento - Seções 3-8 (v0.7.0+)
+
+#### v0.9.0 (Dez 2025) - Seção 5: Fundada Suspeita
+- [x] **Seção 5: Fundada Suspeita** - 4 perguntas (5.1 a 5.4)
+- [x] State machine com lógica condicional (pula se não houve fundada suspeita)
+- [x] Validador com graduação militar obrigatória em 5.3 (mesma regra de 3.3 e 4.3)
+- [x] Validador de observação detalhada (5.2) - mínimo 40 caracteres com contexto
+- [x] Validador de testemunha (5.3) - mínimo 30 caracteres + posição e observação concreta
+- [x] Validador de características individualizadas (5.4) - mínimo 50 caracteres (roupa, porte, nome + vulgo)
+- [x] Geração de texto via LLM (Gemini + Groq) com fundamento jurídico STF HC 261029
+- [x] Testes unitários (12 testes) passando - state machine + validator
+- [x] Test scenarios JSON atualizado com casos de teste da Seção 5
+- [x] Documentação completa (TESTING.md, API.md, CHANGELOG.md, README.md)
+- [x] Seção 5 marca BO como completo (Seção 5 é a última seção por agora - 5/8)
+- [x] Backend completamente integrado - versão v0.9.0
 
 #### v0.8.0 (Dez 2025) - Seção 4: Entrada em Domicílio
 - [x] **Seção 4: Entrada em Domicílio** - 5 perguntas (4.1 a 4.5)

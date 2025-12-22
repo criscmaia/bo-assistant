@@ -131,7 +131,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.8.0</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.9.0</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -310,7 +310,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.8.0 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.9.0 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -432,7 +432,7 @@
         function saveDraft() {
             /**
              * Salva o estado atual no localStorage
-             * v0.8.0: Agora salva chatHistory + generatedTexts + sectionStatuses + suporte a 3 seções
+             * v0.9.0: Agora salva chatHistory + generatedTexts + sectionStatuses + suporte a 5 seções
              */
             // Capturar chatHistory completo
             const chatMessages = [];
@@ -486,7 +486,7 @@
                 generatedTexts: generatedTexts,
                 sectionStatuses: sectionStatuses,
                 savedAt: new Date().toISOString(),
-                version: '0.8.0'
+                version: '0.9.0'
             };
 
             try {
@@ -638,12 +638,12 @@
         async function restoreFromDraft(draft) {
             /**
              * Restaura sessão a partir do rascunho
-             * v0.8.0: Usa sincronização em bloco via /sync_session + migração de IDs antigos
+             * v0.9.0: Usa sincronização em bloco via /sync_session + migração de IDs antigos + suporte a 5 seções
              */
             console.log('[Draft] Restaurando rascunho...');
 
             try {
-                // Migrar IDs antigos se necessário (v0.6.3 → v0.8.0)
+                // Migrar IDs antigos se necessário (v0.6.3 → v0.9.0)
                 if (draft.version === '0.6.3' || !draft.version) {
                     console.log('[Draft] Detectado rascunho v0.6.3. Migrando IDs...');
                     answersState = migrateOldDraftIDs(draft.answers);
@@ -1014,7 +1014,7 @@
 
             // Adicionar footer
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-            fullBO += "Gerado por: BO Inteligente v0.8.0\n";
+            fullBO += "Gerado por: BO Inteligente v0.9.0\n";
             fullBO += "Data: " + new Date().toLocaleDateString('pt-BR') + "\n";
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 
@@ -2180,7 +2180,7 @@
                     // ✅ LIMPAR RASCUNHO ao completar (ANTES de qualquer outra ação)
                     clearDraft();
 
-                    // ⚠️ VERIFICAR SE SEÇÃO FOI PULADA (v0.8.0)
+                    // ⚠️ VERIFICAR SE SEÇÃO FOI PULADA (v0.9.0)
                     if (data.section_skipped) {
                         addMessage('✅ Seção 2 não se aplica.', true, false, null, 'evt_section_skipped');
 

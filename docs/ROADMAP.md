@@ -1,6 +1,6 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.8.0
+## Versão Atual: v0.9.0
 **Última atualização**: 21/12/2025
 
 ---
@@ -9,6 +9,7 @@
 
 **Fase 2 (Seções 3-8)** em andamento:
 - ✅ **v0.7.0 - Seção 3: Campana** - Completamente implementada
+- ✅ **v0.9.0 - Seção 5: Fundada Suspeita** - Completamente implementada
 - ✅ **v0.8.0 - Seção 4: Entrada em Domicílio** - Completamente implementada
 
 ### ✅ Status da Fase 1 (Concluída)

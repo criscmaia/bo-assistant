@@ -2064,9 +2064,11 @@
                 // Atualizar header
                 updateHeaderSection();
 
-                // Limpar card de transição para Seção 2
+                // Limpar card/botão de transição para Seção 2 (pode ter dois IDs possíveis)
                 const transitionCard = document.getElementById('section2-transition-card');
                 if (transitionCard) transitionCard.remove();
+                const buttonContainer = document.getElementById('section2-button-container');
+                if (buttonContainer) buttonContainer.remove();
 
                 // Mensagem de início da Seção 2
                 addMessage('📋 Iniciando Seção 2 - Abordagem a Veículo', true, false, null, 'evt_section2_start');
@@ -2123,9 +2125,11 @@
                 // Atualizar header
                 updateHeaderSection();
 
-                // Limpar card de transição para Seção 3
+                // Limpar card/botão de transição para Seção 3 (pode ter dois IDs possíveis)
                 const transitionCard = document.getElementById('section3-transition-card');
                 if (transitionCard) transitionCard.remove();
+                const buttonContainer = document.getElementById('section3-button-container');
+                if (buttonContainer) buttonContainer.remove();
 
                 // Mensagem de início da Seção 3
                 addMessage('📋 Iniciando Seção 3 - Campana (Vigilância Velada)', true, false, null, 'evt_section3_start');
@@ -2182,9 +2186,11 @@
                 // Atualizar header
                 updateHeaderSection();
 
-                // Limpar card de transição para Seção 4
+                // Limpar card/botão de transição para Seção 4 (pode ter dois IDs possíveis)
                 const transitionCard = document.getElementById('section4-transition-card');
                 if (transitionCard) transitionCard.remove();
+                const buttonContainer = document.getElementById('section4-button-container');
+                if (buttonContainer) buttonContainer.remove();
 
                 // Mensagem de início da Seção 4
                 addMessage('🏠 Iniciando Seção 4 - Entrada em Domicílio', true, false, null, 'evt_section4_start');
@@ -2241,9 +2247,11 @@
                 // Atualizar header
                 updateHeaderSection();
 
-                // Limpar card de transição para Seção 5
+                // Limpar card/botão de transição para Seção 5 (pode ter dois IDs possíveis)
                 const transitionCard = document.getElementById('section5-transition-card');
                 if (transitionCard) transitionCard.remove();
+                const buttonContainer = document.getElementById('section5-button-container');
+                if (buttonContainer) buttonContainer.remove();
 
                 // Mensagem de início da Seção 5
                 addMessage('🎯 Iniciando Seção 5 - Fundada Suspeita', true, false, null, 'evt_section5_start');

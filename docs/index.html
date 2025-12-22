@@ -884,9 +884,35 @@
                         document.getElementById('btn-start-section4').addEventListener('click', startSection4);
 
                         showToast('✅ Rascunho restaurado! Seção 3 completa.');
-                    } else if (currentSection === 4) {
+                    } else if (currentSection === 4 && !document.getElementById('btn-start-section5')) {
                         disableInput();
-                        // Seção 4 é a última - BO completo
+
+                        // Criar botão para iniciar Seção 5
+                        const section5ButtonDiv = document.createElement('div');
+                        section5ButtonDiv.id = 'section5-button-container';
+                        section5ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-pink-50 to-pink-100 border-2 border-pink-200 rounded-xl text-center';
+                        section5ButtonDiv.innerHTML = `
+                            <h3 class="text-xl font-bold text-pink-900 mb-2">🎯 Próxima Etapa: Fundada Suspeita</h3>
+                            <p class="text-gray-700 mb-4">
+                                Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.
+                            </p>
+                            <button
+                                id="btn-start-section5"
+                                class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
+                                ▶️ Iniciar Seção 5
+                            </button>
+                        `;
+
+                        // Inserir após o container de textos gerados
+                        generatedSectionsContainer.parentElement.appendChild(section5ButtonDiv);
+
+                        // Event listener para o botão
+                        document.getElementById('btn-start-section5').addEventListener('click', startSection5);
+
+                        showToast('✅ Rascunho restaurado! Seção 4 completa.');
+                    } else if (currentSection === 5) {
+                        disableInput();
+                        // Seção 5 é a última - BO completo
                         showToast('✅ Rascunho restaurado! BO completo.');
                         boCompleted = true;
                         console.log('[BO] BO marcado como completo (restaurado)');
@@ -2170,6 +2196,9 @@
                 } else if (currentSection === 4) {
                     progress = data.current_step === 'complete' ? 5 : parseInt(data.current_step.split('.')[1]);
                     totalQuestions = 5;
+                } else if (currentSection === 5) {
+                    progress = data.current_step === 'complete' ? 4 : parseInt(data.current_step.split('.')[1]);
+                    totalQuestions = 4;
                 }
 
                 // Atualizar sidebar com step que FOI VALIDADO (displayStep)
@@ -2211,7 +2240,9 @@
                         completionMessage = '✅ Seção 3 completa! Gerando texto...';
                     } else if (currentSection === 4) {
                         completionMessage = '✅ Seção 4 completa! Gerando texto...';
-                        boCompleted = true; // Seção 4 é a última implementada
+                    } else if (currentSection === 5) {
+                        completionMessage = '✅ Seção 5 completa! Gerando texto...';
+                        boCompleted = true; // Seção 5 é a última implementada
                         console.log('[BO] BO marcado como completo');
                     }
 
@@ -2290,8 +2321,29 @@
 
                             // Event listener para o botão
                             document.getElementById('btn-start-section4').addEventListener('click', startSection4);
-                        } else if (currentSection === 4 && boCompleted) {
-                            // Seção 4 completa - BO finalizado
+                        } else if (currentSection === 4 && !boCompleted) {
+                            const section5ButtonDiv = document.createElement('div');
+                            section5ButtonDiv.id = 'section5-transition-card';
+                            section5ButtonDiv.className = 'mt-4 p-4 bg-pink-50 border border-pink-200 rounded-lg text-center fade-in';
+                            section5ButtonDiv.innerHTML = `
+                                <h3 class="font-bold text-pink-900 mb-2">🎯 Seção 5 - Fundada Suspeita</h3>
+                                <p class="text-sm text-pink-700 mb-3">
+                                    Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.
+                                </p>
+                                <button
+                                    id="btn-start-section5"
+                                    class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
+                                    ▶️ Iniciar Seção 5
+                                </button>
+                            `;
+
+                            // Inserir após o container de textos gerados
+                            generatedSectionsContainer.parentElement.appendChild(section5ButtonDiv);
+
+                            // Event listener para o botão
+                            document.getElementById('btn-start-section5').addEventListener('click', startSection5);
+                        } else if (currentSection === 5 && boCompleted) {
+                            // Seção 5 completa - BO finalizado
                             console.log('[BO] Todas as seções implementadas foram concluídas');
                         }
 

@@ -277,9 +277,9 @@ class ReleaseAutomation:
                 }}
             }}
 
-            // 5. Criar botão "Iniciar Seção 3" se upToSection == 2
+            // 5. Criar botão para próxima seção baseado em upToSection
             if (upToSection === 2) {{
-                // Verificar se botão já existe
+                // Criar botão "Iniciar Seção 3"
                 if (!document.getElementById('btn-start-section3')) {{
                     console.log('[E2E] Criando botão Iniciar Seção 3...');
 
@@ -309,6 +309,72 @@ class ReleaseAutomation:
                     if (btn && typeof startSection3 === 'function') {{
                         btn.addEventListener('click', startSection3);
                         console.log('[E2E] Event listener adicionado ao botão');
+                    }}
+                }}
+            }} else if (upToSection === 3) {{
+                // Criar botão "Iniciar Seção 4"
+                if (!document.getElementById('btn-start-section4')) {{
+                    console.log('[E2E] Criando botão Iniciar Seção 4...');
+
+                    const section4ButtonDiv = document.createElement('div');
+                    section4ButtonDiv.id = 'section4-button-container';
+                    section4ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl text-center';
+                    section4ButtonDiv.innerHTML = `
+                        <h3 class="text-xl font-bold text-orange-900 mb-2">🏠 Próxima Etapa: Entrada em Domicílio</h3>
+                        <p class="text-gray-700 mb-4">
+                            Houve entrada em domicílio durante a ocorrência? Continue para a próxima seção.
+                        </p>
+                        <button
+                            id="btn-start-section4"
+                            class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
+                            ▶️ Iniciar Seção 4
+                        </button>
+                    `;
+
+                    // Inserir após o container de textos gerados
+                    const genContainer = document.getElementById('generated-sections-container');
+                    if (genContainer && genContainer.parentElement) {{
+                        genContainer.parentElement.appendChild(section4ButtonDiv);
+                    }}
+
+                    // Event listener - usar a função global startSection4
+                    const btn = document.getElementById('btn-start-section4');
+                    if (btn && typeof startSection4 === 'function') {{
+                        btn.addEventListener('click', startSection4);
+                        console.log('[E2E] Event listener adicionado ao botão Seção 4');
+                    }}
+                }}
+            }} else if (upToSection === 4) {{
+                // Criar botão "Iniciar Seção 5"
+                if (!document.getElementById('btn-start-section5')) {{
+                    console.log('[E2E] Criando botão Iniciar Seção 5...');
+
+                    const section5ButtonDiv = document.createElement('div');
+                    section5ButtonDiv.id = 'section5-button-container';
+                    section5ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-pink-50 to-pink-100 border-2 border-pink-200 rounded-xl text-center';
+                    section5ButtonDiv.innerHTML = `
+                        <h3 class="text-xl font-bold text-pink-900 mb-2">🎯 Próxima Etapa: Fundada Suspeita</h3>
+                        <p class="text-gray-700 mb-4">
+                            Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.
+                        </p>
+                        <button
+                            id="btn-start-section5"
+                            class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
+                            ▶️ Iniciar Seção 5
+                        </button>
+                    `;
+
+                    // Inserir após o container de textos gerados
+                    const genContainer = document.getElementById('generated-sections-container');
+                    if (genContainer && genContainer.parentElement) {{
+                        genContainer.parentElement.appendChild(section5ButtonDiv);
+                    }}
+
+                    // Event listener - usar a função global startSection5
+                    const btn = document.getElementById('btn-start-section5');
+                    if (btn && typeof startSection5 === 'function') {{
+                        btn.addEventListener('click', startSection5);
+                        console.log('[E2E] Event listener adicionado ao botão Seção 5');
                     }}
                 }}
             }}

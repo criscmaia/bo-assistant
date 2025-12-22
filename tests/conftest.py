@@ -91,6 +91,16 @@ def section6_answers() -> Dict:
     }
 
 @pytest.fixture
+def section7_answers() -> Dict:
+    """Respostas válidas para Seção 7 (todas as 4 perguntas)"""
+    return {
+        "7.1": "SIM",
+        "7.2": "O Soldado Breno encontrou 14 pedras de substância análoga ao crack dentro de uma lata azul sobre o banco de concreto próximo ao portão da casa 12. A Soldado Pires localizou 23 pinos de cocaína em um buraco no muro da lateral do imóvel",
+        "7.3": "Foram apreendidos R$ 450,00 em notas de R$ 10 e R$ 20, típicas de comercialização, 2 celulares Samsung, 1 balança de precisão e uma caderneta com anotações de contabilidade do tráfico",
+        "7.4": "O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invólucro 02, fotografou todos os itens no local e ficou responsável pelo material até a entrega na CEFLAN 2"
+    }
+
+@pytest.fixture
 def send_answer(api_base_url):
     """Helper para enviar resposta ao endpoint /chat"""
     def _send(session_id: str, message: str, current_section: int, llm_provider: str = "gemini"):

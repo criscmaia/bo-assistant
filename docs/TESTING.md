@@ -1,6 +1,6 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.10.0
+**Versão:** v0.11.0
 **Última atualização:** 22/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
@@ -61,18 +61,21 @@ pytest tests/integration
 # E2E screenshots - MODO COMPLETO (longo - ~8min, precisa backend + frontend)
 python tests/e2e/automate_release.py --version v0.8.0
 
-# E2E screenshots - MODO RÁPIDO (começar da Seção 6)
-# Preenche Seções 1-5 via API, tira screenshots apenas da Seção 6
-python tests/e2e/automate_release.py --version v0.10.0 --start-section 6 --no-video
+# E2E screenshots - MODO RÁPIDO (começar da Seção 7)
+# Preenche Seções 1-6 via API, tira screenshots apenas da Seção 7
+python tests/e2e/automate_release.py --version v0.11.0 --start-section 7 --no-video
+
+# E2E screenshots - Começar da Seção 6
+python tests/e2e/automate_release.py --version v0.11.0 --start-section 6 --no-video
 
 # E2E screenshots - Começar da Seção 5
-python tests/e2e/automate_release.py --version v0.10.0 --start-section 5 --no-video
+python tests/e2e/automate_release.py --version v0.11.0 --start-section 5 --no-video
 
 # E2E screenshots - Começar da Seção 4
-python tests/e2e/automate_release.py --version v0.10.0 --start-section 4 --no-video
+python tests/e2e/automate_release.py --version v0.11.0 --start-section 4 --no-video
 
 # E2E screenshots - Com vídeo (precisa MAIS tempo)
-python tests/e2e/automate_release.py --version v0.10.0
+python tests/e2e/automate_release.py --version v0.11.0
 
 # Todos os testes pytest juntos
 pytest
@@ -99,16 +102,19 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 ### Cobertura de Testes
 
 **Áreas Críticas:**
-- ✅ Validação de respostas (Seções 1, 2, 3, 4, 5 e 6)
+- ✅ Validação de respostas (Seções 1, 2, 3, 4, 5, 6 e 7)
 - ✅ Geração de texto (Gemini e Groq)
 - ✅ Sistema de rascunhos (localStorage)
-- ✅ Fluxo multi-seção (Seção 1 → Seção 2 → ... → Seção 6)
+- ✅ Fluxo multi-seção (Seção 1 → Seção 2 → ... → Seção 7)
 - ✅ Edição de respostas anteriores
 - ✅ Endpoint `/sync_session` (restauração de rascunhos)
-- ✅ Validação de graduação militar (Seções 3, 4 e 5)
+- ✅ Validação de graduação militar (Seções 3, 4, 5 e 7)
 - ✅ Validação de justa causa (Seção 4)
-- ✅ Validação de frases proibidas (Seção 6) - NOVO
-- ✅ Validação condicional de hospital (Seção 6) - NOVO
+- ✅ Validação de frases proibidas (Seção 6)
+- ✅ Validação condicional de hospital (Seção 6)
+- ✅ Validação de resposta negativa `allow_none_response` (Seção 7, questão 7.3) - NOVO
+- ✅ Validação de destino obrigatório (Seção 7, questão 7.4) - NOVO
+- ✅ Validação de cadeia de custódia (Seção 7) - NOVO
 - ⏳ Casos de erro (rate limit, timeout)
 - ⏳ Navegação mobile (responsividade)
 
@@ -540,6 +546,50 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 
 ---
 
+### Teste 21: Fluxo Completo - Seção 7 (Apreensões e Cadeia de Custódia)
+
+**Objetivo:** Validar fluxo completo da Seção 7 com respostas válidas.
+
+**Passos:**
+1. Completar Seções 1 a 6
+2. Clicar em "Iniciar Seção 7"
+3. Responder pergunta 7.1 com "SIM"
+4. Completar perguntas 7.2 até 7.4 com respostas válidas:
+   - **7.2:** "O Soldado Breno encontrou 14 pedras de substância análoga ao crack dentro de uma lata azul sobre o banco de concreto próximo ao portão da casa 12"
+   - **7.3:** "Foram apreendidos R$ 450,00 em notas de R$ 10 e R$ 20, 2 celulares Samsung e 1 balança de precisão"
+   - **7.4:** "O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invólucro 02, fotografou todos os itens no local e ficou responsável pelo material até a entrega na CEFLAN 2"
+5. Aguardar geração de texto (~3-5 segundos)
+6. Verificar texto gerado no card de Seção 7
+
+**Resultado Esperado:**
+- Todas as respostas aceitas
+- Texto gerado em 3ª pessoa, narrando substâncias, objetos e cadeia de custódia
+- Card de Seção 7 permanece visível com texto narrativo
+- Botão "Copiar BO Completo" copia todas as 7 seções
+- **IMPORTANTE:** BO NÃO é marcado como "COMPLETO" (Seção 8 ainda virá) - botão de transição para Seção 8 visível
+- Alerta: "📷 ATENÇÃO: Fotografar itens e anexar no BO"
+
+---
+
+### Teste 22: Pular Seção 7 (Sem Apreensão de Drogas)
+
+**Objetivo:** Validar lógica condicional da Seção 7.
+
+**Passos:**
+1. Completar Seções 1 a 6
+2. Clicar em "Iniciar Seção 7"
+3. Responder pergunta 7.1 com "NÃO"
+
+**Resultado Esperado:**
+- Texto gerado imediatamente
+- Mensagem: "Não se aplica (não houve apreensão de drogas)"
+- Seção 7 marcada como completa
+- **IMPORTANTE:** BO NÃO é marcado como "COMPLETO" (aguardando Seção 8)
+- Sem perguntas adicionais (7.2-7.4)
+- Botão de transição para Seção 8 visível
+
+---
+
 ### Teste 11: Validação de Graduação Militar (Seção 3)
 
 **Objetivo:** Validar obrigatoriedade de graduação militar em pergunta 3.3.
@@ -801,6 +851,40 @@ O autor apresentou escoriação no joelho direito e hematoma no braço esquerdo,
 - Se resposta começa com "Não houve ferimentos": VÁLIDA (não exige hospital)
 - Se mencionar lesão/ferimento (ferimento, lesão, sangramento, escoriação, hematoma, fratura, contusão, etc.): EXIGE hospital/UPA com ficha
 - Ficha pode ser: "ficha nº", "nº", "número", "número da ficha", etc.
+
+---
+
+### Respostas Validadas - Seção 7
+
+**7.1 - Houve apreensão de drogas?**
+```
+SIM
+```
+**Aceita:** SIM, SÃO, sim, Sim, houve apreensão, etc.
+**Pulará seção se:** NÃO, NAO, NÃO houve, Não realizou, etc.
+
+**7.2 - Descreva as substâncias apreendidas**
+```
+O Soldado Breno encontrou 14 pedras de substância análoga ao crack dentro de uma lata azul sobre o banco de concreto próximo ao portão da casa 12. A Soldado Pires localizou 23 pinos de cocaína em um buraco no muro da lateral do imóvel
+```
+**Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + tipo de droga + quantidade + embalagem + local + QUEM encontrou. Mín. 50 caracteres.
+
+**7.3 - Quais objetos ligados ao tráfico foram apreendidos?**
+```
+Foram apreendidos R$ 450,00 em notas de R$ 10 e R$ 20, típicas de comercialização, 2 celulares Samsung, 1 balança de precisão e uma caderneta com anotações de contabilidade do tráfico
+```
+OU (NOVA FUNCIONALIDADE - `allow_none_response`):
+```
+Nenhum objeto ligado ao tráfico foi encontrado além das substâncias entorpecentes
+```
+**Novo:** Se resposta indica "Nenhum" (padrões: "nenhum", "não havia", "não houve", "não foram"): VÁLIDA sem exigir min_length.
+**Caso contrário:** Mín. 30 caracteres com descrição de objetos (dinheiro, celulares, balança, caderneta, armas, etc.)
+
+**7.4 - Como foi o acondicionamento e guarda?**
+```
+O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invólucro 02, fotografou todos os itens no local e ficou responsável pelo material até a entrega na CEFLAN 2
+```
+**Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + como lacrou + QUEM ficou responsável + destino (CEFLAN, Delegacia, Central, DP, etc.). Mín. 40 caracteres.
 
 ---
 

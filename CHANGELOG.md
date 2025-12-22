@@ -1,8 +1,24 @@
-# Changelog v0.10.0
+# Changelog v0.11.0
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 em Andamento - Seções 3-8 (v0.7.0+)
+
+#### v0.11.0 (Dez 2025) - Seção 7: Apreensões e Cadeia de Custódia
+- [x] **Seção 7: Apreensões e Cadeia de Custódia** - 4 perguntas (7.1 a 7.4)
+- [x] State machine com lógica condicional (pula se não houve apreensão em 7.1)
+- [x] **NOVA FUNCIONALIDADE:** Validação `allow_none_response` - Aceita "Nenhum objeto" sem exigir comprimento mínimo (questão 7.3)
+- [x] Validação de graduação militar obrigatória em 7.2 e 7.4 (Soldado, Sargento, Cabo, Tenente, Capitão)
+- [x] Validação de destino obrigatório em 7.4 (CEFLAN, Delegacia, Central, DP, etc.)
+- [x] Validação de cadeia de custódia - Rastreamento completo (Quem → Onde → Como → Para Onde)
+- [x] Geração de texto via LLM (Gemini + Groq) com fundamento jurídico Lei 11.343/06 + CPP Arts. 240§2 e 244
+- [x] Estrutura narrativa em 2-3 parágrafos (Substâncias → Objetos → Acondicionamento)
+- [x] **IMPORTANTE:** Seção 7 NÃO marca BO como completo - Seção 8 ainda virá (7/8 seções)
+- [x] Testes unitários (16 testes) passando - state machine + validator com `allow_none_response`
+- [x] Testes de integração (6 testes) - validação de graduação, destino, cadeia de custódia
+- [x] Test scenarios JSON atualizado com casos de teste da Seção 7 (6 passos com validação de erros)
+- [x] Documentação completa (TESTING.md com Testes 21-22, API.md com /start_section/7, CHANGELOG.md, README.md)
+- [x] Backend completamente integrado - versão v0.11.0
 
 #### v0.10.0 (Dez 2025) - Seção 6: Reação e Uso da Força
 - [x] **Seção 6: Reação e Uso da Força** - 5 perguntas (6.1 a 6.5)

@@ -1,6 +1,6 @@
 # 📡 Referência de API - BO Inteligente
 
-**Versão:** v0.10.0
+**Versão:** v0.11.0
 **Base URL (Produção):** `https://bo-assistant-backend.onrender.com`
 **Base URL (Local):** `http://localhost:8000`
 
@@ -297,6 +297,24 @@ curl -X POST https://bo-assistant-backend.onrender.com/start_section/6 \
   -d '{"session_id": "uuid"}'
 ```
 
+**Resposta (Seção 7):**
+```json
+{
+  "message": "Seção 7 iniciada",
+  "section": 7,
+  "question": "Houve apreensão de drogas?",
+  "step": "7.1",
+  "total_steps": 4
+}
+```
+
+**Exemplo (curl - Seção 7):**
+```bash
+curl -X POST https://bo-assistant-backend.onrender.com/start_section/7 \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "uuid"}'
+```
+
 **Códigos de Status:**
 - `200 OK` - Sucesso
 - `400 Bad Request` - Seção inválida ou já iniciada
@@ -513,15 +531,21 @@ GET /session/{session_id}/status
 {
   "session_id": "3e4f5a6b-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
   "bo_id": "BO-20251220-a3f8c2e1",
-  "current_section": 2,
+  "current_section": 7,
   "section1_complete": true,
-  "section2_complete": false,
-  "section3_complete": false,
-  "section4_complete": false,
+  "section2_complete": true,
+  "section3_complete": true,
+  "section4_complete": true,
+  "section5_complete": true,
+  "section6_complete": true,
+  "section7_complete": false,
   "section1_text": "No dia 22 de março...",
-  "section2_text": "",
-  "section3_text": "",
-  "section4_text": ""
+  "section2_text": "VW Gol branco...",
+  "section3_text": "Equipe realizou campana...",
+  "section4_text": "Entrada em domicílio...",
+  "section5_text": "Fundada suspeita...",
+  "section6_text": "Resistência durante abordagem...",
+  "section7_text": ""
 }
 ```
 

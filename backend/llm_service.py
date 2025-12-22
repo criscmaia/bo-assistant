@@ -1274,3 +1274,231 @@ IMPORTANTE:
 GERE AGORA O TEXTO DA SEÇÃO 6, seguindo RIGOROSAMENTE as regras acima:"""
 
         return prompt
+
+    # ========================================================================
+    # SEÇÃO 7: APREENSÕES E CADEIA DE CUSTÓDIA
+    # ========================================================================
+
+    def generate_section7_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+        """
+        Gera texto narrativo da Seção 7 (Apreensões e Cadeia de Custódia).
+
+        Args:
+            section_data: Dicionário com respostas {step: answer}
+            provider: "gemini", "groq", "claude" ou "openai"
+
+        Returns:
+            Texto gerado ou string vazia se seção foi pulada
+        """
+        # Se não houve apreensão, retorna vazio
+        if section_data.get("7.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""
+
+        # Gerar com provider selecionado
+        if provider == "gemini":
+            return self._generate_section7_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_section7_with_groq(section_data)
+        elif provider == "claude":
+            raise NotImplementedError("Claude ainda não implementado para Seção 7")
+        elif provider == "openai":
+            raise NotImplementedError("OpenAI ainda não implementado para Seção 7")
+        else:
+            raise ValueError(f"Provider {provider} não suportado")
+
+    def _generate_section7_with_gemini(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 7 usando Gemini.
+        """
+        if not self.gemini_model:
+            raise ValueError("Gemini API key não configurada. Configure GEMINI_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section7(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.gemini_model.generate_content(prompt)
+
+            # Extrair texto
+            generated_text = response.text.strip()
+
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 7 com Gemini: {error_msg}")
+
+    def _generate_section7_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 7 (Apreensões e Cadeia de Custódia) usando Groq.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section7(section_data)
+
+            # Se prompt vazio (seção pulada), retornar vazio
+            if not prompt:
+                return ""
+
+            # Gerar texto
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 7 com Groq: {error_msg}")
+
+    def _build_prompt_section7(self, section_data: Dict[str, str]) -> str:
+        """
+        Constrói prompt para Seção 7 (Apreensões e Cadeia de Custódia).
+
+        Fonte:
+        - materiais-claudio/_pacotao_2.txt (Seção E)
+        - materiais-claudio/_regras_gerais_-_gpt_trafico.txt (linhas 77-83)
+        - Lei 11.343/06 (Lei de Drogas) + CPP Arts. 240§2 e 244
+        """
+
+        # Verifica se seção foi pulada (não houve apreensão)
+        if section_data.get("7.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            return ""  # Não gerar texto
+
+        # Extrair respostas
+        substancias = section_data.get("7.2", "Não informado")
+        objetos = section_data.get("7.3", "Não informado")
+        acondicionamento = section_data.get("7.4", "Não informado")
+
+        # Construir prompt baseado no material do Claudio
+        prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 7 (Apreensões e Cadeia de Custódia) do BO de tráfico de drogas.
+
+REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
+
+1. NUNCA invente informações não fornecidas pelo usuário
+2. Use APENAS os dados das respostas fornecidas abaixo
+3. Escreva em terceira pessoa, tempo passado
+4. Use linguagem técnica, objetiva e norma culta
+5. A CADEIA DE CUSTÓDIA é CRÍTICA: quem encontrou + onde + como acondicionou + para onde levou
+6. Gere texto em 2-3 parágrafos fluidos
+7. NÃO use juridiquês ou termos genéricos como "foi apreendido material ilícito"
+
+FUNDAMENTO JURÍDICO - APREENSÕES E CADEIA DE CUSTÓDIA:
+
+LEI 11.343/06 (Lei de Drogas):
+- Art. 33: Tráfico de drogas
+- Art. 35: Associação para o tráfico (2+ pessoas)
+- Art. 40: Agravantes (armas, menores, escolas)
+
+CPP Arts. 240§2 e 244:
+"A cadeia de custódia assegura a integridade de drogas apreendidas desde a
+apreensão até o depósito, documentando QUEM a detinha, QUANDO, ONDE e COMO."
+
+PRINCÍPIOS DA CADEIA DE CUSTÓDIA (obrigatórios):
+1. Identificar QUEM encontrou o material (graduação + nome)
+2. Descrever ONDE encontrou (local preciso - não genérico)
+3. Informar COMO acondicionou (invólucro, saco plástico, número)
+4. Registrar PARA ONDE levou (CEFLAN, delegacia, central)
+
+ESTRUTURA NARRATIVA (2-3 PARÁGRAFOS):
+
+PARÁGRAFO 1 - SUBSTÂNCIAS ENTORPECENTES:
+- Tipo de droga (crack, cocaína, maconha)
+- Quantidade exata (pedras, pinos, gramas, tabletes)
+- Embalagem (invólucros plásticos, lata, sacola, mochila)
+- Local PRECISO onde foi encontrado (caixa azul em cima da geladeira, buraco no muro)
+- QUEM encontrou (graduação + nome completo do policial)
+
+Exemplo CORRETO:
+"O Soldado Breno encontrou 14 pedras de substância análoga ao crack dentro de uma lata azul sobre o banco de concreto próximo ao portão da casa 12. A Soldado Pires localizou 23 pinos de cocaína em um buraco no muro da lateral do imóvel."
+
+PARÁGRAFO 2 - OBJETOS LIGADOS AO TRÁFICO (se houver):
+- Dinheiro (valores fracionados típicos de venda - R$ 10, R$ 20)
+- Celulares (quantidade e marca)
+- Balança de precisão
+- Armas, cadernos de contabilidade, embalagens vazias
+
+Exemplo CORRETO:
+"Foram apreendidos R$ 450,00 em notas de R$ 10 e R$ 20, típicas de comercialização, 2 celulares Samsung, 1 balança de precisão e uma caderneta com anotações de contabilidade do tráfico."
+
+Se a resposta indicar "Nenhum objeto" ou similar, usar:
+"Não foram apreendidos objetos ligados ao tráfico além das substâncias entorpecentes."
+
+PARÁGRAFO 3 - ACONDICIONAMENTO E GUARDA:
+- Como foi lacrado (invólucro 01, 02, saco plástico, etc.)
+- Quem ficou responsável (graduação + nome)
+- Destino do material (CEFLAN, delegacia civil, central)
+- Fotografias realizadas (mencionar se foram feitas)
+
+Exemplo CORRETO:
+"O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invólucro 02, fotografou todos os itens no local e ficou responsável pelo material até a entrega na CEFLAN 2."
+
+---
+
+ERROS A EVITAR (NULIDADE CERTA):
+
+❌ "Apreensão feita conforme protocolo" (genérico demais)
+❌ "Várias drogas foram apreendidas" (sem quantificar exatamente)
+❌ "Material entregue" (sem dizer QUEM entregou e PARA ONDE)
+❌ "Drogas localizadas" (sem dizer ONDE exatamente e por QUEM)
+❌ "Material acondicionado adequadamente" (sem descrever COMO)
+❌ "Encaminhado à delegacia" (sem identificar quem ficou responsável)
+
+REGRA DE OURO: Quantidade exata + Local preciso + Nome do policial + Destino
+
+---
+
+DADOS FORNECIDOS PELO USUÁRIO:
+
+Substâncias apreendidas (tipo, quantidade, embalagem, local, quem encontrou):
+{substancias}
+
+Objetos ligados ao tráfico (dinheiro, celulares, balança, etc.):
+{objetos}
+
+Acondicionamento e guarda (como lacrou, responsável, destino):
+{acondicionamento}
+
+---
+
+IMPORTANTE:
+
+- A cadeia de custódia é A PROVA MAIS IMPORTANTE em processo de tráfico
+- Sem individualizar QUEM encontrou, o processo pode ser ANULADO
+- Se objetos = "Nenhum" ou similar, mencionar brevemente e seguir para acondicionamento
+- Se alguma resposta estiver como "Não informado", OMITA aquela informação
+- Dois espaços entre frases
+- Manter coerência: substâncias → objetos (se houver) → acondicionamento
+
+GERE AGORA O TEXTO DA SEÇÃO 7, seguindo RIGOROSAMENTE as regras acima:"""
+
+        return prompt

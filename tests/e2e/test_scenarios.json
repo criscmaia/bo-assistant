@@ -349,13 +349,58 @@
           "screenshot": "34-section6-final-all-sections"
         }
       ]
+    },
+    {
+      "section_number": 7,
+      "name": "Apreensões e Cadeia de Custódia",
+      "emoji": "📦",
+      "total_questions": 4,
+      "steps": [
+        {
+          "step": "7.1",
+          "answer": "SIM",
+          "expect": "pass",
+          "screenshot": "35-section7-start"
+        },
+        {
+          "step": "7.2",
+          "answer": "Sem graduação encontrou 14 pedras",
+          "expect": "fail",
+          "reason": "Falta graduação militar obrigatória (ex: Soldado, Sargento)",
+          "screenshot": "36-section7-graduation-error"
+        },
+        {
+          "step": "7.2_retry",
+          "answer": "O Soldado Breno encontrou 14 pedras de substância análoga ao crack dentro de uma lata azul sobre o banco de concreto próximo ao portão da casa 12. A Soldado Pires localizou 23 pinos de cocaína em um buraco no muro da lateral do imóvel",
+          "expect": "pass"
+        },
+        {
+          "step": "7.3",
+          "answer": "Nenhum objeto ligado ao tráfico foi encontrado",
+          "expect": "pass",
+          "note": "Nova funcionalidade: allow_none_response aceita 'Nenhum' sem exigir min_length"
+        },
+        {
+          "step": "7.4",
+          "answer": "Material foi lacrado",
+          "expect": "fail",
+          "reason": "Falta graduação e destino obrigatório (CEFLAN, delegacia, etc)",
+          "screenshot": "37-section7-missing-info-error"
+        },
+        {
+          "step": "7.4_retry",
+          "answer": "O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invólucro 02, fotografou todos os itens no local e ficou responsável pelo material até a entrega na CEFLAN 2",
+          "expect": "pass",
+          "screenshot": "38-section7-final-all-sections-complete"
+        }
+      ]
     }
   ],
   "metadata": {
-    "total_screenshots": 34,
-    "desktop_screenshots": 22,
-    "mobile_screenshots": 12,
-    "video_duration_estimate": "12 minutes",
-    "note": "Seção 6 adicionada: 4 screenshots desktop + 1 mobile. Total: Seções 1-6 completas (6 seções, BO completo com Reação e Uso da Força)"
+    "total_screenshots": 38,
+    "desktop_screenshots": 24,
+    "mobile_screenshots": 14,
+    "video_duration_estimate": "14 minutes",
+    "note": "Seção 7 adicionada: 4 screenshots (35-38). Total: Seções 1-7 completas (7 seções com Apreensões e Cadeia de Custódia). IMPORTANTE: Seção 8 ainda virá - BO não está 100% completo."
   }
 }

@@ -410,6 +410,72 @@ class ReleaseAutomation:
                         console.log('[E2E] Event listener adicionado ao botão Seção 6');
                     }}
                 }}
+            }} else if (upToSection === 6) {{
+                // Criar botão "Iniciar Seção 7"
+                if (!document.getElementById('btn-start-section7')) {{
+                    console.log('[E2E] Criando botão Iniciar Seção 7...');
+
+                    const section7ButtonDiv = document.createElement('div');
+                    section7ButtonDiv.id = 'section7-button-container';
+                    section7ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-amber-50 to-orange-100 border-2 border-amber-200 rounded-xl text-center';
+                    section7ButtonDiv.innerHTML = `
+                        <h3 class="text-xl font-bold text-amber-900 mb-2">📦 Próxima Etapa: Apreensões e Cadeia de Custódia</h3>
+                        <p class="text-gray-700 mb-4">
+                            Quais materiais foram apreendidos? Qual foi o procedimento de cadeia de custódia? Continue para a próxima seção.
+                        </p>
+                        <button
+                            id="btn-start-section7"
+                            class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors">
+                            ▶️ Iniciar Seção 7
+                        </button>
+                    `;
+
+                    // Inserir após o container de textos gerados
+                    const genContainer = document.getElementById('generated-sections-container');
+                    if (genContainer && genContainer.parentElement) {{
+                        genContainer.parentElement.appendChild(section7ButtonDiv);
+                    }}
+
+                    // Event listener - usar a função global startSection7
+                    const btn = document.getElementById('btn-start-section7');
+                    if (btn && typeof startSection7 === 'function') {{
+                        btn.addEventListener('click', startSection7);
+                        console.log('[E2E] Event listener adicionado ao botão Seção 7');
+                    }}
+                }}
+            }} else if (upToSection === 7) {{
+                // Criar botão "Iniciar Seção 8"
+                if (!document.getElementById('btn-start-section8')) {{
+                    console.log('[E2E] Criando botão Iniciar Seção 8...');
+
+                    const section8ButtonDiv = document.createElement('div');
+                    section8ButtonDiv.id = 'section8-button-container';
+                    section8ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-100 border-2 border-indigo-200 rounded-xl text-center';
+                    section8ButtonDiv.innerHTML = `
+                        <h3 class="text-xl font-bold text-indigo-900 mb-2">⚖️ Próxima Etapa: Condução e Pós-Ocorrência</h3>
+                        <p class="text-gray-700 mb-4">
+                            Como foi a condução? Quais foram os procedimentos pós-ocorrência? Esta é a última seção - o BO será marcado como completo.
+                        </p>
+                        <button
+                            id="btn-start-section8"
+                            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors">
+                            ▶️ Iniciar Seção 8
+                        </button>
+                    `;
+
+                    // Inserir após o container de textos gerados
+                    const genContainer = document.getElementById('generated-sections-container');
+                    if (genContainer && genContainer.parentElement) {{
+                        genContainer.parentElement.appendChild(section8ButtonDiv);
+                    }}
+
+                    // Event listener - usar a função global startSection8
+                    const btn = document.getElementById('btn-start-section8');
+                    if (btn && typeof startSection8 === 'function') {{
+                        btn.addEventListener('click', startSection8);
+                        console.log('[E2E] Event listener adicionado ao botão Seção 8');
+                    }}
+                }}
             }}
 
             // 6. Atualizar sidebar

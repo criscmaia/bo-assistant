@@ -1502,3 +1502,229 @@ IMPORTANTE:
 GERE AGORA O TEXTO DA SEÇÃO 7, seguindo RIGOROSAMENTE as regras acima:"""
 
         return prompt
+
+    # ========================================================================
+    # SEÇÃO 8: Condução e Pós-Ocorrência (ÚLTIMA SEÇÃO - MARCA BO COMPLETO)
+    # ========================================================================
+
+    def generate_section8_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+        """
+        Gera texto narrativo da Seção 8 (Condução e Pós-Ocorrência) - ÚLTIMA SEÇÃO.
+
+        Args:
+            section_data: Dicionário com respostas {step: answer}
+            provider: "gemini", "groq", "claude" ou "openai"
+
+        Returns:
+            Texto gerado (todas as 6 perguntas são obrigatórias)
+        """
+        # Seção 8 NÃO tem skip logic - todas as perguntas são obrigatórias
+
+        # Gerar com provider selecionado
+        if provider == "gemini":
+            return self._generate_section8_with_gemini(section_data)
+        elif provider == "groq":
+            return self._generate_section8_with_groq(section_data)
+        elif provider == "claude":
+            raise NotImplementedError("Claude ainda não implementado para Seção 8")
+        elif provider == "openai":
+            raise NotImplementedError("OpenAI ainda não implementado para Seção 8")
+        else:
+            raise ValueError(f"Provider {provider} não suportado")
+
+    def _generate_section8_with_gemini(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 8 usando Gemini.
+        """
+        if not self.gemini_model:
+            raise ValueError("Gemini API key não configurada. Configure GEMINI_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section8(section_data)
+
+            # Gerar texto
+            response = self.gemini_model.generate_content(prompt)
+
+            # Extrair texto
+            generated_text = response.text.strip()
+
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de quota excedida
+            if "429" in error_msg or "quota" in error_msg.lower() or "ResourceExhausted" in error_msg:
+                raise Exception("Quota diária do Gemini excedida. Tente novamente mais tarde ou use outro modelo.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 8 com Gemini: {error_msg}")
+
+    def _generate_section8_with_groq(self, section_data: Dict[str, str]) -> str:
+        """
+        Gera texto da Seção 8 (Condução e Pós-Ocorrência) usando Groq.
+        """
+        if not self.groq_client:
+            raise ValueError("Groq API key não configurada. Configure GROQ_API_KEY no .env")
+
+        try:
+            prompt = self._build_prompt_section8(section_data)
+
+            # Gerar texto
+            response = self.groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um assistente especializado em redigir Boletins de Ocorrência policiais no padrão da PMMG."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
+
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Tratar erro de rate limit
+            if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                raise Exception("Limite de requisições do Groq atingido. Aguarde alguns segundos.")
+
+            raise Exception(f"Erro ao gerar texto da Seção 8 com Groq: {error_msg}")
+
+    def _build_prompt_section8(self, section_data: Dict[str, str]) -> str:
+        """
+        Constrói prompt para Seção 8 (Condução e Pós-Ocorrência) - ÚLTIMA SEÇÃO.
+
+        Fonte:
+        - materiais-claudio/_pacotao_2.txt (Seção F)
+        - materiais-claudio/_regras_gerais_-_gpt_trafico.txt (linhas 85-94)
+        - Lei 11.343/06 (Lei de Drogas)
+        - Lei 13.869/19 (Lei de Abuso de Autoridade)
+        - CPP Arts. 282-284 (Prisão em flagrante)
+        """
+
+        # Extrair respostas (TODAS são obrigatórias - Section 8 não tem skip)
+        voz_prisao = section_data.get("8.1", "Não informado")
+        agravantes = section_data.get("8.2", "Sem agravantes")
+        declaracoes = section_data.get("8.3", "Não declarou")
+        reds = section_data.get("8.4", "Sem registros")
+        faccao = section_data.get("8.5", "Sem vínculo")
+        garantias_destino = section_data.get("8.6", "Não informado")
+
+        # Construir prompt baseado no material do Claudio
+        prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 8 (Condução e Pós-Ocorrência) do BO de tráfico de drogas.
+
+**IMPORTANTE:** Esta é a ÚLTIMA seção do BO. O texto deve consolidar a narrativa final da ocorrência.
+
+REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
+
+1. NUNCA invente informações não fornecidas pelo usuário
+2. Use APENAS os dados das respostas fornecidas abaixo
+3. Escreva em terceira pessoa, tempo passado
+4. Use linguagem técnica, objetiva e norma culta
+5. Gere texto em 2-3 parágrafos fluidos
+6. NÃO use juridiquês ou termos genéricos como "foi dado voz de prisão"
+
+FUNDAMENTO JURÍDICO - CONDUÇÃO E PÓS-OCORRÊNCIA:
+
+LEI 11.343/06 (Lei de Drogas):
+- Art. 33: Tráfico de drogas
+- Art. 35: Associação para o tráfico (2+ pessoas)
+- Art. 40: Agravantes (armas, menores, escolas, associação)
+
+LEI 13.869/19 (Lei de Abuso de Autoridade):
+- Arts. 1-5: Garantias constitucionais do preso (direitos lidos, integridade física)
+- Violação de garantias constitui abuso de autoridade
+
+CPP Arts. 282-284 (Prisão em flagrante):
+"A prisão em flagrante deve ser documentada com voz de prisão, leitura de direitos
+constitucionais, verificação de integridade física e condução adequada."
+
+ESTRUTURA NARRATIVA (2-3 PARÁGRAFOS):
+
+PARÁGRAFO 1 - VOZ DE PRISÃO E AGRAVANTES:
+- QUEM deu voz de prisão (graduação + nome completo do policial)
+- Por QUAL CRIME (art. 33 da Lei 11.343/06 - tráfico)
+- Agravantes identificados (art. 40: associação, armas, menores, escolas) OU "Sem agravantes"
+
+Exemplo CORRETO:
+"O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06. Havia agravante de associação para o tráfico (art. 35) devido à presença de mais de um autor participando do esquema de distribuição."
+
+Se "Sem agravantes":
+"O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06. Não foram identificadas circunstâncias agravantes previstas no art. 40 da referida lei."
+
+PARÁGRAFO 2 - DECLARAÇÕES, ANTECEDENTES E FACÇÃO:
+- Declaração do preso (transcrição literal) OU "permaneceu em silêncio"
+- Registros anteriores (REDS) OU "sem antecedentes"
+- Vínculo com facção OU "sem vínculo identificado"
+
+Exemplo CORRETO (COM declaração):
+"O preso declarou literalmente: 'Essa droga não é minha, eu estava apenas guardando para um amigo'. O autor possui REDS 2023-001234 por tráfico de drogas e REDS 2022-005678 por associação criminosa. Identificado vínculo com a facção Primeiro Comando, atuando como 'vapor' no ponto de venda."
+
+Exemplo CORRETO (SEM declaração):
+"O autor permaneceu em silêncio, exercendo seu direito constitucional de não produzir prova contra si mesmo. Sem registros anteriores no sistema REDS. Sem vínculo com facção criminosa identificado."
+
+PARÁGRAFO 3 - GARANTIAS ASSEGURADAS E DESTINO:
+- Direitos constitucionais lidos (Lei 13.869/19)
+- Integridade física verificada (presença ou ausência de lesões)
+- Destino das PESSOAS (autor conduzido à delegacia/DIPC/central)
+- Destino dos MATERIAIS (substâncias e objetos encaminhados à CEFLAN/perícia)
+
+Exemplo CORRETO:
+"Os direitos constitucionais foram lidos ao preso, que declarou tê-los compreendido. Verificada a integridade física, não foram constatadas lesões. O autor foi conduzido à Delegacia de Plantão Central para lavratura do Auto de Prisão em Flagrante e o material apreendido foi encaminhado à CEFLAN 2 para perícia."
+
+---
+
+ERROS A EVITAR (NULIDADE CERTA):
+
+❌ "Foi dada voz de prisão" (sem identificar QUEM)
+❌ "Preso conduzido" (sem dizer PARA ONDE)
+❌ "Material encaminhado" (sem especificar DESTINO)
+❌ "Direitos garantidos" (genérico - deve mencionar leitura e integridade)
+❌ "Autor possui antecedentes" (sem citar números de REDS)
+❌ "Preso faz parte de facção" (sem detalhar qual e função)
+
+REGRA DE OURO: QUEM deu voz de prisão + Declaração literal (ou silêncio) + Garantias + Destino de pessoas E materiais
+
+---
+
+DADOS FORNECIDOS PELO USUÁRIO:
+
+Voz de prisão (quem deu e por qual crime):
+{voz_prisao}
+
+Agravantes (art. 40):
+{agravantes}
+
+Declarações do preso:
+{declaracoes}
+
+Registros anteriores (REDS):
+{reds}
+
+Vínculo com facção:
+{faccao}
+
+Garantias asseguradas + destino:
+{garantias_destino}
+
+---
+
+IMPORTANTE:
+
+- Esta é a ÚLTIMA seção - finalize a narrativa de forma completa e profissional
+- Se alguma resposta indicar "Sem", "Nenhum", "Não", mencione brevemente (ex: "Sem antecedentes identificados")
+- Se alguma resposta estiver como "Não informado", OMITA aquela informação
+- Dois espaços entre frases
+- Manter coerência: voz de prisão + agravantes → declarações + antecedentes + facção → garantias + destino
+
+GERE AGORA O TEXTO DA SEÇÃO 8, seguindo RIGOROSAMENTE as regras acima:"""
+
+        return prompt

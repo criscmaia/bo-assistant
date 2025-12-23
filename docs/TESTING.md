@@ -638,6 +638,10 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 
 ## ✅ Respostas de Teste Validadas
 
+Este guia completo contém respostas validadas para TODAS as 8 seções do BO, com exemplos reais e critérios de validação.
+
+---
+
 ### Respostas Validadas - Seção 1
 
 **1.1 - Dia, data e hora do acionamento:**
@@ -772,6 +776,41 @@ Sim, ao perceber a movimentação policial, o homem de vermelho correu para o be
 
 ---
 
+### Respostas Validadas - Seção 4
+
+**4.1 - Houve entrada em domicílio?**
+```
+SIM
+```
+**Aceita:** SIM, SÃO, sim, Sim, houve entrada, etc.
+**Pulará seção se:** NÃO, NAO, NÃO houve, Não realizou, etc.
+
+**4.2 - O que foi visto/ouvido/sentido ANTES do ingresso?**
+```
+Vimos o suspeito arremessando uma sacola branca para dentro da casa enquanto corria em direção ao imóvel nº 120 da Rua das Acácias
+```
+**Obrigatório:** Descrição concreta da justa causa (sensorial: visualização, audição, olfato). **ANTES da entrada**. Mín. 40 caracteres.
+
+**4.3 - Qual policial presenciou e o que exatamente viu?**
+```
+O Sargento Silva viu o suspeito entrando na casa com a sacola e manteve contato visual ininterrupto com o alvo
+```
+**Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + o que viu/ouviu. Mín. 30 caracteres.
+
+**4.4 - Como ocorreu o ingresso?**
+```
+Perseguição contínua: a equipe iniciou acompanhamento no final da Rua das Acácias e manteve contato visual ininterrupto até o interior da residência
+```
+**Obrigatório:** Tipo de ingresso: perseguição contínua (sem perda de contato), autorização do morador, ou flagrante visual/auditivo. Mín. 30 caracteres.
+
+**4.5 - Descreva a ação de cada policial**
+```
+O Sargento Silva entrou primeiro pela porta principal que estava aberta. O Cabo Almeida ficou na contenção do portão monitorando saídas. O Soldado Faria entrou em seguida pela cozinha e localizou a sacola branca embaixo da pia contendo invólucros de cocaína.
+```
+**Obrigatório:** Ação por ação: quem entrou primeiro, por onde, quem ficou na contenção/fora, o que cada um visualizou ou fez. Mín. 50 caracteres.
+
+---
+
 ### Respostas Validadas - Seção 5
 
 **5.1 - Houve abordagem por fundada suspeita?**
@@ -888,38 +927,89 @@ O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invóluc
 
 ---
 
-### Respostas Validadas - Seção 4
+### Respostas Validadas - Seção 8
 
-**4.1 - Houve entrada em domicílio?**
+**8.1 - Quem deu voz de prisão e por qual crime?**
 ```
-SIM
+O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06
 ```
-**Aceita:** SIM, SÃO, sim, Sim, houve entrada, etc.
-**Pulará seção se:** NÃO, NAO, NÃO houve, Não realizou, etc.
+**Obrigatório:** Incluir graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + crime + lei/artigo. Mín. 50 caracteres.
 
-**4.2 - O que foi visto/ouvido/sentido ANTES do ingresso?**
-```
-Vimos o suspeito arremessando uma sacola branca para dentro da casa enquanto corria em direção ao imóvel nº 120 da Rua das Acácias
-```
-**Obrigatório:** Descrição concreta da justa causa (sensorial: visualização, audição, olfato). **ANTES da entrada**. Mín. 40 caracteres.
+**Respostas INVÁLIDAS (Proibidas):**
+- ❌ "Deu voz de prisão" (falta graduação)
+- ❌ "O Sargento deu voz de prisão" (falta nome)
+- ❌ "Voz de prisão ao tráfico" (falta por quem)
 
-**4.3 - Qual policial presenciou e o que exatamente viu?**
-```
-O Sargento Silva viu o suspeito entrando na casa com a sacola e manteve contato visual ininterrupto com o alvo
-```
-**Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + o que viu/ouviu. Mín. 30 caracteres.
+---
 
-**4.4 - Como ocorreu o ingresso?**
+**8.2 - Havia agravantes?**
 ```
-Perseguição contínua: a equipe iniciou acompanhamento no final da Rua das Acácias e manteve contato visual ininterrupto até o interior da residência
+Havia agravante de associação para o tráfico (art. 35) devido à presença de mais de um autor participando do esquema de distribuição
 ```
-**Obrigatório:** Tipo de ingresso: perseguição contínua (sem perda de contato), autorização do morador, ou flagrante visual/auditivo. Mín. 30 caracteres.
+OU (se não havia agravantes - NOVA FUNCIONALIDADE):
+```
+Sem agravantes identificados
+```
+**Novo:** Se resposta indica "Sem agravantes" (padrões: "sem agravantes", "não havia", "nenhum agravante", "não houve agravante"): VÁLIDA sem exigir min_length.
+**Caso contrário:** Mín. 20 caracteres com descrição de agravantes (associação, envolvimento de menor, etc.)
 
-**4.5 - Descreva a ação de cada policial**
+---
+
+**8.3 - O preso declarou algo?**
 ```
-O Sargento Silva entrou primeiro pela porta principal que estava aberta. O Cabo Almeida ficou na contenção do portão monitorando saídas. O Soldado Faria entrou em seguida pela cozinha e localizou a sacola branca embaixo da pia contendo invólucros de cocaína.
+O preso declarou literalmente: 'Essa droga não é minha, eu estava apenas guardando para um amigo que viria buscar mais tarde'
 ```
-**Obrigatório:** Ação por ação: quem entrou primeiro, por onde, quem ficou na contenção/fora, o que cada um visualizou ou fez. Mín. 50 caracteres.
+OU (se não declarou - NOVA FUNCIONALIDADE):
+```
+O autor permaneceu em silêncio, exercendo seu direito constitucional de não produzir prova contra si mesmo
+```
+**Novo:** Se resposta indica "Não declarou" (padrões: "não declarou", "permaneceu em silêncio", "nada a declarar", "não proferiu"): VÁLIDA sem exigir min_length.
+**Caso contrário:** Transcrição literal da declaração entre aspas. Mín. 20 caracteres.
+
+---
+
+**8.4 - O preso possui registros anteriores (REDS)?**
+```
+O autor possui REDS 2023-001234 por tráfico de drogas (art. 33) e REDS 2022-005678 por associação criminosa (art. 35)
+```
+OU (se sem registros - NOVA FUNCIONALIDADE):
+```
+Sem registros anteriores no sistema REDS
+```
+**Novo:** Se resposta indica "Sem registros" (padrões: "sem registros", "sem antecedentes", "nada consta", "limpo no sistema"): VÁLIDA sem exigir min_length.
+**Caso contrário:** Listar REDS com ano, número e motivo. Mín. 20 caracteres.
+
+---
+
+**8.5 - O preso possui vínculo com facção?**
+```
+O autor possui vínculo com a facção Primeiro Comando, atuando como 'vapor' (vendedor) no ponto de venda localizado na Rua das Flores
+```
+OU (se sem vínculo - NOVA FUNCIONALIDADE):
+```
+Sem vínculo com facção criminosa identificado
+```
+**Novo:** Se resposta indica "Sem vínculo" (padrões: "sem vínculo", "não identificado", "nenhuma facção", "não possui vínculo"): VÁLIDA sem exigir min_length.
+**Caso contrário:** Detalhar facção, função (vapor, gerente, soldado, etc.) e local de atuação. Mín. 20 caracteres.
+
+---
+
+**8.6 - Garantias asseguradas + destino de pessoas/materiais?**
+```
+Os direitos constitucionais foram lidos ao preso, que declarou tê-los compreendido. Integridade física verificada sem lesões. O autor foi conduzido à Delegacia de Plantão Central para lavratura do APF e o material apreendido foi encaminhado à CEFLAN 2
+```
+**Obrigatório:**
+1. Leitura de direitos (SIM/NÃO)
+2. Estado de integridade física (com/sem lesões)
+3. Destino de PESSOAS (Delegacia, DIPC, Central, DP, etc.)
+4. Destino de MATERIAIS (CEFLAN, Delegacia, etc.)
+
+**Respostas INVÁLIDAS:**
+- ❌ "Os direitos foram lidos" (falta destino)
+- ❌ "Conduzido à delegacia" (falta informações de garantias)
+- ❌ "Material foi apreendido" (falta destinos)
+
+Mín. 50 caracteres. Deve conter uma das palavras de destino: CEFLAN, Delegacia, DIPC, Central, DP, Hospital, UPA.
 
 ---
 

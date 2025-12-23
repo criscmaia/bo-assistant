@@ -101,6 +101,18 @@ def section7_answers() -> Dict:
     }
 
 @pytest.fixture
+def section8_answers() -> Dict:
+    """Respostas válidas para Seção 8 (todas as 6 perguntas) - ÚLTIMA SEÇÃO"""
+    return {
+        "8.1": "O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06",
+        "8.2": "Havia agravante de associação para o tráfico (art. 35) devido à presença de mais de um autor participando do esquema de distribuição",
+        "8.3": "O preso declarou literalmente: 'Essa droga não é minha, eu estava apenas guardando para um amigo que viria buscar mais tarde'",
+        "8.4": "O autor possui REDS 2023-001234 por tráfico de drogas (art. 33) e REDS 2022-005678 por associação criminosa (art. 35)",
+        "8.5": "O autor possui vínculo com a facção Primeiro Comando, atuando como 'vapor' (vendedor) no ponto de venda localizado na Rua das Flores",
+        "8.6": "Os direitos constitucionais foram lidos ao preso, que declarou tê-los compreendido. Integridade física verificada sem lesões. O autor foi conduzido à Delegacia de Plantão Central para lavratura do APF e o material apreendido foi encaminhado à CEFLAN 2"
+    }
+
+@pytest.fixture
 def send_answer(api_base_url):
     """Helper para enviar resposta ao endpoint /chat"""
     def _send(session_id: str, message: str, current_section: int, llm_provider: str = "gemini"):

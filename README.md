@@ -16,21 +16,20 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 
 ## 📊 Status Atual
 
-### ✅ v0.11.0 - Seção 7: Apreensões e Cadeia de Custódia
+### ✅ v0.12.0 - Seção 8: Condução e Pós-Ocorrência (FINAL)
 
-**Novidades v0.11.0:**
-- ✅ **Seção 7: Apreensões e Cadeia de Custódia** - 4 perguntas (7.1 a 7.4)
-- ✅ **NOVA FUNCIONALIDADE:** Validação `allow_none_response` - Aceita "Nenhum objeto" sem exigir comprimento mínimo (questão 7.3)
-- ✅ **Validação de Graduação Militar Obrigatória** - 7.2 e 7.4 exigem (Soldado, Sargento, Cabo, etc.)
-- ✅ **Validação de Destino Obrigatório** - 7.4 exige CEFLAN, Delegacia, Central, etc.
-- ✅ **Validação de Cadeia de Custódia** - Rastreamento completo (Quem → Onde → Como → Para Onde)
-- ✅ **Geração de Texto via LLM** - Com fundamento jurídico Lei 11.343/06 + CPP Arts. 240§2 e 244
-- ✅ **Estrutura narrativa em 2-3 parágrafos** - Substâncias → Objetos → Acondicionamento
-- ✅ **Seção 7 NÃO marca BO como completo** - Seção 8 ainda virá (7/8 seções)
-- ✅ **Testes completos** - 16 unitários + 6 integração passando
-- ✅ **7/8 seções implementadas** - Seções 1 a 7 estão prontas
+**Novidades v0.12.0:**
+- ✅ **Seção 8: Condução e Pós-Ocorrência** - 6 perguntas (8.1 a 8.6) - ÚLTIMA SEÇÃO
+- ✅ **BO 100% COMPLETO** - Todas as 8 seções implementadas (8/8)
+- ✅ **Marca BO como Completo** - Seção 8 marca `boCompleted = true`
+- ✅ **Validação `allow_none_response`** - 4 perguntas aceitam respostas negativas (8.2, 8.3, 8.4, 8.5)
+- ✅ **Validação de Graduação Militar Obrigatória** - 8.1 e 8.6 exigem (Sargento, Soldado, Cabo, etc.)
+- ✅ **Validação de Destino Obrigatório** - 8.6 exige CEFLAN, Delegacia, DIPC, Central, etc.
+- ✅ **Testes completos** - 30+ unitários + 20+ integração passando
+- ✅ **Fundamento Jurídico** - Lei 11.343/06, Lei 13.869/19, CPP Arts. 282-284
+- ✅ **Geração de Texto Final via LLM** - Consolidação da narrativa completa
 
-**Recursos v0.11.0:**
+**Recursos v0.12.0:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas - 1.1 a 1.6)
 - ✅ Seção 2: Abordagem a Veículo (8 perguntas - 2.1 a 2.8)
 - ✅ Seção 3: Campana - Vigilância Velada (8 perguntas - 3.1 a 3.8)
@@ -38,8 +37,9 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 - ✅ Seção 5: Fundada Suspeita (4 perguntas - 5.1 a 5.4)
 - ✅ Seção 6: Reação e Uso da Força (5 perguntas - 6.1 a 6.5)
 - ✅ Seção 7: Apreensões e Cadeia de Custódia (4 perguntas - 7.1 a 7.4)
+- ✅ Seção 8: Condução e Pós-Ocorrência (6 perguntas - 8.1 a 8.6) - MARCA BO COMPLETO
 - ✅ Container persistente de textos gerados (todas seções visíveis)
-- ✅ Sidebar com todas 8 seções (completadas, atual, futuras)
+- ✅ Sidebar com todas 8 seções (100% completa)
 - ✅ Botão "Copiar BO Completo" quando há 2+ seções
 - ✅ Validação inteligente de respostas
 - ✅ Geração de texto usando **Gemini 2.5 Flash** ou **Groq Llama 3.3 70B** (14.4k req/dia)

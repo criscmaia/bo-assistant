@@ -1,7 +1,7 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.11.0
-**Última atualização:** 22/12/2025
+**Versão:** v0.12.0
+**Última atualização:** 23/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
 

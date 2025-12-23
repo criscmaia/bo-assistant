@@ -1,0 +1,4 @@
+python -m http.server 3000 --bind 127.0.0.1
+python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+taskkill /F /IM python.exe
+python tests/e2e/automate_release.py --version v0.12.0 --start-section 8

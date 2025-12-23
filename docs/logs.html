@@ -253,7 +253,7 @@
         function renderDetail(data) {
             const { session, events, feedbacks } = data;
             
-            // Labels das perguntas - Seções 1 a 7
+            // Labels das perguntas - Seções 1 a 8
             const questionLabels = {
                 // Seção 1: Contexto da Ocorrência
                 '1.1': 'Data e hora do acionamento',
@@ -295,7 +295,15 @@
                 '7.1': 'Houve apreensão de drogas?',
                 '7.2': 'Substâncias apreendidas (tipo, quantidade, local, quem encontrou)',
                 '7.3': 'Objetos ligados ao tráfico apreendidos',
-                '7.4': 'Acondicionamento e guarda (lacração, responsável, destino)'
+                '7.4': 'Acondicionamento e guarda (lacração, responsável, destino)',
+
+                // Seção 8: Condução e Pós-Ocorrência
+                '8.1': 'Voz de prisão (quem deu e por qual crime)',
+                '8.2': 'Agravantes (art. 40)',
+                '8.3': 'Declarações do preso',
+                '8.4': 'Registros anteriores (REDS)',
+                '8.5': 'Vínculo com facção',
+                '8.6': 'Garantias asseguradas + destino'
             };
             
             // Organizar feedbacks por event_id e por step
@@ -367,8 +375,8 @@
                     });
                     questions[step].finalAnswer = event.data.new_answer;
                 }
-                else if (event.event_type.match(/^section[1-7]_completed$/)) {
-                    // Extrair número da seção do event_type (section1_completed → 1, ..., section7_completed → 7)
+                else if (event.event_type.match(/^section[1-8]_completed$/)) {
+                    // Extrair número da seção do event_type (section1_completed → 1, ..., section8_completed → 8)
                     const sectionMatch = event.event_type.match(/section(\d)_completed/);
                     if (sectionMatch) {
                         const section = parseInt(sectionMatch[1]);
@@ -423,6 +431,7 @@
             const hasSection5 = Object.keys(questions).some(step => step.startsWith('5.'));
             const hasSection6 = Object.keys(questions).some(step => step.startsWith('6.'));
             const hasSection7 = Object.keys(questions).some(step => step.startsWith('7.'));
+            const hasSection8 = Object.keys(questions).some(step => step.startsWith('8.'));
 
             // Seção 1: Contexto da Ocorrência
             if (hasSection1) {
@@ -571,6 +580,27 @@
                 }
             }
 
+            // Seção 8: Condução e Pós-Ocorrência
+            if (hasSection8) {
+                html += `
+                    <div class="mt-6">
+                        <h3 class="text-lg font-bold text-indigo-800 mb-3 pb-2 border-b-2 border-indigo-200">
+                            ⚖️ SEÇÃO 8 - Condução e Pós-Ocorrência
+                        </h3>
+                    </div>
+                `;
+
+                const section8Steps = ['8.1', '8.2', '8.3', '8.4', '8.5', '8.6'];
+                for (const step of section8Steps) {
+                    html += renderQuestion(step, questions, questionLabels, feedbacksByStep, feedbacksByEventId);
+                }
+
+                // Texto gerado da Seção 8
+                if (generatedTexts[8]) {
+                    html += renderGeneratedText(8, generatedTexts[8], feedbacksByStep, feedbacksByEventId);
+                }
+            }
+
             html += `
                 </div>
             `;
@@ -669,7 +699,8 @@
                 4: { name: 'SEÇÃO 4', bgColor: 'bg-orange-50 border-orange-200' },
                 5: { name: 'SEÇÃO 5', bgColor: 'bg-teal-50 border-teal-200' },
                 6: { name: 'SEÇÃO 6', bgColor: 'bg-red-50 border-red-200' },
-                7: { name: 'SEÇÃO 7', bgColor: 'bg-amber-50 border-amber-200' }
+                7: { name: 'SEÇÃO 7', bgColor: 'bg-amber-50 border-amber-200' },
+                8: { name: 'SEÇÃO 8', bgColor: 'bg-indigo-50 border-indigo-200' }
             };
             const config = sectionConfig[sectionNum] || { name: `SEÇÃO ${sectionNum}`, bgColor: 'bg-gray-50 border-gray-200' };
             const sectionName = config.name;

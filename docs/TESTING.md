@@ -58,24 +58,24 @@ pytest tests/unit
 # Integration tests (médio - ~30s, precisa de backend rodando)
 pytest tests/integration
 
-# E2E screenshots - MODO COMPLETO (longo - ~8min, precisa backend + frontend)
-python tests/e2e/automate_release.py --version v0.8.0
+# E2E screenshots - MODO COMPLETO (longo - ~10min, precisa backend + frontend)
+python tests/e2e/automate_release.py --version v0.12.0
 
-# E2E screenshots - MODO RÁPIDO (começar da Seção 7)
-# Preenche Seções 1-6 via API, tira screenshots apenas da Seção 7
-python tests/e2e/automate_release.py --version v0.11.0 --start-section 7 --no-video
+# E2E screenshots - MODO RÁPIDO (começar da Seção 8)
+# Preenche Seções 1-7 via API, tira screenshots apenas da Seção 8
+python tests/e2e/automate_release.py --version v0.12.0 --start-section 8 --no-video
+
+# E2E screenshots - Começar da Seção 7
+python tests/e2e/automate_release.py --version v0.12.0 --start-section 7 --no-video
 
 # E2E screenshots - Começar da Seção 6
-python tests/e2e/automate_release.py --version v0.11.0 --start-section 6 --no-video
+python tests/e2e/automate_release.py --version v0.12.0 --start-section 6 --no-video
 
 # E2E screenshots - Começar da Seção 5
-python tests/e2e/automate_release.py --version v0.11.0 --start-section 5 --no-video
-
-# E2E screenshots - Começar da Seção 4
-python tests/e2e/automate_release.py --version v0.11.0 --start-section 4 --no-video
+python tests/e2e/automate_release.py --version v0.12.0 --start-section 5 --no-video
 
 # E2E screenshots - Com vídeo (precisa MAIS tempo)
-python tests/e2e/automate_release.py --version v0.11.0
+python tests/e2e/automate_release.py --version v0.12.0
 
 # Todos os testes pytest juntos
 pytest

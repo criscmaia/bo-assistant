@@ -391,16 +391,73 @@
           "step": "7.4_retry",
           "answer": "O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invólucro 02, fotografou todos os itens no local e ficou responsável pelo material até a entrega na CEFLAN 2",
           "expect": "pass",
-          "screenshot": "38-section7-final-all-sections-complete"
+          "screenshot": "38-section7-complete"
+        }
+      ]
+    },
+    {
+      "section_number": 8,
+      "name": "Condução e Pós-Ocorrência",
+      "emoji": "⚖️",
+      "total_questions": 6,
+      "steps": [
+        {
+          "step": "8.1",
+          "answer": "Alguém deu voz de prisão sem graduação",
+          "expect": "fail",
+          "reason": "Falta graduação militar obrigatória (ex: Sargento, Cabo)",
+          "screenshot": "39-section8-start"
+        },
+        {
+          "step": "8.1_retry",
+          "answer": "O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06",
+          "expect": "pass",
+          "screenshot": "40-section8-graduation-ok"
+        },
+        {
+          "step": "8.2",
+          "answer": "Sem agravantes identificados",
+          "expect": "pass",
+          "note": "allow_none_response: aceita 'Sem agravantes'"
+        },
+        {
+          "step": "8.3",
+          "answer": "O autor permaneceu em silêncio, exercendo seu direito constitucional",
+          "expect": "pass",
+          "note": "allow_none_response: aceita silêncio como resposta válida"
+        },
+        {
+          "step": "8.4",
+          "answer": "Sem registros anteriores no sistema REDS",
+          "expect": "pass",
+          "note": "allow_none_response: aceita 'Sem registros'"
+        },
+        {
+          "step": "8.5",
+          "answer": "O autor possui vínculo com a facção Primeiro Comando, atuando como 'vapor' no ponto de venda localizado na Rua das Flores",
+          "expect": "pass"
+        },
+        {
+          "step": "8.6",
+          "answer": "Faltando o destino do material apreendido",
+          "expect": "fail",
+          "reason": "Falta destino obrigatório (CEFLAN, delegacia, etc)",
+          "screenshot": "41-section8-missing-destination"
+        },
+        {
+          "step": "8.6_retry",
+          "answer": "Os direitos constitucionais foram lidos ao preso, que declarou tê-los compreendido. Integridade física verificada sem lesões. O autor foi conduzido à Delegacia de Plantão Central para lavratura do APF e o material apreendido foi encaminhado à CEFLAN 2",
+          "expect": "pass",
+          "screenshot": "42-section8-final-bo-complete"
         }
       ]
     }
   ],
   "metadata": {
-    "total_screenshots": 38,
-    "desktop_screenshots": 24,
+    "total_screenshots": 42,
+    "desktop_screenshots": 28,
     "mobile_screenshots": 14,
-    "video_duration_estimate": "14 minutes",
-    "note": "Seção 7 adicionada: 4 screenshots (35-38). Total: Seções 1-7 completas (7 seções com Apreensões e Cadeia de Custódia). IMPORTANTE: Seção 8 ainda virá - BO não está 100% completo."
+    "video_duration_estimate": "16 minutes",
+    "note": "Seção 8 adicionada: 4 screenshots (39-42). Total: Seções 1-8 completas (8 seções - BO 100% COMPLETO). Seção 8 marca boCompleted=true."
   }
 }

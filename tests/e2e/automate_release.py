@@ -1415,10 +1415,250 @@ class ReleaseAutomation:
         await page.evaluate('window.scrollTo(0, 0)')  # Voltar ao topo
         await page.wait_for_timeout(500)
         await self.take_screenshot(page, '32-section6-final.png',
-                                  'BO COMPLETO - Todas as 6 seções visíveis', full_page=True)
+                                  'Seção 6 completa', full_page=True)
 
         print("\n✅ Fluxo Seção 6 desktop concluído!")
-        print("✅ BO COMPLETO - 6 seções (1 + 2 + 3 + 4 + 5 + 6) completas!")
+
+    async def run_section7_flow(self, page: Page, slow_mode: bool = False):
+        """Executa fluxo completo da Seção 7 - Desktop (Apreensões e Cadeia de Custódia)"""
+        print("\n📦 Iniciando fluxo DESKTOP Seção 7...")
+
+        # 1. Aguardar e rolar até o botão "Iniciar Seção 7"
+        print("  ⏳ Aguardando 2s após conclusão da Seção 6...")
+        await page.wait_for_timeout(2000)
+
+        # Verificar se botão existe
+        btn_exists = await page.locator('#btn-start-section7').count()
+        print(f"  🔍 Botão 'Iniciar Seção 7' encontrado: {btn_exists > 0}")
+
+        # Scroll para garantir que o botão esteja visível
+        await page.evaluate("""
+            const btn = document.getElementById('btn-start-section7');
+            if (btn) {
+                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        """)
+        await page.wait_for_timeout(1000)
+
+        # Clicar em "Iniciar Seção 7"
+        print("  🖱️  Aguardando botão ficar visível (timeout 10s)...")
+        btn_start = page.locator('#btn-start-section7')
+        await btn_start.wait_for(state='visible', timeout=10000)
+        print("  ✓ Botão visível! Clicando...")
+        await page.wait_for_timeout(1000)
+        await btn_start.click()
+        print("  ✓ Botão clicado!")
+
+        # Aguardar input ficar habilitado
+        print("  ⏳ Aguardando primeira pergunta carregar (timeout 30s)...")
+        try:
+            await page.wait_for_selector('#user-input:not([disabled])', timeout=30000)
+            print("  ✓ Primeira pergunta carregada!")
+        except Exception as e:
+            print(f"  ❌ ERRO: Timeout aguardando input habilitado: {e}")
+            await self.take_screenshot(page, 'DEBUG-section7-timeout.png', 'Debug - Timeout Seção 7', full_page=True)
+            raise
+        await page.wait_for_timeout(500)
+
+        # Scroll para o topo
+        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
+        await page.wait_for_timeout(1500)
+
+        # Screenshot logo após iniciar Seção 7
+        await self.take_screenshot(page, '35-section7-start.png',
+                                  'Início da Seção 7 - Pergunta 7.1', full_page=True)
+
+        # 2. Responder perguntas da Seção 7
+        section7_steps = self.config['sections'][6]['steps']
+        i = 0
+        while i < len(section7_steps):
+            step_data = section7_steps[i]
+            step = step_data['step']
+            answer = step_data['answer']
+            expect = step_data['expect']
+
+            print(f"  [{step}] Respondendo: {answer[:60]}...")
+
+            # Preencher e enviar
+            await self.fill_and_send(page, answer, slow_typing=slow_mode)
+
+            # Aguardar resposta da API
+            await self.wait_for_api_response(page, timeout=10000)
+
+            # Capturar screenshot se especificado
+            if 'screenshot' in step_data:
+                screenshot_file = step_data['screenshot'] + '.png'
+                await self.take_screenshot(page, screenshot_file, f"Step {step}", full_page=True)
+
+            # Se espera falha
+            if expect == 'fail':
+                print(f"    ⚠️  Validação de erro esperada funcionou")
+            else:
+                print(f"    ✓ Resposta aceita")
+
+            i += 1
+
+        # 3. Aguardar geração de texto da Seção 7
+        print("\n  ⏳ Aguardando geração de texto da Seção 7 (pode levar 15-30 segundos)...")
+
+        try:
+            await page.wait_for_selector('text=Gerando texto', timeout=5000)
+        except:
+            pass
+
+        # Aguardar card da Seção 7 aparecer
+        section7_card = page.locator('#section7-card:not(.hidden)')
+        await section7_card.wait_for(state='visible', timeout=50000)
+        await page.wait_for_timeout(1000)
+
+        # 4. Scroll suave até o container de textos
+        await page.evaluate("""
+            document.querySelector('#generated-sections-container').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            })
+        """)
+
+        await page.wait_for_timeout(2000)
+
+        # Scroll até o final do texto da Seção 7
+        await page.evaluate("""
+            const container = document.querySelector('#section7-text');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        """)
+
+        await page.wait_for_timeout(3000)
+
+        # 5. Screenshot final da Seção 7
+        await page.evaluate('window.scrollTo(0, 0)')  # Voltar ao topo
+        await page.wait_for_timeout(500)
+        await self.take_screenshot(page, '38-section7-complete.png',
+                                  'Seção 7 completa', full_page=True)
+
+        print("\n✅ Fluxo Seção 7 desktop concluído!")
+
+    async def run_section8_flow(self, page: Page, slow_mode: bool = False):
+        """Executa fluxo completo da Seção 8 - Desktop (Condução e Pós-Ocorrência) - ÚLTIMA SEÇÃO"""
+        print("\n⚖️ Iniciando fluxo DESKTOP Seção 8 (ÚLTIMA SEÇÃO)...")
+
+        # 1. Aguardar e rolar até o botão "Iniciar Seção 8"
+        print("  ⏳ Aguardando 2s após conclusão da Seção 7...")
+        await page.wait_for_timeout(2000)
+
+        # Verificar se botão existe
+        btn_exists = await page.locator('#btn-start-section8').count()
+        print(f"  🔍 Botão 'Iniciar Seção 8' encontrado: {btn_exists > 0}")
+
+        # Scroll para garantir que o botão esteja visível
+        await page.evaluate("""
+            const btn = document.getElementById('btn-start-section8');
+            if (btn) {
+                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        """)
+        await page.wait_for_timeout(1000)
+
+        # Clicar em "Iniciar Seção 8"
+        print("  🖱️  Aguardando botão ficar visível (timeout 10s)...")
+        btn_start = page.locator('#btn-start-section8')
+        await btn_start.wait_for(state='visible', timeout=10000)
+        print("  ✓ Botão visível! Clicando...")
+        await page.wait_for_timeout(1000)
+        await btn_start.click()
+        print("  ✓ Botão clicado!")
+
+        # Aguardar input ficar habilitado
+        print("  ⏳ Aguardando primeira pergunta carregar (timeout 30s)...")
+        try:
+            await page.wait_for_selector('#user-input:not([disabled])', timeout=30000)
+            print("  ✓ Primeira pergunta carregada!")
+        except Exception as e:
+            print(f"  ❌ ERRO: Timeout aguardando input habilitado: {e}")
+            await self.take_screenshot(page, 'DEBUG-section8-timeout.png', 'Debug - Timeout Seção 8', full_page=True)
+            raise
+        await page.wait_for_timeout(500)
+
+        # Scroll para o topo
+        await page.evaluate("window.scrollTo({ top: 0, behavior: 'smooth' })")
+        await page.wait_for_timeout(1500)
+
+        # Screenshot logo após iniciar Seção 8
+        await self.take_screenshot(page, '39-section8-start.png',
+                                  'Início da Seção 8 - Pergunta 8.1', full_page=True)
+
+        # 2. Responder perguntas da Seção 8
+        section8_steps = self.config['sections'][7]['steps']
+        i = 0
+        while i < len(section8_steps):
+            step_data = section8_steps[i]
+            step = step_data['step']
+            answer = step_data['answer']
+            expect = step_data['expect']
+
+            print(f"  [{step}] Respondendo: {answer[:60]}...")
+
+            # Preencher e enviar
+            await self.fill_and_send(page, answer, slow_typing=slow_mode)
+
+            # Aguardar resposta da API
+            await self.wait_for_api_response(page, timeout=10000)
+
+            # Capturar screenshot se especificado
+            if 'screenshot' in step_data:
+                screenshot_file = step_data['screenshot'] + '.png'
+                await self.take_screenshot(page, screenshot_file, f"Step {step}", full_page=True)
+
+            # Se espera falha
+            if expect == 'fail':
+                print(f"    ⚠️  Validação de erro esperada funcionou")
+            else:
+                print(f"    ✓ Resposta aceita")
+
+            i += 1
+
+        # 3. Aguardar geração de texto da Seção 8
+        print("\n  ⏳ Aguardando geração de texto da Seção 8 (pode levar 15-30 segundos)...")
+
+        try:
+            await page.wait_for_selector('text=Gerando texto', timeout=5000)
+        except:
+            pass
+
+        # Aguardar card da Seção 8 aparecer
+        section8_card = page.locator('#section8-card:not(.hidden)')
+        await section8_card.wait_for(state='visible', timeout=50000)
+        await page.wait_for_timeout(1000)
+
+        # 4. Scroll suave até o container de textos
+        await page.evaluate("""
+            document.querySelector('#generated-sections-container').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            })
+        """)
+
+        await page.wait_for_timeout(2000)
+
+        # Scroll até o final do texto da Seção 8
+        await page.evaluate("""
+            const container = document.querySelector('#section8-text');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        """)
+
+        await page.wait_for_timeout(3000)
+
+        # 5. Screenshot final (página completa com todas as 8 seções - BO COMPLETO)
+        await page.evaluate('window.scrollTo(0, 0)')  # Voltar ao topo
+        await page.wait_for_timeout(500)
+        await self.take_screenshot(page, '42-section8-final-bo-complete.png',
+                                  'BO 100% COMPLETO - Todas as 8 seções finalizadas', full_page=True)
+
+        print("\n✅ Fluxo Seção 8 desktop concluído!")
+        print("🎉 BO 100% COMPLETO - 8 seções (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8) finalizadas!")
 
         # Fechar página para parar gravação de vídeo
         await page.close()
@@ -1895,6 +2135,8 @@ class ReleaseAutomation:
                 await self.run_section4_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section5_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section6_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section7_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
             elif self.start_section == 2:
                 # Restaurar Seção 1 instantaneamente, depois fazer Seção 2-6 com screenshots
                 print("\n⚡ MODO RÁPIDO DESKTOP: Restaurando Seção 1 instantaneamente...")
@@ -1908,12 +2150,14 @@ class ReleaseAutomation:
                 await self.take_screenshot(page_desktop, '05-section1-final-with-button.png',
                                           'Final Seção 1 (restaurada instantaneamente)', full_page=True)
 
-                # Agora fazer Seção 2-6 normalmente
+                # Agora fazer Seção 2-8 normalmente
                 await self.run_section2_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section3_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section4_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section5_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section6_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section7_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
             elif self.start_section == 3:
                 # Restaurar Seções 1 e 2 instantaneamente, depois fazer Seção 3-6 com screenshots
                 print("\n⚡ MODO RÁPIDO DESKTOP: Restaurando Seções 1 e 2 instantaneamente...")
@@ -1927,11 +2171,13 @@ class ReleaseAutomation:
                 await self.take_screenshot(page_desktop, '10-section2-final-both-sections.png',
                                           'Final Seção 2 (restaurada instantaneamente)', full_page=True)
 
-                # Agora fazer Seção 3-6 normalmente
+                # Agora fazer Seção 3-8 normalmente
                 await self.run_section3_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section4_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section5_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section6_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section7_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
             elif self.start_section == 4:
                 # Restaurar Seções 1, 2 e 3 instantaneamente, depois fazer Seção 4-6 com screenshots
                 print("\n⚡ MODO RÁPIDO DESKTOP: Restaurando Seções 1, 2 e 3 instantaneamente...")
@@ -1945,10 +2191,12 @@ class ReleaseAutomation:
                 await self.take_screenshot(page_desktop, '17-section3-start.png',
                                           'Final Seção 3 (restaurada instantaneamente)', full_page=True)
 
-                # Agora fazer Seção 4-6 normalmente
+                # Agora fazer Seção 4-8 normalmente
                 await self.run_section4_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section5_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section6_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section7_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
             elif self.start_section == 5:
                 # Restaurar Seções 1-4 instantaneamente, depois fazer Seção 5 e 6 com screenshots
                 print("\n⚡ MODO RÁPIDO DESKTOP: Restaurando Seções 1-4 instantaneamente...")
@@ -1962,9 +2210,11 @@ class ReleaseAutomation:
                 await self.take_screenshot(page_desktop, '24-section4-final-all-sections.png',
                                           'Final Seção 4 (restaurada instantaneamente)', full_page=True)
 
-                # Agora fazer Seção 5 e 6 normalmente
+                # Agora fazer Seção 5-8 normalmente
                 await self.run_section5_flow(page_desktop, slow_mode=not self.no_video)
                 await self.run_section6_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section7_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
             elif self.start_section == 6:
                 # Restaurar Seções 1-5 instantaneamente, depois fazer Seção 6 com screenshots
                 print("\n⚡ MODO RÁPIDO DESKTOP: Restaurando Seções 1-5 instantaneamente...")
@@ -1978,8 +2228,41 @@ class ReleaseAutomation:
                 await self.take_screenshot(page_desktop, '32-section5-final-all-sections.png',
                                           'Final Seção 5 (restaurada instantaneamente)', full_page=True)
 
-                # Agora fazer Seção 6 normalmente
+                # Agora fazer Seção 6-8 normalmente
                 await self.run_section6_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section7_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
+            elif self.start_section == 7:
+                # Restaurar Seções 1-6 instantaneamente, depois fazer Seção 7-8 com screenshots
+                print("\n⚡ MODO RÁPIDO DESKTOP: Restaurando Seções 1-6 instantaneamente...")
+                await page_desktop.goto(self.config['frontend_url'])
+                await page_desktop.wait_for_timeout(1000)
+                await self.inject_session_and_restore(page_desktop, session_id_desktop, 6)
+
+                # Screenshot final da Seção 6 (para contexto)
+                await page_desktop.evaluate('window.scrollTo(0, 0)')
+                await page_desktop.wait_for_timeout(500)
+                await self.take_screenshot(page_desktop, '32-section6-final.png',
+                                          'Final Seção 6 (restaurada instantaneamente)', full_page=True)
+
+                # Agora fazer Seção 7-8 normalmente
+                await self.run_section7_flow(page_desktop, slow_mode=not self.no_video)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
+            elif self.start_section == 8:
+                # Restaurar Seções 1-7 instantaneamente, depois fazer Seção 8 com screenshots
+                print("\n⚡ MODO RÁPIDO DESKTOP: Restaurando Seções 1-7 instantaneamente...")
+                await page_desktop.goto(self.config['frontend_url'])
+                await page_desktop.wait_for_timeout(1000)
+                await self.inject_session_and_restore(page_desktop, session_id_desktop, 7)
+
+                # Screenshot final da Seção 7 (para contexto)
+                await page_desktop.evaluate('window.scrollTo(0, 0)')
+                await page_desktop.wait_for_timeout(500)
+                await self.take_screenshot(page_desktop, '38-section7-complete.png',
+                                          'Final Seção 7 (restaurada instantaneamente)', full_page=True)
+
+                # Agora fazer Seção 8 normalmente (última seção)
+                await self.run_section8_flow(page_desktop, slow_mode=not self.no_video)
 
             # Mobile: Seção 1 + Seção 2 + Seção 3 + Seção 4
             page_mobile = await context.new_page()
@@ -2153,8 +2436,8 @@ def main():
     parser.add_argument('--version', required=True, help='Versão do release (ex: v0.3.2)')
     parser.add_argument('--backend', default='http://localhost:8000', help='URL do backend')
     parser.add_argument('--no-video', action='store_true', help='Não gravar vídeo')
-    parser.add_argument('--start-section', type=int, choices=[1, 2, 3, 4, 5, 6], default=1,
-                        help='Seção inicial (1, 2, 3, 4, 5 ou 6). Seções anteriores serão preenchidas rapidamente sem screenshots.')
+    parser.add_argument('--start-section', type=int, choices=[1, 2, 3, 4, 5, 6, 7, 8], default=1,
+                        help='Seção inicial (1-8). Seções anteriores serão preenchidas rapidamente sem screenshots.')
 
     args = parser.parse_args()
 

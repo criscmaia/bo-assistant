@@ -1,12 +1,12 @@
 # Guia de Implementação de Novas Seções
 
-**Versão:** 4.0
-**Última atualização:** 22/12/2025
-**Baseado em:** Experiência das implementações das Seções 3 (Campana), 4 (Entrada em Domicílio), 5 (Fundada Suspeita) e 6 (Reação e Uso da Força)
+**Versão:** 5.0
+**Última atualização:** 23/12/2025
+**Baseado em:** Experiência das implementações das Seções 3 (Campana), 4 (Entrada em Domicílio), 5 (Fundada Suspeita), 6 (Reação e Uso da Força) e 7 (Apreensões e Cadeia de Custódia)
 
 Este documento fornece instruções detalhadas para implementar qualquer nova seção do BO Inteligente, otimizado para uso com Claude Haiku (60% das tarefas) e Sonnet (40% das tarefas).
 
-> **Lição Aprendida (Seções 4, 5 e 6):** As implementações das Seções 4, 5 e 6 revelaram que alguns pontos críticos no frontend (barra de progresso, restauração de rascunho, **limpeza de botões de transição**) requerem modificações em MÚLTIPLOS locais. A Seção 6 introduziu novas funcionalidades de validação (**frases proibidas** e **validação condicional de hospital**). Este guia foi atualizado com checklists específicos para evitar esses bugs.
+> **Lição Aprendida (Seções 4, 5, 6 e 7):** As implementações das Seções 4, 5, 6 e 7 revelaram que alguns pontos críticos no frontend (barra de progresso, restauração de rascunho, **limpeza de botões de transição**) requerem modificações em MÚLTIPLOS locais. A Seção 6 introduziu novas funcionalidades de validação (**frases proibidas** e **validação condicional de hospital**). A Seção 7 introduziu **validação de resposta negativa** (`allow_none_response`) e revelou que o arquivo `docs/logs.html` precisa ser atualizado para cada nova seção. Este guia foi atualizado com checklists específicos para evitar esses bugs.
 
 ---
 
@@ -22,6 +22,7 @@ Este documento fornece instruções detalhadas para implementar qualquer nova se
 8. [Lições Aprendidas (Seção 4)](#8-lições-aprendidas-seção-4)
 9. [Lições Aprendidas (Seção 5)](#9-lições-aprendidas-seção-5)
 10. [Lições Aprendidas (Seção 6)](#10-lições-aprendidas-seção-6)
+11. [Lições Aprendidas (Seção 7)](#11-lições-aprendidas-seção-7)
 
 ---
 
@@ -214,13 +215,15 @@ class BOStateMachineSectionN:
 }
 ```
 
-**Novas opções de validação (introduzidas na Seção 6):**
+**Novas opções de validação (introduzidas nas Seções 6 e 7):**
 
-| Campo | Descrição | Uso |
-|-------|-----------|-----|
-| `forbidden_phrases` | Lista de frases que **invalidam** a resposta | Rejeitar generalizações como "resistiu ativamente" |
-| `conditional_hospital` | Se True, exige hospital/UPA quando lesão mencionada | Perguntas sobre ferimentos |
-| `required_keywords_any` | Exige pelo menos UMA das keywords (OR) | Justificativas com múltiplas opções |
+| Campo | Descrição | Uso | Seção |
+|-------|-----------|-----|-------|
+| `forbidden_phrases` | Lista de frases que **invalidam** a resposta | Rejeitar generalizações como "resistiu ativamente" | 6 |
+| `conditional_hospital` | Se True, exige hospital/UPA quando lesão mencionada | Perguntas sobre ferimentos | 6 |
+| `required_keywords_any` | Exige pelo menos UMA das keywords (OR) | Justificativas com múltiplas opções | 6 |
+| `allow_none_response` | Se True, aceita respostas negativas sem exigir min_length | Perguntas onde "Nenhum" é válido | 7 |
+| `none_patterns` | Lista de padrões que indicam resposta negativa | Usado com `allow_none_response` | 7 |
 
 ### 3.3 Criar `tests/unit/test_sectionN.py`
 
@@ -1142,6 +1145,150 @@ if "forbidden_phrases" in rules:
     "screenshot": "XX-sectionN-forbidden-error"
 }
 ```
+
+---
+
+## 11. Lições Aprendidas (Seção 7)
+
+### 11.1 Nova Funcionalidade: Validação de Resposta Negativa (`allow_none_response`)
+
+**Problema:** Em 7.3 ("Quais objetos ligados ao tráfico foram apreendidos?"), o policial pode responder "Nenhum objeto" ou "Não havia objetos", que não atende ao min_length de 30 caracteres.
+
+**Solução:** Nova regra de validação que aceita respostas negativas sem exigir comprimento mínimo.
+
+```python
+# Em validator_section7.py
+VALIDATION_RULES_SECTION7 = {
+    "7.3": {
+        "min_length": 30,
+        "allow_none_response": True,
+        "none_patterns": ["nenhum", "não havia", "não houve", "não foram"],
+        "examples": [
+            "Foram apreendidos R$ 450,00...",
+            "Nenhum objeto ligado ao tráfico foi encontrado"
+        ],
+        "error_message": "Liste objetos ou informe 'Nenhum objeto'. Mín. 30 caracteres."
+    }
+}
+
+# Implementação do método
+@staticmethod
+def _check_none_response(answer: str, none_patterns: list) -> bool:
+    """Verifica se resposta indica ausência."""
+    answer_lower = answer.lower()
+    return any(pattern.lower() in answer_lower for pattern in none_patterns)
+```
+
+**Quando usar:**
+- Perguntas onde "Nenhum" é uma resposta válida
+- Perguntas sobre objetos opcionais (dinheiro, celulares, armas)
+- Complementos que podem não existir
+
+### 11.2 Bug Corrigido: logs.html não exibia Seções 3-7
+
+**Sintoma:** Ao clicar em um BO específico no dashboard de logs, as respostas das Seções 3-7 não apareciam.
+
+**Causa Raiz:** O arquivo `docs/logs.html` foi criado quando só existiam Seções 1-2 e nunca foi atualizado:
+- `questionLabels` só tinha labels para 1.x e 2.x
+- Processamento de eventos só tratava `section1_completed` e `section2_completed`
+- Renderização só verificava `hasSection1` e `hasSection2`
+
+**Solução completa (5 pontos de modificação):**
+
+| # | Local | Mudança |
+|---|-------|---------|
+| 1 | `questionLabels` | Adicionar labels 3.0-7.4 |
+| 2 | Processamento eventos | Usar regex `/^section[1-7]_completed$/` |
+| 3 | Verificação seções | Adicionar `hasSection3` a `hasSection7` |
+| 4 | Renderização | Adicionar blocos para Seções 3-7 com cores |
+| 5 | `renderGeneratedText()` | Usar `sectionConfig` para cores por seção |
+
+**Código-chave para eventos:**
+```javascript
+// ANTES (ERRADO):
+if (event.event_type === 'section1_completed' || event.event_type === 'section2_completed')
+
+// DEPOIS (CORRETO):
+if (event.event_type.match(/^section[1-7]_completed$/)) {
+    const sectionMatch = event.event_type.match(/section(\d)_completed/);
+    if (sectionMatch) {
+        const section = parseInt(sectionMatch[1]);
+        // ...
+    }
+}
+```
+
+### 11.3 Padrão de Validação para Cadeia de Custódia
+
+A Seção 7 introduziu validação de **cadeia de custódia** - conjunto de informações que garantem a integridade da prova:
+
+| Elemento | Obrigatório em | Validação |
+|----------|----------------|-----------|
+| QUEM encontrou | 7.2, 7.4 | `required_keywords` = graduação militar |
+| ONDE encontrou | 7.2 | min_length >= 50 |
+| COMO acondicionou | 7.4 | min_length >= 40 |
+| PARA ONDE levou | 7.4 | `required_keywords_any` = destinos |
+
+**Template para seções futuras com custódia:**
+```python
+"N.X": {
+    "min_length": 40,
+    "required_keywords": ["soldado", "sargento", "cabo", "tenente", "capitão"],  # QUEM
+    "required_keywords_any": ["ceflan", "delegacia", "dp", "central"],  # PARA ONDE
+    "error_message": "Informe QUEM (graduação + nome) e PARA ONDE (destino)."
+}
+```
+
+### 11.4 Checklist Atualizado: logs.html para Novas Seções
+
+> ⚠️ **NOVO:** Ao implementar uma nova seção, **TAMBÉM atualizar `docs/logs.html`:**
+
+| # | Local | Ação |
+|---|-------|------|
+| 1 | `questionLabels` | Adicionar labels N.1 a N.Y |
+| 2 | Processamento eventos | Atualizar regex para incluir seção N |
+| 3 | `hasSection{N}` | Adicionar verificação de existência |
+| 4 | Renderização HTML | Adicionar bloco com cor temática |
+| 5 | `sectionConfig` | Adicionar entrada para seção N |
+
+### 11.5 O que funcionou bem na Seção 7
+
+1. **Reutilização de padrões** - `allow_none_response` baseado em `conditional_hospital` da Seção 6
+2. **Testes unitários incluem "Nenhum objeto"** - Garantiu que nova funcionalidade funciona
+3. **Checklist de 21 pontos do frontend** - Evitou bugs já conhecidos
+4. **Cor âmbar (amber)** - Diferencia visualmente das outras seções
+5. **Prompt LLM com fundamento jurídico** - Lei 11.343/06 citada corretamente
+
+### 11.6 O que deu problema na Seção 7
+
+| Problema | Causa Raiz | Tempo Perdido | Prevenção |
+|----------|------------|---------------|-----------|
+| logs.html não mostrava Seções 3-7 | Arquivo nunca atualizado | ~20 min | Adicionar logs.html ao checklist |
+| Validação 7.3 rejeitava "Nenhum" | Faltava `allow_none_response` | ~15 min | Identificar casos de resposta negativa |
+
+### 11.7 Recomendações para Seção 8
+
+1. **Adicionar logs.html ao checklist** - Incluir 5 pontos de modificação (ver 11.4)
+2. **Verificar se há perguntas com "Nenhum" válido** - Usar `allow_none_response`
+3. **Seção 8 DEVE marcar BO como completo** - Adicionar `boCompleted = true` ao final
+4. **Criar botão de conclusão final** - Não terá "Iniciar Seção 9"
+5. **Atualizar versão para v0.12.0** - Manter padrão de incremento
+
+### 11.8 Resumo de Commits da Seção 7
+
+| Commit | Descrição | Arquivos Modificados |
+|--------|-----------|---------------------|
+| dd0f6da | docs: Add section implementation guide for future sections (4-8) | SECTION_IMPLEMENTATION_GUIDE.md |
+| 4dfc369 | fix: logs.html - Corrigir exibição das Seções 3-7 | docs/logs.html + 39 outros |
+
+### 11.9 Checklist Completo Atualizado (22 Pontos)
+
+O checklist de 21 pontos do frontend agora inclui **1 novo ponto** para logs.html:
+
+| # | Local | Ação |
+|---|-------|------|
+| 1-21 | `docs/index.html` | (ver seção 4.3 - checklist original) |
+| **22** | `docs/logs.html` | Atualizar 5 locais (ver seção 11.4) |
 
 ---
 

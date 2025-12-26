@@ -3219,22 +3219,75 @@
 
                     // ⚠️ VERIFICAR SE SEÇÃO FOI PULADA (v0.9.0)
                     if (data.section_skipped) {
-                        addMessage('✅ Seção 2 não se aplica.', true, false, null, 'evt_section_skipped');
+                        const section = ALL_SECTIONS[currentSection];
+                        addMessage(`✅ Seção ${currentSection} não se aplica.`, true, false, null, 'evt_section_skipped');
 
                         // Adicionar texto explicativo ao container (em estilo diferente)
                         const skipText = document.createElement('div');
                         skipText.className = 'mt-4 p-4 bg-gray-100 border border-gray-300 rounded-lg text-center italic text-gray-600';
                         skipText.innerHTML = `
-                            <h3 class="font-semibold text-gray-700 mb-1">🚗 Seção 2 - Abordagem a Veículo</h3>
+                            <h3 class="font-semibold text-gray-700 mb-1">${section.emoji} Seção ${currentSection} - ${section.name}</h3>
                             <p class="text-sm">${data.generated_text}</p>
                         `;
                         generatedSectionsContainer.appendChild(skipText);
                         generatedSectionsContainer.classList.remove('hidden');
 
-                        // Desabilitar inputs (BO finalizado)
+                        // Desabilitar inputs e preparar para próxima seção
                         disableInput();
 
-                        addMessage('📋 BO finalizado. Você pode copiar o texto da Seção 1 acima.', true, false, null, 'evt_bo_complete');
+                        // Mostrar botão para próxima seção (se não for a última)
+                        if (currentSection < 8) {
+                            setTimeout(() => {
+                                const nextSectionNum = currentSection + 1;
+                                const nextSection = ALL_SECTIONS[nextSectionNum];
+                                const nextSectionButtonDiv = document.createElement('div');
+                                nextSectionButtonDiv.id = `section${nextSectionNum}-transition-card`;
+                                nextSectionButtonDiv.className = 'mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center fade-in';
+
+                                // Criar o HTML com base na próxima seção (reusando a lógica existente)
+                                let buttonHTML = `
+                                    <h3 class="font-bold text-blue-900 mb-2">${nextSection.emoji} Seção ${nextSectionNum} - ${nextSection.name}</h3>
+                                    <p class="text-sm text-blue-700 mb-3">`;
+
+                                // Adicionar textos contextuais para cada seção
+                                switch(nextSectionNum) {
+                                    case 3:
+                                        buttonHTML += 'A equipe realizou campana antes da abordagem? Continue para a próxima seção.';
+                                        break;
+                                    case 4:
+                                        buttonHTML += 'Houve entrada em domicílio durante a ocorrência? Continue para a próxima seção.';
+                                        break;
+                                    case 5:
+                                        buttonHTML += 'Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.';
+                                        break;
+                                    case 6:
+                                        buttonHTML += 'Houve resistência ou uso de força durante a abordagem? Continue para a próxima seção.';
+                                        break;
+                                    case 7:
+                                        buttonHTML += 'Houve apreensão de drogas ou objetos ligados ao tráfico? Continue para a próxima seção.';
+                                        break;
+                                    case 8:
+                                        buttonHTML += 'Última etapa: voz de prisão, direitos do preso, destino dos materiais. Finalize seu BO.';
+                                        break;
+                                }
+
+                                buttonHTML += `
+                                    </p>
+                                    <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                                        ▶️ Iniciar Seção ${nextSectionNum}
+                                    </button>
+                                `;
+
+                                nextSectionButtonDiv.innerHTML = buttonHTML;
+                                generatedSectionsContainer.parentElement.appendChild(nextSectionButtonDiv);
+
+                                // Adicionar event listener dinâmico
+                                const startFunctionName = `startSection${nextSectionNum}`;
+                                if (window[startFunctionName]) {
+                                    document.getElementById(`btn-start-section${nextSectionNum}`).addEventListener('click', window[startFunctionName]);
+                                }
+                            }, 500);
+                        }
 
                         return;
                     }

@@ -263,34 +263,40 @@
                 '1.5': 'Local exato da ocorrência',
                 '1.6': 'Histórico do local / facção',
                 // Seção 2: Abordagem a Veículo
-                '2.0': 'Havia veículo?',
-                '2.1': 'Marca e modelo do veículo',
-                '2.2': 'Placa do veículo',
-                '2.3': 'Ocupantes (graduação, nome, função)',
-                '2.4': 'Posição do veículo',
-                '2.5': 'Atitude do condutor',
-                '2.6': 'Descrição da abordagem',
-                '2.7': 'Motivo da suspeição',
-                // Seção 3: Abordagem Pessoal
-                '3.0': 'Houve abordagem pessoal?',
-                '3.1': 'Quem foi abordado (nome, idade, características)',
-                '3.2': 'Atitude do abordado',
-                '3.3': 'Descrição da abordagem pessoal',
-                '3.4': 'Motivo da suspeição pessoal',
-                // Seção 4: Entrada no Imóvel
-                '4.0': 'Houve entrada em imóvel?',
-                '4.1': 'Qual foi a justificativa legal da entrada?',
-                '4.2': 'Descreva detalhadamente a entrada',
-                '4.3': 'Qual era o estado do imóvel?',
-                // Seção 5: Testemunhas
-                '5.0': 'Havia testemunha?',
-                '5.1': 'Dados da testemunha (nome, idade, profissão)',
-                '5.2': 'O que a testemunha relatou?',
-                // Seção 6: Vítimas
-                '6.0': 'Há vítima nesta ocorrência?',
-                '6.1': 'Dados da vítima (nome, idade, profissão)',
-                '6.2': 'Qual era o estado da vítima?',
-                '6.3': 'Houve atendimento médico?',
+                '2.1': 'Havia veículo?',
+                '2.2': 'Marca/modelo/cor/placa',
+                '2.3': 'Onde foi visto?',
+                '2.4': 'Qual policial percebeu e o que viu?',
+                '2.5': 'Como foi dada a ordem de parada?',
+                '2.6': 'Parou ou houve perseguição?',
+                '2.7': 'Como foi a abordagem e busca?',
+                '2.8': 'Haviam irregularidades? Veículo furtado/roubado/clonado?',
+                // Seção 3: Campana (Vigilância Velada)
+                '3.1': 'A equipe realizou campana antes da abordagem?',
+                '3.2': 'Onde foi feita a campana? (local, ponto de observação, distância)',
+                '3.3': 'Qual policial tinha visão direta e o que cada um via?',
+                '3.4': 'O que motivou a campana?',
+                '3.5': 'Quanto tempo durou a campana? (contínua ou alternada)',
+                '3.6': 'O que foi observado durante a campana? (atos concretos)',
+                '3.7': 'Houve abordagem de usuários durante a campana?',
+                '3.8': 'Houve fuga ao notar a equipe? Como ocorreu?',
+                // Seção 4: Entrada em Domicílio
+                '4.1': 'Houve entrada em domicílio?',
+                '4.2': 'Qual foi a justificativa legal da entrada?',
+                '4.3': 'Descreva detalhadamente a entrada',
+                '4.4': 'Qual era o estado do imóvel?',
+                '4.5': 'Houve resistência?',
+                // Seção 5: Fundada Suspeita
+                '5.1': 'Havia fundada suspeita (sem veículo, campana ou entrada)?',
+                '5.2': 'Dados do abordado (nome, idade, características)',
+                '5.3': 'Descrição da abordagem e atitude',
+                '5.4': 'O que motivou a suspeita?',
+                // Seção 6: Reação e Uso da Força
+                '6.1': 'Houve resistência durante a abordagem?',
+                '6.2': 'Como foi a reação? (fuga, agressão, ameaça)',
+                '6.3': 'Qual foi a resposta da PM? (arma, força, algemas)',
+                '6.4': 'Houve ferimentos?',
+                '6.5': 'Descreva o uso da força de forma objetiva',
                 // Seção 7: Apreensões e Cadeia de Custódia
                 '7.1': 'Houve apreensão de drogas?',
                 '7.2': 'Substâncias apreendidas (tipo, quantidade, local, quem encontrou)',
@@ -464,7 +470,7 @@
                     </div>
                 `;
 
-                const section2Steps = ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7'];
+                const section2Steps = ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8'];
                 for (const step of section2Steps) {
                     html += renderQuestion(step, questions, questionLabels, feedbacksByStep, feedbacksByEventId);
                 }
@@ -475,17 +481,17 @@
                 }
             }
 
-            // Seção 3: Abordagem Pessoal
+            // Seção 3: Campana (Vigilância Velada)
             if (hasSection3) {
                 html += `
                     <div class="mt-6">
                         <h3 class="text-lg font-bold text-purple-800 mb-3 pb-2 border-b-2 border-purple-200">
-                            👤 SEÇÃO 3 - Abordagem Pessoal
+                            👁️ SEÇÃO 3 - Campana (Vigilância Velada)
                         </h3>
                     </div>
                 `;
 
-                const section3Steps = ['3.0', '3.1', '3.2', '3.3', '3.4'];
+                const section3Steps = ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '3.8'];
                 for (const step of section3Steps) {
                     html += renderQuestion(step, questions, questionLabels, feedbacksByStep, feedbacksByEventId);
                 }
@@ -496,17 +502,17 @@
                 }
             }
 
-            // Seção 4: Entrada no Imóvel
+            // Seção 4: Entrada em Domicílio
             if (hasSection4) {
                 html += `
                     <div class="mt-6">
                         <h3 class="text-lg font-bold text-orange-800 mb-3 pb-2 border-b-2 border-orange-200">
-                            🏠 SEÇÃO 4 - Entrada no Imóvel
+                            🏠 SEÇÃO 4 - Entrada em Domicílio
                         </h3>
                     </div>
                 `;
 
-                const section4Steps = ['4.0', '4.1', '4.2', '4.3'];
+                const section4Steps = ['4.1', '4.2', '4.3', '4.4', '4.5'];
                 for (const step of section4Steps) {
                     html += renderQuestion(step, questions, questionLabels, feedbacksByStep, feedbacksByEventId);
                 }
@@ -517,17 +523,17 @@
                 }
             }
 
-            // Seção 5: Testemunhas
+            // Seção 5: Fundada Suspeita
             if (hasSection5) {
                 html += `
                     <div class="mt-6">
                         <h3 class="text-lg font-bold text-teal-800 mb-3 pb-2 border-b-2 border-teal-200">
-                            👁️ SEÇÃO 5 - Testemunhas
+                            🎯 SEÇÃO 5 - Fundada Suspeita
                         </h3>
                     </div>
                 `;
 
-                const section5Steps = ['5.0', '5.1', '5.2'];
+                const section5Steps = ['5.1', '5.2', '5.3', '5.4'];
                 for (const step of section5Steps) {
                     html += renderQuestion(step, questions, questionLabels, feedbacksByStep, feedbacksByEventId);
                 }
@@ -538,17 +544,17 @@
                 }
             }
 
-            // Seção 6: Vítimas
+            // Seção 6: Reação e Uso da Força
             if (hasSection6) {
                 html += `
                     <div class="mt-6">
                         <h3 class="text-lg font-bold text-red-800 mb-3 pb-2 border-b-2 border-red-200">
-                            🩹 SEÇÃO 6 - Vítimas
+                            💪 SEÇÃO 6 - Reação e Uso da Força
                         </h3>
                     </div>
                 `;
 
-                const section6Steps = ['6.0', '6.1', '6.2', '6.3'];
+                const section6Steps = ['6.1', '6.2', '6.3', '6.4', '6.5'];
                 for (const step of section6Steps) {
                     html += renderQuestion(step, questions, questionLabels, feedbacksByStep, feedbacksByEventId);
                 }

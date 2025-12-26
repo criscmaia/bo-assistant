@@ -1172,13 +1172,19 @@
              * @param {number} sectionNumber - Número da seção (1, 2, 3...)
              * @param {string} skipReason - Motivo do skip (fornecido pelo backend)
              */
-            const section = ALL_SECTIONS[sectionNumber];
-            const textElement = document.getElementById(`section${sectionNumber}-text`);
-            const cardElement = document.getElementById(`section${sectionNumber}-card`);
-            const containerElement = document.getElementById('generated-sections-container');
-            const copyAllButton = document.getElementById('copy-all-button');
+            try {
+                const textElement = document.getElementById(`section${sectionNumber}-text`);
+                const cardElement = document.getElementById(`section${sectionNumber}-card`);
+                const containerElement = document.getElementById('generated-sections-container');
+                const copyAllButton = document.getElementById('copy-all-button');
 
-            if (textElement && cardElement) {
+                console.log(`[Skip] Tentando adicionar seção ${sectionNumber} - textElement:`, !!textElement, 'cardElement:', !!cardElement);
+
+                if (!textElement || !cardElement) {
+                    console.error(`[Skip] Elementos não encontrados para seção ${sectionNumber}`);
+                    return;
+                }
+
                 // Criar HTML especial para seção pulada
                 const skippedHTML = `⏭️ SEÇÃO PULADA\n\n${skipReason}`;
                 textElement.textContent = skippedHTML;
@@ -1188,7 +1194,10 @@
                 const summary = cardElement.querySelector('summary');
                 if (summary) {
                     summary.classList.add('opacity-75');
-                    summary.innerHTML += ' <span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold ml-2">⏭️ Pulada</span>';
+                    const existingBadge = summary.querySelector('span');
+                    if (!existingBadge) {
+                        summary.innerHTML += ' <span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold ml-2">⏭️ Pulada</span>';
+                    }
                 }
 
                 cardElement.classList.remove('hidden'); // Mostrar card da seção
@@ -1200,7 +1209,9 @@
                     copyAllButton.classList.remove('hidden');
                 }
 
-                console.log(`[Skip] Seção ${sectionNumber} pulada (adicionada ao container)`);
+                console.log(`[Skip] Seção ${sectionNumber} pulada (adicionada ao container). Seções visíveis: ${visibleSections.length}`);
+            } catch (error) {
+                console.error(`[Skip] Erro ao adicionar seção ${sectionNumber}:`, error);
             }
         }
 

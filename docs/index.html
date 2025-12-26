@@ -3326,6 +3326,13 @@
                             block: 'nearest'
                         });
 
+                        // ✅ Adicionar mensagem de confirmação que o texto foi gerado
+                        if (currentSection === 8 && boCompleted) {
+                            addMessage('📋 Texto da Seção 8 foi gerado abaixo! Todas as seções foram finalizadas. Copie o BO completo usando o botão abaixo.', true, false, null, 'evt_text_generated');
+                        } else {
+                            addMessage(`📝 Texto da Seção ${currentSection} foi gerado abaixo. Você pode copiar o texto e clicar no botão para continuar para a próxima seção.`, true, false, null, 'evt_text_generated');
+                        }
+
                         // ✅ Botões para iniciar próxima seção (SOMENTE se BO não está completo)
                         if (currentSection === 1 && !boCompleted) {
                             const section2ButtonDiv = document.createElement('div');

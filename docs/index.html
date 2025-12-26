@@ -3238,6 +3238,13 @@
                         // Desabilitar inputs e preparar para próxima seção
                         disableInput();
 
+                        // Mostrar mensagem de orientação ou conclusão
+                        if (currentSection < 8) {
+                            addMessage('⬇️ Role para baixo para ver o texto gerado e clique no botão para continuar para a próxima seção.', true, false, null, 'evt_scroll_guidance');
+                        } else {
+                            addMessage('🎉 Parabéns! Você chegou ao final do BO! Todas as seções foram processadas.', true, false, null, 'evt_completion');
+                        }
+
                         // Mostrar botão para próxima seção (se não for a última)
                         if (currentSection < 8) {
                             setTimeout(() => {

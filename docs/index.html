@@ -1190,19 +1190,27 @@
 
                 // Apenas mostrar o motivo da seção pulada, sem título extras
                 textElement.textContent = skipReason;
-                textElement.classList.add('italic', 'text-gray-600');
+                textElement.classList.add('italic', 'text-gray-500'); // Cinza mais claro para parecer "desconsiderado"
+                textElement.style.fontSize = '0.95rem'; // Ligeiramente menor
 
-                // Atualizar summary com badge ao lado do título
+                // Atualizar summary com badge ao lado do título e aparência de "pálido"
                 const summary = cardElement.querySelector('summary');
                 if (summary) {
                     // Modificar o HTML do summary para ter badge inline
-                    summary.innerHTML = `${section.emoji} Seção ${sectionNumber} - ${section.name} <span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold ml-2">Pulada</span>`;
+                    summary.innerHTML = `${section.emoji} <span class="text-gray-500">Seção ${sectionNumber} - ${section.name}</span> <span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold ml-2">Pulada</span>`;
+                    summary.classList.add('opacity-80'); // Reduzir opacidade
                 }
 
-                // Adicionar fundo cinza ao card para indicar que foi pulada
+                // Adicionar fundo cinza claro ao card (summary) para indicar que foi pulada
+                if (summary) {
+                    summary.classList.add('bg-gray-100');
+                }
+
+                // Adicionar fundo cinza mais forte ao conteúdo
                 const cardDiv = cardElement.querySelector('.bg-white');
                 if (cardDiv) {
-                    cardDiv.classList.add('bg-gray-50');
+                    cardDiv.classList.remove('bg-white');
+                    cardDiv.classList.add('bg-gray-100'); // Fundo cinza mais destacado
                 }
 
                 // Esconder botão de copiar para seções puladas

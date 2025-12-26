@@ -3222,12 +3222,15 @@
                         const section = ALL_SECTIONS[currentSection];
                         addMessage(`✅ Seção ${currentSection} não se aplica.`, true, false, null, 'evt_section_skipped');
 
-                        // Adicionar texto explicativo ao container (em estilo diferente)
+                        // Adicionar texto explicativo ao container (em estilo diferente para indicar que foi pulada)
                         const skipText = document.createElement('div');
-                        skipText.className = 'mt-4 p-4 bg-gray-100 border border-gray-300 rounded-lg text-center italic text-gray-600';
+                        skipText.className = 'mt-4 p-4 bg-gray-100 border-2 border-gray-300 rounded-lg text-center italic text-gray-600';
                         skipText.innerHTML = `
-                            <h3 class="font-semibold text-gray-700 mb-1">${section.emoji} Seção ${currentSection} - ${section.name}</h3>
-                            <p class="text-sm">${data.generated_text}</p>
+                            <div class="flex items-center justify-center gap-2 mb-2">
+                                <h3 class="font-semibold text-gray-700">${section.emoji} Seção ${currentSection} - ${section.name}</h3>
+                                <span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold">⏭️ Pulada</span>
+                            </div>
+                            <p class="text-sm text-gray-600">${data.generated_text}</p>
                         `;
                         generatedSectionsContainer.appendChild(skipText);
                         generatedSectionsContainer.classList.remove('hidden');

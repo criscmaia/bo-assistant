@@ -1200,13 +1200,17 @@
                     }
                 }
 
-                cardElement.classList.remove('hidden'); // Mostrar card da seção
-                containerElement.classList.remove('hidden'); // Mostrar container geral
+                // Remover classe hidden tanto do classList quanto com estilo inline para garantir visibilidade
+                cardElement.classList.remove('hidden');
+                cardElement.style.display = '';
+                containerElement.classList.remove('hidden');
+                containerElement.style.display = '';
 
                 // Mostrar botão "Copiar BO Completo" se houver 2+ seções
                 const visibleSections = document.querySelectorAll('#generated-sections-container details:not(.hidden)');
                 if (visibleSections.length >= 2) {
                     copyAllButton.classList.remove('hidden');
+                    copyAllButton.style.display = '';
                 }
 
                 console.log(`[Skip] Seção ${sectionNumber} pulada (adicionada ao container). Seções visíveis: ${visibleSections.length}`);
@@ -1231,13 +1235,18 @@
             if (textElement && cardElement) {
                 textElement.textContent = text;
                 textElement.classList.remove('italic', 'text-gray-500'); // Remover estilos de skip se houver
-                cardElement.classList.remove('hidden'); // Mostrar card da seção
-                containerElement.classList.remove('hidden'); // Mostrar container geral
+
+                // Remover classe hidden tanto do classList quanto com estilo inline para garantir visibilidade
+                cardElement.classList.remove('hidden');
+                cardElement.style.display = '';
+                containerElement.classList.remove('hidden');
+                containerElement.style.display = '';
 
                 // Mostrar botão "Copiar BO Completo" se houver 2+ seções
                 const visibleSections = document.querySelectorAll('#generated-sections-container details:not(.hidden)');
                 if (visibleSections.length >= 2) {
                     copyAllButton.classList.remove('hidden');
+                    copyAllButton.style.display = '';
                 }
 
                 console.log(`[Texto] Seção ${sectionNumber} adicionada ao container persistente`);

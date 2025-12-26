@@ -16,9 +16,9 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 
 ## 📊 Status Atual
 
-### ✅ v0.12.0 - Seção 8: Condução e Pós-Ocorrência (FINAL)
+### ✅ v0.12.1 - Seção 8: Condução e Pós-Ocorrência (FINAL)
 
-**Novidades v0.12.0:**
+**Novidades v0.12.1:**
 - ✅ **Seção 8: Condução e Pós-Ocorrência** - 6 perguntas (8.1 a 8.6) - ÚLTIMA SEÇÃO
 - ✅ **BO 100% COMPLETO** - Todas as 8 seções implementadas (8/8)
 - ✅ **Marca BO como Completo** - Seção 8 marca `boCompleted = true`
@@ -29,7 +29,7 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 - ✅ **Fundamento Jurídico** - Lei 11.343/06, Lei 13.869/19, CPP Arts. 282-284
 - ✅ **Geração de Texto Final via LLM** - Consolidação da narrativa completa
 
-**Recursos v0.12.0:**
+**Recursos v0.12.1:**
 - ✅ Seção 1: Contexto da Ocorrência (6 perguntas - 1.1 a 1.6)
 - ✅ Seção 2: Abordagem a Veículo (8 perguntas - 2.1 a 2.8)
 - ✅ Seção 3: Campana - Vigilância Velada (8 perguntas - 3.1 a 3.8)

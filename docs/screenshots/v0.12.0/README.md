@@ -1,4 +1,4 @@
-# Screenshots - vv0.12.0
+# Screenshots - vv0.12.1
 
 **Data de geração:** 23/12/2025 15:17
 
@@ -53,7 +53,7 @@
 - **Python 3.13**
 - **Backend:** http://localhost:8000
 - **Frontend:** http://localhost:3000
-- **Versão:** v0.12.0
+- **Versão:** v0.12.1
 
 ## ✅ Validações Testadas
 - ✅ Erro de validação ao editar (data inválida) - Seção 1

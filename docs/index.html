@@ -1166,6 +1166,44 @@
         // FUNÇÕES DE GERENCIAMENTO DE TEXTOS GERADOS (MÚLTIPLAS SEÇÕES)
         // ================================================================
 
+        function addSkippedSectionText(sectionNumber, skipReason) {
+            /**
+             * Adiciona texto de seção pulada (não aplicável) no card correto
+             * @param {number} sectionNumber - Número da seção (1, 2, 3...)
+             * @param {string} skipReason - Motivo do skip (fornecido pelo backend)
+             */
+            const section = ALL_SECTIONS[sectionNumber];
+            const textElement = document.getElementById(`section${sectionNumber}-text`);
+            const cardElement = document.getElementById(`section${sectionNumber}-card`);
+            const containerElement = document.getElementById('generated-sections-container');
+            const copyAllButton = document.getElementById('copy-all-button');
+
+            if (textElement && cardElement) {
+                // Criar HTML especial para seção pulada
+                const skippedHTML = `⏭️ SEÇÃO PULADA\n\n${skipReason}`;
+                textElement.textContent = skippedHTML;
+                textElement.classList.add('italic', 'text-gray-500');
+
+                // Atualizar summary para indicar que foi pulada
+                const summary = cardElement.querySelector('summary');
+                if (summary) {
+                    summary.classList.add('opacity-75');
+                    summary.innerHTML += ' <span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold ml-2">⏭️ Pulada</span>';
+                }
+
+                cardElement.classList.remove('hidden'); // Mostrar card da seção
+                containerElement.classList.remove('hidden'); // Mostrar container geral
+
+                // Mostrar botão "Copiar BO Completo" se houver 2+ seções
+                const visibleSections = document.querySelectorAll('#generated-sections-container details:not(.hidden)');
+                if (visibleSections.length >= 2) {
+                    copyAllButton.classList.remove('hidden');
+                }
+
+                console.log(`[Skip] Seção ${sectionNumber} pulada (adicionada ao container)`);
+            }
+        }
+
         function addGeneratedSectionText(sectionNumber, text) {
             /**
              * Adiciona ou atualiza texto de uma seção no container persistente
@@ -1181,6 +1219,7 @@
 
             if (textElement && cardElement) {
                 textElement.textContent = text;
+                textElement.classList.remove('italic', 'text-gray-500'); // Remover estilos de skip se houver
                 cardElement.classList.remove('hidden'); // Mostrar card da seção
                 containerElement.classList.remove('hidden'); // Mostrar container geral
 
@@ -3222,18 +3261,8 @@
                         const section = ALL_SECTIONS[currentSection];
                         addMessage(`✅ Seção ${currentSection} não se aplica.`, true, false, null, 'evt_section_skipped');
 
-                        // Adicionar texto explicativo ao container (em estilo diferente para indicar que foi pulada)
-                        const skipText = document.createElement('div');
-                        skipText.className = 'mt-4 p-4 bg-gray-100 border-2 border-gray-300 rounded-lg text-center italic text-gray-600';
-                        skipText.innerHTML = `
-                            <div class="flex items-center justify-center gap-2 mb-2">
-                                <h3 class="font-semibold text-gray-700">${section.emoji} Seção ${currentSection} - ${section.name}</h3>
-                                <span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold">⏭️ Pulada</span>
-                            </div>
-                            <p class="text-sm text-gray-600">${data.generated_text}</p>
-                        `;
-                        generatedSectionsContainer.appendChild(skipText);
-                        generatedSectionsContainer.classList.remove('hidden');
+                        // Adicionar texto de seção pulada no card correto (mantendo ordem)
+                        addSkippedSectionText(currentSection, data.generated_text);
 
                         // Desabilitar inputs e preparar para próxima seção
                         disableInput();

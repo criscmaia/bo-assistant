@@ -1185,10 +1185,11 @@
                     return;
                 }
 
-                // Criar HTML especial para seção pulada
-                const skippedHTML = `⏭️ SEÇÃO PULADA\n\n${skipReason}`;
-                textElement.textContent = skippedHTML;
-                textElement.classList.add('italic', 'text-gray-500');
+                // Criar HTML especial para seção pulada com estilo bonito
+                const section = ALL_SECTIONS[sectionNumber];
+                const skippedHTML = `${section.emoji} SEÇÃO ${sectionNumber} - ${section.name.toUpperCase()}\n⏭️ PULADA\n\n${skipReason}`;
+                textElement.innerHTML = `<span class="text-center block mb-2 font-semibold text-gray-700">${section.emoji} Seção ${sectionNumber} - ${section.name}</span><span class="inline-block bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs font-semibold mb-3">⏭️ Pulada</span><p class="italic text-gray-600 mt-3">${skipReason.replace(/\n/g, '<br>')}</p>`;
+                textElement.classList.add('text-center');
 
                 // Atualizar summary para indicar que foi pulada
                 const summary = cardElement.querySelector('summary');

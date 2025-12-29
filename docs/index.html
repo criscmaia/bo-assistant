@@ -2862,11 +2862,11 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section2_first_q');
                     enableInput();
 
-                    // 📍 Scroll até o começo do chat para ver a pergunta
-                    const chatContainer = document.querySelector('.chat-messages');
-                    if (chatContainer) {
-                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    // 📍 Scroll até o TOPO da página para ver a pergunta
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
                     // 🎯 Focar no input do chat
                     userInput.focus();
@@ -2932,11 +2932,11 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section3_first_q');
                     enableInput();
 
-                    // 📍 Scroll até o começo do chat para ver a pergunta
-                    const chatContainer = document.querySelector('.chat-messages');
-                    if (chatContainer) {
-                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    // 📍 Scroll até o TOPO da página para ver a pergunta
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
                     // 🎯 Focar no input do chat
                     userInput.focus();
@@ -3002,11 +3002,11 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section4_first_q');
                     enableInput();
 
-                    // 📍 Scroll até o começo do chat para ver a pergunta
-                    const chatContainer = document.querySelector('.chat-messages');
-                    if (chatContainer) {
-                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    // 📍 Scroll até o TOPO da página para ver a pergunta
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
                     // 🎯 Focar no input do chat
                     userInput.focus();
@@ -3072,11 +3072,11 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section5_first_q');
                     enableInput();
 
-                    // 📍 Scroll até o começo do chat para ver a pergunta
-                    const chatContainer = document.querySelector('.chat-messages');
-                    if (chatContainer) {
-                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    // 📍 Scroll até o TOPO da página para ver a pergunta
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
                     // 🎯 Focar no input do chat
                     userInput.focus();
@@ -3142,11 +3142,11 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section6_first_q');
                     enableInput();
 
-                    // 📍 Scroll até o começo do chat para ver a pergunta
-                    const chatContainer = document.querySelector('.chat-messages');
-                    if (chatContainer) {
-                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    // 📍 Scroll até o TOPO da página para ver a pergunta
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
                     // 🎯 Focar no input do chat
                     userInput.focus();
@@ -3212,11 +3212,11 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section7_first_q');
                     enableInput();
 
-                    // 📍 Scroll até o começo do chat para ver a pergunta
-                    const chatContainer = document.querySelector('.chat-messages');
-                    if (chatContainer) {
-                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    // 📍 Scroll até o TOPO da página para ver a pergunta
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
                     // 🎯 Focar no input do chat
                     userInput.focus();
@@ -3282,11 +3282,11 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section8_first_q');
                     enableInput();
 
-                    // 📍 Scroll até o começo do chat para ver a pergunta
-                    const chatContainer = document.querySelector('.chat-messages');
-                    if (chatContainer) {
-                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    // 📍 Scroll até o TOPO da página para ver a pergunta
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
                     // 🎯 Focar no input do chat
                     userInput.focus();
@@ -3720,12 +3720,6 @@
                         // ✅ NOVO: Adicionar texto ao container persistente
                         addGeneratedSectionText(currentSection, data.generated_text);
 
-                        // Scroll suave para o final da página (para ver o texto gerado + botão próxima seção)
-                        window.scrollTo({
-                            top: document.documentElement.scrollHeight,
-                            behavior: 'smooth'
-                        });
-
                         // ✅ Adicionar mensagem de confirmação que o texto foi gerado
                         if (currentSection === 8 && boCompleted) {
                             addMessage('📋 Texto da Seção 8 foi gerado abaixo! Todas as seções foram finalizadas. Copie o BO completo usando o botão abaixo.', true, false, null, 'evt_text_generated');
@@ -3960,7 +3954,11 @@
                             });
                         }
 
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                        // 📍 Scroll suave para o final da página (para ver texto gerado + botão próxima seção)
+                        window.scrollTo({
+                            top: document.documentElement.scrollHeight,
+                            behavior: 'smooth'
+                        });
                     }, 1000);
                 } else {
                     // ✅ SALVAR RASCUNHO após resposta válida (apenas se seção NÃO está completa)

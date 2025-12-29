@@ -683,6 +683,19 @@ async def start_section(section_number: int, request_body: dict):
 
         # Auto-responder pergunta 2.1 como "SIM" (usuário já confirmou ao clicar no botão)
         state_machine.store_answer("SIM")
+
+        # ✅ Log: registrar resposta auto-respondida 2.1
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="answer_submitted",
+            data={
+                "step": "2.1",
+                "answer": "Sim",
+                "is_valid": True,
+                "auto_responded": True
+            }
+        )
+
         state_machine.next_step()
 
         # Agora pega pergunta 2.2 (não 2.1)
@@ -694,8 +707,7 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question,
-                "auto_answered": "2.1 = SIM"
+                "first_question": first_question
             }
         )
 
@@ -716,6 +728,19 @@ async def start_section(section_number: int, request_body: dict):
 
         # Auto-responder pergunta 3.1 como "SIM" (usuário já confirmou ao clicar no botão)
         state_machine.store_answer("SIM")
+
+        # ✅ Log: registrar resposta auto-respondida 3.1
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="answer_submitted",
+            data={
+                "step": "3.1",
+                "answer": "Sim",
+                "is_valid": True,
+                "auto_responded": True
+            }
+        )
+
         state_machine.next_step()
 
         # Agora pega pergunta 3.2 (não 3.1)
@@ -727,8 +752,7 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question,
-                "auto_answered": "3.1 = SIM"
+                "first_question": first_question
             }
         )
 
@@ -749,6 +773,19 @@ async def start_section(section_number: int, request_body: dict):
 
         # Auto-responder pergunta 4.1 como "SIM" (usuário já confirmou ao clicar no botão)
         state_machine.store_answer("SIM")
+
+        # ✅ Log: registrar resposta auto-respondida 4.1
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="answer_submitted",
+            data={
+                "step": "4.1",
+                "answer": "Sim",
+                "is_valid": True,
+                "auto_responded": True
+            }
+        )
+
         state_machine.next_step()
 
         # Agora pega pergunta 4.2 (não 4.1)
@@ -760,8 +797,7 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question,
-                "auto_answered": "4.1 = SIM"
+                "first_question": first_question
             }
         )
 
@@ -782,6 +818,19 @@ async def start_section(section_number: int, request_body: dict):
 
         # Auto-responder pergunta 5.1 como "SIM" (usuário já confirmou ao clicar no botão)
         state_machine.store_answer("SIM")
+
+        # ✅ Log: registrar resposta auto-respondida 5.1
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="answer_submitted",
+            data={
+                "step": "5.1",
+                "answer": "Sim",
+                "is_valid": True,
+                "auto_responded": True
+            }
+        )
+
         state_machine.next_step()
 
         # Agora pega pergunta 5.2 (não 5.1)
@@ -793,8 +842,7 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question,
-                "auto_answered": "5.1 = SIM"
+                "first_question": first_question
             }
         )
 
@@ -815,6 +863,19 @@ async def start_section(section_number: int, request_body: dict):
 
         # Auto-responder pergunta 6.1 como "SIM" (usuário já confirmou ao clicar no botão)
         state_machine.store_answer("SIM")
+
+        # ✅ Log: registrar resposta auto-respondida 6.1
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="answer_submitted",
+            data={
+                "step": "6.1",
+                "answer": "Sim",
+                "is_valid": True,
+                "auto_responded": True
+            }
+        )
+
         state_machine.next_step()
 
         # Agora pega pergunta 6.2 (não 6.1)
@@ -826,8 +887,7 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question,
-                "auto_answered": "6.1 = SIM"
+                "first_question": first_question
             }
         )
 
@@ -848,6 +908,19 @@ async def start_section(section_number: int, request_body: dict):
 
         # Auto-responder pergunta 7.1 como "SIM" (usuário já confirmou ao clicar no botão)
         state_machine.store_answer("SIM")
+
+        # ✅ Log: registrar resposta auto-respondida 7.1
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="answer_submitted",
+            data={
+                "step": "7.1",
+                "answer": "Sim",
+                "is_valid": True,
+                "auto_responded": True
+            }
+        )
+
         state_machine.next_step()
 
         # Agora pega pergunta 7.2 (não 7.1)
@@ -859,8 +932,7 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question,
-                "auto_answered": "7.1 = SIM"
+                "first_question": first_question
             }
         )
 

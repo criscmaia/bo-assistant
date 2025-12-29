@@ -1,8 +1,19 @@
-# Changelog v0.12.2
+# Changelog v0.12.3
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
+
+#### v0.12.3 (Dez 2025) - Correções de UX e Logging
+- [x] **Bug Fix:** Logging gravando apenas 2 primeiras respostas (Issue #6) - Agora grava todas as respostas
+- [x] **UX:** Títulos de seção melhorados: "Seção N: Nome" ao invés de "Próxima Etapa: Nome"
+- [x] **UX:** Ordem dos botões invertida: "Não" à esquerda, "Sim" à direita
+- [x] **UX:** Contraste do botão cinza melhorado (bg-gray-400 → bg-gray-600)
+- [x] **UX:** Sidebar atualizada para mostrar pergunta X.1 como respondida ("Sim") ao iniciar seção
+- [x] **UX:** Scroll automático para topo ao clicar "Sim" + foco no input
+- [x] **UX:** Scroll automático para final ao clicar "Não" ou completar seção
+- [x] **Logging:** Auto-respostas (X.1 = "Sim") agora registradas no /logs com flag `auto_responded: true`
+- [x] Documentação atualizada (CHANGELOG.md, README.md, docs/*.md)
 
 #### v0.12.2 (Dez 2025) - Seção 8: Condução e Pós-Ocorrência (FINAL - BO COMPLETO)
 - [x] **Seção 8: Condução e Pós-Ocorrência** - 6 perguntas (8.1 a 8.6) - ÚLTIMA SEÇÃO

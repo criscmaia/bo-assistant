@@ -1,7 +1,7 @@
 # 🛠️ Guia de Desenvolvimento - BO Inteligente
 
-**Versão:** v0.8.0
-**Última atualização:** 21/12/2025
+**Versão:** v0.12.3
+**Última atualização:** 29/12/2025
 
 Este documento serve como memória institucional do projeto, documentando decisões arquiteturais, comandos essenciais e guias de debugging para desenvolvedores.
 

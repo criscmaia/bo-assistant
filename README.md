@@ -269,6 +269,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.9.0
-**Última atualização:** 22/12/2025
+**Versão:** 0.12.3
+**Última atualização:** 29/12/2025
 **Status:** Em produção

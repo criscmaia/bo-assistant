@@ -1,6 +1,6 @@
 # 🛠️ Guia de Desenvolvimento - BO Inteligente
 
-**Versão:** v0.12.3
+**Versão:** v0.12.4
 **Última atualização:** 29/12/2025
 
 Este documento serve como memória institucional do projeto, documentando decisões arquiteturais, comandos essenciais e guias de debugging para desenvolvedores.
@@ -35,6 +35,43 @@ python -m http.server 3000 --bind 127.0.0.1
 | Backend API | https://bo-assistant-backend.onrender.com |
 | Dashboard Logs | https://criscmaia.github.io/bo-assistant/logs.html |
 | Repositório | https://github.com/criscmaia/bo-assistant |
+
+---
+
+## 🔄 CI/CD - GitHub Actions
+
+**Versão:** v0.12.4+
+
+O projeto possui workflow automatizado de CI/CD que roda em cada push ou Pull Request para a branch `main`.
+
+### O que o CI executa:
+- ✅ Testes unitários (`tests/unit/`)
+- ✅ Testes de integração (`tests/integration/`)
+- ❌ Testes E2E **não** rodam no CI (precisam de Playwright/browser)
+
+### Configuração do Workflow:
+- **Arquivo:** `.github/workflows/test.yml`
+- **Runner:** Ubuntu latest
+- **Python:** 3.13
+- **Timeout:** 10 minutos
+- **Variáveis:** `GEMINI_API_KEY` e `GROQ_API_KEY` mockadas
+
+### Rodar testes localmente (igual ao CI):
+
+**Windows (PowerShell):**
+```powershell
+$env:PYTHONPATH = "backend"
+pytest tests/unit tests/integration -v --tb=short
+```
+
+**Linux/Mac:**
+```bash
+export PYTHONPATH=backend
+pytest tests/unit tests/integration -v --tb=short
+```
+
+### Badge de Status:
+O README.md exibe o status dos testes em tempo real via badge do GitHub Actions.
 
 ---
 

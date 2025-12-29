@@ -1,5 +1,8 @@
 # 📋 BO Inteligente
 
+[![Tests](https://github.com/criscmaia/bo-assistant/actions/workflows/test.yml/badge.svg)](https://github.com/criscmaia/bo-assistant/actions/workflows/test.yml)
+[![Security Scan](https://github.com/criscmaia/bo-assistant/actions/workflows/security-scan.yml/badge.svg)](https://github.com/criscmaia/bo-assistant/actions/workflows/security-scan.yml)
+
 Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utilizando IA para gerar textos técnicos seguindo as normas jurídicas estabelecidas.
 
 ---
@@ -15,6 +18,14 @@ Sistema de auxílio à elaboração de Boletins de Ocorrência policiais, utiliz
 ---
 
 ## 📊 Status Atual
+
+### ✅ v0.12.4 - CI/CD e Melhorias de Infraestrutura
+
+**Novidades v0.12.4:**
+- ✅ **CI/CD com GitHub Actions** - Testes automatizados em PRs
+- ✅ **Testes E2E separados** - Estrutura reorganizada (Playwright isolado)
+- ✅ **Badge de Status** - Visibilidade em tempo real da saúde do código
+- ✅ **Comandos de teste** documentados para rodar localmente igual ao CI
 
 ### ✅ v0.12.2 - Seção 8: Condução e Pós-Ocorrência (FINAL)
 
@@ -269,6 +280,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.12.3
+**Versão:** 0.12.4
 **Última atualização:** 29/12/2025
 **Status:** Em produção

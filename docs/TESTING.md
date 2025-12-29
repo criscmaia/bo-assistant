@@ -1,6 +1,6 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.12.3
+**Versão:** v0.12.4
 **Última atualização:** 29/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
@@ -31,19 +31,30 @@ tests/
 ├── pytest.ini               # Configuração pytest
 │
 ├── unit/                    # Testes unitários (sem I/O)
+│   ├── test_section3.py
+│   ├── test_section4.py
+│   ├── test_section5.py
+│   ├── test_section6.py
+│   ├── test_section7.py
+│   ├── test_section8.py
 │   └── test_backend_changes.py
 │
 ├── integration/             # Testes de integração (com backend)
 │   ├── test_complete_flow.py
 │   ├── test_sync_session.py
-│   ├── test_draft_persistence.py
-│   ├── test_draft_recovery.py
-│   └── test_section1_isolated.py
+│   ├── test_section3_flow.py
+│   ├── test_section4_flow.py
+│   ├── test_section6_flow.py
+│   ├── test_section7_flow.py
+│   └── test_section8_flow.py
 │
-├── e2e/                     # Testes E2E (Playwright)
+├── e2e/                     # Testes E2E (Playwright - NÃO rodam no CI)
 │   ├── README.md
 │   ├── automate_release.py
-│   └── test_scenarios.json
+│   ├── test_scenarios.json
+│   ├── test_draft_persistence.py    # Movido de integration/
+│   ├── test_draft_recovery.py       # Movido de integration/
+│   └── test_section1_isolated.py    # Movido de integration/
 │
 └── fixtures/                # Dados de teste
     └── valid_payload.json
@@ -77,11 +88,43 @@ python tests/e2e/automate_release.py --version v0.12.2 --start-section 5 --no-vi
 # E2E screenshots - Com vídeo (precisa MAIS tempo)
 python tests/e2e/automate_release.py --version v0.12.2
 
-# Todos os testes pytest juntos
-pytest
+# Todos os testes pytest juntos (unit + integration, sem E2E)
+pytest tests/unit tests/integration
 ```
 
 Veja [tests/README.md](../tests/README.md) para detalhes completos.
+
+### CI/CD - GitHub Actions
+
+**Versão:** v0.12.4+
+
+O projeto tem testes automatizados que rodam em cada push/PR:
+
+**O que roda no CI:**
+- ✅ `pytest tests/unit` - Testes unitários
+- ✅ `pytest tests/integration` - Testes de integração
+- ❌ Testes E2E **não** rodam (precisam de Playwright/browser)
+
+**Por que E2E não roda no CI?**
+- Testes E2E usam Playwright que precisa de browser real
+- São mais lentos (~10min vs 30s dos unit/integration)
+- Melhor rodá-los localmente antes de releases
+
+**Ver workflow:** `.github/workflows/test.yml`
+**Ver status:** Badge no README.md
+
+**Rodar localmente como o CI:**
+```powershell
+# Windows
+$env:PYTHONPATH = "backend"
+pytest tests/unit tests/integration -v --tb=short
+```
+
+```bash
+# Linux/Mac
+export PYTHONPATH=backend
+pytest tests/unit tests/integration -v --tb=short
+```
 
 ---
 

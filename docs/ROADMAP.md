@@ -1,6 +1,6 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.12.3 (8/8 Seções Completas)
+## Versão Atual: v0.12.4 (8/8 Seções Completas + CI/CD)
 **Última atualização:** 29/12/2025
 
 > **Funcionalidades já implementadas:** Ver [CHANGELOG.md](CHANGELOG.md)
@@ -8,29 +8,34 @@
 
 ---
 
-## Backlog de Funcionalidades
+## ✅ Funcionalidades Implementadas Recentemente
 
-### 1. CI/CD - GitHub Actions
+### CI/CD - GitHub Actions (v0.12.4)
+✅ **Implementado em 29/12/2025**
 
-**O que é:** Automação que roda testes automaticamente quando alguém faz push ou abre um Pull Request. Se os testes falharem, o merge é bloqueado.
+**O que foi feito:**
+- ✅ Workflow `.github/workflows/test.yml` configurado
+- ✅ Roda automaticamente em push/PR para `main`
+- ✅ Executa testes unitários e de integração (Python 3.13, Ubuntu latest)
+- ✅ Timeout de 10min, variáveis mockadas (GEMINI_API_KEY, GROQ_API_KEY)
+- ✅ Badge de status adicionado ao README
+- ✅ Validação de código antes de merge
 
-**Por que é importante:**
-- Evita que bugs cheguem em produção
-- Garante que mudanças não quebrem funcionalidades existentes
-- Dá confiança para fazer refatorações
-- Padrão da indústria para projetos de software
+**Estrutura de testes reorganizada:**
+- ✅ Testes E2E (Playwright) movidos para `tests/e2e/`
+- ✅ CI exclui E2E (precisa de browser)
+- ✅ Comandos documentados para rodar localmente
 
-**O que precisaria ser feito:**
-- Criar workflow que roda `pytest` (testes unitários e integração)
-- Configurar para rodar em cada PR antes do merge
-- Adicionar badge de status no README ("tests passing ✅")
-- Opcionalmente: rodar linting (ruff) e type checking (mypy)
-
-**Dependências:** Nenhuma - pode ser feito a qualquer momento.
+**Impacto:**
+- ✅ Previne bugs em produção
+- ✅ Garante qualidade em PRs
+- ✅ Confiança para refatorações
 
 ---
 
-### 2. Comparação e Avaliação de LLMs
+## Backlog de Funcionalidades
+
+### 1. Comparação e Avaliação de LLMs
 
 **O que é:** Sistema para comparar a qualidade dos textos gerados por diferentes modelos de linguagem (LLMs) e escolher o melhor para o caso de uso de BOs policiais.
 

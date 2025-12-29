@@ -1,8 +1,31 @@
-# Changelog v0.12.3
+# Changelog v0.12.4
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
+
+#### v0.12.4 (29 de Dezembro de 2025) - CI/CD e Reorganização de Testes
+
+### ✅ Adicionado
+- **CI/CD com GitHub Actions** (`.github/workflows/test.yml`)
+  - Testes automatizados em push/PR para branch main
+  - Roda testes unitários e de integração (Python 3.13, Ubuntu latest)
+  - Timeout de 10 minutos, variáveis de ambiente mockadas (GEMINI_API_KEY, GROQ_API_KEY)
+  - Badge de status no README.md
+  - Validação de código antes de merge
+- **Comandos de teste local** documentados em `comandos.txt`
+  - `$env:PYTHONPATH = "backend"` + `pytest tests/unit tests/integration -v --tb=short`
+  - Permite rodar localmente exatamente como o CI roda
+
+### 🔧 Melhorado
+- **Estrutura de testes reorganizada**
+  - Testes E2E (Playwright) movidos para `tests/e2e/`
+  - CI roda apenas unit + integration (E2E exclui browser, mais lento)
+  - 3 arquivos reclassificados: `test_draft_persistence.py`, `test_draft_recovery.py`, `test_section1_isolated.py`
+- **Documentação de infraestrutura**
+  - DEVELOPMENT.md: Seção completa sobre CI/CD
+  - TESTING.md: Atualizada com estrutura E2E e badges
+  - ROADMAP.md: CI/CD marcado como implementado
 
 #### v0.12.3 (Dez 2025) - Correções de UX e Logging
 - [x] **Bug Fix:** Logging gravando apenas 2 primeiras respostas (Issue #6) - Agora grava todas as respostas

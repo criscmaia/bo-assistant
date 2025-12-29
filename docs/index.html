@@ -965,20 +965,20 @@
                         section2ButtonDiv.id = 'section2-button-container';
                         section2ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl text-center';
                         section2ButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold text-blue-900 mb-2">🚗 Próxima Etapa: Abordagem a Veículo</h3>
+                            <h3 class="text-xl font-bold text-blue-900 mb-2">🚗 Seção 2: Abordagem a Veículo</h3>
                             <p class="text-gray-700 mb-4">
                                 Havia veículo envolvido na ocorrência? Continue para a próxima seção.
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button
+                                    id="btn-skip-section2"
+                                    class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não havia veículo
+                                </button>
+                                <button
                                     id="btn-start-section2"
                                     class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
                                     ✅ Sim, havia veículo
-                                </button>
-                                <button
-                                    id="btn-skip-section2"
-                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                    ⏭️ Não havia veículo
                                 </button>
                             </div>
                         `;
@@ -999,20 +999,20 @@
                         section3ButtonDiv.id = 'section3-button-container';
                         section3ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl text-center';
                         section3ButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold text-purple-900 mb-2">👁️ Próxima Etapa: Campana</h3>
+                            <h3 class="text-xl font-bold text-purple-900 mb-2">👁️ Seção 3: Campana</h3>
                             <p class="text-gray-700 mb-4">
                                 A equipe realizou campana antes da abordagem? Continue para a próxima seção.
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button
+                                    id="btn-skip-section3"
+                                    class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve campana
+                                </button>
+                                <button
                                     id="btn-start-section3"
                                     class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
                                     ✅ Sim, houve campana
-                                </button>
-                                <button
-                                    id="btn-skip-section3"
-                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                    ⏭️ Não houve campana
                                 </button>
                             </div>
                         `;
@@ -1033,20 +1033,20 @@
                         section4ButtonDiv.id = 'section4-button-container';
                         section4ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl text-center';
                         section4ButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold text-orange-900 mb-2">🏠 Próxima Etapa: Entrada em Domicílio</h3>
+                            <h3 class="text-xl font-bold text-orange-900 mb-2">🏠 Seção 4: Entrada em Domicílio</h3>
                             <p class="text-gray-700 mb-4">
                                 Houve entrada em domicílio durante a ocorrência? Continue para a próxima seção.
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button
+                                    id="btn-skip-section4"
+                                    class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve entrada em domicílio
+                                </button>
+                                <button
                                     id="btn-start-section4"
                                     class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
                                     ✅ Sim, houve entrada em domicílio
-                                </button>
-                                <button
-                                    id="btn-skip-section4"
-                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                    ⏭️ Não houve entrada em domicílio
                                 </button>
                             </div>
                         `;
@@ -1067,20 +1067,20 @@
                         section5ButtonDiv.id = 'section5-button-container';
                         section5ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-pink-50 to-pink-100 border-2 border-pink-200 rounded-xl text-center';
                         section5ButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold text-pink-900 mb-2">🎯 Próxima Etapa: Fundada Suspeita</h3>
+                            <h3 class="text-xl font-bold text-pink-900 mb-2">🎯 Seção 5: Fundada Suspeita</h3>
                             <p class="text-gray-700 mb-4">
                                 Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button
+                                    id="btn-skip-section5"
+                                    class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve fundada suspeita
+                                </button>
+                                <button
                                     id="btn-start-section5"
                                     class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
                                     ✅ Sim, houve fundada suspeita
-                                </button>
-                                <button
-                                    id="btn-skip-section5"
-                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                    ⏭️ Não houve fundada suspeita
                                 </button>
                             </div>
                         `;
@@ -1101,20 +1101,20 @@
                         section6ButtonDiv.id = 'section6-button-container';
                         section6ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-xl text-center';
                         section6ButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold text-teal-900 mb-2">💪 Próxima Etapa: Reação e Uso da Força</h3>
+                            <h3 class="text-xl font-bold text-teal-900 mb-2">💪 Seção 6: Reação e Uso da Força</h3>
                             <p class="text-gray-700 mb-4">
                                 Houve resistência ou uso de força durante a abordagem? Continue para a próxima seção.
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button
+                                    id="btn-skip-section6"
+                                    class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve resistência
+                                </button>
+                                <button
                                     id="btn-start-section6"
                                     class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
                                     ✅ Sim, houve resistência
-                                </button>
-                                <button
-                                    id="btn-skip-section6"
-                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                    ⏭️ Não houve resistência
                                 </button>
                             </div>
                         `;
@@ -1135,20 +1135,20 @@
                         section7ButtonDiv.id = 'section7-button-container';
                         section7ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-amber-50 to-amber-100 border-2 border-amber-200 rounded-xl text-center';
                         section7ButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold text-amber-900 mb-2">📦 Próxima Etapa: Apreensões e Cadeia de Custódia</h3>
+                            <h3 class="text-xl font-bold text-amber-900 mb-2">📦 Seção 7: Apreensões e Cadeia de Custódia</h3>
                             <p class="text-gray-700 mb-4">
                                 Houve apreensão de drogas ou objetos ligados ao tráfico? Continue para a próxima seção.
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button
+                                    id="btn-skip-section7"
+                                    class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve apreensão
+                                </button>
+                                <button
                                     id="btn-start-section7"
                                     class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors">
                                     ✅ Sim, houve apreensão
-                                </button>
-                                <button
-                                    id="btn-skip-section7"
-                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                    ⏭️ Não houve apreensão
                                 </button>
                             </div>
                         `;
@@ -1169,7 +1169,7 @@
                         section8ButtonDiv.id = 'section8-button-container';
                         section8ButtonDiv.className = 'mt-6 p-6 bg-gradient-to-r from-indigo-50 to-indigo-100 border-2 border-indigo-200 rounded-xl text-center';
                         section8ButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold text-indigo-900 mb-2">⚖️ Próxima Etapa: Condução e Pós-Ocorrência (FINAL)</h3>
+                            <h3 class="text-xl font-bold text-indigo-900 mb-2">⚖️ Seção 8: Condução e Pós-Ocorrência (FINAL)</h3>
                             <p class="text-gray-700 mb-4">
                                 Última etapa: voz de prisão, direitos do preso, destino dos materiais. Finalize seu BO.
                             </p>
@@ -3310,11 +3310,11 @@
                         if (nextSectionNum >= 2 && nextSectionNum <= 7) {
                             buttonsHTML = `
                                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button id="btn-skip-section${nextSectionNum}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ ${skipTexts[nextSectionNum]}
+                                    </button>
                                     <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 ${colors.btn} text-white font-semibold rounded-lg transition-colors">
                                         ✅ ${startTexts[nextSectionNum]}
-                                    </button>
-                                    <button id="btn-skip-section${nextSectionNum}" class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                        ⏭️ ${skipTexts[nextSectionNum]}
                                     </button>
                                 </div>
                             `;
@@ -3327,7 +3327,7 @@
                         }
 
                         nextSectionButtonDiv.innerHTML = `
-                            <h3 class="text-xl font-bold ${colors.text} mb-2">${nextSection.emoji} Próxima Etapa: ${nextSection.name}</h3>
+                            <h3 class="text-xl font-bold ${colors.text} mb-2">${nextSection.emoji} Seção ${nextSectionNum}: ${nextSection.name}</h3>
                             <p class="text-gray-700 mb-4">
                                 ${sectionTexts[nextSectionNum]}
                             </p>

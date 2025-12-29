@@ -15,5 +15,4 @@ python -m uvicorn main:app --reload
 
 
 # Rodar os testes como o CI faria
-$env:PYTHONPATH = "backend"
-pytest tests/unit tests/integration -v --tb=short
+$env:PYTHONPATH = "backend"; pytest tests/unit tests/integration -v --tb=short

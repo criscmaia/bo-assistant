@@ -2862,6 +2862,15 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section2_first_q');
                     enableInput();
 
+                    // 📍 Scroll até o começo do chat para ver a pergunta
+                    const chatContainer = document.querySelector('.chat-messages');
+                    if (chatContainer) {
+                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // 🎯 Focar no input do chat
+                    userInput.focus();
+
                     // Atualizar sidebar para Seção 2
                     updateSidebarForSection2();
                 }, 500);
@@ -2922,6 +2931,15 @@
                 setTimeout(() => {
                     addMessage(data.question, true, false, data.current_step, 'evt_section3_first_q');
                     enableInput();
+
+                    // 📍 Scroll até o começo do chat para ver a pergunta
+                    const chatContainer = document.querySelector('.chat-messages');
+                    if (chatContainer) {
+                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // 🎯 Focar no input do chat
+                    userInput.focus();
 
                     // Atualizar sidebar para Seção 3
                     updateSidebarForSection3();
@@ -2984,6 +3002,15 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section4_first_q');
                     enableInput();
 
+                    // 📍 Scroll até o começo do chat para ver a pergunta
+                    const chatContainer = document.querySelector('.chat-messages');
+                    if (chatContainer) {
+                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // 🎯 Focar no input do chat
+                    userInput.focus();
+
                     // Atualizar sidebar para Seção 4
                     updateSidebarForSection4();
                 }, 500);
@@ -3044,6 +3071,15 @@
                 setTimeout(() => {
                     addMessage(data.question, true, false, data.current_step, 'evt_section5_first_q');
                     enableInput();
+
+                    // 📍 Scroll até o começo do chat para ver a pergunta
+                    const chatContainer = document.querySelector('.chat-messages');
+                    if (chatContainer) {
+                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // 🎯 Focar no input do chat
+                    userInput.focus();
 
                     // Atualizar sidebar para Seção 5
                     updateSidebarForSection5();
@@ -3106,6 +3142,15 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section6_first_q');
                     enableInput();
 
+                    // 📍 Scroll até o começo do chat para ver a pergunta
+                    const chatContainer = document.querySelector('.chat-messages');
+                    if (chatContainer) {
+                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // 🎯 Focar no input do chat
+                    userInput.focus();
+
                     // Atualizar sidebar para Seção 6
                     updateSidebarForSection6();
                 }, 500);
@@ -3166,6 +3211,15 @@
                 setTimeout(() => {
                     addMessage(data.question, true, false, data.current_step, 'evt_section7_first_q');
                     enableInput();
+
+                    // 📍 Scroll até o começo do chat para ver a pergunta
+                    const chatContainer = document.querySelector('.chat-messages');
+                    if (chatContainer) {
+                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // 🎯 Focar no input do chat
+                    userInput.focus();
 
                     // Atualizar sidebar para Seção 7
                     updateSidebarForSection7();
@@ -3228,6 +3282,15 @@
                     addMessage(data.question, true, false, data.current_step, 'evt_section8_first_q');
                     enableInput();
 
+                    // 📍 Scroll até o começo do chat para ver a pergunta
+                    const chatContainer = document.querySelector('.chat-messages');
+                    if (chatContainer) {
+                        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // 🎯 Focar no input do chat
+                    userInput.focus();
+
                     // Atualizar sidebar para Seção 8
                     updateSidebarForSection8();
                 }, 500);
@@ -3279,6 +3342,14 @@
 
                 // Desabilitar input
                 disableInput();
+
+                // 📍 Scroll até o final para ver o card de seção pulada
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: document.documentElement.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }, 300);
 
                 // Mostrar mensagem de orientação
                 if (sectionNumber < 8) {

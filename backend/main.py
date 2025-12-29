@@ -362,31 +362,61 @@ async def chat(request_body: ChatRequest, request: Request):
     else:
         raise HTTPException(status_code=400, detail=f"Seção {current_section} não suportada")
 
-    # Log único com is_valid correto - adicionar à fila provisoriamente
+    # Log único com is_valid correto
     event_id = None
     if is_valid:
-        # Adicionar evento à fila para ser logado depois (quando atingir 2 respostas)
-        session_data["pending_events"].append({
-            "event_type": "answer_submitted",
-            "data": {
-                "step": current_step,
-                "answer": request_body.message,
-                "is_valid": is_valid
-            }
-        })
-        # Usar um pseudo-ID para compatibilidade
-        event_id = f"pending_{len(session_data['pending_events'])}"
+        # Verificar se sessão já está registrada no banco
+        is_already_logged = session_data.get("logged_to_db", False)
+
+        if is_already_logged:
+            # Já está no banco - gravar diretamente
+            event_id = BOLogger.log_event(
+                bo_id=bo_id,
+                event_type="answer_submitted",
+                data={
+                    "step": current_step,
+                    "answer": request_body.message,
+                    "is_valid": is_valid
+                }
+            )
+        else:
+            # Ainda não está no banco - adicionar à fila para ser logado depois
+            session_data["pending_events"].append({
+                "event_type": "answer_submitted",
+                "data": {
+                    "step": current_step,
+                    "answer": request_body.message,
+                    "is_valid": is_valid
+                }
+            })
+            # Usar um pseudo-ID para compatibilidade
+            event_id = f"pending_{len(session_data['pending_events'])}"
 
     if not is_valid:
-        # Log adicional: erro de validação
-        session_data["pending_events"].append({
-            "event_type": "validation_error",
-            "data": {
-                "step": current_step,
-                "answer": request_body.message,
-                "error_message": error_message
-            }
-        })
+        # Verificar se sessão já está registrada no banco
+        is_already_logged = session_data.get("logged_to_db", False)
+
+        if is_already_logged:
+            # Já está no banco - gravar erro diretamente
+            BOLogger.log_event(
+                bo_id=bo_id,
+                event_type="validation_error",
+                data={
+                    "step": current_step,
+                    "answer": request_body.message,
+                    "error_message": error_message
+                }
+            )
+        else:
+            # Ainda não está no banco - adicionar à fila
+            session_data["pending_events"].append({
+                "event_type": "validation_error",
+                "data": {
+                    "step": current_step,
+                    "answer": request_body.message,
+                    "error_message": error_message
+                }
+            })
 
         return ChatResponse(
             session_id=session_id,
@@ -651,6 +681,11 @@ async def start_section(section_number: int, request_body: dict):
         session_data["current_section"] = 2
         state_machine = session_data["sections"][2]
 
+        # Auto-responder pergunta 2.1 como "SIM" (usuário já confirmou ao clicar no botão)
+        state_machine.store_answer("SIM")
+        state_machine.next_step()
+
+        # Agora pega pergunta 2.2 (não 2.1)
         first_question = state_machine.get_current_question()
 
         # Log: seção iniciada
@@ -659,7 +694,8 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question
+                "first_question": first_question,
+                "auto_answered": "2.1 = SIM"
             }
         )
 
@@ -678,6 +714,11 @@ async def start_section(section_number: int, request_body: dict):
         session_data["current_section"] = 3
         state_machine = session_data["sections"][3]
 
+        # Auto-responder pergunta 3.1 como "SIM" (usuário já confirmou ao clicar no botão)
+        state_machine.store_answer("SIM")
+        state_machine.next_step()
+
+        # Agora pega pergunta 3.2 (não 3.1)
         first_question = state_machine.get_current_question()
 
         # Log: seção iniciada
@@ -686,7 +727,8 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question
+                "first_question": first_question,
+                "auto_answered": "3.1 = SIM"
             }
         )
 
@@ -705,6 +747,11 @@ async def start_section(section_number: int, request_body: dict):
         session_data["current_section"] = 4
         state_machine = session_data["sections"][4]
 
+        # Auto-responder pergunta 4.1 como "SIM" (usuário já confirmou ao clicar no botão)
+        state_machine.store_answer("SIM")
+        state_machine.next_step()
+
+        # Agora pega pergunta 4.2 (não 4.1)
         first_question = state_machine.get_current_question()
 
         # Log: seção iniciada
@@ -713,7 +760,8 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question
+                "first_question": first_question,
+                "auto_answered": "4.1 = SIM"
             }
         )
 
@@ -732,6 +780,11 @@ async def start_section(section_number: int, request_body: dict):
         session_data["current_section"] = 5
         state_machine = session_data["sections"][5]
 
+        # Auto-responder pergunta 5.1 como "SIM" (usuário já confirmou ao clicar no botão)
+        state_machine.store_answer("SIM")
+        state_machine.next_step()
+
+        # Agora pega pergunta 5.2 (não 5.1)
         first_question = state_machine.get_current_question()
 
         # Log: seção iniciada
@@ -740,7 +793,8 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question
+                "first_question": first_question,
+                "auto_answered": "5.1 = SIM"
             }
         )
 
@@ -759,6 +813,11 @@ async def start_section(section_number: int, request_body: dict):
         session_data["current_section"] = 6
         state_machine = session_data["sections"][6]
 
+        # Auto-responder pergunta 6.1 como "SIM" (usuário já confirmou ao clicar no botão)
+        state_machine.store_answer("SIM")
+        state_machine.next_step()
+
+        # Agora pega pergunta 6.2 (não 6.1)
         first_question = state_machine.get_current_question()
 
         # Log: seção iniciada
@@ -767,7 +826,8 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question
+                "first_question": first_question,
+                "auto_answered": "6.1 = SIM"
             }
         )
 
@@ -786,6 +846,11 @@ async def start_section(section_number: int, request_body: dict):
         session_data["current_section"] = 7
         state_machine = session_data["sections"][7]
 
+        # Auto-responder pergunta 7.1 como "SIM" (usuário já confirmou ao clicar no botão)
+        state_machine.store_answer("SIM")
+        state_machine.next_step()
+
+        # Agora pega pergunta 7.2 (não 7.1)
         first_question = state_machine.get_current_question()
 
         # Log: seção iniciada
@@ -794,7 +859,8 @@ async def start_section(section_number: int, request_body: dict):
             event_type="section_started",
             data={
                 "section": section_number,
-                "first_question": first_question
+                "first_question": first_question,
+                "auto_answered": "7.1 = SIM"
             }
         )
 
@@ -834,6 +900,67 @@ async def start_section(section_number: int, request_body: dict):
         }
 
     raise HTTPException(status_code=400, detail="Seção inválida")
+
+@app.post("/skip_section/{section_number}")
+async def skip_section(section_number: int, request_body: dict):
+    """
+    Pula uma seção opcional (2-7) sem iniciar.
+    Equivalente a responder "NÃO" na primeira pergunta.
+    """
+    session_id = request_body.get("session_id")
+
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id é obrigatório")
+
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+
+    # Validar que seção é pulável
+    if section_number not in [2, 3, 4, 5, 6, 7]:
+        raise HTTPException(status_code=400, detail="Esta seção não pode ser pulada")
+
+    session_data = sessions[session_id]
+    bo_id = session_data["bo_id"]
+
+    # Criar state machine da seção
+    state_machine_classes = {
+        2: BOStateMachineSection2,
+        3: BOStateMachineSection3,
+        4: BOStateMachineSection4,
+        5: BOStateMachineSection5,
+        6: BOStateMachineSection6,
+        7: BOStateMachineSection7,
+    }
+
+    state_machine = state_machine_classes[section_number]()
+    state_machine.store_answer("NÃO")  # Simula resposta "NÃO"
+
+    # Armazenar na sessão
+    session_data["sections"][section_number] = state_machine
+    session_data["current_section"] = section_number
+
+    skip_reason = state_machine.get_skip_reason()
+
+    # Log: seção pulada
+    BOLogger.log_event(
+        bo_id=bo_id,
+        event_type="section_skipped",
+        data={
+            "section": section_number,
+            "reason": skip_reason,
+            "skipped_from_button": True  # Diferencia de pular via chat
+        }
+    )
+
+    return {
+        "session_id": session_id,
+        "bo_id": bo_id,
+        "generated_text": skip_reason,
+        "is_section_complete": True,
+        "current_step": "complete",
+        "current_section": section_number,
+        "section_skipped": True
+    }
 
 @app.post("/sync_session")
 async def sync_session(request_body: dict):

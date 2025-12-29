@@ -1,4 +1,4 @@
-c:\AI\bo-assistant
+cd c:\AI\bo-assistant
 python -m http.server 3000 --bind 127.0.0.1
 python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 taskkill /F /IM python.exe

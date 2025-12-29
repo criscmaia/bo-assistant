@@ -1,0 +1,14 @@
+{
+  user(login: "criscmaia") {
+    projectV2(number: 1) {
+      field(name: "Status") {
+        ... on ProjectV2SingleSelectField {
+          options {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}

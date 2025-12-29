@@ -1,6 +1,6 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.12.1 (COMPLETA - 8/8 SEÇÕES)
+## Versão Atual: v0.12.2 (COMPLETA - 8/8 SEÇÕES)
 **Última atualização**: 23/12/2025
 
 ---

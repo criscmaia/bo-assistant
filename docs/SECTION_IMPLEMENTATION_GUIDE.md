@@ -1272,7 +1272,7 @@ A Seção 7 introduziu validação de **cadeia de custódia** - conjunto de info
 2. **Verificar se há perguntas com "Nenhum" válido** - Usar `allow_none_response`
 3. **Seção 8 DEVE marcar BO como completo** - Adicionar `boCompleted = true` ao final
 4. **Criar botão de conclusão final** - Não terá "Iniciar Seção 9"
-5. **Atualizar versão para v0.12.1** - Manter padrão de incremento
+5. **Atualizar versão para v0.12.2** - Manter padrão de incremento
 
 ### 11.8 Resumo de Commits da Seção 7
 
@@ -1292,7 +1292,7 @@ O checklist de 21 pontos do frontend agora inclui **1 novo ponto** para logs.htm
 
 ---
 
-## 12. Seção 8: Condução e Pós-Ocorrência (v0.12.1) - Lições Aprendidas
+## 12. Seção 8: Condução e Pós-Ocorrência (v0.12.2) - Lições Aprendidas
 
 ### 12.1 Diferenças Críticas da Seção 8
 
@@ -1360,7 +1360,7 @@ A Seção 8 é a primeira onde o **backend está 100% pronto antes do frontend**
 |------|--------|------------|
 | Backend Core | ✅ COMPLETO | Haiku |
 | Backend Testes | ✅ COMPLETO | Haiku |
-| Versão Backend | ✅ v0.12.1 | Haiku |
+| Versão Backend | ✅ v0.12.2 | Haiku |
 | **Frontend** | ⏳ PENDENTE | **Sonnet** (22 pontos) |
 | **Validador Backend** | ✅ COMPLETO | (Haiku criou) |
 | **Main.py Integration** | ⏳ PENDENTE | **Sonnet** |
@@ -1377,7 +1377,7 @@ A Seção 8 é a primeira onde o **backend está 100% pronto antes do frontend**
 4. **Tests como especificação** - Escrever testes ANTES de criar o validator
 5. **Modular color schemes** - Usar Tailwind color names consistentemente
 
-### 12.8 Resumo de Versão v0.12.1
+### 12.8 Resumo de Versão v0.12.2
 
 - **Data:** 23/12/2025
 - **Status:** ✅ Backend Completo (frontend pendente)
@@ -1394,4 +1394,4 @@ A Seção 8 é a primeira onde o **backend está 100% pronto antes do frontend**
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Arquitetura técnica
 - [TESTING.md](TESTING.md) - Guia de testes
 - [API.md](API.md) - Referência de endpoints
-- [SECTION8_RELEASE_NOTES.md](SECTION8_RELEASE_NOTES.md) - Release notes v0.12.1
+- [SECTION8_RELEASE_NOTES.md](SECTION8_RELEASE_NOTES.md) - Release notes v0.12.2

@@ -1,10 +1,10 @@
-# Changelog v0.12.1
+# Changelog v0.12.2
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
 
-#### v0.12.1 (Dez 2025) - Seção 8: Condução e Pós-Ocorrência (FINAL - BO COMPLETO)
+#### v0.12.2 (Dez 2025) - Seção 8: Condução e Pós-Ocorrência (FINAL - BO COMPLETO)
 - [x] **Seção 8: Condução e Pós-Ocorrência** - 6 perguntas (8.1 a 8.6) - ÚLTIMA SEÇÃO
 - [x] **BO 100% COMPLETO** - Todas as 8 seções implementadas (8/8 seções)
 - [x] State machine SEM lógica condicional (todas as 6 perguntas são obrigatórias)
@@ -17,7 +17,7 @@
 - [x] Testes de integração (20+ testes) - validação completa de todas as 6 perguntas
 - [x] Test scenarios JSON com casos de teste da Seção 8 (6 passos com validação de erros)
 - [x] Documentação completa - versão atualizada em README.md, CHANGELOG.md, API.md, TESTING.md
-- [x] Backend completamente integrado - versão v0.12.1
+- [x] Backend completamente integrado - versão v0.12.2
 - [x] **FRONTEND PENDENTE:** 22 pontos críticos para suporte completo de Seção 8
 
 #### v0.11.0 (Dez 2025) - Seção 7: Apreensões e Cadeia de Custódia

@@ -1,6 +1,6 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.12.1
+**Versão:** v0.12.2
 **Última atualização:** 23/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
@@ -59,23 +59,23 @@ pytest tests/unit
 pytest tests/integration
 
 # E2E screenshots - MODO COMPLETO (longo - ~10min, precisa backend + frontend)
-python tests/e2e/automate_release.py --version v0.12.1
+python tests/e2e/automate_release.py --version v0.12.2
 
 # E2E screenshots - MODO RÁPIDO (começar da Seção 8)
 # Preenche Seções 1-7 via API, tira screenshots apenas da Seção 8
-python tests/e2e/automate_release.py --version v0.12.1 --start-section 8 --no-video
+python tests/e2e/automate_release.py --version v0.12.2 --start-section 8 --no-video
 
 # E2E screenshots - Começar da Seção 7
-python tests/e2e/automate_release.py --version v0.12.1 --start-section 7 --no-video
+python tests/e2e/automate_release.py --version v0.12.2 --start-section 7 --no-video
 
 # E2E screenshots - Começar da Seção 6
-python tests/e2e/automate_release.py --version v0.12.1 --start-section 6 --no-video
+python tests/e2e/automate_release.py --version v0.12.2 --start-section 6 --no-video
 
 # E2E screenshots - Começar da Seção 5
-python tests/e2e/automate_release.py --version v0.12.1 --start-section 5 --no-video
+python tests/e2e/automate_release.py --version v0.12.2 --start-section 5 --no-video
 
 # E2E screenshots - Com vídeo (precisa MAIS tempo)
-python tests/e2e/automate_release.py --version v0.12.1
+python tests/e2e/automate_release.py --version v0.12.2
 
 # Todos os testes pytest juntos
 pytest

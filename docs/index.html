@@ -3588,11 +3588,11 @@
                                     };
                                     buttonHTML += `
                                         <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                            <button id="btn-skip-section${nextSectionNum}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                                ⏭️ ${skipTexts[nextSectionNum]}
+                                            </button>
                                             <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
                                                 ✅ ${startTexts[nextSectionNum]}
-                                            </button>
-                                            <button id="btn-skip-section${nextSectionNum}" class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                                ⏭️ ${skipTexts[nextSectionNum]}
                                             </button>
                                         </div>
                                     `;
@@ -3649,10 +3649,10 @@
                         // ✅ NOVO: Adicionar texto ao container persistente
                         addGeneratedSectionText(currentSection, data.generated_text);
 
-                        // Scroll suave para o container de textos
-                        generatedSectionsContainer.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'nearest'
+                        // Scroll suave para o final da página (para ver o texto gerado + botão próxima seção)
+                        window.scrollTo({
+                            top: document.documentElement.scrollHeight,
+                            behavior: 'smooth'
                         });
 
                         // ✅ Adicionar mensagem de confirmação que o texto foi gerado
@@ -3674,14 +3674,14 @@
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                     <button
+                                        id="btn-skip-section2"
+                                        class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não havia veículo
+                                    </button>
+                                    <button
                                         id="btn-start-section2"
                                         class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
                                         ✅ Sim, havia veículo
-                                    </button>
-                                    <button
-                                        id="btn-skip-section2"
-                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                        ⏭️ Não havia veículo
                                     </button>
                                 </div>
                             `;
@@ -3703,14 +3703,14 @@
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                     <button
+                                        id="btn-skip-section3"
+                                        class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve campana
+                                    </button>
+                                    <button
                                         id="btn-start-section3"
                                         class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
                                         ✅ Sim, houve campana
-                                    </button>
-                                    <button
-                                        id="btn-skip-section3"
-                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                        ⏭️ Não houve campana
                                     </button>
                                 </div>
                             `;
@@ -3732,14 +3732,14 @@
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                     <button
+                                        id="btn-skip-section4"
+                                        class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve entrada em domicílio
+                                    </button>
+                                    <button
                                         id="btn-start-section4"
                                         class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
                                         ✅ Sim, houve entrada em domicílio
-                                    </button>
-                                    <button
-                                        id="btn-skip-section4"
-                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                        ⏭️ Não houve entrada em domicílio
                                     </button>
                                 </div>
                             `;
@@ -3761,14 +3761,14 @@
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                     <button
+                                        id="btn-skip-section5"
+                                        class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve fundada suspeita
+                                    </button>
+                                    <button
                                         id="btn-start-section5"
                                         class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
                                         ✅ Sim, houve fundada suspeita
-                                    </button>
-                                    <button
-                                        id="btn-skip-section5"
-                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                        ⏭️ Não houve fundada suspeita
                                     </button>
                                 </div>
                             `;
@@ -3790,14 +3790,14 @@
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                     <button
+                                        id="btn-skip-section6"
+                                        class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve resistência
+                                    </button>
+                                    <button
                                         id="btn-start-section6"
                                         class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
                                         ✅ Sim, houve resistência
-                                    </button>
-                                    <button
-                                        id="btn-skip-section6"
-                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                        ⏭️ Não houve resistência
                                     </button>
                                 </div>
                             `;
@@ -3819,14 +3819,14 @@
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                     <button
+                                        id="btn-skip-section7"
+                                        class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve apreensão
+                                    </button>
+                                    <button
                                         id="btn-start-section7"
                                         class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors">
                                         ✅ Sim, houve apreensão
-                                    </button>
-                                    <button
-                                        id="btn-skip-section7"
-                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
-                                        ⏭️ Não houve apreensão
                                     </button>
                                 </div>
                             `;

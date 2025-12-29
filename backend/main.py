@@ -157,18 +157,20 @@ async def new_session(request: Request):
     # Criar session_id (UUID)
     session_id = str(uuid.uuid4())
 
-    # Criar bo_id no banco de dados
+    # Criar bo_id (formato) mas NÃO registrar no banco ainda
+    # Só será registrado após 2 respostas válidas (lazy session creation)
     ip_address = get_client_ip(request)
     user_agent = request.headers.get("User-Agent")
-    bo_id = BOLogger.create_session(
-        ip_address=ip_address,
-        user_agent=user_agent,
-        app_version=APP_VERSION
-    )
+    bo_id = f"BO-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8]}"
 
     # Criar estrutura de sessão com múltiplas seções
     sessions[session_id] = {
         "bo_id": bo_id,
+        "logged_to_db": False,        # Flag para controlar se já foi registrado no banco
+        "answer_count": 0,             # Contador de respostas válidas
+        "pending_events": [],          # Eventos a serem registrados quando atingir 2 respostas
+        "ip_address": ip_address,      # Guardar para usar no create_session depois
+        "user_agent": user_agent,      # Guardar para usar no create_session depois
         "sections": {
             1: BOStateMachine(),
             # Seções 2, 3, 4, 5 e 6 serão inicializadas quando usuário clicar em "Iniciar Seção X"
@@ -189,22 +191,75 @@ async def new_session(request: Request):
     # Primeira pergunta
     first_question = state_machine.get_current_question()
 
-    # Log: primeira pergunta exibida
-    BOLogger.log_event(
-        bo_id=bo_id,
-        event_type="question_asked",
-        data={
+    # Armazenar evento para logar depois (quando atingir 2 respostas)
+    # ao invés de logar imediatamente
+    sessions[session_id]["pending_events"].append({
+        "event_type": "question_asked",
+        "data": {
             "step": state_machine.current_step,
             "question": first_question,
             "section": 1
         }
-    )
+    })
 
     return NewSessionResponse(
         session_id=session_id,
         bo_id=bo_id,
         first_question=first_question
     )
+
+def ensure_session_logged(session_id: str) -> bool:
+    """
+    Garante que a sessão foi registrada no banco de dados.
+    Só registra quando answer_count >= 2.
+
+    Args:
+        session_id: ID da sessão em memória
+
+    Returns:
+        True se sessão foi registrada (agora ou anteriormente), False caso contrário
+    """
+    if session_id not in sessions:
+        return False
+
+    session_data = sessions[session_id]
+
+    # Já foi registrado anteriormente
+    if session_data.get("logged_to_db", False):
+        return True
+
+    # Verificar se atingiu o threshold de 2 respostas
+    if session_data.get("answer_count", 0) < 2:
+        return False
+
+    # Threshold atingido! Registrar no banco agora
+    bo_id = session_data["bo_id"]
+    ip_address = session_data.get("ip_address")
+    user_agent = session_data.get("user_agent")
+
+    # Criar sessão no banco com o bo_id já definido
+    BOLogger.create_session(
+        bo_id=bo_id,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        app_version=APP_VERSION
+    )
+
+    # Marcar como registrado
+    session_data["logged_to_db"] = True
+
+    # Logar eventos pendentes (primeira pergunta, primeiras respostas, etc)
+    for pending_event in session_data.get("pending_events", []):
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type=pending_event["event_type"],
+            data=pending_event["data"]
+        )
+
+    # Limpar fila de eventos pendentes
+    session_data["pending_events"] = []
+
+    return True
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request_body: ChatRequest, request: Request):
@@ -306,29 +361,62 @@ async def chat(request_body: ChatRequest, request: Request):
         )
     else:
         raise HTTPException(status_code=400, detail=f"Seção {current_section} não suportada")
-    
+
+    # Se resposta válida, incrementar contador de respostas
+    if is_valid:
+        session_data["answer_count"] = session_data.get("answer_count", 0) + 1
+
+    # Garantir que sessão está no banco (se já tiver 2+ respostas)
+    is_logged = ensure_session_logged(session_id)
+
     # Log único com is_valid correto
-    event_id = BOLogger.log_event(
-        bo_id=bo_id,
-        event_type="answer_submitted",
-        data={
-            "step": current_step,
-            "answer": request_body.message,
-            "is_valid": is_valid
-        }
-    )
-    
-    if not is_valid:
-        # Log adicional: erro de validação
-        BOLogger.log_event(
+    event_id = None
+    if is_logged:
+        # Sessão já está no banco, logar normalmente
+        event_id = BOLogger.log_event(
             bo_id=bo_id,
-            event_type="validation_error",
+            event_type="answer_submitted",
             data={
                 "step": current_step,
                 "answer": request_body.message,
-                "error_message": error_message
+                "is_valid": is_valid
             }
         )
+    else:
+        # Ainda não atingiu threshold, adicionar à fila de eventos pendentes
+        session_data["pending_events"].append({
+            "event_type": "answer_submitted",
+            "data": {
+                "step": current_step,
+                "answer": request_body.message,
+                "is_valid": is_valid
+            }
+        })
+        # Usar um pseudo-ID para compatibilidade
+        event_id = f"pending_{len(session_data['pending_events'])}"
+
+    if not is_valid:
+        # Log adicional: erro de validação
+        if is_logged:
+            BOLogger.log_event(
+                bo_id=bo_id,
+                event_type="validation_error",
+                data={
+                    "step": current_step,
+                    "answer": request_body.message,
+                    "error_message": error_message
+                }
+            )
+        else:
+            # Adicionar à fila se ainda não logado
+            session_data["pending_events"].append({
+                "event_type": "validation_error",
+                "data": {
+                    "step": current_step,
+                    "answer": request_body.message,
+                    "error_message": error_message
+                }
+            })
         
         return ChatResponse(
             session_id=session_id,
@@ -438,17 +526,30 @@ async def chat(request_body: ChatRequest, request: Request):
             generation_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
 
             # Log: texto gerado
-            BOLogger.log_event(
-                bo_id=bo_id,
-                event_type=f"section{current_section}_completed",
-                data={
-                    "section": current_section,
-                    "llm_provider": request_body.llm_provider,
-                    "generated_text": generated_text,
-                    "generation_time_ms": generation_time_ms,
-                    "answers": state_machine.get_all_answers()
-                }
-            )
+            if is_logged:
+                BOLogger.log_event(
+                    bo_id=bo_id,
+                    event_type=f"section{current_section}_completed",
+                    data={
+                        "section": current_section,
+                        "llm_provider": request_body.llm_provider,
+                        "generated_text": generated_text,
+                        "generation_time_ms": generation_time_ms,
+                        "answers": state_machine.get_all_answers()
+                    }
+                )
+            else:
+                # Adicionar à fila de eventos pendentes
+                session_data["pending_events"].append({
+                    "event_type": f"section{current_section}_completed",
+                    "data": {
+                        "section": current_section,
+                        "llm_provider": request_body.llm_provider,
+                        "generated_text": generated_text,
+                        "generation_time_ms": generation_time_ms,
+                        "answers": state_machine.get_all_answers()
+                    }
+                })
 
             # Atualizar status da sessão apenas se todas as seções foram concluídas
             if current_section == 1:
@@ -481,14 +582,24 @@ async def chat(request_body: ChatRequest, request: Request):
             error_msg = str(e)
 
             # Log: erro na geração
-            BOLogger.log_event(
-                bo_id=bo_id,
-                event_type="generation_error",
-                data={
-                    "error": error_msg,
-                    "llm_provider": request_body.llm_provider
-                }
-            )
+            if is_logged:
+                BOLogger.log_event(
+                    bo_id=bo_id,
+                    event_type="generation_error",
+                    data={
+                        "error": error_msg,
+                        "llm_provider": request_body.llm_provider
+                    }
+                )
+            else:
+                # Adicionar à fila de eventos pendentes
+                session_data["pending_events"].append({
+                    "event_type": "generation_error",
+                    "data": {
+                        "error": error_msg,
+                        "llm_provider": request_body.llm_provider
+                    }
+                })
 
             # Mensagens mais amigáveis baseadas no tipo de erro
             if "quota" in error_msg.lower() or "429" in error_msg:
@@ -504,15 +615,26 @@ async def chat(request_body: ChatRequest, request: Request):
     next_question = state_machine.get_current_question()
 
     # Log: próxima pergunta
-    BOLogger.log_event(
-        bo_id=bo_id,
-        event_type="question_asked",
-        data={
-            "step": state_machine.current_step,
-            "question": next_question,
-            "section": current_section
-        }
-    )
+    if is_logged:
+        BOLogger.log_event(
+            bo_id=bo_id,
+            event_type="question_asked",
+            data={
+                "step": state_machine.current_step,
+                "question": next_question,
+                "section": current_section
+            }
+        )
+    else:
+        # Adicionar à fila de eventos pendentes
+        session_data["pending_events"].append({
+            "event_type": "question_asked",
+            "data": {
+                "step": state_machine.current_step,
+                "question": next_question,
+                "section": current_section
+            }
+        })
 
     return ChatResponse(
         session_id=session_id,
@@ -768,6 +890,40 @@ async def sync_session(request_body: dict):
 
     session_data = sessions[session_id]
     bo_id = session_data["bo_id"]
+
+    # Contar quantas respostas válidas existem antes de sincronizar
+    valid_answer_count = 0
+    for step in answers.keys():
+        step_section = int(step.split('.')[0])
+        answer = answers[step]
+
+        # Validação rápida
+        if step_section == 1:
+            is_valid, _ = ResponseValidator.validate(step, answer)
+        elif step_section == 2:
+            is_valid, _ = ResponseValidatorSection2.validate(step, answer)
+        elif step_section == 3:
+            is_valid, _ = ResponseValidatorSection3.validate(step, answer)
+        elif step_section == 4:
+            is_valid, _ = ResponseValidatorSection4.validate(step, answer)
+        elif step_section == 5:
+            is_valid, _ = ResponseValidatorSection5.validate(step, answer)
+        elif step_section == 6:
+            is_valid, _ = ResponseValidatorSection6.validate(step, answer)
+        elif step_section == 7:
+            is_valid, _ = ResponseValidatorSection7.validate(step, answer)
+        else:
+            is_valid = False
+
+        if is_valid:
+            valid_answer_count += 1
+
+    # Atualizar contador na sessão
+    session_data["answer_count"] = valid_answer_count
+
+    # Se tiver >= 2 respostas, garantir que sessão está no banco
+    if valid_answer_count >= 2:
+        ensure_session_logged(session_id)
 
     # Ordenar steps (1.1, 1.2, ..., 2.1, 2.2, ...)
     sorted_steps = sorted(answers.keys(), key=lambda s: tuple(map(int, s.split('.'))))

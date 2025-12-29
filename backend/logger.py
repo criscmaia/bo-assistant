@@ -139,13 +139,36 @@ class BOLogger:
     """Gerenciador de logs do sistema"""
     
     @staticmethod
-    def create_session(ip_address: Optional[str] = None, user_agent: Optional[str] = None, app_version: Optional[str] = None) -> str:
+    def create_session(
+        bo_id: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+        app_version: Optional[str] = None
+    ) -> str:
         """
-        Cria nova sessão de BO
-        Returns: bo_id
+        Cria nova sessão de BO.
+
+        Args:
+            bo_id: ID do BO (se não fornecido, gera automaticamente)
+            ip_address: IP do cliente
+            user_agent: User agent do cliente
+            app_version: Versão da aplicação
+
+        Returns:
+            bo_id
         """
-        bo_id = f"BO-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8]}"
-        
+        # Se bo_id não foi fornecido, gerar novo
+        if not bo_id:
+            bo_id = f"BO-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8]}"
+
+        # Verificar se bo_id já existe (prevenir duplicatas)
+        with get_db() as db:
+            existing = db.query(BOSession).filter(BOSession.bo_id == bo_id).first()
+            if existing:
+                # Sessão já existe, retornar o bo_id
+                return bo_id
+
+        # Criar nova sessão
         with get_db() as db:
             session = BOSession(
                 bo_id=bo_id,
@@ -156,14 +179,14 @@ class BOLogger:
             )
             db.add(session)
             db.commit()
-        
+
         # Log evento de início
         BOLogger.log_event(
             bo_id=bo_id,
             event_type="session_started",
             data={"ip": ip_address, "app_version": app_version}
         )
-        
+
         return bo_id
     
     @staticmethod

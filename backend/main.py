@@ -362,28 +362,10 @@ async def chat(request_body: ChatRequest, request: Request):
     else:
         raise HTTPException(status_code=400, detail=f"Seção {current_section} não suportada")
 
-    # Se resposta válida, incrementar contador de respostas
-    if is_valid:
-        session_data["answer_count"] = session_data.get("answer_count", 0) + 1
-
-    # Garantir que sessão está no banco (se já tiver 2+ respostas)
-    is_logged = ensure_session_logged(session_id)
-
-    # Log único com is_valid correto
+    # Log único com is_valid correto - adicionar à fila provisoriamente
     event_id = None
-    if is_logged:
-        # Sessão já está no banco, logar normalmente
-        event_id = BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="answer_submitted",
-            data={
-                "step": current_step,
-                "answer": request_body.message,
-                "is_valid": is_valid
-            }
-        )
-    else:
-        # Ainda não atingiu threshold, adicionar à fila de eventos pendentes
+    if is_valid:
+        # Adicionar evento à fila para ser logado depois (quando atingir 2 respostas)
         session_data["pending_events"].append({
             "event_type": "answer_submitted",
             "data": {
@@ -397,27 +379,15 @@ async def chat(request_body: ChatRequest, request: Request):
 
     if not is_valid:
         # Log adicional: erro de validação
-        if is_logged:
-            BOLogger.log_event(
-                bo_id=bo_id,
-                event_type="validation_error",
-                data={
-                    "step": current_step,
-                    "answer": request_body.message,
-                    "error_message": error_message
-                }
-            )
-        else:
-            # Adicionar à fila se ainda não logado
-            session_data["pending_events"].append({
-                "event_type": "validation_error",
-                "data": {
-                    "step": current_step,
-                    "answer": request_body.message,
-                    "error_message": error_message
-                }
-            })
-        
+        session_data["pending_events"].append({
+            "event_type": "validation_error",
+            "data": {
+                "step": current_step,
+                "answer": request_body.message,
+                "error_message": error_message
+            }
+        })
+
         return ChatResponse(
             session_id=session_id,
             bo_id=bo_id,
@@ -432,6 +402,11 @@ async def chat(request_body: ChatRequest, request: Request):
     # Armazenar resposta válida
     state_machine.store_answer(request_body.message)
     state_machine.next_step()
+
+    # AGORA incrementar contador e garantir que sessão está no banco
+    # (após armazenar resposta no state machine)
+    session_data["answer_count"] = session_data.get("answer_count", 0) + 1
+    is_logged = ensure_session_logged(session_id)
 
     # Verificar se seção está completa
     if state_machine.is_section_complete():

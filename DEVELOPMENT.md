@@ -325,6 +325,50 @@ git push origin main
 - Verificar se backend acordou (primeira requisição pode demorar 30-60s)
 - Validar gerações de texto para as 4 seções
 
+### Fluxo de Correção de Bugs com Claude Code Skills
+
+Ao usar o skill `/fix-issue` para corrigir bugs, siga este fluxo padronizado:
+
+#### Passo 1: Iniciar Correção
+```bash
+/fix-issue 6
+```
+
+#### Passo 2: Implementar Correção
+- Analise o bug descrito na issue
+- Identifique os arquivos relacionados
+- Implemente a correção
+- Teste localmente
+
+#### Passo 3: Atualizar Versão
+Após implementar a correção, atualize a versão:
+
+1. Encontre a versão atual em `backend/main.py` (linha ~34):
+   ```python
+   APP_VERSION = "0.12.2"
+   ```
+
+2. Incremente a versão patch (0.12.2 → 0.12.3) ou minor (0.12.x → 0.13.0)
+
+3. Faça commit com a versão:
+   ```bash
+   git add -A
+   git commit -m "chore: Atualizar versão de v0.12.2 para v0.12.3"
+   ```
+
+#### Passo 4: Mover para Teste Local
+Após atualizar a versão, mova a issue para "🧪 Teste Local":
+```bash
+/test-local 6
+```
+
+Isso marca a issue como pronta para testes locais antes de ir para produção.
+
+**Resumo do fluxo:**
+1. `/fix-issue N` → Corrigir bug
+2. Atualizar versão e fazer commit
+3. `/test-local N` → Mover para coluna de Teste Local no Kanban
+
 ### Variáveis de Ambiente
 
 ```bash

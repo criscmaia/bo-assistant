@@ -131,7 +131,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.2</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.3</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -370,7 +370,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.12.2 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.12.3 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -969,18 +969,26 @@
                             <p class="text-gray-700 mb-4">
                                 Havia veículo envolvido na ocorrência? Continue para a próxima seção.
                             </p>
-                            <button
-                                id="btn-start-section2"
-                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-                                ▶️ Iniciar Seção 2
-                            </button>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    id="btn-start-section2"
+                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                                    ✅ Sim, havia veículo
+                                </button>
+                                <button
+                                    id="btn-skip-section2"
+                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não havia veículo
+                                </button>
+                            </div>
                         `;
 
                         // Inserir após o container de textos gerados
                         generatedSectionsContainer.parentElement.appendChild(section2ButtonDiv);
 
-                        // Event listener para o botão
+                        // Event listeners para os botões
                         document.getElementById('btn-start-section2').addEventListener('click', startSection2);
+                        document.getElementById('btn-skip-section2').addEventListener('click', () => skipSection(2));
 
                         showToast('✅ Rascunho restaurado! Seção 1 completa.');
                     } else if (currentSection === 2 && !document.getElementById('btn-start-section3')) {
@@ -995,18 +1003,26 @@
                             <p class="text-gray-700 mb-4">
                                 A equipe realizou campana antes da abordagem? Continue para a próxima seção.
                             </p>
-                            <button
-                                id="btn-start-section3"
-                                class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
-                                ▶️ Iniciar Seção 3
-                            </button>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    id="btn-start-section3"
+                                    class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
+                                    ✅ Sim, houve campana
+                                </button>
+                                <button
+                                    id="btn-skip-section3"
+                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve campana
+                                </button>
+                            </div>
                         `;
 
                         // Inserir após o container de textos gerados
                         generatedSectionsContainer.parentElement.appendChild(section3ButtonDiv);
 
-                        // Event listener para o botão
+                        // Event listeners para os botões
                         document.getElementById('btn-start-section3').addEventListener('click', startSection3);
+                        document.getElementById('btn-skip-section3').addEventListener('click', () => skipSection(3));
 
                         showToast('✅ Rascunho restaurado! Seção 2 completa.');
                     } else if (currentSection === 3 && !document.getElementById('btn-start-section4')) {
@@ -1021,18 +1037,26 @@
                             <p class="text-gray-700 mb-4">
                                 Houve entrada em domicílio durante a ocorrência? Continue para a próxima seção.
                             </p>
-                            <button
-                                id="btn-start-section4"
-                                class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
-                                ▶️ Iniciar Seção 4
-                            </button>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    id="btn-start-section4"
+                                    class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
+                                    ✅ Sim, houve entrada em domicílio
+                                </button>
+                                <button
+                                    id="btn-skip-section4"
+                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve entrada em domicílio
+                                </button>
+                            </div>
                         `;
 
                         // Inserir após o container de textos gerados
                         generatedSectionsContainer.parentElement.appendChild(section4ButtonDiv);
 
-                        // Event listener para o botão
+                        // Event listeners para os botões
                         document.getElementById('btn-start-section4').addEventListener('click', startSection4);
+                        document.getElementById('btn-skip-section4').addEventListener('click', () => skipSection(4));
 
                         showToast('✅ Rascunho restaurado! Seção 3 completa.');
                     } else if (currentSection === 4 && !document.getElementById('btn-start-section5')) {
@@ -1047,18 +1071,26 @@
                             <p class="text-gray-700 mb-4">
                                 Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.
                             </p>
-                            <button
-                                id="btn-start-section5"
-                                class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
-                                ▶️ Iniciar Seção 5
-                            </button>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    id="btn-start-section5"
+                                    class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
+                                    ✅ Sim, houve fundada suspeita
+                                </button>
+                                <button
+                                    id="btn-skip-section5"
+                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve fundada suspeita
+                                </button>
+                            </div>
                         `;
 
                         // Inserir após o container de textos gerados
                         generatedSectionsContainer.parentElement.appendChild(section5ButtonDiv);
 
-                        // Event listener para o botão
+                        // Event listeners para os botões
                         document.getElementById('btn-start-section5').addEventListener('click', startSection5);
+                        document.getElementById('btn-skip-section5').addEventListener('click', () => skipSection(5));
 
                         showToast('✅ Rascunho restaurado! Seção 4 completa.');
                     } else if (currentSection === 5 && !document.getElementById('btn-start-section6')) {
@@ -1073,18 +1105,26 @@
                             <p class="text-gray-700 mb-4">
                                 Houve resistência ou uso de força durante a abordagem? Continue para a próxima seção.
                             </p>
-                            <button
-                                id="btn-start-section6"
-                                class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
-                                ▶️ Iniciar Seção 6
-                            </button>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    id="btn-start-section6"
+                                    class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
+                                    ✅ Sim, houve resistência
+                                </button>
+                                <button
+                                    id="btn-skip-section6"
+                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve resistência
+                                </button>
+                            </div>
                         `;
 
                         // Inserir após o container de textos gerados
                         generatedSectionsContainer.parentElement.appendChild(section6ButtonDiv);
 
-                        // Event listener para o botão
+                        // Event listeners para os botões
                         document.getElementById('btn-start-section6').addEventListener('click', startSection6);
+                        document.getElementById('btn-skip-section6').addEventListener('click', () => skipSection(6));
 
                         showToast('✅ Rascunho restaurado! Seção 5 completa.');
                     } else if (currentSection === 6 && !document.getElementById('btn-start-section7')) {
@@ -1099,18 +1139,26 @@
                             <p class="text-gray-700 mb-4">
                                 Houve apreensão de drogas ou objetos ligados ao tráfico? Continue para a próxima seção.
                             </p>
-                            <button
-                                id="btn-start-section7"
-                                class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors">
-                                ▶️ Iniciar Seção 7
-                            </button>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    id="btn-start-section7"
+                                    class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors">
+                                    ✅ Sim, houve apreensão
+                                </button>
+                                <button
+                                    id="btn-skip-section7"
+                                    class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                    ⏭️ Não houve apreensão
+                                </button>
+                            </div>
                         `;
 
                         // Inserir após o container de textos gerados
                         generatedSectionsContainer.parentElement.appendChild(section7ButtonDiv);
 
-                        // Event listener para o botão
+                        // Event listeners para os botões
                         document.getElementById('btn-start-section7').addEventListener('click', startSection7);
+                        document.getElementById('btn-skip-section7').addEventListener('click', () => skipSection(7));
 
                         showToast('✅ Rascunho restaurado! Seção 6 completa.');
                     } else if (currentSection === 7 && !document.getElementById('btn-start-section8')) {
@@ -1382,7 +1430,7 @@
 
             // Adicionar footer
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-            fullBO += "Gerado por: BO Inteligente v0.12.2\n";
+            fullBO += "Gerado por: BO Inteligente v0.12.3\n";
             fullBO += "Data: " + new Date().toLocaleDateString('pt-BR') + "\n";
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 
@@ -2798,7 +2846,7 @@
                 const button = document.getElementById('btn-start-section2');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = '▶️ Iniciar Seção 2';
+                    button.textContent = '✅ Sim, havia veículo';
                 }
             }
         }
@@ -2859,7 +2907,7 @@
                 const button = document.getElementById('btn-start-section3');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = '▶️ Iniciar Seção 3';
+                    button.textContent = '✅ Sim, houve campana';
                 }
             }
         }
@@ -2920,7 +2968,7 @@
                 const button = document.getElementById('btn-start-section4');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = '▶️ Iniciar Seção 4';
+                    button.textContent = '✅ Sim, houve entrada em domicílio';
                 }
             }
         }
@@ -2981,7 +3029,7 @@
                 const button = document.getElementById('btn-start-section5');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = '▶️ Iniciar Seção 5';
+                    button.textContent = '✅ Sim, houve fundada suspeita';
                 }
             }
         }
@@ -3042,7 +3090,7 @@
                 const button = document.getElementById('btn-start-section6');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = '▶️ Iniciar Seção 6';
+                    button.textContent = '✅ Sim, houve resistência';
                 }
             }
         }
@@ -3103,7 +3151,7 @@
                 const button = document.getElementById('btn-start-section7');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = '▶️ Iniciar Seção 7';
+                    button.textContent = '✅ Sim, houve apreensão';
                 }
             }
         }
@@ -3166,6 +3214,145 @@
                     button.disabled = false;
                     button.textContent = '▶️ Iniciar Seção 8';
                 }
+            }
+        }
+
+        async function skipSection(sectionNumber) {
+            if (!sessionId) {
+                showToast('❌ Nenhuma sessão ativa');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/skip_section/${sectionNumber}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                if (!response.ok) throw new Error('Erro ao pular seção');
+
+                const data = await response.json();
+
+                // Atualizar seção atual
+                currentSection = sectionNumber;
+
+                // Mostrar mensagem no chat
+                addMessage(`✅ Seção ${sectionNumber} não se aplica.`, true);
+
+                // Atualizar card da seção como "Pulada"
+                addSkippedSectionText(sectionNumber, data.generated_text);
+
+                // Remover AMBOS os possíveis containers do botão atual
+                const buttonContainer = document.getElementById(`section${sectionNumber}-button-container`);
+                if (buttonContainer) buttonContainer.remove();
+                const transitionCard = document.getElementById(`section${sectionNumber}-transition-card`);
+                if (transitionCard) transitionCard.remove();
+
+                // Desabilitar input
+                disableInput();
+
+                // Mostrar mensagem de orientação
+                if (sectionNumber < 8) {
+                    addMessage('⬇️ Role para baixo para ver o botão da próxima seção.', true, false, null, 'evt_scroll_guidance');
+
+                    // Criar botão da próxima seção
+                    setTimeout(() => {
+                        const nextSectionNum = sectionNumber + 1;
+                        const nextSection = ALL_SECTIONS[nextSectionNum];
+                        const nextSectionButtonDiv = document.createElement('div');
+                        nextSectionButtonDiv.id = `section${nextSectionNum}-button-container`;
+
+                        // Definir cores por seção
+                        const sectionColors = {
+                            2: { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-200', text: 'text-blue-900', btn: 'bg-blue-600 hover:bg-blue-700' },
+                            3: { bg: 'from-purple-50 to-indigo-50', border: 'border-purple-200', text: 'text-purple-900', btn: 'bg-purple-600 hover:bg-purple-700' },
+                            4: { bg: 'from-orange-50 to-orange-100', border: 'border-orange-200', text: 'text-orange-900', btn: 'bg-orange-600 hover:bg-orange-700' },
+                            5: { bg: 'from-pink-50 to-pink-100', border: 'border-pink-200', text: 'text-pink-900', btn: 'bg-pink-600 hover:bg-pink-700' },
+                            6: { bg: 'from-teal-50 to-cyan-50', border: 'border-teal-200', text: 'text-teal-900', btn: 'bg-teal-600 hover:bg-teal-700' },
+                            7: { bg: 'from-amber-50 to-amber-100', border: 'border-amber-200', text: 'text-amber-900', btn: 'bg-amber-600 hover:bg-amber-700' },
+                            8: { bg: 'from-indigo-50 to-indigo-100', border: 'border-indigo-200', text: 'text-indigo-900', btn: 'bg-indigo-600 hover:bg-indigo-700' }
+                        };
+
+                        const colors = sectionColors[nextSectionNum];
+                        nextSectionButtonDiv.className = `mt-6 p-6 bg-gradient-to-r ${colors.bg} border-2 ${colors.border} rounded-xl text-center`;
+
+                        // Textos contextuais
+                        const sectionTexts = {
+                            2: 'Havia veículo envolvido na ocorrência? Continue para a próxima seção.',
+                            3: 'A equipe realizou campana antes da abordagem? Continue para a próxima seção.',
+                            4: 'Houve entrada em domicílio durante a ocorrência? Continue para a próxima seção.',
+                            5: 'Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.',
+                            6: 'Houve resistência ou uso de força durante a abordagem? Continue para a próxima seção.',
+                            7: 'Houve apreensão de drogas ou objetos ligados ao tráfico? Continue para a próxima seção.',
+                            8: 'Última etapa: voz de prisão, direitos do preso, destino dos materiais. Finalize seu BO.'
+                        };
+
+                        const startTexts = {
+                            2: 'Sim, havia veículo',
+                            3: 'Sim, houve campana',
+                            4: 'Sim, houve entrada em domicílio',
+                            5: 'Sim, houve fundada suspeita',
+                            6: 'Sim, houve resistência',
+                            7: 'Sim, houve apreensão'
+                        };
+
+                        const skipTexts = {
+                            2: 'Não havia veículo',
+                            3: 'Não houve campana',
+                            4: 'Não houve entrada em domicílio',
+                            5: 'Não houve fundada suspeita',
+                            6: 'Não houve resistência',
+                            7: 'Não houve apreensão'
+                        };
+
+                        let buttonsHTML = '';
+                        if (nextSectionNum >= 2 && nextSectionNum <= 7) {
+                            buttonsHTML = `
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 ${colors.btn} text-white font-semibold rounded-lg transition-colors">
+                                        ✅ ${startTexts[nextSectionNum]}
+                                    </button>
+                                    <button id="btn-skip-section${nextSectionNum}" class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ ${skipTexts[nextSectionNum]}
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            buttonsHTML = `
+                                <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 ${colors.btn} text-white font-semibold rounded-lg transition-colors">
+                                    ▶️ Iniciar Seção ${nextSectionNum}${nextSectionNum === 8 ? ' (FINAL)' : ''}
+                                </button>
+                            `;
+                        }
+
+                        nextSectionButtonDiv.innerHTML = `
+                            <h3 class="text-xl font-bold ${colors.text} mb-2">${nextSection.emoji} Próxima Etapa: ${nextSection.name}</h3>
+                            <p class="text-gray-700 mb-4">
+                                ${sectionTexts[nextSectionNum]}
+                            </p>
+                            ${buttonsHTML}
+                        `;
+
+                        generatedSectionsContainer.parentElement.appendChild(nextSectionButtonDiv);
+
+                        // Event listeners
+                        const startFunctionName = `startSection${nextSectionNum}`;
+                        if (window[startFunctionName]) {
+                            document.getElementById(`btn-start-section${nextSectionNum}`).addEventListener('click', window[startFunctionName]);
+                        }
+                        if (nextSectionNum >= 2 && nextSectionNum <= 7) {
+                            document.getElementById(`btn-skip-section${nextSectionNum}`).addEventListener('click', () => skipSection(nextSectionNum));
+                        }
+                    }, 500);
+                }
+
+                // Salvar rascunho
+                saveDraft();
+
+            } catch (error) {
+                console.error('[Skip] Erro:', error);
+                showToast('❌ Erro ao pular seção');
             }
         }
 
@@ -3351,19 +3538,54 @@
                                 }
 
                                 buttonHTML += `
-                                    </p>
-                                    <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-                                        ▶️ Iniciar Seção ${nextSectionNum}
-                                    </button>
-                                `;
+                                    </p>`;
+
+                                // Adicionar botões (com skip apenas para seções 2-7)
+                                if (nextSectionNum >= 2 && nextSectionNum <= 7) {
+                                    const startTexts = {
+                                        2: 'Sim, havia veículo',
+                                        3: 'Sim, houve campana',
+                                        4: 'Sim, houve entrada em domicílio',
+                                        5: 'Sim, houve fundada suspeita',
+                                        6: 'Sim, houve resistência',
+                                        7: 'Sim, houve apreensão'
+                                    };
+                                    const skipTexts = {
+                                        2: 'Não havia veículo',
+                                        3: 'Não houve campana',
+                                        4: 'Não houve entrada em domicílio',
+                                        5: 'Não houve fundada suspeita',
+                                        6: 'Não houve resistência',
+                                        7: 'Não houve apreensão'
+                                    };
+                                    buttonHTML += `
+                                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                            <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                                                ✅ ${startTexts[nextSectionNum]}
+                                            </button>
+                                            <button id="btn-skip-section${nextSectionNum}" class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                                ⏭️ ${skipTexts[nextSectionNum]}
+                                            </button>
+                                        </div>
+                                    `;
+                                } else {
+                                    buttonHTML += `
+                                        <button id="btn-start-section${nextSectionNum}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                                            ▶️ Iniciar Seção ${nextSectionNum}
+                                        </button>
+                                    `;
+                                }
 
                                 nextSectionButtonDiv.innerHTML = buttonHTML;
                                 generatedSectionsContainer.parentElement.appendChild(nextSectionButtonDiv);
 
-                                // Adicionar event listener dinâmico
+                                // Adicionar event listeners dinâmicos
                                 const startFunctionName = `startSection${nextSectionNum}`;
                                 if (window[startFunctionName]) {
                                     document.getElementById(`btn-start-section${nextSectionNum}`).addEventListener('click', window[startFunctionName]);
+                                }
+                                if (nextSectionNum >= 2 && nextSectionNum <= 7) {
+                                    document.getElementById(`btn-skip-section${nextSectionNum}`).addEventListener('click', () => skipSection(nextSectionNum));
                                 }
                             }, 500);
                         }
@@ -3422,18 +3644,26 @@
                                 <p class="text-sm text-blue-700 mb-3">
                                     Havia veículo envolvido na ocorrência? Continue para a próxima seção.
                                 </p>
-                                <button
-                                    id="btn-start-section2"
-                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-                                    ▶️ Iniciar Seção 2
-                                </button>
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button
+                                        id="btn-start-section2"
+                                        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                                        ✅ Sim, havia veículo
+                                    </button>
+                                    <button
+                                        id="btn-skip-section2"
+                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não havia veículo
+                                    </button>
+                                </div>
                             `;
 
                             // Inserir após o container de textos gerados
                             generatedSectionsContainer.parentElement.appendChild(section2ButtonDiv);
 
-                            // Event listener para o botão
+                            // Event listeners para os botões
                             document.getElementById('btn-start-section2').addEventListener('click', startSection2);
+                            document.getElementById('btn-skip-section2').addEventListener('click', () => skipSection(2));
                         } else if (currentSection === 2 && !boCompleted) {
                             const section3ButtonDiv = document.createElement('div');
                             section3ButtonDiv.id = 'section3-transition-card';
@@ -3443,18 +3673,26 @@
                                 <p class="text-sm text-purple-700 mb-3">
                                     A equipe realizou campana antes da abordagem? Continue para a próxima seção.
                                 </p>
-                                <button
-                                    id="btn-start-section3"
-                                    class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
-                                    ▶️ Iniciar Seção 3
-                                </button>
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button
+                                        id="btn-start-section3"
+                                        class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
+                                        ✅ Sim, houve campana
+                                    </button>
+                                    <button
+                                        id="btn-skip-section3"
+                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve campana
+                                    </button>
+                                </div>
                             `;
 
                             // Inserir após o container de textos gerados
                             generatedSectionsContainer.parentElement.appendChild(section3ButtonDiv);
 
-                            // Event listener para o botão
+                            // Event listeners para os botões
                             document.getElementById('btn-start-section3').addEventListener('click', startSection3);
+                            document.getElementById('btn-skip-section3').addEventListener('click', () => skipSection(3));
                         } else if (currentSection === 3 && !boCompleted) {
                             const section4ButtonDiv = document.createElement('div');
                             section4ButtonDiv.id = 'section4-transition-card';
@@ -3464,18 +3702,26 @@
                                 <p class="text-sm text-orange-700 mb-3">
                                     Houve entrada em domicílio durante a ocorrência? Continue para a próxima seção.
                                 </p>
-                                <button
-                                    id="btn-start-section4"
-                                    class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
-                                    ▶️ Iniciar Seção 4
-                                </button>
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button
+                                        id="btn-start-section4"
+                                        class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
+                                        ✅ Sim, houve entrada em domicílio
+                                    </button>
+                                    <button
+                                        id="btn-skip-section4"
+                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve entrada em domicílio
+                                    </button>
+                                </div>
                             `;
 
                             // Inserir após o container de textos gerados
                             generatedSectionsContainer.parentElement.appendChild(section4ButtonDiv);
 
-                            // Event listener para o botão
+                            // Event listeners para os botões
                             document.getElementById('btn-start-section4').addEventListener('click', startSection4);
+                            document.getElementById('btn-skip-section4').addEventListener('click', () => skipSection(4));
                         } else if (currentSection === 4 && !boCompleted) {
                             const section5ButtonDiv = document.createElement('div');
                             section5ButtonDiv.id = 'section5-transition-card';
@@ -3485,18 +3731,26 @@
                                 <p class="text-sm text-pink-700 mb-3">
                                     Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)? Continue para a próxima seção.
                                 </p>
-                                <button
-                                    id="btn-start-section5"
-                                    class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
-                                    ▶️ Iniciar Seção 5
-                                </button>
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button
+                                        id="btn-start-section5"
+                                        class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors">
+                                        ✅ Sim, houve fundada suspeita
+                                    </button>
+                                    <button
+                                        id="btn-skip-section5"
+                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve fundada suspeita
+                                    </button>
+                                </div>
                             `;
 
                             // Inserir após o container de textos gerados
                             generatedSectionsContainer.parentElement.appendChild(section5ButtonDiv);
 
-                            // Event listener para o botão
+                            // Event listeners para os botões
                             document.getElementById('btn-start-section5').addEventListener('click', startSection5);
+                            document.getElementById('btn-skip-section5').addEventListener('click', () => skipSection(5));
                         } else if (currentSection === 5 && !boCompleted) {
                             const section6ButtonDiv = document.createElement('div');
                             section6ButtonDiv.id = 'section6-transition-card';
@@ -3506,18 +3760,26 @@
                                 <p class="text-sm text-teal-700 mb-3">
                                     Houve resistência ou uso de força durante a abordagem? Continue para a próxima seção.
                                 </p>
-                                <button
-                                    id="btn-start-section6"
-                                    class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
-                                    ▶️ Iniciar Seção 6
-                                </button>
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button
+                                        id="btn-start-section6"
+                                        class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors">
+                                        ✅ Sim, houve resistência
+                                    </button>
+                                    <button
+                                        id="btn-skip-section6"
+                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve resistência
+                                    </button>
+                                </div>
                             `;
 
                             // Inserir após o container de textos gerados
                             generatedSectionsContainer.parentElement.appendChild(section6ButtonDiv);
 
-                            // Event listener para o botão
+                            // Event listeners para os botões
                             document.getElementById('btn-start-section6').addEventListener('click', startSection6);
+                            document.getElementById('btn-skip-section6').addEventListener('click', () => skipSection(6));
                         } else if (currentSection === 6 && !boCompleted) {
                             const section7ButtonDiv = document.createElement('div');
                             section7ButtonDiv.id = 'section7-transition-card';
@@ -3527,18 +3789,26 @@
                                 <p class="text-sm text-amber-700 mb-3">
                                     Houve apreensão de drogas ou objetos ligados ao tráfico? Continue para a próxima seção.
                                 </p>
-                                <button
-                                    id="btn-start-section7"
-                                    class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors">
-                                    ▶️ Iniciar Seção 7
-                                </button>
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <button
+                                        id="btn-start-section7"
+                                        class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors">
+                                        ✅ Sim, houve apreensão
+                                    </button>
+                                    <button
+                                        id="btn-skip-section7"
+                                        class="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                                        ⏭️ Não houve apreensão
+                                    </button>
+                                </div>
                             `;
 
                             // Inserir após o container de textos gerados
                             generatedSectionsContainer.parentElement.appendChild(section7ButtonDiv);
 
-                            // Event listener para o botão
+                            // Event listeners para os botões
                             document.getElementById('btn-start-section7').addEventListener('click', startSection7);
+                            document.getElementById('btn-skip-section7').addEventListener('click', () => skipSection(7));
                         } else if (currentSection === 7 && !boCompleted) {
                             const section8ButtonDiv = document.createElement('div');
                             section8ButtonDiv.id = 'section8-transition-card';

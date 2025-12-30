@@ -131,7 +131,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.6</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.7</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -370,7 +370,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.12.6 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.12.7 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -396,14 +396,17 @@
 
         // Perguntas da Seção 2 (Abordagem a Veículo)
         const SECTION2_QUESTIONS = {
-            '2.1': 'Havia veículo?',
-            '2.2': 'Marca/modelo/cor/placa.',
-            '2.3': 'Onde foi visto?',
-            '2.4': 'Qual policial percebeu e o que viu?',
-            '2.5': 'Como foi dada a ordem de parada?',
-            '2.6': 'Parou ou houve perseguição?',
-            '2.7': 'Como foi a abordagem e busca?',
-            '2.8': 'Haviam irregularidades? Veículo furtado/roubado/clonado?'
+            '2.1': 'Havia veículo envolvido na ocorrência?',
+            '2.2': 'Qual a marca, modelo, cor e placa do veículo?',
+            '2.3': 'Onde e em que contexto o veículo foi visto? (local + situação)',
+            '2.4': 'Qual policial percebeu primeiro? De onde viu e o que exatamente observou? (graduação + nome)',
+            '2.5': 'Como foi dada a ordem de parada? (sirene, megafone, sinal manual)',
+            '2.6': 'O veículo parou imediatamente ou houve perseguição? Se houve, descreva o trajeto.',
+            '2.7': 'Como foi realizada a abordagem dos ocupantes? (quem abordou, quantos ocupantes, posicionamento)',
+            '2.8': 'Quem realizou a busca pessoal nos ocupantes? (graduação + nome)',
+            '2.9': 'Quem realizou a busca no veículo e em quais partes? (graduação + nome + locais vistoriados)',
+            '2.10': 'O que foi localizado, com quem estava e em qual parte do veículo?',
+            '2.11': 'O veículo apresentava irregularidades? (furto, roubo, clonagem, adulteração)'
         };
 
         // Perguntas da Seção 3 (Campana - Vigilância Velada)
@@ -1436,7 +1439,7 @@
 
             // Adicionar footer
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-            fullBO += "Gerado por: BO Inteligente v0.12.6\n";
+            fullBO += "Gerado por: BO Inteligente v0.12.7\n";
             fullBO += "Data: " + new Date().toLocaleDateString('pt-BR') + "\n";
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 

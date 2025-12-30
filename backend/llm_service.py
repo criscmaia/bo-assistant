@@ -289,17 +289,20 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
         """
 
         # Verifica se seção foi pulada (não havia veículo)
-        if section_data.get("2.0", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+        if section_data.get("2.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
             return ""  # Não gerar texto
 
-        # Extrair respostas
-        veiculo_desc = section_data.get("2.1", "Não informado")
-        local_visto = section_data.get("2.2", "Não informado")
-        policial_viu = section_data.get("2.3", "Não informado")
-        ordem_parada = section_data.get("2.4", "Não informado")
-        reacao_veiculo = section_data.get("2.5", "Não informado")
-        abordagem_busca = section_data.get("2.6", "Não informado")
-        irregularidades = section_data.get("2.7", "Não informado")
+        # Extrair respostas (agora são 11 perguntas)
+        veiculo_desc = section_data.get("2.2", "Não informado")
+        local_contexto = section_data.get("2.3", "Não informado")
+        policial_viu = section_data.get("2.4", "Não informado")
+        ordem_parada = section_data.get("2.5", "Não informado")
+        reacao_veiculo = section_data.get("2.6", "Não informado")
+        abordagem_ocupantes = section_data.get("2.7", "Não informado")
+        busca_pessoal = section_data.get("2.8", "Não informado")
+        busca_veiculo = section_data.get("2.9", "Não informado")
+        material_encontrado = section_data.get("2.10", "Não informado")
+        irregularidades = section_data.get("2.11", "Não informado")
 
         # Construir prompt baseado no material do Claudio
         prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 2 (Abordagem a Veículo) do BO de tráfico de drogas.
@@ -318,12 +321,15 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 DADOS FORNECIDOS PELO USUÁRIO:
 
 - Marca/modelo/cor/placa: {veiculo_desc}
-- Local onde foi visto: {local_visto}
-- Policial que viu e o que observou: {policial_viu}
+- Local e contexto onde foi visto: {local_contexto}
+- Policial que viu primeiro e o que observou: {policial_viu}
 - Ordem de parada: {ordem_parada}
 - Reação do veículo: {reacao_veiculo}
-- Abordagem e busca: {abordagem_busca}
-- Irregularidades: {irregularidades}
+- Abordagem dos ocupantes: {abordagem_ocupantes}
+- Busca pessoal nos ocupantes: {busca_pessoal}
+- Busca no veículo (quem e onde): {busca_veiculo}
+- Material encontrado (o que, com quem, onde): {material_encontrado}
+- Irregularidades veiculares: {irregularidades}
 
 EXEMPLOS CORRETOS (do material do Claudio):
 
@@ -345,22 +351,27 @@ EXEMPLOS CORRETOS (do material do Claudio):
 
 ESTRUTURA NARRATIVA (seguir esta ordem):
 
-1. Contexto inicial: onde e quando o veículo foi visualizado
+1. Contexto inicial: onde, em que situação o veículo foi visualizado
 2. Descrição do veículo: marca, modelo, cor, placa
 3. Comportamento observado: o que chamou atenção (CONCRETO, não vago)
-4. Identificação: qual policial viu primeiro
-5. Ordem de parada: como foi dada
+4. Identificação: qual policial viu primeiro, de onde viu
+5. Ordem de parada: como foi dada (sirene, megafone, sinal)
 6. Reação: veículo parou ou fugiu? Se fugiu, descrever trajeto e distância
-7. Fundada suspeita: conectar comportamento observado com decisão de buscar
-8. Busca: quem fez, onde procurou, o que encontrou
-9. Irregularidades (se houver): veículo furtado/roubado/clonado
+7. Abordagem dos ocupantes: quem abordou, quantos ocupantes, posicionamento
+8. Busca pessoal: quem realizou busca pessoal em cada ocupante
+9. Busca veicular: quem vistoriou o veículo e quais partes (porta-luvas, bancos, porta-malas, etc)
+10. Material encontrado: o que foi localizado, com quem estava, em qual parte do veículo
+11. Irregularidades (se houver): veículo furtado/roubado/clonado com REDS
 
-IMPORTANTE:
+IMPORTANTE - SEPARAÇÃO DE BUSCA PESSOAL E BUSCA VEICULAR:
 
+- A busca PESSOAL (nos ocupantes) e a busca NO VEÍCULO são atos DIFERENTES
+- Cada busca deve ter SEU RESPONSÁVEL identificado (graduação + nome)
+- Isso é CRÍTICO para a CADEIA DE CUSTÓDIA: quem encontrou o quê e onde
 - Se alguma resposta estiver como "Não informado", simplesmente OMITA aquela informação (não invente)
 - Descreva SEMPRE: motivo da atenção → conduta observada → decisão pela busca
 - Use conectivos para fluidez: "ao notar", "diante de", "sendo que", "durante", "onde"
-- Mantenha coerência temporal: visualização → ordem → reação → abordagem
+- Mantenha coerência temporal: visualização → ordem → reação → abordagem → busca pessoal → busca veicular → o que foi encontrado
 - Se houver irregularidade no veículo (REDS, furto, etc.), mencionar ao final
 
 Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
@@ -378,8 +389,8 @@ Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
         Returns:
             Texto gerado ou string vazia se seção foi pulada
         """
-        # Se não havia veículo, retorna vazio
-        if section_data.get("2.0", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+        # Se não havia veículo, retorna vazio (pergunta 2.1)
+        if section_data.get("2.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
             return ""
 
         # Gerar com provider selecionado

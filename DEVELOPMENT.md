@@ -1,6 +1,6 @@
 # 🛠️ Guia de Desenvolvimento - BO Inteligente
 
-**Versão:** v0.12.6
+**Versão:** v0.12.7
 **Última atualização:** 29/12/2025
 
 Este documento serve como memória institucional do projeto, documentando decisões arquiteturais, comandos essenciais e guias de debugging para desenvolvedores.
@@ -40,7 +40,7 @@ python -m http.server 3000 --bind 127.0.0.1
 
 ## 🔄 CI/CD - GitHub Actions
 
-**Versão:** v0.12.6+
+**Versão:** v0.12.7+
 
 O projeto possui workflow automatizado de CI/CD que roda em cada push ou Pull Request para a branch `main`.
 

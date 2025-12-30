@@ -25,65 +25,95 @@ VALIDATION_RULES_SECTION2 = {
         "examples": [
             "VW Gol branco, placa ABC-1D23",
             "Fiat Palio preto, placa DXY9876",
-            "Chevrolet Onix prata, ABC1A23"
+            "Honda CG 160 vermelha, placa ABC1A23"
         ],
         "error_message": "Informe marca, modelo, cor e placa do veículo. Ex: 'VW Gol branco, placa ABC-1D23'"
     },
     "2.3": {
-        "min_length": 20,
+        "min_length": 30,
         "examples": [
-            "Rua das Flores, altura do nº 123, Bairro Centro",
-            "Esquina da Av. Brasil com Rua Rio",
-            "Rodovia BR-381, km 450"
+            "Na Rua das Flores, altura do nº 123, Bairro Centro. O veículo estava estacionado em frente ao bar.",
+            "Rodovia BR-381, km 450, sentido BH. O veículo transitava em alta velocidade.",
+            "Esquina da Av. Brasil com Rua Rio. O veículo parou ao ver a viatura."
         ],
-        "error_message": "Onde o veículo foi visto? Informe o local com detalhes (rua, número, referências)."
+        "error_message": "Informe o local exato E o contexto (estacionado, em movimento, parado, etc.). Mínimo 30 caracteres."
     },
     "2.4": {
-        "min_length": 30,
+        "min_length": 40,
         "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
         "examples": [
-            "O Sargento Lucas viu o veículo em alta velocidade mudando bruscamente de direção",
-            "O Soldado Marcos percebeu o condutor olhando nervosamente para o retrovisor",
-            "O Cabo Almeida visualizou o veículo tentando fugir ao notar a viatura"
+            "O Sargento Silva, de dentro da viatura estacionada a 30 metros, viu o condutor arremessar objeto pela janela",
+            "O Cabo Almeida, posicionado na esquina, observou o veículo mudar bruscamente de direção ao notar a viatura"
         ],
-        "error_message": "Informe qual policial viu (graduação + nome) E o que exatamente observou. Ex: 'O Sargento Lucas viu...'"
+        "error_message": "Informe: QUEM viu (graduação + nome), DE ONDE viu e O QUE exatamente observou. Mínimo 40 caracteres."
     },
     "2.5": {
         "min_length": 20,
         "examples": [
-            "Foi gritado 'Parado, Polícia Militar!' pelo megafone",
-            "O Sargento acionou a sirene e sinalizou com a mão para o veículo encostar",
-            "Foi usado o alto-falante da viatura ordenando a parada imediata"
+            "Foi acionada sirene e dado comando verbal 'Parado, Polícia Militar!' pelo megafone",
+            "O Sargento fez sinal manual para encostar e acionou o giroflex",
+            "Comando verbal direto pela janela da viatura: 'Encosta o veículo!'"
         ],
-        "error_message": "Descreva como foi dada a ordem de parada (megafone, sirene, sinal, etc.)."
+        "error_message": "Descreva como foi dada a ordem de parada (sirene, megafone, sinal manual, comando verbal)."
     },
     "2.6": {
         "min_length": 15,
         "examples": [
-            "Parou imediatamente",
-            "Fugiu pela Rua Sete, percorreu aproximadamente 200 metros e parou",
-            "Acelerou tentando fugir, foi perseguido por 500m até encostar"
+            "Parou imediatamente no acostamento",
+            "Houve perseguição por aproximadamente 500 metros pela Rua Sete até a Praça Central, onde o veículo colidiu com o meio-fio",
+            "Tentou fugir pela contramão, percorreu 200 metros e parou ao encontrar bloqueio"
         ],
-        "error_message": "O veículo parou ou houve perseguição? Descreva o que aconteceu."
+        "error_message": "Informe se parou imediatamente ou houve perseguição. Se houve, descreva o trajeto."
     },
     "2.7": {
-        "min_length": 30,
+        "min_length": 40,
+        "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
         "examples": [
-            "O Cabo Nogueira revistou o porta-luvas e encontrou dois tabletes de substância análoga à cocaína",
-            "Foi realizada busca no banco traseiro, porta-malas e painel, sendo localizado material entorpecente",
-            "O Soldado Faria vistoriou o veículo encontrando porções de maconha sob o banco do motorista"
+            "O Sargento Silva abordou o condutor pelo lado esquerdo. O Cabo Almeida abordou o passageiro pelo lado direito. Havia 2 ocupantes.",
+            "O Soldado Faria ordenou que os 3 ocupantes descessem com as mãos na cabeça. O Cabo posicionou-se na contenção."
         ],
-        "error_message": "Descreva a abordagem e a busca no veículo (quem fez, onde procurou, o que encontrou)."
+        "error_message": "Descreva: QUEM abordou (graduação + nome), quantos ocupantes e como foi o posicionamento. Mínimo 40 caracteres."
     },
     "2.8": {
+        "min_length": 30,
+        "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+        "examples": [
+            "O Cabo Almeida realizou busca pessoal no condutor. O Soldado Faria revistou o passageiro.",
+            "A Soldado Pires realizou busca pessoal na ocupante feminina"
+        ],
+        "error_message": "Informe QUEM (graduação + nome) realizou a busca pessoal em cada ocupante. Mínimo 30 caracteres."
+    },
+    "2.9": {
+        "min_length": 40,
+        "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+        "examples": [
+            "O Soldado Faria vistoriou o porta-luvas, console central e sob os bancos. O Cabo Silva verificou o porta-malas.",
+            "O Sargento Alves realizou busca completa: painel, bancos dianteiros e traseiros, porta-malas e compartimento do estepe"
+        ],
+        "error_message": "Informe QUEM (graduação + nome) fez a busca e QUAIS PARTES do veículo foram vistoriadas. Mínimo 40 caracteres."
+    },
+    "2.10": {
+        "min_length": 30,
+        "allow_none_response": True,
+        "none_patterns": ["nada encontrado", "nada localizado", "sem material", "não foi encontrado", "negativo"],
+        "examples": [
+            "No porta-luvas, o Soldado Faria localizou 20 porções de cocaína. No bolso do condutor João Silva, foram encontradas R$ 350,00 em notas diversas.",
+            "Sob o banco traseiro, encontradas 15 pedras de crack. Com o passageiro, 2 celulares.",
+            "Nada de ilícito foi localizado no veículo ou com os ocupantes"
+        ],
+        "error_message": "Informe O QUE foi encontrado, COM QUEM ou EM QUAL PARTE do veículo. Se nada, informe 'Nada localizado'."
+    },
+    "2.11": {
         "min_length": 3,
+        "allow_none_response": True,
+        "none_patterns": ["não", "nao", "negativo", "nenhuma", "sem irregularidade", "regular"],
         "examples": [
             "NÃO",
-            "Veículo furtado, consta no REDS número 12345/2024",
-            "Placa clonada, identificado através de chassi divergente",
-            "Veículo com registro de roubo em Contagem/MG"
+            "Veículo com queixa de furto, consta no REDS 2024-001234",
+            "Placa clonada - chassi divergente do registrado no documento",
+            "Veículo com registro de roubo em Contagem/MG, REDS 2023-005678"
         ],
-        "error_message": "Havia irregularidades no veículo (furto, roubo, clonagem, REDS)? Se não, responda 'NÃO'."
+        "error_message": "Informe irregularidades (furto, roubo, clonagem) com REDS se houver. Se não, responda 'NÃO'."
     }
 }
 
@@ -149,10 +179,9 @@ class ResponseValidatorSection2:
             if not has_keyword:
                 return False, rules["error_message"]
 
-        # Validações específicas por pergunta
-        if step == "2.8":
-            # Pergunta 2.8 aceita "NÃO" como resposta válida curta
-            if answer.upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO", "NENHUMA"]:
+        # Validação de allow_none_response para perguntas 2.10 e 2.11
+        if "allow_none_response" in rules and rules["allow_none_response"]:
+            if ResponseValidatorSection2._check_none_response(answer, rules.get("none_patterns", [])):
                 return True, ""
 
         # Se passou todas as validações
@@ -218,6 +247,26 @@ class ResponseValidatorSection2:
 
         for keyword in keywords:
             if keyword.lower() in answer_lower:
+                return True
+
+        return False
+
+    @staticmethod
+    def _check_none_response(answer: str, none_patterns: list) -> bool:
+        """
+        Verifica se a resposta indica ausência de material/irregularidade.
+
+        Args:
+            answer: Resposta do usuário
+            none_patterns: Lista de padrões que indicam "nada encontrado"
+
+        Returns:
+            True se a resposta indica negativo, False caso contrário
+        """
+        answer_lower = answer.lower()
+
+        for pattern in none_patterns:
+            if pattern.lower() in answer_lower:
                 return True
 
         return False

@@ -1,8 +1,43 @@
-# Changelog v0.12.6
+# Changelog v0.12.7
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
+
+#### v0.12.7 (30 de Dezembro de 2024) - Expansão Seção 2
+
+### ✅ Adicionado
+- **3 Novas Perguntas na Seção 2 - Abordagem a Veículo**
+  - 2.8: "Quem realizou a busca pessoal nos ocupantes? (graduação + nome)"
+  - 2.9: "Quem realizou a busca no veículo e em quais partes? (graduação + nome + locais vistoriados)"
+  - 2.10: "O que foi localizado, com quem estava e em qual parte do veículo?"
+  - Separação crítica para documentação da **cadeia de custódia**
+
+### 🔄 Alterado
+- **Seção 2 - Pergunta 2.7 dividida + Renumeração**
+  - Antiga 2.7 (abordagem + busca combinadas) separada em 2.7 (abordagem) + 2.8 (busca pessoal) + 2.9 (busca veicular) + 2.10 (encontrado)
+  - Antiga 2.8 (irregularidades) renumerada para 2.11
+  - Pergunta 2.3 agora exige contexto (local + situação, mínimo 30 caracteres)
+
+### 🧪 Testes
+- **Criado `tests/unit/test_validator_section2.py`**
+  - 29 testes unitários para Seção 2
+  - Validação de placa Mercosul (ABC-1D23, ABC1D23)
+  - Validação de graduação militar obrigatória em 2.4, 2.7, 2.8, 2.9
+  - Validação de respostas negativas em 2.10 e 2.11 ("Nada localizado", "NÃO")
+  - Todos os 160 testes unitários passando (131 anteriores + 29 novos)
+
+### 📝 Validador
+- **Adicionado método `_check_none_response()` em `backend/validator_section2.py`**
+  - Permite aceitar respostas negativas em perguntas 2.10 e 2.11
+  - Padrões aceitos: "nada encontrado", "nada localizado", "não", "negativo"
+
+### 📚 Fundamentação Legal
+- **CPP Art. 244:** Autoriza busca pessoal (2.8)
+- **Cadeia de Custódia:** Separação entre busca pessoal e busca veicular é essencial para:
+  - Identificar quem encontrou cada item
+  - Onde cada item foi encontrado (com pessoa ou no veículo)
+  - Individualizar responsabilidades dos ocupantes
 
 #### v0.12.6 (30 de Dezembro de 2024) - Reformulação Seção 8
 

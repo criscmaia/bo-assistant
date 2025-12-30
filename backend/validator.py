@@ -22,8 +22,9 @@ class ResponseValidator:
             "error_message": "Informe graduação + nome completo de TODOS os policiais + prefixo/viatura. Ex: 'Sgt João Silva e Cb Pedro Santos, prefixo 1234'"
         },
         "1.3": {
-            "min_length": 10,
-            "examples": ["190", "DDU", "Mandado de prisão", "Patrulhamento preventivo para combater tráfico", "Operação NOME"],
+            "min_length": 3,
+            "valid_short_answers": ["190", "ddu", "via 190", "pelo 190", "copom"],
+            "examples": ["190", "Via 190", "DDU", "Mandado de prisão", "Patrulhamento preventivo para combater tráfico", "Operação NOME"],
             "error_message": "Informe como foi acionado: 190, DDU, mandado, patrulhamento, etc."
         },
         "1.4": {
@@ -122,7 +123,12 @@ class ResponseValidator:
 
         if not rules:
             return True, None  # Sem regras específicas, aceitar
-        
+
+        # Verificar se resposta curta é válida (para pergunta 1.3 por exemplo)
+        valid_short = rules.get("valid_short_answers", [])
+        if valid_short and answer.lower() in [v.lower() for v in valid_short]:
+            return True, None
+
         # Validar tamanho mínimo
         if len(answer) < rules.get("min_length", 0):
             return False, rules.get("error_message", "Resposta muito curta. Forneça mais detalhes.")

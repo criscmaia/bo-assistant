@@ -106,12 +106,18 @@ class LLMService:
         # Montar dados das respostas
         questions_map = {
             "1.1": "Dia, data e hora do acionamento",
-            "1.2": "Composição da guarnição e prefixo",
-            "1.3": "Natureza do empenho",
-            "1.4": "Ordem de serviço / COPOM / DDU",
-            "1.5": "Local exato da ocorrência",
-            "1.6": "Histórico do local / facção",
-            "1.7": "Proximidade de escola/hospital/transporte (Art. 40)"
+            "1.2": "Composição da guarnição e prefixo da viatura",
+            "1.3": "Como foi acionado",
+            "1.4": "Informações recebidas no acionamento",
+            "1.5": "Houve deslocamento",
+            "1.5.1": "Local de partida da guarnição",
+            "1.5.2": "Alterações durante o percurso",
+            "1.6": "Local exato da ocorrência",
+            "1.7": "Histórico do local (ponto de tráfico)",
+            "1.8": "Facção criminosa",
+            "1.9": "Proximidade de espaço de interesse público (Art. 40)",
+            "1.9.1": "Nome do estabelecimento",
+            "1.9.2": "Distância aproximada"
         }
         
         answers_text = f"{questions_map['1.1']}: {datetime_enriched}\n"
@@ -144,15 +150,27 @@ REGRAS DE REDAÇÃO (nunca violar):
 6. Individualizar locais: use o endereço FORNECIDO, não invente números ou nomes
 7. Evitar repetições: use pronomes ou sinônimos ("a guarnição", "os militares", "a equipe")
 
+⚠️ OBSERVAÇÃO CRÍTICA DO CLAUDIO:
+"Não existe patrulhamento de rotina, operação de rotina... É sempre a atividade seguida do objetivo."
+Exemplos CORRETOS:
+- "Patrulhamento preventivo para combater o tráfico de drogas"
+- "Incursão para localizar foragidos"
+- "Operação para desarticular ponto de tráfico"
+Exemplos ERRADOS:
+- "Patrulhamento de rotina" ❌
+- "Operação de rotina" ❌
+
 ESTRUTURA ESPERADA (baseada nos modelos do Claudio):
 1. Início com contexto temporal: "Cumprindo a ordem de serviço, prevista para [dia da semana], [dia] de [mês] de [ano], por volta das [hora]h[min]min..."
 2. Identificar equipe: "a equipe composta pelo [posto + nome]..." (ou "pelos [posto + nomes]" se múltiplos)
 3. Se prefixo fornecido: "na viatura [prefixo]..."
-4. Descrever acionamento: "foi acionada para...", "recebeu determinação para...", "foi empenhada para..."
+4. Descrever acionamento: "foi acionada para...", "recebeu determinação para...", "foi empenhada para..." (SEMPRE com objetivo específico)
 5. Informar conteúdo da ordem: O que foi fornecido - use VARIAÇÃO: "A ordem indicava...", "Segundo a denúncia...", "O acionamento reportava..."
-6. Detalhar local: Use EXATAMENTE o que foi fornecido - "O local indicado foi..." ou "no endereço..."
-7. Histórico (se aplicável): "O endereço consta em registros anteriores..." ou "O local possui histórico..."
-8. Agravante de proximidade (Art. 40, inciso III): Se o local é próximo a escola, hospital ou transporte público, incluir: "O local da ocorrência situa-se a aproximadamente [X] metros do/da [estabelecimento], configurando a circunstância agravante prevista no Art. 40, inciso III da Lei 11.343/06."
+6. Deslocamento (se houve): Se resposta 1.5 = SIM, incluir: "A guarnição partiu de [local 1.5.1]..." e se houve alterações [1.5.2], mencionar
+7. Detalhar local: Use EXATAMENTE o que foi fornecido - "O local indicado foi..." ou "no endereço..."
+8. Histórico do local (se aplicável): "O endereço consta em registros anteriores..." ou "O local possui histórico..." [resposta 1.7]
+9. Facção (se aplicável): "A área é dominada pela facção..." [resposta 1.8]
+10. Agravante de proximidade (Art. 40, inciso III): Se resposta 1.9 = SIM, incluir: "O local da ocorrência situa-se a aproximadamente [1.9.2] do/da [1.9.1], configurando a circunstância agravante prevista no Art. 40, inciso III da Lei 11.343/06."
 
 EXEMPLOS DE QUALIDADE (do manual do Claudio):
 
@@ -292,17 +310,19 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
         if section_data.get("2.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
             return ""  # Não gerar texto
 
-        # Extrair respostas (agora são 11 perguntas)
-        veiculo_desc = section_data.get("2.2", "Não informado")
-        local_contexto = section_data.get("2.3", "Não informado")
+        # Extrair respostas (agora são 13 perguntas)
+        local_contexto = section_data.get("2.2", "Não informado")
+        veiculo_desc = section_data.get("2.3", "Não informado")
         policial_viu = section_data.get("2.4", "Não informado")
-        ordem_parada = section_data.get("2.5", "Não informado")
-        reacao_veiculo = section_data.get("2.6", "Não informado")
-        abordagem_ocupantes = section_data.get("2.7", "Não informado")
-        busca_pessoal = section_data.get("2.8", "Não informado")
-        busca_veiculo = section_data.get("2.9", "Não informado")
-        material_encontrado = section_data.get("2.10", "Não informado")
-        irregularidades = section_data.get("2.11", "Não informado")
+        reacao_motorista = section_data.get("2.5", "Não informado")
+        ordem_parada = section_data.get("2.6", "Não informado")
+        parou_ou_perseguicao = section_data.get("2.7", "Não informado")
+        motivo_parada = section_data.get("2.8", "Não informado")
+        abordagem_ocupantes = section_data.get("2.9", "Não informado")
+        busca_veiculo = section_data.get("2.10", "Não informado")
+        busca_pessoal = section_data.get("2.11", "Não informado")
+        material_encontrado = section_data.get("2.12", "Não informado")
+        irregularidades = section_data.get("2.13", "Não informado")
 
         # Construir prompt baseado no material do Claudio
         prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 2 (Abordagem a Veículo) do BO de tráfico de drogas.
@@ -320,14 +340,16 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 
 DADOS FORNECIDOS PELO USUÁRIO:
 
-- Marca/modelo/cor/placa: {veiculo_desc}
 - Local e contexto onde foi visto: {local_contexto}
+- Marca/modelo/cor/placa: {veiculo_desc}
 - Policial que viu primeiro e o que observou: {policial_viu}
+- Reação do motorista/ocupantes: {reacao_motorista}
 - Ordem de parada: {ordem_parada}
-- Reação do veículo: {reacao_veiculo}
+- Parou imediatamente ou houve perseguição: {parou_ou_perseguicao}
+- Motivo da parada (se houve perseguição): {motivo_parada}
 - Abordagem dos ocupantes: {abordagem_ocupantes}
-- Busca pessoal nos ocupantes: {busca_pessoal}
 - Busca no veículo (quem e onde): {busca_veiculo}
+- Busca pessoal nos ocupantes: {busca_pessoal}
 - Material encontrado (o que, com quem, onde): {material_encontrado}
 - Irregularidades veiculares: {irregularidades}
 
@@ -355,13 +377,15 @@ ESTRUTURA NARRATIVA (seguir esta ordem):
 2. Descrição do veículo: marca, modelo, cor, placa
 3. Comportamento observado: o que chamou atenção (CONCRETO, não vago)
 4. Identificação: qual policial viu primeiro, de onde viu
-5. Ordem de parada: como foi dada (sirene, megafone, sinal)
-6. Reação: veículo parou ou fugiu? Se fugiu, descrever trajeto e distância
-7. Abordagem dos ocupantes: quem abordou, quantos ocupantes, posicionamento
-8. Busca pessoal: quem realizou busca pessoal em cada ocupante
-9. Busca veicular: quem vistoriou o veículo e quais partes (porta-luvas, bancos, porta-malas, etc)
-10. Material encontrado: o que foi localizado, com quem estava, em qual parte do veículo
-11. Irregularidades (se houver): veículo furtado/roubado/clonado com REDS
+5. Reação do motorista/ocupantes: manobra brusca, fuga, descarte de objeto (ou ausência de reação)
+6. Ordem de parada: como foi dada (sirene, megafone, sinal), quem deu
+7. Resposta à ordem: veículo parou ou houve perseguição?
+8. Motivo da parada (se houve perseguição): desistiu, cercado, bateu, capotou
+9. Abordagem dos ocupantes: quem abordou, quantos ocupantes, posicionamento
+10. Busca veicular: quem vistoriou o veículo e quais partes (porta-luvas, bancos, porta-malas, etc)
+11. Busca pessoal: quem realizou busca pessoal em cada ocupante
+12. Material encontrado: o que foi localizado, com quem estava, em qual parte do veículo/corpo
+13. Irregularidades (se houver): veículo furtado/roubado/clonado com REDS
 
 IMPORTANTE - SEPARAÇÃO DE BUSCA PESSOAL E BUSCA VEICULAR:
 
@@ -369,9 +393,10 @@ IMPORTANTE - SEPARAÇÃO DE BUSCA PESSOAL E BUSCA VEICULAR:
 - Cada busca deve ter SEU RESPONSÁVEL identificado (graduação + nome)
 - Isso é CRÍTICO para a CADEIA DE CUSTÓDIA: quem encontrou o quê e onde
 - Se alguma resposta estiver como "Não informado", simplesmente OMITA aquela informação (não invente)
-- Descreva SEMPRE: motivo da atenção → conduta observada → decisão pela busca
+- Descreva SEMPRE: motivo da atenção → reação do motorista → ordem de parada → resposta (parou/perseguição) → abordagem → busca veicular → busca pessoal → o que foi encontrado
 - Use conectivos para fluidez: "ao notar", "diante de", "sendo que", "durante", "onde"
-- Mantenha coerência temporal: visualização → ordem → reação → abordagem → busca pessoal → busca veicular → o que foi encontrado
+- Mantenha coerência temporal: visualização → reação → ordem → parou/perseguição → abordagem → busca veicular → busca pessoal → material encontrado
+- A busca VEICULAR agora vem ANTES da busca PESSOAL na narrativa
 - Se houver irregularidade no veículo (REDS, furto, etc.), mencionar ao final
 
 Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""

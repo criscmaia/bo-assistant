@@ -1,8 +1,49 @@
-# Changelog v0.12.8
+# Changelog v0.12.9
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
+
+#### v0.12.9 (30 de Dezembro de 2024) - Revisão Seções 1 e 2 (Documento Claudio 2025-12-30)
+
+### ⚠️ BREAKING CHANGES
+- **Seção 1 expandida de 7 para 11 perguntas** (+ sub-perguntas condicionais)
+- **Seção 2 expandida de 11 para 13 perguntas** (+ reordenação)
+- Renumeração: 1.5→1.6, 1.6→1.7+1.8, 1.7→1.9 (Seção 1)
+- Reordenação: contexto (2.2) agora vem ANTES de placa (2.3) na Seção 2
+
+### ✅ Adicionado na Seção 1
+- **Nova Pergunta 1.5** - "Houve deslocamento entre o ponto de acionamento e o local da ocorrência?" (SIM/NÃO)
+  - **Sub-pergunta 1.5.1** (condicional): "Local de onde a guarnição partiu"
+  - **Sub-pergunta 1.5.2** (condicional): "Houve alguma alteração durante o percurso?"
+- **Pergunta 1.6** separada em duas:
+  - **1.7**: "O local é conhecido como ponto de tráfico?"
+  - **1.8**: "O local é dominado por facção criminosa?"
+- **Pergunta 1.9** expandida com sub-perguntas:
+  - **1.9.1** (condicional): "Nome do estabelecimento"
+  - **1.9.2** (condicional): "Distância aproximada"
+
+### ✅ Adicionado na Seção 2
+- **Nova Pergunta 2.5** - "Descreva se houve reação do motorista ou ocupantes"
+- **Nova Pergunta 2.8** - "Se houve perseguição, por qual motivo o veículo parou?"
+
+### 🔄 Alterado na Seção 1
+- **Pergunta 1.3** reescrita com exemplos (190, DDU, mandado, patrulhamento)
+- **Lógica condicional** implementada: sub-perguntas só aparecem se resposta pai = SIM
+- Observação do Claudio incluída no prompt: "não existe patrulhamento de rotina... É sempre atividade + objetivo"
+
+### 🔄 Alterado na Seção 2
+- **Reordenação estratégica**: contexto do veículo (2.2) agora vem ANTES de marca/placa (2.3)
+- **Pergunta 2.6** separada em duas: parou/perseguição (2.7) e motivo parada (2.8)
+- **Busca veicular (2.10)** agora vem ANTES de busca pessoal (2.11)
+- Textos simplificados e mais claros em várias perguntas
+
+### 📊 Totais
+- Total de perguntas: **55 → 61** (+6 perguntas)
+- Seção 1: 7 → 11 perguntas (+4)
+- Seção 2: 11 → 13 perguntas (+2)
+
+---
 
 #### v0.12.8 (30 de Dezembro de 2024) - Ajustes nas Seções 3, 4, 5 e 6
 

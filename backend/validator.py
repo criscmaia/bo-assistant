@@ -23,37 +23,61 @@ class ResponseValidator:
         },
         "1.3": {
             "min_length": 10,
-            "forbidden_words": ["tráfico"],  # Se só responder "tráfico", é muito vago
-            "examples": ["Ligação ao 190", "Denúncia anônima", "Incursão", "Ordem do comandante", "Operação NOME"],
-            "error_message": "Seja mais específico. Ex: Ligação ao 190. Denúncia anônima. Incursão. Ordem do comandante. Operação \"NOME\""
+            "examples": ["190", "DDU", "Mandado de prisão", "Patrulhamento preventivo para combater tráfico", "Operação NOME"],
+            "error_message": "Informe como foi acionado: 190, DDU, mandado, patrulhamento, etc."
         },
         "1.4": {
             "min_length": 20,
-            "forbidden_words": ["denúncia"],  # "denúncia" sozinha é vago
             "examples": ["Denúncia anônima via COPOM reportando venda de drogas na esquina", "Ordem de serviço 123/2024 para verificar tráfico no bairro Centro"],
-            "error_message": "Descreva o que constava na ordem: quem acionou (COPOM/DDU) e o que foi reportado."
+            "error_message": "Descreva o que foi informado no acionamento: quem acionou e o que foi reportado."
         },
         "1.5": {
+            "min_length": 3,
+            "custom_check": "yes_no",
+            "examples": ["SIM", "NÃO"],
+            "error_message": "Responda apenas SIM ou NÃO."
+        },
+        "1.5.1": {
+            "min_length": 10,
+            "examples": ["Batalhão PM, bairro Centro", "Base da PM na Rua XV, próximo ao shopping"],
+            "error_message": "Informe o local de onde a guarnição partiu."
+        },
+        "1.5.2": {
+            "min_length": 3,
+            "examples": ["Sim, radar na Av. Principal registrou passagem", "Não houve alterações", "Sinal fechado na Rua X atrasou em 2 minutos"],
+            "error_message": "Informe se houve alguma alteração no percurso. Se não, responda 'Não houve alterações'."
+        },
+        "1.6": {
             "min_length": 20,
             "required_keywords": ["rua", "número", "bairro"],
             "examples": ["Rua das Acácias, número 456, bairro Floresta, próximo ao Bar do Zé"],
-            "error_message": "Informe logradouro + número + bairro + referência (se houver). Ex: 'Rua das Acácias, número 456, bairro Floresta, próximo ao Bar do Zé'"
-        },
-        "1.6": {
-            "min_length": 15,
-            "forbidden_words": ["sim"],  # "sim" sozinho é vago
-            "examples": ["Sim, local com histórico de 3 operações em 2024. Facção ABC atua na região"],
-            "error_message": "Se sim, descreva: quantas operações anteriores? Qual facção? Se não, escreva 'NÃO'. Ex: 'Sim, local com histórico de operações anteriores. Facção ABC atua na região'"
+            "error_message": "Informe logradouro + número + bairro + referência. Ex: 'Rua das Acácias, número 456, bairro Floresta, próximo ao Bar do Zé'"
         },
         "1.7": {
+            "min_length": 10,
+            "examples": ["Sim, 3 ocorrências em 2024 conforme BO 123/24, 456/24 e 789/24", "Não há histórico de ocorrências anteriores", "Local conhecido por denúncias de tráfico"],
+            "error_message": "Descreva o histórico do local: ocorrências anteriores, denúncias, BOs. Se não houver, informe 'Não há histórico'."
+        },
+        "1.8": {
+            "min_length": 10,
+            "examples": ["Sim, facção XYZ domina a região conforme relatório de inteligência", "Não há indícios de facção criminosa", "Área controlada pelo PCC segundo moradores"],
+            "error_message": "Informe se há facção e descreva evidências. Se não houver, informe 'Não há indícios de facção'."
+        },
+        "1.9": {
             "min_length": 3,
-            "examples": [
-                "Sim, a 50 metros da Escola Estadual João XXIII",
-                "Próximo ao Hospital Municipal, aproximadamente 100 metros",
-                "A 200 metros do ponto de ônibus da linha 4501",
-                "NÃO"
-            ],
-            "error_message": "Informe se há escola, hospital ou transporte público próximo. Se sim, qual e a distância aproximada. Se não, responda 'NÃO'."
+            "custom_check": "yes_no",
+            "examples": ["SIM", "NÃO"],
+            "error_message": "Responda apenas SIM ou NÃO."
+        },
+        "1.9.1": {
+            "min_length": 5,
+            "examples": ["Escola Estadual João XXIII", "Hospital Municipal", "Terminal Rodoviário", "Presídio Central"],
+            "error_message": "Informe o nome do estabelecimento."
+        },
+        "1.9.2": {
+            "min_length": 5,
+            "examples": ["Dois quarteirões", "Aproximadamente 300 metros", "50 metros"],
+            "error_message": "Informe a distância aproximada. Ex: 'dois quarteirões', '300 metros'."
         }
     }
     
@@ -72,23 +96,30 @@ class ResponseValidator:
         # Verificar se resposta está vazia
         if not answer or len(answer) < 3:
             return False, "Por favor, forneça uma resposta. Se não se aplica, escreva 'NÃO'."
-        
+
+        # Buscar regras específicas da pergunta
+        rules = ResponseValidator.VALIDATION_RULES.get(step)
+
+        # Validação especial para perguntas SIM/NÃO (1.5 e 1.9)
+        if rules and rules.get("custom_check") == "yes_no":
+            if answer.upper() in ["SIM", "NÃO", "NAO", "S", "N"]:
+                return True, None
+            else:
+                return False, rules.get("error_message", "Responda apenas SIM ou NÃO.")
+
         # Verificar se é só "NÃO" (válido apenas para algumas perguntas)
         if answer.upper() == "NÃO":
-            if step in ["1.6", "1.7"]:  # Histórico e proximidade podem ser NÃO
+            # Perguntas que aceitam NÃO como resposta válida
+            if step in ["1.7", "1.8"]:  # Histórico e facção podem ser NÃO
                 return True, None
             else:
                 return False, "Esta pergunta é obrigatória. 'NÃO' não é uma resposta válida aqui."
-        
+
         # Verificar se é só "SIM" (inválido para perguntas que exigem detalhes)
         if answer.upper() == "SIM":
-            if step in ["1.6"]:  # Histórico precisa de detalhes
-                return False, "Se sim, forneça detalhes: quantas operações anteriores? Qual facção? Ex: 'Sim, local com histórico de operações anteriores. Facção ABC atua na região'"
-            else:
-                return False, "Esta pergunta exige detalhes. 'SIM' sozinho não é suficiente."
-        
-        # Buscar regras específicas da pergunta
-        rules = ResponseValidator.VALIDATION_RULES.get(step)
+            # Apenas 1.5 e 1.9 aceitam SIM sozinho (já validado acima)
+            return False, "Esta pergunta exige detalhes. 'SIM' sozinho não é suficiente."
+
         if not rules:
             return True, None  # Sem regras específicas, aceitar
         
@@ -160,14 +191,14 @@ class ResponseValidator:
         # Validar palavras-chave obrigatórias
         required = rules.get("required_keywords", [])
         answer_lower = answer.lower()
-        
-        # Para 1.5 (local), ser mais flexível com sinônimos
-        if step == "1.5":
+
+        # Para 1.6 (local exato), ser mais flexível com sinônimos
+        if step == "1.6":
             # Aceitar variações: rua/avenida/travessa, numero/nº/n, bairro/região
             has_street = any(word in answer_lower for word in ["rua", "avenida", "av", "travessa", "alameda"])
             has_number = any(word in answer_lower for word in ["número", "numero", "nº", "n°", "n."])
             has_neighborhood = any(word in answer_lower for word in ["bairro", "região", "setor"])
-            
+
             if not (has_street and has_number and has_neighborhood):
                 return False, rules.get("error_message")
         else:

@@ -9,16 +9,22 @@ class BOStateMachine:
     # Perguntas da Seção 1 - Contexto da Ocorrência
     QUESTIONS = {
         "1.1": "Dia, data e hora do acionamento.",
-        "1.2": "Composição da guarnição e prefixo.",
-        "1.3": "Natureza do empenho.",
-        "1.4": "O que constava na ordem de serviço, informações do COPOM, DDU.",
-        "1.5": "Local exato da ocorrência (logradouro, número, bairro).",
-        "1.6": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?",
-        "1.7": "O local é próximo a escola, hospital ou transporte público? Qual estabelecimento e a que distância aproximada?"
+        "1.2": "Composição da guarnição e prefixo da viatura.",
+        "1.3": "Como foi acionado? (190, DDU, mandado de prisão/busca, patrulhamento preventivo, outro)",
+        "1.4": "Descreva as informações recebidas no acionamento (ordem de serviço, despacho COPOM, denúncia).",
+        "1.5": "Houve deslocamento entre o ponto de acionamento e o local da ocorrência?",
+        "1.5.1": "Local de onde a guarnição partiu.",
+        "1.5.2": "Houve alguma alteração durante o percurso? (radar, sinal fechado, acidente)",
+        "1.6": "Local exato da ocorrência (logradouro, número, bairro, ponto de referência).",
+        "1.7": "O local é conhecido como ponto de tráfico? Descreva histórico de ocorrências ou denúncias.",
+        "1.8": "O local é dominado por facção criminosa? Qual? Descreva evidências.",
+        "1.9": "O local é ou fica próximo de espaço de interesse público qualificado? (escola, hospital, transporte público, unidade prisional/militar)",
+        "1.9.1": "Nome do estabelecimento.",
+        "1.9.2": "Distância aproximada (ex: dois quarteirões, 300 metros)."
     }
 
     # Ordem das perguntas
-    STEPS = ["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "complete"]
+    STEPS = ["1.1", "1.2", "1.3", "1.4", "1.5", "1.5.1", "1.5.2", "1.6", "1.7", "1.8", "1.9", "1.9.1", "1.9.2", "complete"]
     
     def __init__(self):
         self.current_step = "1.1"  # Começar na primeira pergunta
@@ -44,10 +50,31 @@ class BOStateMachine:
     def next_step(self) -> None:
         """
         Avança para a próxima pergunta.
+        Implementa lógica condicional para sub-perguntas.
         """
         if self.step_index < len(self.STEPS) - 1:
             self.step_index += 1
-            self.current_step = self.STEPS[self.step_index]
+            next_step_candidate = self.STEPS[self.step_index]
+
+            # Lógica condicional para 1.5.x
+            if next_step_candidate in ["1.5.1", "1.5.2"]:
+                answer_1_5 = self.answers.get("1.5", "").strip().upper()
+                if answer_1_5 in ["NÃO", "NAO", "N", "NEGATIVO"]:
+                    # Pular 1.5.1 e 1.5.2, ir direto para 1.6
+                    while self.step_index < len(self.STEPS) - 1 and self.STEPS[self.step_index] in ["1.5.1", "1.5.2"]:
+                        self.step_index += 1
+                    next_step_candidate = self.STEPS[self.step_index]
+
+            # Lógica condicional para 1.9.x
+            if next_step_candidate in ["1.9.1", "1.9.2"]:
+                answer_1_9 = self.answers.get("1.9", "").strip().upper()
+                if answer_1_9 in ["NÃO", "NAO", "N", "NEGATIVO"]:
+                    # Pular 1.9.1 e 1.9.2, ir direto para complete
+                    while self.step_index < len(self.STEPS) - 1 and self.STEPS[self.step_index] in ["1.9.1", "1.9.2"]:
+                        self.step_index += 1
+                    next_step_candidate = self.STEPS[self.step_index]
+
+            self.current_step = next_step_candidate
     
     def is_section_complete(self) -> bool:
         """

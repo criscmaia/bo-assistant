@@ -131,7 +131,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.8</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.9</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -370,7 +370,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.12.8 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.12.9 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -386,27 +386,35 @@
         // Perguntas da Seção 1
         const SECTION1_QUESTIONS = {
             '1.1': 'Dia, data e hora do acionamento.',
-            '1.2': 'Composição da guarnição e prefixo.',
-            '1.3': 'Natureza do empenho.',
-            '1.4': 'O que constava na ordem de serviço, informações do COPOM, DDU.',
-            '1.5': 'Local exato da ocorrência (logradouro, número, bairro).',
-            '1.6': 'O local é ponto de tráfico? Quais evidências anteriores? Há facção?',
-            '1.7': 'O local é próximo a escola, hospital ou transporte público? Qual estabelecimento e a que distância aproximada?'
+            '1.2': 'Composição da guarnição e prefixo da viatura.',
+            '1.3': 'Como foi acionado? (190, DDU, mandado de prisão/busca, patrulhamento preventivo, outro)',
+            '1.4': 'Descreva as informações recebidas no acionamento (ordem de serviço, despacho COPOM, denúncia).',
+            '1.5': 'Houve deslocamento entre o ponto de acionamento e o local da ocorrência?',
+            '1.5.1': 'Local de onde a guarnição partiu.',
+            '1.5.2': 'Houve alguma alteração durante o percurso? (radar, sinal fechado, acidente)',
+            '1.6': 'Local exato da ocorrência (logradouro, número, bairro, ponto de referência).',
+            '1.7': 'O local é conhecido como ponto de tráfico? Descreva histórico de ocorrências ou denúncias.',
+            '1.8': 'O local é dominado por facção criminosa? Qual? Descreva evidências.',
+            '1.9': 'O local é ou fica próximo de espaço de interesse público qualificado? (escola, hospital, transporte público, unidade prisional/militar)',
+            '1.9.1': 'Nome do estabelecimento.',
+            '1.9.2': 'Distância aproximada (ex: dois quarteirões, 300 metros).'
         };
 
         // Perguntas da Seção 2 (Abordagem a Veículo)
         const SECTION2_QUESTIONS = {
             '2.1': 'Havia veículo envolvido na ocorrência?',
-            '2.2': 'Qual a marca, modelo, cor e placa do veículo?',
-            '2.3': 'Onde e em que contexto o veículo foi visto? (local + situação)',
-            '2.4': 'Qual policial percebeu primeiro? De onde viu e o que exatamente observou? (graduação + nome)',
-            '2.5': 'Como foi dada a ordem de parada? (sirene, megafone, sinal manual)',
-            '2.6': 'O veículo parou imediatamente ou houve perseguição? Se houve, descreva o trajeto.',
-            '2.7': 'Como foi realizada a abordagem dos ocupantes? (quem abordou, quantos ocupantes, posicionamento)',
-            '2.8': 'Quem realizou a busca pessoal nos ocupantes? (graduação + nome)',
-            '2.9': 'Quem realizou a busca no veículo e em quais partes? (graduação + nome + locais vistoriados)',
-            '2.10': 'O que foi localizado, com quem estava e em qual parte do veículo?',
-            '2.11': 'O veículo apresentava irregularidades? (furto, roubo, clonagem, adulteração)'
+            '2.2': 'Onde e em que contexto o veículo foi visualizado?',
+            '2.3': 'Qual a marca, modelo, cor e placa do veículo?',
+            '2.4': 'Quem da equipe viu o veículo? (nome do policial + o que chamou atenção)',
+            '2.5': 'Descreva se houve reação do motorista ou ocupantes (manobra brusca, tentativa de fuga, descarte de objeto).',
+            '2.6': 'Quem deu a ordem de parada e como? (sirene, apito, gesto, farol)',
+            '2.7': 'O veículo parou imediatamente ou houve perseguição?',
+            '2.8': 'Se houve perseguição, por qual motivo o veículo parou? (desistiu, cercado, bateu, capotou)',
+            '2.9': 'Descreva como foi a abordagem (quem mandou descer, posicionamento)',
+            '2.10': 'Quem realizou a busca veicular e em quais partes do veículo?',
+            '2.11': 'Quem realizou a busca pessoal nos ocupantes?',
+            '2.12': 'O que foi localizado, com quem ou em qual parte do veículo/corpo estava cada material?',
+            '2.13': 'O veículo apresentava irregularidade? (furto, roubo, clonagem, adulteração)'
         };
 
         // Perguntas da Seção 3 (Campana - Vigilância Velada)
@@ -1439,7 +1447,7 @@
 
             // Adicionar footer
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-            fullBO += "Gerado por: BO Inteligente v0.12.8\n";
+            fullBO += "Gerado por: BO Inteligente v0.12.9\n";
             fullBO += "Data: " + new Date().toLocaleDateString('pt-BR') + "\n";
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 

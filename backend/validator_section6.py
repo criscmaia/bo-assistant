@@ -20,11 +20,22 @@ from typing import Tuple
 # Regras de validação para cada pergunta da Seção 6
 VALIDATION_RULES_SECTION6 = {
     "6.1": {
+        "min_length": 5,
+        "allow_none_response": True,
+        "none_patterns": ["não", "não houve", "negativo", "sem ameaça"],
+        "examples": [
+            "Sim, o suspeito empunhou revólver contra a guarnição",
+            "Ameaçou testemunha com faca",
+            "Não houve"
+        ],
+        "error_message": "Descreva se houve ameaça ou uso de arma, ou informe 'Não houve'."
+    },
+    "6.2": {
         "valid_responses": ["SIM", "NÃO", "NAO", "S", "N", "NENHUM", "NEGATIVO"],
         "examples": ["SIM", "NÃO"],
         "error_message": "Responda com SIM ou NÃO: houve resistência durante a abordagem?"
     },
-    "6.2": {
+    "6.3": {
         "min_length": 30,
         "forbidden_phrases": [
             "resistiu ativamente",
@@ -44,7 +55,7 @@ VALIDATION_RULES_SECTION6 = {
         ],
         "error_message": "Descreva o que o autor FEZ (soco, empurrão, fuga, etc). NÃO use frases genéricas como 'resistiu ativamente' ou 'uso moderado da força'. Mínimo 30 caracteres."
     },
-    "6.3": {
+    "6.4": {
         "min_length": 40,
         "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
         "examples": [
@@ -54,7 +65,7 @@ VALIDATION_RULES_SECTION6 = {
         ],
         "error_message": "Informe: GRADUAÇÃO + nome do policial, qual técnica usou (chave, cotovelada, empurrão, taser, etc) e o resultado. Mínimo 40 caracteres."
     },
-    "6.4": {
+    "6.5": {
         "min_length": 20,
         "required_keywords_any": ["risco", "fuga", "agressiv", "resistência", "perigo", "tentou", "ameaça"],
         "examples": [
@@ -64,7 +75,7 @@ VALIDATION_RULES_SECTION6 = {
         ],
         "error_message": "Justifique as algemas com FATO OBJETIVO (risco de fuga, agressividade, tentativa de agressão). Mínimo 20 caracteres."
     },
-    "6.5": {
+    "6.6": {
         "min_length": 30,
         "conditional_hospital": True,  # Se mencionar lesão, exigir hospital/UPA
         "examples": [
@@ -82,11 +93,12 @@ class ResponseValidatorSection6:
     Validador de respostas para Seção 6 (Reação e Uso da Força).
 
     Aplica regras específicas para cada pergunta, incluindo:
-    - Validação de resposta condicional (6.1)
-    - Validação de frases proibidas (6.2) - NOVA FUNCIONALIDADE
-    - Validação de presença de graduação militar (6.3)
-    - Validação de justificativa objetiva para algemas (6.4)
-    - Validação condicional de atendimento hospitalar (6.5)
+    - Validação de ameaça/arma com "Não houve" aceito (6.1)
+    - Validação de resposta condicional (6.2)
+    - Validação de frases proibidas (6.3)
+    - Validação de presença de graduação militar (6.4)
+    - Validação de justificativa objetiva para algemas (6.5)
+    - Validação condicional de atendimento hospitalar (6.6)
 
     Fundamento jurídico: Súmula Vinculante 11 (STF) - "Só é lícito o uso de algemas
     em caso de resistência, fundado receio de fuga ou perigo à integridade física própria
@@ -120,12 +132,24 @@ class ResponseValidatorSection6:
 
         rules = VALIDATION_RULES_SECTION6[step]
 
-        # Validação especial para pergunta 6.1 (condicional)
+        # Validação especial para pergunta 6.1 (arma/ameaça - aceita "Não houve")
         if step == "6.1":
+            answer_lower = answer.lower().strip()
+            if rules.get("allow_none_response"):
+                for pattern in rules.get("none_patterns", []):
+                    if pattern in answer_lower:
+                        return True, ""
+            # Se não for "Não houve", valida comprimento mínimo
+            if len(answer) < rules.get("min_length", 5):
+                return False, rules["error_message"]
+            return True, ""
+
+        # Validação especial para pergunta 6.2 (condicional - SIM/NÃO)
+        if step == "6.2":
             return ResponseValidatorSection6._validate_yes_no(answer, rules)
 
-        # Validação de frases proibidas (NOVA - seção 6.2)
-        if step == "6.2" and "forbidden_phrases" in rules:
+        # Validação de frases proibidas (para 6.3)
+        if step == "6.3" and "forbidden_phrases" in rules:
             has_forbidden, matched = ResponseValidatorSection6._check_forbidden_phrases(
                 answer, rules["forbidden_phrases"]
             )
@@ -145,7 +169,7 @@ class ResponseValidatorSection6:
             if not has_keyword:
                 return False, rules["error_message"]
 
-        # Validação de palavras-chave "qualquer uma de" (para 6.4)
+        # Validação de palavras-chave "qualquer uma de" (para 6.5)
         if "required_keywords_any" in rules:
             has_any_keyword = ResponseValidatorSection6._check_required_keywords_any(
                 answer, rules["required_keywords_any"]
@@ -153,8 +177,8 @@ class ResponseValidatorSection6:
             if not has_any_keyword:
                 return False, rules["error_message"]
 
-        # Validação condicional de hospital para 6.5
-        if step == "6.5" and rules.get("conditional_hospital"):
+        # Validação condicional de hospital para 6.6
+        if step == "6.6" and rules.get("conditional_hospital"):
             # Se resposta começa com "Não houve", não exige hospital
             answer_lower = answer.lower().strip()
             if not answer_lower.startswith("não houve"):

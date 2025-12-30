@@ -15,11 +15,6 @@ from typing import Tuple
 # Regras de validação para cada pergunta da Seção 5
 VALIDATION_RULES_SECTION5 = {
     "5.1": {
-        "valid_responses": ["SIM", "NÃO", "NAO", "S", "N", "NENHUM", "NEGATIVO"],
-        "examples": ["SIM", "NÃO"],
-        "error_message": "Responda com SIM ou NÃO. Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)?"
-    },
-    "5.2": {
         "min_length": 40,
         "examples": [
             "Durante patrulhamento pela Rua das Palmeiras, região com registros anteriores de tráfico de drogas, visualizamos um homem de camisa vermelha e bermuda jeans retirando pequenos invólucros de um buraco no muro",
@@ -28,7 +23,7 @@ VALIDATION_RULES_SECTION5 = {
         ],
         "error_message": "Descreva o que a equipe viu ao chegar no local. Mínimo 40 caracteres com detalhes concretos (local, contexto, comportamento observado)."
     },
-    "5.3": {
+    "5.2": {
         "min_length": 30,
         "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
         "examples": [
@@ -38,7 +33,7 @@ VALIDATION_RULES_SECTION5 = {
         ],
         "error_message": "Informe a GRADUAÇÃO + nome do policial, de onde viu e o que exatamente viu. Exemplo: 'O Sargento João viu...'"
     },
-    "5.4": {
+    "5.3": {
         "min_length": 50,
         "examples": [
             "Homem de camisa vermelha e bermuda jeans, porte atlético, gestos nervosos ao perceber a viatura, posteriormente identificado como JOÃO DA SILVA, vulgo 'Vermelho'. Ao ser abordado, tentou esconder objeto no bolso da bermuda.",
@@ -87,10 +82,6 @@ class ResponseValidatorSection5:
 
         rules = VALIDATION_RULES_SECTION5[step]
 
-        # Validação especial para pergunta 5.1 (condicional)
-        if step == "5.1":
-            return ResponseValidatorSection5._validate_yes_no(answer, rules)
-
         # Validação de comprimento mínimo
         if "min_length" in rules:
             if len(answer) < rules["min_length"]:
@@ -106,23 +97,6 @@ class ResponseValidatorSection5:
 
         # Se passou todas as validações
         return True, ""
-
-    @staticmethod
-    def _validate_yes_no(answer: str, rules: dict) -> Tuple[bool, str]:
-        """Valida resposta SIM/NÃO para pergunta 5.1"""
-        answer_upper = answer.strip().upper()
-
-        # Remove acentos para comparação
-        answer_normalized = answer_upper.replace("Ã", "A")
-
-        valid_responses_normalized = [
-            resp.replace("Ã", "A") for resp in rules["valid_responses"]
-        ]
-
-        if answer_normalized in valid_responses_normalized:
-            return True, ""
-
-        return False, rules["error_message"]
 
     @staticmethod
     def _check_required_keywords(answer: str, keywords: list) -> bool:

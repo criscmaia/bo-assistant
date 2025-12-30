@@ -41,9 +41,10 @@ VALIDATION_RULES_SECTION4 = {
         "examples": [
             "Perseguição contínua: a equipe iniciou acompanhamento na rua e manteve contato visual ininterrupto até o interior da residência",
             "Autorização do morador: o proprietário franqueou a entrada voluntariamente após identificação da equipe",
-            "Flagrante visual: de fora, através da janela que dava para a rua, visualizamos as drogas sobre a mesa"
+            "Flagrante visual: de fora, através da janela que dava para a rua, visualizamos as drogas sobre a mesa",
+            "Droga à vista: pela porta aberta, visualizamos porções de cocaína sobre a mesa da cozinha"
         ],
-        "error_message": "Descreva como ocorreu o ingresso: perseguição contínua (sem perda de contato visual), autorização do morador ou flagrante visual/auditivo."
+        "error_message": "Descreva como ocorreu o ingresso: autorização, perseguição contínua, droga à vista ou outro fundamento concreto."
     },
     "4.5": {
         "min_length": 50,

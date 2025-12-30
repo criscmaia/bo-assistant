@@ -11,14 +11,15 @@ from typing import Dict, Optional
 
 # Perguntas da Seção 6 (fonte: _02_uso_da_forca_e_algemas.txt)
 SECTION6_QUESTIONS = {
-    "6.1": "Houve resistência durante a abordagem?",
-    "6.2": "Descreva a resistência com fatos concretos (o que o autor fez exatamente?)",
-    "6.3": "Qual técnica foi aplicada, por quem (graduação + nome), e qual foi o resultado?",
-    "6.4": "Por que foi necessário algemar? (justificativa objetiva)",
-    "6.5": "Houve ferimentos? Se sim, descreva: em quem, qual lesão, atendimento e nº da ficha hospitalar"
+    "6.1": "Houve ameaça ou uso de arma? Contra quem e como?",
+    "6.2": "Houve resistência durante a abordagem?",
+    "6.3": "Descreva a resistência com fatos concretos (ex.: empurrão, fuga, soco)",
+    "6.4": "Qual técnica foi aplicada e qual foi o resultado?",
+    "6.5": "Por que foi necessário algemar? (risco de fuga, agressividade)",
+    "6.6": "Houve ferimentos? Descreva: quem, tipo, local de atendimento."
 }
 
-SECTION6_STEPS = ["6.1", "6.2", "6.3", "6.4", "6.5", "complete"]
+SECTION6_STEPS = ["6.1", "6.2", "6.3", "6.4", "6.5", "6.6", "complete"]
 
 
 class BOStateMachineSection6:
@@ -26,16 +27,17 @@ class BOStateMachineSection6:
     State Machine para gerenciar o fluxo de perguntas da Seção 6 (Reação e Uso da Força).
 
     Comportamento especial:
-    - Pergunta 6.1 é condicional: se resposta = "NÃO", pula toda a seção
-    - Se resposta = "SIM", percorre perguntas 6.2 até 6.5
-    - Fundamento jurídico: Súmula Vinculante 11 (STF) + Decreto 8.858/2016
+    - Pergunta 6.1 sobre arma/ameaça é sempre respondida
+    - Pergunta 6.2 é condicional: se resposta = "NÃO", pula perguntas 6.3 até 6.6
+    - Se resposta = "SIM", percorre perguntas 6.3 até 6.6
+    - Fundamento jurídico: Súmula Vinculante 11 (STF) + Decreto 8.858/2016 + Art. 40, IV
     """
 
     def __init__(self):
         self.current_step = "6.1"
         self.answers: Dict[str, str] = {}
         self.step_index = 0
-        self.section_skipped = False  # True se responder "NÃO" na pergunta 6.1
+        self.section_skipped = False  # True se responder "NÃO" na pergunta 6.2
 
     def get_current_question(self) -> str:
         """Retorna o texto da pergunta atual"""
@@ -47,19 +49,19 @@ class BOStateMachineSection6:
         """
         Armazena a resposta da pergunta atual.
 
-        Lógica especial para pergunta 6.1:
+        Lógica especial para pergunta 6.2:
         - Se resposta = "NÃO", marca seção como pulada e vai direto para "complete"
         - Caso contrário, armazena normalmente
         """
         answer_clean = answer.strip()
 
-        # Pergunta 6.1 condicional - verifica se houve resistência
-        if self.current_step == "6.1":
+        # Pergunta 6.2 condicional - verifica se houve resistência
+        if self.current_step == "6.2":
             answer_upper = answer_clean.upper()
             # Aceita variações: NÃO, NAO, N, NENHUM, etc.
             if answer_upper in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
                 self.section_skipped = True
-                self.answers["6.1"] = "NÃO"
+                self.answers["6.2"] = "NÃO"
                 self.current_step = "complete"
                 self.step_index = len(SECTION6_STEPS) - 1
                 return
@@ -125,8 +127,8 @@ class BOStateMachineSection6:
         if self.section_skipped:
             return {
                 "current_step": "complete",
-                "total_steps": 5,
-                "completed_steps": 5,
+                "total_steps": 6,
+                "completed_steps": 6,
                 "progress_percentage": 100.0,
                 "section_skipped": True
             }
@@ -160,19 +162,23 @@ class BOStateMachineSection6:
         if step not in SECTION6_QUESTIONS:
             return False
 
-        # Não permite editar se seção foi pulada
-        if self.section_skipped and step != "6.1":
+        # Não permite editar se seção foi pulada (exceto 6.1 e 6.2)
+        if self.section_skipped and step not in ["6.1", "6.2"]:
             return False
 
-        # Se editando 6.1 de "NÃO" para "SIM", precisa resetar seção
-        if step == "6.1" and self.section_skipped:
+        # Se editando 6.2 de "NÃO" para "SIM", precisa resetar seção
+        if step == "6.2" and self.section_skipped:
             answer_upper = new_answer.strip().upper()
             if answer_upper not in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
                 # Resetar seção
                 self.section_skipped = False
-                self.current_step = "6.2"
-                self.step_index = 1
-                self.answers = {"6.1": new_answer.strip()}
+                self.current_step = "6.3"
+                self.step_index = 2
+                # Manter resposta de 6.1 se existir
+                if "6.1" in self.answers:
+                    self.answers["6.2"] = new_answer.strip()
+                else:
+                    self.answers = {"6.2": new_answer.strip()}
                 return True
 
         self.answers[step] = new_answer.strip()

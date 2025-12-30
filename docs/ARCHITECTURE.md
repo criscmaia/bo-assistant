@@ -1,6 +1,6 @@
 # 🏗️ Arquitetura Técnica - BO Inteligente
 
-**Versão:** v0.12.7
+**Versão:** v0.12.8
 **Última atualização:** 29/12/2025
 
 Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de dados e estruturas internas.

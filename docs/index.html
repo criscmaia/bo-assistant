@@ -131,7 +131,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.7</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.8</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -370,7 +370,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.12.7 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.12.8 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -411,38 +411,38 @@
 
         // Perguntas da Seção 3 (Campana - Vigilância Velada)
         const SECTION3_QUESTIONS = {
-            '3.1': 'Realizou campana?',
-            '3.2': 'Local da campana (ponto de observação, distância)',
-            '3.3': 'Policial com visão direta e o que via',
-            '3.4': 'Motivação da campana',
-            '3.5': 'Duração (contínua ou alternada)',
-            '3.6': 'O que foi observado (atos concretos)',
-            '3.7': 'Abordagem de usuários?',
-            '3.8': 'Houve fuga?'
+            '3.1': 'A equipe realizou campana (vigilância velada)?',
+            '3.2': 'Local exato da campana, ponto de observação e distância aproximada até o alvo.',
+            '3.3': 'Quem tinha visão direta e o que cada um conseguia ver? (graduação + nome)',
+            '3.4': 'O que motivou a campana? (denúncia, inteligência, histórico do local)',
+            '3.5': 'Qual foi a duração da campana? (tempo aproximado e se foi contínua ou alternada)',
+            '3.6': 'O que foi visto durante a campana? (entregas, usuários, esconderijos)',
+            '3.7': 'Houve abordagem de usuário? O que portava? O que disse?',
+            '3.8': 'Houve fuga? Como ocorreu?'
         };
 
         // Perguntas da Seção 4 (Entrada em Domicílio)
         const SECTION4_QUESTIONS = {
             '4.1': 'Houve entrada em domicílio?',
-            '4.2': 'O que foi visto/ouvido ANTES do ingresso (justa causa)',
-            '4.3': 'Policial que presenciou (graduação + nome)',
-            '4.4': 'Como ocorreu o ingresso',
-            '4.5': 'Ação de cada policial'
+            '4.2': 'O que foi visto/ouvido ANTES do ingresso?',
+            '4.3': 'Quem viu e o quê? (graduação + nome)',
+            '4.4': 'Como ocorreu o ingresso? (autorização, perseguição, droga à vista)',
+            '4.5': 'Quais policiais entraram? Quem fez o quê?'
         };
 
         const SECTION5_QUESTIONS = {
-            '5.1': 'Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)?',
-            '5.2': 'O que a equipe viu ao chegar no local da ocorrência?',
-            '5.3': 'Quem viu, de onde viu, o que exatamente viu? (informe graduação e nome)',
-            '5.4': 'Descreva as características e ações dos abordados (roupa, porte, gestos, nome completo e vulgo)'
+            '5.1': 'O que a equipe viu ao chegar no local?',
+            '5.2': 'Quem viu, de onde, e o que exatamente?',
+            '5.3': 'Descrever aparência e ações dos abordados.'
         };
 
         const SECTION6_QUESTIONS = {
-            '6.1': 'Houve resistência durante a abordagem?',
-            '6.2': 'Descreva a resistência com fatos concretos (o que o autor fez exatamente?)',
-            '6.3': 'Qual técnica foi aplicada, por quem (graduação + nome), e qual foi o resultado?',
-            '6.4': 'Por que foi necessário algemar? (justificativa objetiva)',
-            '6.5': 'Houve ferimentos? Se sim, descreva: em quem, qual lesão, atendimento e nº da ficha hospitalar'
+            '6.1': 'Houve ameaça ou uso de arma? Contra quem e como?',
+            '6.2': 'Houve resistência durante a abordagem?',
+            '6.3': 'Descreva a resistência com fatos concretos (ex.: empurrão, fuga, soco)',
+            '6.4': 'Qual técnica foi aplicada e qual foi o resultado?',
+            '6.5': 'Por que foi necessário algemar? (risco de fuga, agressividade)',
+            '6.6': 'Houve ferimentos? Descreva: quem, tipo, local de atendimento.'
         };
 
         const SECTION7_QUESTIONS = {
@@ -1439,7 +1439,7 @@
 
             // Adicionar footer
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-            fullBO += "Gerado por: BO Inteligente v0.12.7\n";
+            fullBO += "Gerado por: BO Inteligente v0.12.8\n";
             fullBO += "Data: " + new Date().toLocaleDateString('pt-BR') + "\n";
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 

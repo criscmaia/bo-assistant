@@ -57,20 +57,21 @@ VALIDATION_RULES_SECTION3 = {
     "3.6": {
         "min_length": 40,
         "examples": [
-            "O homem tirou pequenos invólucros da mochila preta e entregou para dois rapazes que chegaram de moto",
-            "A mulher recebia dinheiro e retirava algo do bolso esquerdo, entregando aos compradores",
-            "O suspeito pegava porções de um pote azul escondido atrás do poste e entregava aos usuários"
+            "Visualizamos o homem tirando pequenos invólucros da mochila preta e entregando para dois rapazes que chegaram de moto",
+            "Observamos a mulher recebendo dinheiro e retirando algo do bolso esquerdo, entregando aos usuários",
+            "Vimos o suspeito pegando porções de um pote azul escondido atrás do poste e entregando aos compradores",
+            "O indivíduo realizou aproximadamente 8 entregas, sempre retirando pequenos objetos de um buraco no muro"
         ],
-        "error_message": "Descreva atos CONCRETOS observados (trocas, entregas, esconderijos). NÃO use generalizações como 'atitude suspeita'."
+        "error_message": "Descreva o que foi visto durante a campana: entregas, usuários, esconderijos. NÃO use generalizações como 'atitude suspeita'."
     },
     "3.7": {
         "min_length": 3,
         "examples": [
             "NÃO",
             "Sim, foram abordados 2 usuários que saíam do local. Portavam 3 porções de cocaína e relataram ter comprado do 'cara de vermelho' por R$ 50",
-            "Sim, 1 usuário foi abordado pelo Cabo Silva. Tinha 1 porção de maconha e disse ter comprado no bar"
+            "Sim, 1 usuário foi abordado pelo Cabo Silva. Portava 1 porção de maconha e disse ter comprado no bar"
         ],
-        "error_message": "Houve abordagem de usuários? Se sim, informe quantos, o que tinham, o que relataram. Se não, escreva NÃO."
+        "error_message": "Houve abordagem de usuário? Se sim, informe o que portava e o que disse. Se não, escreva NÃO."
     },
     "3.8": {
         "min_length": 3,
@@ -79,7 +80,7 @@ VALIDATION_RULES_SECTION3 = {
             "Sim, ao perceber a movimentação policial, correu para o beco ao lado da casa 40",
             "Sim, tentou fugir pulando o muro dos fundos do bar, sendo alcançado pelo Soldado Faria"
         ],
-        "error_message": "Houve fuga ao notar a equipe? Se sim, descreva como. Se não, escreva NÃO."
+        "error_message": "Houve fuga? Se sim, descreva como ocorreu. Se não, escreva NÃO."
     }
 }
 

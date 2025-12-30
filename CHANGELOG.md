@@ -1,8 +1,57 @@
-# Changelog v0.12.7
+# Changelog v0.12.8
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
+
+#### v0.12.8 (30 de Dezembro de 2024) - Ajustes nas Seções 3, 4, 5 e 6
+
+### ⚠️ BREAKING CHANGES
+- **Seção 5 reduzida de 4 para 3 perguntas** (removida pergunta condicional 5.1)
+- **Seção 6 expandida de 5 para 6 perguntas** (adicionada nova pergunta 6.1 sobre arma/ameaça)
+- Renumeração: 5.2→5.1, 5.3→5.2, 5.4→5.3 (Seção 5)
+- Renumeração: todas as perguntas da Seção 6 avançam 1 número após nova 6.1
+
+### ✅ Adicionado
+- **Nova Pergunta 6.1 na Seção 6 - Reação/Força**
+  - "Houve ameaça ou uso de arma? Contra quem e como?"
+  - Importante para tipificação (Art. 40, IV - emprego de arma de fogo)
+  - Aceita resposta negativa ("Não houve")
+
+### 🔄 Alterado
+- **Seção 3 - Campana (8 perguntas - mantidas)**
+  - Textos melhorados com mais detalhes e exemplos
+  - 3.6: Exemplos de observação (entregas, usuários, esconderijos)
+  - 3.7: Adicionado "O que portava? O que disse?" em abordagem
+  - 3.8: Adicionado "Como ocorreu?" em fuga
+
+- **Seção 4 - Domicílio (5 perguntas - mantidas)**
+  - Pergunta 4.4 agora inclui exemplos (autorização, perseguição, droga à vista)
+
+- **Seção 5 - Fundada Suspeita (4→3 perguntas)**
+  - Removida pergunta condicional 5.1 "Houve abordagem por fundada suspeita?"
+  - Seção já é opcional, pergunta condicional redundante
+  - Renumeração: 5.2→5.1, 5.3→5.2, 5.4→5.3
+
+- **Seção 6 - Reação/Força (5→6 perguntas)**
+  - Nova 6.1 sobre arma/ameaça inserida como PRIMEIRA pergunta
+  - Antigas perguntas renumeradas: 6.1→6.2, 6.2→6.3, 6.3→6.4, 6.4→6.5, 6.5→6.6
+
+### 🧪 Testes
+- **Atualizado `tests/unit/test_section5.py`** - 7 testes (adaptado para 3 perguntas)
+- **Atualizado `tests/unit/test_section6.py`** - 18 testes (adaptado para 6 perguntas)
+- Todos os testes unitários passando
+
+### 📚 Fundamentação Legal
+- **Art. 40, IV da Lei 11.343/06:** Uso de arma de fogo é agravante
+- Nova pergunta 6.1 documenta esse elemento essencial para tipificação e fixação de pena
+
+### 📊 Resumo das Mudanças
+- Seção 3: 8 perguntas (mantidas - textos melhorados)
+- Seção 4: 5 perguntas (mantidas - exemplos adicionados)
+- Seção 5: 4→3 perguntas (removida condicional redundante)
+- Seção 6: 5→6 perguntas (adicionada arma/ameaça)
+- **Total líquido:** 22→22 perguntas (sem mudança no total)
 
 #### v0.12.7 (30 de Dezembro de 2024) - Expansão Seção 2
 

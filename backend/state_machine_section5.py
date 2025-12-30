@@ -11,29 +11,27 @@ from typing import Dict, Optional
 
 # Perguntas da Seção 5 (fonte: REGRAS GERAIS - GPT Tráfico e material do Claudio)
 SECTION5_QUESTIONS = {
-    "5.1": "Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)?",
-    "5.2": "O que a equipe viu ao chegar no local da ocorrência?",
-    "5.3": "Quem viu, de onde viu, o que exatamente viu? (informe graduação e nome)",
-    "5.4": "Descreva as características e ações dos abordados (roupa, porte, gestos, nome completo e vulgo)"
+    "5.1": "O que a equipe viu ao chegar no local?",
+    "5.2": "Quem viu, de onde, e o que exatamente?",
+    "5.3": "Descrever aparência e ações dos abordados."
 }
 
-SECTION5_STEPS = ["5.1", "5.2", "5.3", "5.4", "complete"]
+SECTION5_STEPS = ["5.1", "5.2", "5.3", "complete"]
 
 
 class BOStateMachineSection5:
     """
     State Machine para gerenciar o fluxo de perguntas da Seção 5 (Fundada Suspeita).
 
-    Comportamento especial:
-    - Pergunta 5.1 é condicional: se resposta = "NÃO", pula toda a seção
-    - Se resposta = "SIM", percorre perguntas 5.2 até 5.4
+    Esta seção não tem perguntas condicionais - todas as 3 perguntas são obrigatórias.
+    A seção em si é opcional (só aparece quando há abordagem por fundada suspeita).
     """
 
     def __init__(self):
         self.current_step = "5.1"
         self.answers: Dict[str, str] = {}
         self.step_index = 0
-        self.section_skipped = False  # True se responder "NÃO" na pergunta 5.1
+        self.section_skipped = False  # Mantido para compatibilidade
 
     def get_current_question(self) -> str:
         """Retorna o texto da pergunta atual"""
@@ -45,22 +43,9 @@ class BOStateMachineSection5:
         """
         Armazena a resposta da pergunta atual.
 
-        Lógica especial para pergunta 5.1:
-        - Se resposta = "NÃO", marca seção como pulada e vai direto para "complete"
-        - Caso contrário, armazena normalmente
+        Todas as perguntas são obrigatórias nesta seção.
         """
         answer_clean = answer.strip()
-
-        # Pergunta 5.1 condicional - verifica se houve abordagem por fundada suspeita
-        if self.current_step == "5.1":
-            answer_upper = answer_clean.upper()
-            # Aceita variações: NÃO, NAO, N, NENHUM, etc.
-            if answer_upper in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
-                self.section_skipped = True
-                self.answers["5.1"] = "NÃO"
-                self.current_step = "complete"
-                self.step_index = len(SECTION5_STEPS) - 1
-                return
 
         # Armazena resposta normalmente
         self.answers[self.current_step] = answer_clean
@@ -85,9 +70,9 @@ class BOStateMachineSection5:
         return self.section_skipped
 
     def get_skip_reason(self) -> Optional[str]:
-        """Retorna texto explicativo se seção foi pulada"""
+        """Retorna texto explicativo se seção foi pulada (mantido para compatibilidade)"""
         if self.section_skipped:
-            return "Não se aplica (não houve abordagem por fundada suspeita)"
+            return "Não se aplica"
         return None
 
     def get_all_answers(self) -> Dict[str, str]:
@@ -123,8 +108,8 @@ class BOStateMachineSection5:
         if self.section_skipped:
             return {
                 "current_step": "complete",
-                "total_steps": 4,
-                "completed_steps": 4,
+                "total_steps": 3,
+                "completed_steps": 3,
                 "progress_percentage": 100.0,
                 "section_skipped": True
             }
@@ -159,19 +144,8 @@ class BOStateMachineSection5:
             return False
 
         # Não permite editar se seção foi pulada
-        if self.section_skipped and step != "5.1":
+        if self.section_skipped:
             return False
-
-        # Se editando 5.1 de "NÃO" para "SIM", precisa resetar seção
-        if step == "5.1" and self.section_skipped:
-            answer_upper = new_answer.strip().upper()
-            if answer_upper not in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
-                # Resetar seção
-                self.section_skipped = False
-                self.current_step = "5.2"
-                self.step_index = 1
-                self.answers = {"5.1": new_answer.strip()}
-                return True
 
         self.answers[step] = new_answer.strip()
         return True

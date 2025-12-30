@@ -514,19 +514,26 @@
 
         function migrateOldDraftIDs(answers) {
             /**
-             * Migra IDs antigos (2.0-2.7) para novos (2.1-2.8)
-             * Garante compatibilidade com rascunhos v0.6.3
+             * Migra IDs antigos (2.0-2.11) para novos (2.1-2.13)
+             * Garante compatibilidade com rascunhos v0.12.8
+             * v0.12.9: Seção 2 expandida de 11 para 13 perguntas
              */
             const migrated = {};
             const migrationMap = {
                 '2.0': '2.1',
-                '2.1': '2.2',
-                '2.2': '2.3',
-                '2.3': '2.4',
-                '2.4': '2.5',
-                '2.5': '2.6',
-                '2.6': '2.7',
-                '2.7': '2.8'
+                // v0.12.9: Reordenação - contexto antes de placa
+                // Antiga 2.2 (placa) → Nova 2.3
+                // Antiga 2.3 (contexto) → Nova 2.2
+                '2.1': '2.3',  // marca/placa era 2.2, agora é 2.3
+                '2.2': '2.2',  // contexto era 2.3, agora é 2.2 (swap)
+                '2.3': '2.4',  // policial que viu
+                '2.4': '2.6',  // ordem de parada (pula nova 2.5)
+                '2.5': '2.7',  // perseguição (pula nova 2.5, agora 2.7)
+                '2.6': '2.9',  // abordagem (pula 2.7 e 2.8)
+                '2.7': '2.11', // busca pessoal (era 2.8, agora 2.11)
+                '2.8': '2.10', // busca veicular (era 2.9, agora 2.10)
+                '2.9': '2.12', // material encontrado (era 2.10, agora 2.12)
+                '2.10': '2.13' // irregularidades (era 2.11, agora 2.13)
             };
 
             for (const [step, answer] of Object.entries(answers)) {
@@ -693,18 +700,18 @@
             let preview = '';
 
             // Status da Seção 1
-            if (section1Answers === 7) {
+            if (section1Answers === 11) {
                 preview += `<div class="mb-1 text-sm">Seção 1: ✅ Completa</div>`;
             } else if (section1Answers > 0) {
-                preview += `<div class="mb-1 text-sm">Seção 1: ${section1Answers}/7 perguntas respondidas</div>`;
+                preview += `<div class="mb-1 text-sm">Seção 1: ${section1Answers}/11 perguntas respondidas</div>`;
             }
 
             // Status da Seção 2 (se iniciada)
             if (section2Answers > 0) {
-                if (section2Answers === 8) {
+                if (section2Answers === 13) {
                     preview += `<div class="mb-1 text-sm">Seção 2: ✅ Completa</div>`;
                 } else {
-                    preview += `<div class="mb-1 text-sm">Seção 2: ${section2Answers}/8 perguntas respondidas</div>`;
+                    preview += `<div class="mb-1 text-sm">Seção 2: ${section2Answers}/13 perguntas respondidas</div>`;
                 }
             }
 
@@ -926,9 +933,9 @@
                 } else if (currentSection === 3) {
                     updateSidebarProgress(section3Count, 8);
                 } else if (currentSection === 2) {
-                    updateSidebarProgress(section2Count, 8);
+                    updateSidebarProgress(section2Count, 13);
                 } else {
-                    updateSidebarProgress(section1Count, 7);
+                    updateSidebarProgress(section1Count, 11);
                 }
 
                 // 8. Mostrar próxima pergunta OU desabilitar se completo
@@ -1656,8 +1663,8 @@
                 questionsList.appendChild(sectionPreview);
             }
 
-            // Resetar progresso para Seção 2 (8 perguntas: 2.1 a 2.8)
-            updateSidebarProgress(0, 8);
+            // Resetar progresso para Seção 2 (13 perguntas: 2.1 a 2.13)
+            updateSidebarProgress(0, 13);
 
             // Marcar primeira pergunta como respondida (auto-resposta "SIM")
             updateSidebarStatus('2.1', 'answered');
@@ -2802,7 +2809,7 @@
                 setTimeout(() => {
                     addMessage(data.first_question, true, false, '1.1', 'evt_first_question');
                     enableInput();
-                    updateSidebarProgress(0, 7);
+                    updateSidebarProgress(0, 11);
                 }, 500);
 
             } catch (error) {

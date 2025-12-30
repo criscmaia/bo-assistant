@@ -1,8 +1,56 @@
-# Changelog v0.12.5
+# Changelog v0.12.6
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
+
+#### v0.12.6 (30 de Dezembro de 2024) - Reformulação Seção 8
+
+### ⚠️ BREAKING CHANGE
+- **Seção 8 expandida de 6 para 11 perguntas**
+  - BOs em andamento na Seção 8 podem ser afetados
+  - Alteração visa melhorar documentação policial conforme metodologia do especialista
+
+### ✅ Adicionado
+- **5 Novas Perguntas na Seção 8 - Condução e Pós-Ocorrência**
+  - 8.2: "Onde e como o preso foi transportado até a delegacia?"
+  - 8.4: "Qual era a função do preso no tráfico? (vapor, gerente, olheiro)"
+  - 8.6: "Há sinais de dedicação ao crime? O que mostra isso?"
+  - 8.7: "O preso tem papel relevante na facção? Atuação ocasional ou contínua?"
+  - 8.8: "Houve tentativa de destruir ou ocultar provas, ou intimidar alguém?"
+  - 8.9: "Havia menor de idade envolvido? Se sim, idade e participação?"
+  - 8.10: "Quem informou as garantias constitucionais ao preso?"
+  - 8.11: "Qual o destino dos presos e materiais apreendidos?"
+
+### 🔄 Alterado
+- **Seção 8 - Perguntas Renumeradas**
+  - Antiga 8.2 (agravantes Art. 40) removida - informação movida para pergunta 1.7
+  - Antiga 8.3 mantida como 8.3 (Declaração do preso)
+  - Antiga 8.4 renumerada para 8.5 (Passagens anteriores/REDS)
+  - Antiga 8.5 incorporada em 8.7 (Papel na facção)
+  - Antiga 8.6 separada em 8.10 (Garantias) e 8.11 (Destino)
+
+### 🧪 Testes
+- **Atualizado `tests/unit/test_section8.py`**
+  - 37 testes unitários para Seção 8
+  - Validação de respostas negativas ("NÃO", "Sem indícios") em 7 perguntas (8.3-8.9)
+  - Validação de graduação militar obrigatória em 8.1 e 8.10
+  - Validação de palavras-chave específicas em 8.2 (transporte) e 8.11 (destino)
+  - Todos os 131 testes unitários passando
+
+### 📝 Prompt LLM
+- **Reescrito `_build_prompt_section8()` em `backend/llm_service.py`**
+  - Prompt reorganizado em 4 parágrafos narrativos
+  - Integra todas as 11 novas informações na geração de texto
+  - Instruções detalhadas para incluir: transporte, função no tráfico, dedicação ao crime, papel na facção, destruição de provas, menores, garantias constitucionais, destino
+
+### 📚 Fundamentação Legal
+- Seção 8 agora documenta melhor elementos essenciais para:
+  - Tipificação do crime (função no tráfico)
+  - Fixação de pena (dedicação habitual, papel na facção)
+  - Envolvimento de menores (Art. 243, ECA)
+  - Garantias constitucionais (Art. 5º, CF)
+  - Cadeia de custódia (destino de presos e materiais)
 
 #### v0.12.5 (30 de Dezembro de 2024) - Pergunta 1.7 (Art. 40)
 

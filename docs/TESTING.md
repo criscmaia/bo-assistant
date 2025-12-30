@@ -1,6 +1,6 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.12.5
+**Versão:** v0.12.6
 **Última atualização:** 29/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
@@ -96,7 +96,7 @@ Veja [tests/README.md](../tests/README.md) para detalhes completos.
 
 ### CI/CD - GitHub Actions
 
-**Versão:** v0.12.5+
+**Versão:** v0.12.6+
 
 O projeto tem testes automatizados que rodam em cada push/PR:
 

@@ -3,9 +3,10 @@
 Validador de respostas para Seção 8: Condução e Pós-Ocorrência
 
 Implementa regras de validação específicas para perguntas sobre condução e pós-ocorrência:
-- Validação de graduação militar obrigatória (8.1, 8.6)
-- Validação de resposta negativa aceita (8.2, 8.3, 8.4, 8.5) - allow_none_response
-- Validação de destino obrigatório (8.6)
+- Validação de graduação militar obrigatória (8.1, 8.10)
+- Validação de resposta negativa aceita (8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9) - allow_none_response
+- Validação de transporte obrigatório (8.2)
+- Validação de destino obrigatório (8.11)
 - Validação de comprimento mínimo
 
 Fundamento jurídico:
@@ -14,7 +15,7 @@ Fundamento jurídico:
 - CPP Arts. 282-284 (Prisão em flagrante e garantias)
 
 Author: Cristiano Maia + Claude (Anthropic)
-Date: 23/12/2025
+Date: 30/12/2025
 """
 from typing import Tuple
 
@@ -22,59 +23,120 @@ from typing import Tuple
 # Regras de validação para cada pergunta da Seção 8
 VALIDATION_RULES_SECTION8 = {
     "8.1": {
-        "min_length": 50,
+        "min_length": 30,
         "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
         "examples": [
-            "O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas (art. 33 da Lei 11.343/06)",
-            "O Soldado Faria deu voz de prisão aos dois autores pelo crime de tráfico de entorpecentes (art. 33)"
+            "O Sargento Silva deu voz de prisão pelo crime de tráfico de drogas (art. 33 da Lei 11.343/06)",
+            "O Cabo Almeida deu voz de prisão por tráfico (art. 33) e associação (art. 35)"
         ],
-        "error_message": "Informe QUEM deu voz de prisão (graduação + nome) e POR QUAL CRIME. Mínimo 50 caracteres."
+        "error_message": "Informe QUEM deu voz de prisão (graduação + nome) e POR QUAL CRIME (artigo). Mínimo 30 caracteres."
     },
     "8.2": {
         "min_length": 20,
-        "allow_none_response": True,
-        "none_patterns": ["sem agravantes", "não havia", "nenhum agravante", "não houve agravante", "nenhuma circunstância agravante"],
+        "required_keywords_any": ["viatura", "prefixo", "veículo", "conduzido", "transportado"],
         "examples": [
-            "Havia agravante de associação para o tráfico (art. 35) e envolvimento de menor de idade",
-            "Sem agravantes identificados"
+            "O preso foi conduzido na viatura prefixo 1234, no banco traseiro, algemado",
+            "Transportado na viatura da guarnição até a Delegacia de Plantão"
         ],
-        "error_message": "Informe os agravantes (art. 40) ou responda 'Sem agravantes'. Mínimo 20 caracteres."
+        "error_message": "Informe como o preso foi transportado (viatura, prefixo, posição). Mínimo 20 caracteres."
     },
     "8.3": {
+        "min_length": 10,
         "allow_none_response": True,
-        "none_patterns": ["não declarou", "nada a declarar", "não falou", "silêncio", "permaneceu em silêncio", "não proferiu", "recusou"],
+        "none_patterns": ["não declarou", "permaneceu em silêncio", "silêncio", "nada declarou", "recusou"],
         "examples": [
-            "O preso declarou literalmente: 'Essa droga não é minha, eu só estava guardando para um amigo'",
-            "O autor permaneceu em silêncio, exercendo seu direito constitucional de não produzir prova contra si mesmo"
+            "O preso declarou: 'Essa droga não é minha, estava só guardando'",
+            "Permaneceu em silêncio, exercendo seu direito constitucional",
+            "Não declarou nada"
         ],
-        "error_message": "Transcreva literalmente a declaração ou informe 'Não declarou' / 'Permaneceu em silêncio'."
+        "error_message": "Transcreva literalmente o que o preso declarou ou informe 'Permaneceu em silêncio'."
     },
     "8.4": {
+        "min_length": 10,
         "allow_none_response": True,
-        "none_patterns": ["sem registros", "sem antecedentes", "nada consta", "limpo", "não possui", "nenhum registro"],
+        "none_patterns": ["não identificada", "não apurada", "desconhecida", "não informada"],
         "examples": [
-            "O autor possui REDS 2023-001234 por tráfico e REDS 2022-005678 por associação criminosa",
-            "Sem registros anteriores no sistema REDS"
+            "Vapor - responsável pela venda direta aos usuários",
+            "Gerente do ponto de tráfico",
+            "Olheiro - vigiava a chegada da polícia",
+            "Função não identificada durante a ocorrência"
         ],
-        "error_message": "Cite os REDS anteriores ou informe 'Sem registros anteriores'."
+        "error_message": "Informe a função no tráfico (vapor, gerente, olheiro, etc.) ou 'Não identificada'."
     },
     "8.5": {
+        "min_length": 5,
         "allow_none_response": True,
-        "none_patterns": ["sem vínculo", "não identificado", "nenhuma facção", "não possui vínculo", "nenhum vínculo"],
+        "none_patterns": ["sem passagens", "nada consta", "sem registros", "não possui", "negativo"],
         "examples": [
-            "O autor possui vínculo com a facção Primeiro Comando, atuando como 'vapor' no ponto de venda localizado na Rua das Flores",
-            "Sem vínculo com facção criminosa identificado"
+            "Possui REDS 2024-001234 por tráfico e REDS 2023-005678 por associação",
+            "Sem passagens anteriores no sistema REDS",
+            "Nada consta"
         ],
-        "error_message": "Detalhe o vínculo com facção ou informe 'Sem vínculo identificado'."
+        "error_message": "Informe os REDS anteriores ou 'Sem passagens anteriores'."
     },
     "8.6": {
-        "min_length": 50,
-        "required_keywords_any": ["ceflan", "delegacia", "dp", "dipc", "central", "hospital", "upa", "destino"],
+        "min_length": 5,
+        "allow_none_response": True,
+        "none_patterns": ["não há", "sem indícios", "não identificado", "negativo", "não foram identificados"],
         "examples": [
-            "Os direitos constitucionais foram lidos ao preso, que declarou tê-los compreendido. Integridade física verificada sem lesões. O autor foi conduzido à Delegacia de Plantão Central e o material apreendido encaminhado à CEFLAN 2",
-            "Garantias asseguradas: leitura de direitos e verificação de integridade física (sem lesões). Pessoas conduzidas à DIPC e materiais à CEFLAN"
+            "Sim, portava cordão de ouro, relógio de luxo e R$ 5.000 em espécie",
+            "Tatuagem com símbolo da facção no antebraço direito",
+            "Não há indícios aparentes"
         ],
-        "error_message": "Informe: (1) garantias asseguradas (direitos + integridade) e (2) destino de PESSOAS e MATERIAIS. Mínimo 50 caracteres."
+        "error_message": "Descreva indícios de dedicação ao crime (ostentação, tatuagens) ou 'Não há indícios'."
+    },
+    "8.7": {
+        "min_length": 5,
+        "allow_none_response": True,
+        "none_patterns": ["não", "sem papel", "não identificado", "negativo", "não possui", "ocasional"],
+        "examples": [
+            "Sim, identificado como gerente regional da facção na zona norte",
+            "É conhecido como 'disciplina' da boca de fumo, atuação contínua",
+            "Atuação ocasional, sem papel de liderança identificado"
+        ],
+        "error_message": "Informe papel na facção (ocasional ou contínua) ou 'Não identificado'."
+    },
+    "8.8": {
+        "min_length": 5,
+        "allow_none_response": True,
+        "none_patterns": ["não houve", "não tentou", "negativo", "não"],
+        "examples": [
+            "Sim, tentou jogar sacola com drogas pela janela ao ver a viatura",
+            "Tentou engolir porções de cocaína durante a abordagem",
+            "Ameaçou testemunha: 'Se falar de mim, vou voltar aqui'",
+            "Não houve tentativa de destruição ou intimidação"
+        ],
+        "error_message": "Descreva tentativa de destruir/ocultar provas ou intimidar, ou 'Não houve'."
+    },
+    "8.9": {
+        "min_length": 5,
+        "allow_none_response": True,
+        "none_patterns": ["não havia", "não", "negativo", "nenhum menor"],
+        "examples": [
+            "Sim, menor de 16 anos atuava como olheiro",
+            "Havia criança de 12 anos no imóvel, encaminhada ao Conselho Tutelar",
+            "Não havia menor envolvido"
+        ],
+        "error_message": "Informe se havia menor, idade e participação, ou 'Não havia menor'."
+    },
+    "8.10": {
+        "min_length": 20,
+        "required_keywords": ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+        "examples": [
+            "O Sargento Silva informou as garantias constitucionais ao preso",
+            "O Cabo Almeida leu os direitos do preso, que declarou ter compreendido"
+        ],
+        "error_message": "Informe QUEM (graduação + nome) informou as garantias constitucionais."
+    },
+    "8.11": {
+        "min_length": 30,
+        "required_keywords_any": ["delegacia", "ceflan", "dp", "dipc", "central", "plantão"],
+        "examples": [
+            "Presos conduzidos à Delegacia de Plantão Central. Drogas encaminhadas à CEFLAN 2",
+            "Autor apresentado na DIPC. Material apreendido lacrado e entregue na CEFLAN",
+            "Conduzido à DP de Contagem. Drogas e dinheiro entregues na delegacia"
+        ],
+        "error_message": "Informe destino dos PRESOS (delegacia) e dos MATERIAIS (CEFLAN). Mínimo 30 caracteres."
     }
 }
 
@@ -84,10 +146,11 @@ class ResponseValidatorSection8:
     Validador de respostas para Seção 8 (Condução e Pós-Ocorrência).
 
     Características:
-    - Nenhuma pergunta é condicional (todas devem ser respondidas)
-    - 4 perguntas usam allow_none_response (8.2, 8.3, 8.4, 8.5)
-    - 2 perguntas exigem graduação militar (8.1, 8.6 implícita)
-    - Pergunta 8.6 requer destino (CEFLAN, delegacia, etc.)
+    - Nenhuma pergunta é condicional (todas as 11 perguntas devem ser respondidas)
+    - 7 perguntas usam allow_none_response (8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9)
+    - 2 perguntas exigem graduação militar (8.1, 8.10)
+    - Pergunta 8.2 requer detalhes de transporte (viatura, prefixo)
+    - Pergunta 8.11 requer destino (CEFLAN, delegacia, etc.)
 
     Fundamento jurídico: Lei 11.343/06, Lei 13.869/19, CPP Arts. 282-284
     """

@@ -1518,9 +1518,9 @@ GERE AGORA O TEXTO DA SEÇÃO 7, seguindo RIGOROSAMENTE as regras acima:"""
             provider: "gemini", "groq", "claude" ou "openai"
 
         Returns:
-            Texto gerado (todas as 6 perguntas são obrigatórias)
+            Texto gerado (todas as 11 perguntas são obrigatórias)
         """
-        # Seção 8 NÃO tem skip logic - todas as perguntas são obrigatórias
+        # Seção 8 NÃO tem skip logic - todas as 11 perguntas são obrigatórias
 
         # Gerar com provider selecionado
         if provider == "gemini":
@@ -1612,18 +1612,23 @@ GERE AGORA O TEXTO DA SEÇÃO 7, seguindo RIGOROSAMENTE as regras acima:"""
         - CPP Arts. 282-284 (Prisão em flagrante)
         """
 
-        # Extrair respostas (TODAS são obrigatórias - Section 8 não tem skip)
+        # Extrair respostas (TODAS as 11 perguntas são obrigatórias - Section 8 não tem skip)
         voz_prisao = section_data.get("8.1", "Não informado")
-        agravantes = section_data.get("8.2", "Sem agravantes")
+        transporte = section_data.get("8.2", "Não informado")
         declaracoes = section_data.get("8.3", "Não declarou")
-        reds = section_data.get("8.4", "Sem registros")
-        faccao = section_data.get("8.5", "Sem vínculo")
-        garantias_destino = section_data.get("8.6", "Não informado")
+        funcao_trafico = section_data.get("8.4", "Não identificada")
+        passagens = section_data.get("8.5", "Sem passagens")
+        dedicacao_crime = section_data.get("8.6", "Sem indícios")
+        papel_faccao = section_data.get("8.7", "Não identificado")
+        destruicao_provas = section_data.get("8.8", "Não houve")
+        menor_envolvido = section_data.get("8.9", "Não havia")
+        garantias = section_data.get("8.10", "Não informado")
+        destino = section_data.get("8.11", "Não informado")
 
         # Construir prompt baseado no material do Claudio
         prompt = f"""Você é um redator especializado em Boletins de Ocorrência policiais da Polícia Militar de Minas Gerais. Sua tarefa é gerar o trecho da SEÇÃO 8 (Condução e Pós-Ocorrência) do BO de tráfico de drogas.
 
-**IMPORTANTE:** Esta é a ÚLTIMA seção do BO. O texto deve consolidar a narrativa final da ocorrência.
+**IMPORTANTE:** Esta é a ÚLTIMA seção do BO. O texto deve consolidar a narrativa final da ocorrência com base nas 11 perguntas respondidas.
 
 REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 
@@ -1631,8 +1636,8 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 2. Use APENAS os dados das respostas fornecidas abaixo
 3. Escreva em terceira pessoa, tempo passado
 4. Use linguagem técnica, objetiva e norma culta
-5. Gere texto em 2-3 parágrafos fluidos
-6. NÃO use juridiquês ou termos genéricos como "foi dado voz de prisão"
+5. Gere texto em 3-4 parágrafos fluidos
+6. NÃO use juridiquês ou termos genéricos
 
 FUNDAMENTO JURÍDICO - CONDUÇÃO E PÓS-OCORRÊNCIA:
 
@@ -1643,89 +1648,80 @@ LEI 11.343/06 (Lei de Drogas):
 
 LEI 13.869/19 (Lei de Abuso de Autoridade):
 - Arts. 1-5: Garantias constitucionais do preso (direitos lidos, integridade física)
-- Violação de garantias constitui abuso de autoridade
 
 CPP Arts. 282-284 (Prisão em flagrante):
 "A prisão em flagrante deve ser documentada com voz de prisão, leitura de direitos
 constitucionais, verificação de integridade física e condução adequada."
 
-ESTRUTURA NARRATIVA (2-3 PARÁGRAFOS):
+ESTRUTURA NARRATIVA (3-4 PARÁGRAFOS):
 
-PARÁGRAFO 1 - VOZ DE PRISÃO E AGRAVANTES:
-- QUEM deu voz de prisão (graduação + nome completo do policial)
-- Por QUAL CRIME (art. 33 da Lei 11.343/06 - tráfico)
-- Agravantes identificados (art. 40: associação, armas, menores, escolas) OU "Sem agravantes"
+PARÁGRAFO 1 - VOZ DE PRISÃO E TRANSPORTE:
+- QUEM deu voz de prisão (graduação + nome)
+- Por QUAL CRIME (art. 33 da Lei 11.343/06)
+- Como foi transportado (viatura, prefixo, posição)
 
-Exemplo CORRETO:
-"O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06. Havia agravante de associação para o tráfico (art. 35) devido à presença de mais de um autor participando do esquema de distribuição."
+PARÁGRAFO 2 - DECLARAÇÕES E PERFIL DO PRESO:
+- Declaração do preso (literal) OU "permaneceu em silêncio"
+- Função no tráfico (vapor, gerente, olheiro) se identificada
+- Passagens anteriores (REDS) se houver
+- Sinais de dedicação ao crime (ostentação, tatuagens) se houver
 
-Se "Sem agravantes":
-"O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06. Não foram identificadas circunstâncias agravantes previstas no art. 40 da referida lei."
+PARÁGRAFO 3 - ORGANIZAÇÃO CRIMINOSA E PROVAS:
+- Papel na facção (ocasional ou contínua) se identificado
+- Tentativas de destruir/ocultar provas ou intimidar se houver
+- Envolvimento de menor se houver
 
-PARÁGRAFO 2 - DECLARAÇÕES, ANTECEDENTES E FACÇÃO:
-- Declaração do preso (transcrição literal) OU "permaneceu em silêncio"
-- Registros anteriores (REDS) OU "sem antecedentes"
-- Vínculo com facção OU "sem vínculo identificado"
-
-Exemplo CORRETO (COM declaração):
-"O preso declarou literalmente: 'Essa droga não é minha, eu estava apenas guardando para um amigo'. O autor possui REDS 2023-001234 por tráfico de drogas e REDS 2022-005678 por associação criminosa. Identificado vínculo com a facção Primeiro Comando, atuando como 'vapor' no ponto de venda."
-
-Exemplo CORRETO (SEM declaração):
-"O autor permaneceu em silêncio, exercendo seu direito constitucional de não produzir prova contra si mesmo. Sem registros anteriores no sistema REDS. Sem vínculo com facção criminosa identificado."
-
-PARÁGRAFO 3 - GARANTIAS ASSEGURADAS E DESTINO:
-- Direitos constitucionais lidos (Lei 13.869/19)
-- Integridade física verificada (presença ou ausência de lesões)
-- Destino das PESSOAS (autor conduzido à delegacia/DIPC/central)
-- Destino dos MATERIAIS (substâncias e objetos encaminhados à CEFLAN/perícia)
-
-Exemplo CORRETO:
-"Os direitos constitucionais foram lidos ao preso, que declarou tê-los compreendido. Verificada a integridade física, não foram constatadas lesões. O autor foi conduzido à Delegacia de Plantão Central para lavratura do Auto de Prisão em Flagrante e o material apreendido foi encaminhado à CEFLAN 2 para perícia."
+PARÁGRAFO 4 - GARANTIAS E DESTINO:
+- QUEM informou garantias constitucionais (graduação + nome)
+- Destino dos PRESOS (delegacia específica)
+- Destino dos MATERIAIS (CEFLAN)
 
 ---
 
-ERROS A EVITAR (NULIDADE CERTA):
+DADOS FORNECIDOS PELO USUÁRIO (11 PERGUNTAS):
 
-❌ "Foi dada voz de prisão" (sem identificar QUEM)
-❌ "Preso conduzido" (sem dizer PARA ONDE)
-❌ "Material encaminhado" (sem especificar DESTINO)
-❌ "Direitos garantidos" (genérico - deve mencionar leitura e integridade)
-❌ "Autor possui antecedentes" (sem citar números de REDS)
-❌ "Preso faz parte de facção" (sem detalhar qual e função)
-
-REGRA DE OURO: QUEM deu voz de prisão + Declaração literal (ou silêncio) + Garantias + Destino de pessoas E materiais
-
----
-
-DADOS FORNECIDOS PELO USUÁRIO:
-
-Voz de prisão (quem deu e por qual crime):
+1. Voz de prisão (quem deu e por qual crime):
 {voz_prisao}
 
-Agravantes (art. 40):
-{agravantes}
+2. Transporte (onde e como):
+{transporte}
 
-Declarações do preso:
+3. Declarações do preso:
 {declaracoes}
 
-Registros anteriores (REDS):
-{reds}
+4. Função no tráfico:
+{funcao_trafico}
 
-Vínculo com facção:
-{faccao}
+5. Passagens anteriores (REDS):
+{passagens}
 
-Garantias asseguradas + destino:
-{garantias_destino}
+6. Sinais de dedicação ao crime:
+{dedicacao_crime}
+
+7. Papel na facção:
+{papel_faccao}
+
+8. Destruição/ocultação de provas:
+{destruicao_provas}
+
+9. Menor envolvido:
+{menor_envolvido}
+
+10. Quem informou garantias:
+{garantias}
+
+11. Destino (presos e materiais):
+{destino}
 
 ---
 
 IMPORTANTE:
 
-- Esta é a ÚLTIMA seção - finalize a narrativa de forma completa e profissional
-- Se alguma resposta indicar "Sem", "Nenhum", "Não", mencione brevemente (ex: "Sem antecedentes identificados")
+- Esta é a ÚLTIMA seção - finalize a narrativa de forma completa
+- Se alguma resposta indicar "Não", "Sem", "Nenhum", mencione brevemente quando relevante
 - Se alguma resposta estiver como "Não informado", OMITA aquela informação
 - Dois espaços entre frases
-- Manter coerência: voz de prisão + agravantes → declarações + antecedentes + facção → garantias + destino
+- Integre naturalmente as informações das 11 perguntas no texto
 
 GERE AGORA O TEXTO DA SEÇÃO 8, seguindo RIGOROSAMENTE as regras acima:"""
 

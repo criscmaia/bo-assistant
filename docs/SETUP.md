@@ -1,6 +1,6 @@
 # 🛠️ Setup e Deploy - BO Inteligente
 
-**Versão:** v0.12.5
+**Versão:** v0.12.6
 **Última atualização:** 29/12/2025
 
 Este documento cobre setup de desenvolvimento local e deploy em produção (Render + GitHub Pages).

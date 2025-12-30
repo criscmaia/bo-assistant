@@ -1,7 +1,7 @@
 # 🧪 Guia de Testes - BO Inteligente
 
 **Versão:** v0.12.9
-**Última atualização:** 29/12/2025
+**Última atualização:** 30/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
 
@@ -173,7 +173,7 @@ pytest tests/unit tests/integration -v --tb=short
 1. Acessar https://criscmaia.github.io/bo-assistant/
 2. Responder pergunta 1.1 (ver [Respostas Validadas](#respostas-validadas-seção-1))
 3. Clicar em "Enviar"
-4. Repetir para perguntas 1.2 até 1.6
+4. Repetir para perguntas 1.2 até 1.9 (total de 11 perguntas, algumas condicionais)
 5. Aguardar geração de texto (~3-5 segundos)
 6. Verificar texto gerado no card de Seção 1
 
@@ -320,16 +320,16 @@ pytest tests/unit tests/integration -v --tb=short
 **Objetivo:** Validar fluxo completo com todas as quatro seções.
 
 **Passos:**
-1. Completar Seção 1 (perguntas 1.1 a 1.6)
+1. Completar Seção 1 (perguntas 1.1 a 1.9 - total 11 perguntas)
 2. Clicar em "Iniciar Seção 2"
 3. Responder pergunta 2.1 com "SIM"
-4. Completar Seção 2 (perguntas 2.2 a 2.8)
+4. Completar Seção 2 (perguntas 2.2 a 2.13 - total 13 perguntas)
 5. Clicar em "Iniciar Seção 3"
 6. Responder pergunta 3.1 com "SIM"
-7. Completar Seção 3 (perguntas 3.2 a 3.8)
+7. Completar Seção 3 (perguntas 3.2 a 3.8 - total 8 perguntas)
 8. Clicar em "Iniciar Seção 4"
 9. Responder pergunta 4.1 com "SIM"
-10. Completar Seção 4 (perguntas 4.2 a 4.5)
+10. Completar Seção 4 (perguntas 4.2 a 4.5 - total 5 perguntas)
 
 **Resultado Esperado:**
 - Todas as quatro seções aparecem no container de textos gerados
@@ -687,81 +687,200 @@ Este guia completo contém respostas validadas para TODAS as 8 seções do BO, c
 
 ### Respostas Validadas - Seção 1
 
+**TOTAL: 11 perguntas (13 incluindo condicionais 1.5.x e 1.9.x)**
+
 **1.1 - Dia, data e hora do acionamento:**
 ```
 19/12/2025, 14h30min, quinta-feira
 ```
+**Validação:** Não aceita datas futuras.
 
-**1.2 - Composição da guarnição e prefixo:**
+**1.2 - Composição da guarnição e prefixo da viatura:**
 ```
 Sargento João Silva, Cabo Pedro Almeida e Soldado Carlos Faria, viatura 2234
 ```
 **Nota:** Validador exige nome completo (primeiro + último) de todos os policiais.
 
-**1.3 - Natureza do empenho:**
+**1.3 - Como foi acionado?**
+```
+Via 190
+```
+OU
 ```
 Patrulhamento preventivo de combate ao tráfico de drogas
 ```
+OU
+```
+DDU para verificar denúncia anônima de tráfico
+```
+**Validação:** Aceita respostas curtas como "190", "Via 190", "DDU", "Pelo 190", "COPOM". Também aceita respostas longas como "Patrulhamento preventivo..." ou "Mandado de prisão...".
 
-**1.4 - Ordem de serviço / COPOM / DDU:**
+**1.4 - Descreva as informações recebidas no acionamento:**
 ```
 Ordem de serviço nº 145/2025 determinava patrulhamento no Bairro Santa Rita. COPOM informou denúncia anônima de veículo transportando drogas na região.
 ```
 
-**1.5 - Local exato da ocorrência:**
+**1.5 - Houve deslocamento entre o ponto de acionamento e o local da ocorrência?**
+```
+SIM
+```
+OU
+```
+NÃO
+```
+**Validação:** Resposta SIM/NÃO obrigatória. Se SIM, exibe perguntas 1.5.1 e 1.5.2. Se NÃO, pula para 1.6.
+
+**1.5.1 - Local de onde a guarnição partiu:** (condicional - só aparece se 1.5 = SIM)
+```
+Base Operacional do 16º BPM, localizada na Avenida Brasil, 1234, Bairro Centro
+```
+
+**1.5.2 - Houve alguma alteração durante o percurso?** (condicional - só aparece se 1.5 = SIM)
+```
+Não houve alterações durante o deslocamento
+```
+OU
+```
+Passou por radar a 10 km/h acima da velocidade permitida devido à urgência da ocorrência
+```
+
+**1.6 - Local exato da ocorrência:**
 ```
 Rua das Acácias, altura do número 789, Bairro Santa Rita, Contagem/MG
 ```
 
-**1.6 - Histórico do local / facção:**
+**1.7 - O local é conhecido como ponto de tráfico?**
 ```
-Sim, local consta em 12 registros anteriores de tráfico de drogas. Há denúncias recorrentes de comercialização de entorpecentes. Área sob influência da facção Comando Vermelho segundo relatórios de inteligência.
+Sim, local consta em 12 registros anteriores de tráfico de drogas. Há denúncias recorrentes de comercialização de entorpecentes desde 2023 segundo o COPOM.
+```
+
+**1.8 - O local é dominado por facção criminosa? Qual?**
+```
+Área sob influência da facção Comando Vermelho segundo relatórios de inteligência e histórico de ocorrências com símbolos CV nas paredes do imóvel.
+```
+OU
+```
+Não há evidências de dominação por facção criminosa no local
+```
+
+**1.9 - O local é ou fica próximo de espaço de interesse público qualificado?**
+```
+SIM
+```
+OU
+```
+NÃO
+```
+**Validação:** Resposta SIM/NÃO obrigatória. Se SIM, exibe perguntas 1.9.1 e 1.9.2. Se NÃO, finaliza Seção 1.
+
+**1.9.1 - Nome do estabelecimento:** (condicional - só aparece se 1.9 = SIM)
+```
+Escola Estadual João XXIII
+```
+
+**1.9.2 - Distância aproximada:** (condicional - só aparece se 1.9 = SIM)
+```
+Aproximadamente 300 metros
+```
+OU
+```
+Dois quarteirões
 ```
 
 ---
 
 ### Respostas Validadas - Seção 2
 
-**2.1 - Havia veículo?**
+**TOTAL: 13 perguntas (incluindo pergunta condicional 2.1)**
+
+**2.1 - Havia veículo envolvido na ocorrência?**
 ```
 SIM
 ```
 **Aceita:** SIM, SÃO, sim, Sim, havia, Havia um Gol, etc.
+**Pulará seção se:** NÃO, NAO, NÃO havia, Não tinha, etc.
 
-**2.2 - Marca/modelo/cor/placa:**
+**2.2 - Onde e em que contexto o veículo foi visualizado?**
+```
+Na Rua das Acácias, esquina com Avenida Brasil, próximo ao Bar do João, Bairro Santa Rita. O veículo estava parado com motorista entregando algo pela janela para um indivíduo a pé.
+```
+**Nota:** Esta pergunta vem ANTES da placa (foi reordenada na v0.12.9).
+
+**2.3 - Qual a marca, modelo, cor e placa do veículo?**
 ```
 VW Gol branco, placa ABC-1D23, ano 2018
 ```
 **Validação:** Placa deve estar em formato Mercosul (ABC1D23 ou ABC-1D23).
 
-**2.3 - Onde foi visto?:**
+**2.4 - Quem da equipe viu o veículo?**
 ```
-Na Rua das Acácias, esquina com Avenida Brasil, próximo ao Bar do João, Bairro Santa Rita
+O Sargento Silva visualizou o veículo transitando em alta velocidade pela Rua das Acácias. O condutor mudou bruscamente o sentido de direção ao notar a viatura.
+```
+**Validação:** Deve incluir nome do policial + o que chamou atenção.
+
+**2.5 - Descreva se houve reação do motorista ou ocupantes:** (NOVA na v0.12.9)
+```
+O condutor acelerou bruscamente tentando fugir. O passageiro descartou uma sacola branca pela janela.
+```
+OU
+```
+Não houve reação, o veículo parou imediatamente
 ```
 
-**2.4 - Qual policial percebeu e o que viu?:**
-```
-O Sargento Silva visualizou o veículo transitando em alta velocidade pela Rua das Acácias. O condutor mudou bruscamente o sentido de direção ao notar a viatura e acelerou tentando fugir.
-```
-
-**2.5 - Como foi dada a ordem de parada?:**
+**2.6 - Quem deu a ordem de parada e como?**
 ```
 Foi acionada a sirene da viatura e o Sargento Silva utilizou o megafone ordenando "Parado, Polícia Militar! Encoste o veículo imediatamente!"
 ```
 
-**2.6 - Parou ou houve perseguição?:**
+**2.7 - O veículo parou imediatamente ou houve perseguição?**
 ```
-O condutor acelerou tentando fugir pela Avenida Brasil, percorreu aproximadamente 300 metros em alta velocidade, desobedeceu dois semáforos vermelhos e só parou após cercar o veículo em um beco sem saída.
+O condutor acelerou tentando fugir pela Avenida Brasil, percorreu aproximadamente 300 metros em alta velocidade, desobedeceu dois semáforos vermelhos.
+```
+OU
+```
+O veículo parou imediatamente
 ```
 
-**2.7 - Como foi a abordagem e busca?:**
+**2.8 - Se houve perseguição, por qual motivo o veículo parou?** (NOVA na v0.12.9)
 ```
-O Cabo Almeida procedeu a abordagem ao motorista determinando que saísse do veículo com as mãos na cabeça. O Soldado Faria realizou busca no interior do veículo, revistando porta-luvas, painel, banco traseiro e porta-malas. No banco do motorista, embaixo do assento, foram localizados 28 invólucros plásticos contendo substância análoga à cocaína.
+Só parou após cercar o veículo em um beco sem saída
+```
+OU
+```
+Desistiu da fuga voluntariamente após 500 metros
+```
+OU
+```
+Bateu em um poste na Rua das Flores
 ```
 
-**2.8 - Havia irregularidades?:**
+**2.9 - Descreva como foi a abordagem:**
+```
+O Cabo Almeida procedeu a abordagem ao motorista determinando que saísse do veículo com as mãos na cabeça. Os ocupantes foram posicionados de costas para a viatura com as mãos na parede.
+```
+
+**2.10 - Quem realizou a busca veicular e em quais partes do veículo?**
+```
+O Soldado Faria realizou busca no interior do veículo, revistando porta-luvas, painel, banco traseiro e porta-malas. No banco do motorista, embaixo do assento, foram localizados 28 invólucros plásticos.
+```
+
+**2.11 - Quem realizou a busca pessoal nos ocupantes?**
+```
+O Cabo Almeida realizou busca pessoal no motorista e o Soldado Pires realizou busca no passageiro.
+```
+
+**2.12 - O que foi localizado, com quem ou em qual parte do veículo/corpo estava cada material?**
+```
+Com o motorista, no bolso da calça, foram localizados R$ 230,00 em notas pequenas. Embaixo do assento do motorista, foram encontrados 28 invólucros plásticos contendo substância análoga à cocaína. Com o passageiro, na cintura, foi localizada 1 pistola calibre .380 com numeração suprimida.
+```
+
+**2.13 - O veículo apresentava irregularidade?**
 ```
 Sim. Consulta ao sistema indicou que o veículo possuía restrição de roubo/furto datada de 15/11/2025, registrado na cidade de Belo Horizonte/MG.
+```
+OU
+```
+Não, veículo sem irregularidades no sistema
 ```
 
 ---
@@ -856,26 +975,21 @@ O Sargento Silva entrou primeiro pela porta principal que estava aberta. O Cabo 
 
 ### Respostas Validadas - Seção 5
 
-**5.1 - Houve abordagem por fundada suspeita?**
-```
-SIM
-```
-**Aceita:** SIM, SÃO, sim, Sim, houve abordagem, etc.
-**Pulará seção se:** NÃO, NAO, NÃO houve, Não realizou, etc.
+**TOTAL: 3 perguntas (Fundada Suspeita)**
 
-**5.2 - O que a equipe viu ao chegar no local?**
+**5.1 - O que a equipe viu ao chegar no local?**
 ```
 Durante patrulhamento pela Rua das Palmeiras, região com registros anteriores de tráfico de drogas, visualizamos um homem de camisa vermelha e bermuda jeans retirando pequenos invólucros de um buraco no muro e entregando-os a motociclistas que paravam rapidamente
 ```
 **Obrigatório:** Descrição concreta de comportamento observado (local, contexto, comportamento). Mín. 40 caracteres.
 
-**5.3 - Qual policial tinha visão direta e o que viu?**
+**5.2 - Quem viu, de onde, e o que exatamente?**
 ```
 O Sargento João, de dentro da viatura estacionada a aproximadamente 20 metros do local, visualizou o suspeito retirando invólucros do buraco no muro e realizando as entregas por cerca de dois minutos antes de perceber a aproximação policial
 ```
 **Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + local + o que viu. Mín. 30 caracteres.
 
-**5.4 - Características individualizadas do abordado?**
+**5.3 - Descrever aparência e ações dos abordados:**
 ```
 Homem de camisa vermelha e bermuda jeans azul, porte atlético, aproximadamente 1,75m de altura. Ao perceber a aproximação da viatura, demonstrou nervosismo acentuado e tentou guardar parte do material no bolso. Posteriormente identificado como JOÃO DA SILVA SANTOS, vulgo 'Vermelho'.
 ```
@@ -885,14 +999,25 @@ Homem de camisa vermelha e bermuda jeans azul, porte atlético, aproximadamente 
 
 ### Respostas Validadas - Seção 6
 
-**6.1 - Houve resistência durante a abordagem?**
+**TOTAL: 6 perguntas (Reação e Uso da Força)**
+
+**6.1 - Houve ameaça ou uso de arma? Contra quem e como?**
+```
+O autor sacou uma arma de fogo apontando para o Sargento Silva, proferindo ameaças de morte
+```
+OU
+```
+Não houve ameaça ou uso de arma
+```
+
+**6.2 - Houve resistência durante a abordagem?**
 ```
 SIM
 ```
 **Aceita:** SIM, SÃO, sim, Sim, houve resistência, etc.
-**Pulará seção se:** NÃO, NAO, NÃO houve, Não ocorreu, etc.
+**Pulará demais perguntas se:** NÃO, NAO, NÃO houve, Não ocorreu, etc.
 
-**6.2 - Descreva a resistência com fatos concretos**
+**6.3 - Descreva a resistência com fatos concretos:**
 ```
 O autor empurrou o Cabo Rezende com força no peito tentando fugir em direção ao beco lateral, sendo alcançado após aproximadamente 10 metros de perseguição a pé
 ```
@@ -905,19 +1030,19 @@ O autor empurrou o Cabo Rezende com força no peito tentando fugir em direção 
 - ❌ "Houve resistência"
 - ❌ "Em atitude suspeita"
 
-**6.3 - Qual técnica foi aplicada, por quem, e qual foi o resultado?**
+**6.4 - Qual técnica foi aplicada e qual foi o resultado?**
 ```
 O Soldado Pires aplicou chave de braço no suspeito, forçando o cotovelo esquerdo e o imobilizou no chão. O Cabo Rezende auxiliou na contenção segurando as pernas do autor até a completa imobilização sem lesões visíveis no momento
 ```
 **Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + técnica (chave, cotovelada, empurrão, taser, etc.) + resultado. Mín. 40 caracteres.
 
-**6.4 - Por que foi necessário algemar?**
+**6.5 - Por que foi necessário algemar?**
 ```
 Diante da agressividade demonstrada ao tentar agredir os policiais e o risco de nova tentativa de agressão durante o deslocamento, o autor foi algemado para garantir a segurança da guarnição e evitar lesões a terceiros
 ```
 **Obrigatório:** Justificativa OBJETIVA com fato concreto (risco de fuga, agressividade demonstrada, tentativa de agressão, comportamento ameaçador, etc.). Deve conter uma das palavras-chave: risco, fuga, agressiv, resistência, perigo, tentou, ameaça. Mín. 20 caracteres.
 
-**6.5 - Houve ferimentos?**
+**6.6 - Houve ferimentos? Descreva: quem, tipo, local de atendimento:**
 
 **Resposta SEM ferimentos (válida):**
 ```
@@ -972,6 +1097,8 @@ O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invóluc
 
 ### Respostas Validadas - Seção 8
 
+**TOTAL: 11 perguntas (Qualificação do Crime, Informação do Preso e Destinos)**
+
 **8.1 - Quem deu voz de prisão e por qual crime?**
 ```
 O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de tráfico de drogas, tipificado no artigo 33 da Lei 11.343/06
@@ -983,20 +1110,11 @@ O Sargento Marco deu voz de prisão ao autor pelo aparente flagrante delito de t
 - ❌ "O Sargento deu voz de prisão" (falta nome)
 - ❌ "Voz de prisão ao tráfico" (falta por quem)
 
----
-
-**8.2 - Havia agravantes?**
+**8.2 - Onde e como o preso foi transportado até a delegacia?**
 ```
-Havia agravante de associação para o tráfico (art. 35) devido à presença de mais de um autor participando do esquema de distribuição
+O preso foi transportado no banco traseiro da viatura 2234, algemado e com cinto de segurança, até a Delegacia de Plantão Central localizada na Avenida Afonso Pena, percurso de aproximadamente 8 km sem intercorrências
 ```
-OU (se não havia agravantes - NOVA FUNCIONALIDADE):
-```
-Sem agravantes identificados
-```
-**Novo:** Se resposta indica "Sem agravantes" (padrões: "sem agravantes", "não havia", "nenhum agravante", "não houve agravante"): VÁLIDA sem exigir min_length.
-**Caso contrário:** Mín. 20 caracteres com descrição de agravantes (associação, envolvimento de menor, etc.)
-
----
+**Obrigatório:** Veículo/viatura + posição (banco traseiro, traseira da viatura, etc.) + destino. Mín. 30 caracteres.
 
 **8.3 - O preso declarou algo?**
 ```
@@ -1009,9 +1127,13 @@ O autor permaneceu em silêncio, exercendo seu direito constitucional de não pr
 **Novo:** Se resposta indica "Não declarou" (padrões: "não declarou", "permaneceu em silêncio", "nada a declarar", "não proferiu"): VÁLIDA sem exigir min_length.
 **Caso contrário:** Transcrição literal da declaração entre aspas. Mín. 20 caracteres.
 
----
+**8.4 - Qual era a função do preso no tráfico?**
+```
+O preso atuava como 'vapor' (vendedor de rua), realizando entregas diretas aos usuários no ponto de venda localizado na Rua das Flores
+```
+**Obrigatório:** Função (vapor, gerente, olheiro, segurança, gerência, chefia, etc.) + descrição da atividade. Mín. 20 caracteres.
 
-**8.4 - O preso possui registros anteriores (REDS)?**
+**8.5 - O preso possui passagens anteriores?**
 ```
 O autor possui REDS 2023-001234 por tráfico de drogas (art. 33) e REDS 2022-005678 por associação criminosa (art. 35)
 ```
@@ -1022,37 +1144,67 @@ Sem registros anteriores no sistema REDS
 **Novo:** Se resposta indica "Sem registros" (padrões: "sem registros", "sem antecedentes", "nada consta", "limpo no sistema"): VÁLIDA sem exigir min_length.
 **Caso contrário:** Listar REDS com ano, número e motivo. Mín. 20 caracteres.
 
----
+**8.6 - Há sinais de dedicação ao crime? O que mostra isso?**
+```
+Sim, o autor possui tatuagem com símbolo da facção CV no braço direito, celular com anotações de contabilidade do tráfico e foi identificado por testemunhas como vendedor habitual no local há pelo menos 6 meses
+```
+OU
+```
+Não foram identificados sinais de dedicação exclusiva ao crime
+```
+**Obrigatório:** Detalhar evidências concretas (tatuagens, anotações, depoimentos, histórico no local). Mín. 30 caracteres.
 
-**8.5 - O preso possui vínculo com facção?**
+**8.7 - O preso tem papel relevante na facção? Atuação ocasional ou contínua?**
 ```
-O autor possui vínculo com a facção Primeiro Comando, atuando como 'vapor' (vendedor) no ponto de venda localizado na Rua das Flores
+O preso possui papel relevante na facção Comando Vermelho, atuando como gerente do ponto de venda da Rua das Flores de forma contínua há 2 anos, conforme apurado por inteligência e relatos de usuários abordados
 ```
-OU (se sem vínculo - NOVA FUNCIONALIDADE):
+OU
 ```
-Sem vínculo com facção criminosa identificado
+Atuação ocasional, não foi identificado papel de liderança ou relevância na estrutura da facção
 ```
-**Novo:** Se resposta indica "Sem vínculo" (padrões: "sem vínculo", "não identificado", "nenhuma facção", "não possui vínculo"): VÁLIDA sem exigir min_length.
-**Caso contrário:** Detalhar facção, função (vapor, gerente, soldado, etc.) e local de atuação. Mín. 20 caracteres.
+**Obrigatório:** Especificar relevância (gerente, soldado, relevante, ocasional) + frequência (contínua, esporádica). Mín. 30 caracteres.
 
----
-
-**8.6 - Garantias asseguradas + destino de pessoas/materiais?**
+**8.8 - Houve tentativa de destruir ou ocultar provas, ou intimidar alguém?**
 ```
-Os direitos constitucionais foram lidos ao preso, que declarou tê-los compreendido. Integridade física verificada sem lesões. O autor foi conduzido à Delegacia de Plantão Central para lavratura do APF e o material apreendido foi encaminhado à CEFLAN 2
+Sim, ao perceber a aproximação policial, o autor tentou jogar os invólucros de drogas no bueiro e ameaçou verbalmente uma testemunha dizendo 'você não viu nada, se falar vai se dar mal'
+```
+OU
+```
+Não houve tentativa de destruir provas nem intimidação de testemunhas
+```
+**Obrigatório:** Detalhar ação concreta (descarte, ocultação, ameaça verbal, agressão) OU negar explicitamente. Mín. 20 caracteres.
+
+**8.9 - Havia menor de idade envolvido na ocorrência? Se sim, idade e participação:**
+```
+Sim, havia um menor de 16 anos atuando como olheiro, posicionado na esquina da rua alertando sobre a movimentação policial através de sinais manuais
+```
+OU
+```
+Não havia menor de idade envolvido na ocorrência
+```
+**Obrigatório:** Se SIM: idade + função (olheiro, vendedor, transportador). Se NÃO: negar explicitamente. Mín. 15 caracteres.
+
+**8.10 - Quem informou as garantias constitucionais ao preso?**
+```
+O Sargento Marco informou ao preso seus direitos constitucionais, incluindo o direito ao silêncio, de não produzir prova contra si mesmo, de comunicar-se com familiar e de ter assistência de advogado. O preso declarou ter compreendido todos os direitos
+```
+**Obrigatório:** Graduação militar + nome + listar direitos informados + declaração de compreensão. Mín. 50 caracteres.
+
+**8.11 - Qual o destino dos presos e dos materiais apreendidos?**
+```
+O preso foi conduzido à Delegacia de Plantão Central para lavratura do Auto de Prisão em Flagrante. As substâncias entorpecentes foram acondicionadas em invólucro lacrado e encaminhadas à CEFLAN 2 para perícia. Os objetos apreendidos (celular, dinheiro, balança) foram registrados e seguiram para depósito na própria delegacia
 ```
 **Obrigatório:**
-1. Leitura de direitos (SIM/NÃO)
-2. Estado de integridade física (com/sem lesões)
-3. Destino de PESSOAS (Delegacia, DIPC, Central, DP, etc.)
-4. Destino de MATERIAIS (CEFLAN, Delegacia, etc.)
+1. Destino de PESSOAS (Delegacia + qual, DIPC, Central, DP)
+2. Destino de DROGAS (CEFLAN + número, Delegacia)
+3. Destino de OBJETOS (depósito, delegacia, etc.)
 
 **Respostas INVÁLIDAS:**
-- ❌ "Os direitos foram lidos" (falta destino)
-- ❌ "Conduzido à delegacia" (falta informações de garantias)
-- ❌ "Material foi apreendido" (falta destinos)
+- ❌ "Conduzido à delegacia" (falta qual delegacia, falta destino de materiais)
+- ❌ "Material foi apreendido" (falta destinos específicos)
+- ❌ "Encaminhado à CEFLAN" (falta destino de pessoas e objetos)
 
-Mín. 50 caracteres. Deve conter uma das palavras de destino: CEFLAN, Delegacia, DIPC, Central, DP, Hospital, UPA.
+Mín. 50 caracteres. Deve conter palavras de destino: CEFLAN, Delegacia, DIPC, Central, DP.
 
 ---
 

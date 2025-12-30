@@ -1,6 +1,6 @@
 # 📡 Referência de API - BO Inteligente
 
-**Versão:** v0.12.4
+**Versão:** v0.12.5
 **Base URL (Produção):** `https://bo-assistant-backend.onrender.com`
 **Base URL (Local):** `http://localhost:8000`
 

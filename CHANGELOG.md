@@ -1,10 +1,30 @@
-# Changelog v0.12.4
+# Changelog v0.12.5
 
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)
 
-#### v0.12.4 (29 de Dezembro de 2025) - CI/CD e Reorganização de Testes
+#### v0.12.5 (30 de Dezembro de 2024) - Pergunta 1.7 (Art. 40)
+
+### ✅ Adicionado
+- **Pergunta 1.7 - Agravantes de Proximidade (Art. 40)**
+  - Nova pergunta na Seção 1: "O local é próximo a escola, hospital ou transporte público? Qual estabelecimento e a que distância aproximada?"
+  - Validação aceita "NÃO" como resposta válida
+  - Validação exige especificação do estabelecimento e distância quando resposta é positiva
+  - Prompt do LLM atualizado para incluir frase modelo do Art. 40, inciso III da Lei 11.343/06
+  - Seção 1 passa de 6 para 7 perguntas
+
+### 🧪 Testes
+- **Criado `tests/unit/test_section1.py`**
+  - 12 testes unitários para Seção 1 (BOStateMachine + ResponseValidator)
+  - Testes para validação da pergunta 1.7 (aceita "NÃO", aceita resposta detalhada, rejeita resposta muito curta)
+  - Todos os 121 testes unitários passando
+
+### 📚 Documentação
+- Atualizada versão para v0.12.5 em todos os arquivos principais
+- CHANGELOG.md, README.md, DEVELOPMENT.md, API.md, TESTING.md, SETUP.md, ARCHITECTURE.md, ROADMAP.md
+
+#### v0.12.4 (29 de Dezembro de 2024) - CI/CD e Reorganização de Testes
 
 ### ✅ Adicionado
 - **CI/CD com GitHub Actions** (`.github/workflows/test.yml`)

@@ -131,7 +131,7 @@
         <header class="bg-blue-900 text-white p-4 shadow-lg">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.4</h1>
+                    <h1 class="text-2xl font-bold">📋 BO Inteligente v0.12.5</h1>
                     <p class="text-blue-200 text-sm">Seção 1 - Contexto da Ocorrência</p>
                 </div>
                 <!-- Botão mobile para abrir sidebar -->
@@ -370,7 +370,7 @@
 
         <!-- Footer -->
         <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-sm text-gray-600">
-            <p>BO Inteligente v0.12.4 | 💾 Rascunho salvo automaticamente</p>
+            <p>BO Inteligente v0.12.5 | 💾 Rascunho salvo automaticamente</p>
         </footer>
     </div>
 
@@ -390,7 +390,8 @@
             '1.3': 'Natureza do empenho.',
             '1.4': 'O que constava na ordem de serviço, informações do COPOM, DDU.',
             '1.5': 'Local exato da ocorrência (logradouro, número, bairro).',
-            '1.6': 'O local é ponto de tráfico? Quais evidências anteriores? Há facção?'
+            '1.6': 'O local é ponto de tráfico? Quais evidências anteriores? Há facção?',
+            '1.7': 'O local é próximo a escola, hospital ou transporte público? Qual estabelecimento e a que distância aproximada?'
         };
 
         // Perguntas da Seção 2 (Abordagem a Veículo)
@@ -676,10 +677,10 @@
             let preview = '';
 
             // Status da Seção 1
-            if (section1Answers === 6) {
+            if (section1Answers === 7) {
                 preview += `<div class="mb-1 text-sm">Seção 1: ✅ Completa</div>`;
             } else if (section1Answers > 0) {
-                preview += `<div class="mb-1 text-sm">Seção 1: ${section1Answers}/6 perguntas respondidas</div>`;
+                preview += `<div class="mb-1 text-sm">Seção 1: ${section1Answers}/7 perguntas respondidas</div>`;
             }
 
             // Status da Seção 2 (se iniciada)
@@ -911,7 +912,7 @@
                 } else if (currentSection === 2) {
                     updateSidebarProgress(section2Count, 8);
                 } else {
-                    updateSidebarProgress(section1Count, 6);
+                    updateSidebarProgress(section1Count, 7);
                 }
 
                 // 8. Mostrar próxima pergunta OU desabilitar se completo
@@ -1430,7 +1431,7 @@
 
             // Adicionar footer
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-            fullBO += "Gerado por: BO Inteligente v0.12.4\n";
+            fullBO += "Gerado por: BO Inteligente v0.12.5\n";
             fullBO += "Data: " + new Date().toLocaleDateString('pt-BR') + "\n";
             fullBO += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 
@@ -2785,7 +2786,7 @@
                 setTimeout(() => {
                     addMessage(data.first_question, true, false, '1.1', 'evt_first_question');
                     enableInput();
-                    updateSidebarProgress(0, 6);
+                    updateSidebarProgress(0, 7);
                 }, 500);
 
             } catch (error) {

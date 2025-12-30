@@ -13,11 +13,12 @@ class BOStateMachine:
         "1.3": "Natureza do empenho.",
         "1.4": "O que constava na ordem de serviço, informações do COPOM, DDU.",
         "1.5": "Local exato da ocorrência (logradouro, número, bairro).",
-        "1.6": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?"
+        "1.6": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?",
+        "1.7": "O local é próximo a escola, hospital ou transporte público? Qual estabelecimento e a que distância aproximada?"
     }
-    
+
     # Ordem das perguntas
-    STEPS = ["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "complete"]
+    STEPS = ["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "complete"]
     
     def __init__(self):
         self.current_step = "1.1"  # Começar na primeira pergunta

@@ -44,6 +44,16 @@ class ResponseValidator:
             "forbidden_words": ["sim"],  # "sim" sozinho é vago
             "examples": ["Sim, local com histórico de 3 operações em 2024. Facção ABC atua na região"],
             "error_message": "Se sim, descreva: quantas operações anteriores? Qual facção? Se não, escreva 'NÃO'. Ex: 'Sim, local com histórico de operações anteriores. Facção ABC atua na região'"
+        },
+        "1.7": {
+            "min_length": 3,
+            "examples": [
+                "Sim, a 50 metros da Escola Estadual João XXIII",
+                "Próximo ao Hospital Municipal, aproximadamente 100 metros",
+                "A 200 metros do ponto de ônibus da linha 4501",
+                "NÃO"
+            ],
+            "error_message": "Informe se há escola, hospital ou transporte público próximo. Se sim, qual e a distância aproximada. Se não, responda 'NÃO'."
         }
     }
     
@@ -65,7 +75,7 @@ class ResponseValidator:
         
         # Verificar se é só "NÃO" (válido apenas para algumas perguntas)
         if answer.upper() == "NÃO":
-            if step in ["1.6"]:  # Histórico pode ser NÃO
+            if step in ["1.6", "1.7"]:  # Histórico e proximidade podem ser NÃO
                 return True, None
             else:
                 return False, "Esta pergunta é obrigatória. 'NÃO' não é uma resposta válida aqui."

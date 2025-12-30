@@ -280,6 +280,6 @@ Para dúvidas, sugestões ou feedback:
 
 ---
 
-**Versão:** 0.12.4
-**Última atualização:** 29/12/2025
+**Versão:** 0.12.5
+**Última atualização:** 30/12/2024
 **Status:** Em produção

@@ -110,7 +110,8 @@ class LLMService:
             "1.3": "Natureza do empenho",
             "1.4": "Ordem de serviço / COPOM / DDU",
             "1.5": "Local exato da ocorrência",
-            "1.6": "Histórico do local / facção"
+            "1.6": "Histórico do local / facção",
+            "1.7": "Proximidade de escola/hospital/transporte (Art. 40)"
         }
         
         answers_text = f"{questions_map['1.1']}: {datetime_enriched}\n"
@@ -151,6 +152,7 @@ ESTRUTURA ESPERADA (baseada nos modelos do Claudio):
 5. Informar conteúdo da ordem: O que foi fornecido - use VARIAÇÃO: "A ordem indicava...", "Segundo a denúncia...", "O acionamento reportava..."
 6. Detalhar local: Use EXATAMENTE o que foi fornecido - "O local indicado foi..." ou "no endereço..."
 7. Histórico (se aplicável): "O endereço consta em registros anteriores..." ou "O local possui histórico..."
+8. Agravante de proximidade (Art. 40, inciso III): Se o local é próximo a escola, hospital ou transporte público, incluir: "O local da ocorrência situa-se a aproximadamente [X] metros do/da [estabelecimento], configurando a circunstância agravante prevista no Art. 40, inciso III da Lei 11.343/06."
 
 EXEMPLOS DE QUALIDADE (do manual do Claudio):
 

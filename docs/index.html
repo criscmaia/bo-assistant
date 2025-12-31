@@ -1886,6 +1886,26 @@
         /* ============================================ */
         /* FIM TELA FINAL - ESTILOS */
         /* ============================================ */
+
+        /* ============================================ */
+        /* ACESSIBILIDADE */
+        /* ============================================ */
+
+        /* Focus visível para navegação por teclado */
+        button:focus-visible,
+        input:focus-visible,
+        .progress-node:focus-visible,
+        .single-choice__option:focus-visible,
+        .multiple-choice__option:focus-visible {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Remover outline padrão mas manter focus-visible */
+        button:focus:not(:focus-visible),
+        input:focus:not(:focus-visible) {
+            outline: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -1978,6 +1998,38 @@
     </div>
 
     <script>
+        // ============================================
+        // CONFIGURAÇÃO DE DEBUG
+        // ============================================
+
+        const DEBUG = {
+            enabled: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+
+            log: function(component, message, data = null) {
+                if (!this.enabled) return;
+                const timestamp = new Date().toLocaleTimeString();
+                const prefix = `[${timestamp}] [${component}]`;
+                if (data) {
+                    console.log(prefix, message, data);
+                } else {
+                    console.log(prefix, message);
+                }
+            },
+
+            warn: function(component, message, data = null) {
+                if (!this.enabled) return;
+                console.warn(`[${component}]`, message, data || '');
+            },
+
+            error: function(component, message, error = null) {
+                // Erros sempre logados
+                console.error(`[${component}]`, message, error || '');
+            }
+        };
+
+        // Expor para debug manual
+        window.DEBUG = DEBUG;
+
         // ============================================
         // CLASSE PROGRESSBAR - BARRA DE PROGRESSO
         // ============================================
@@ -2932,6 +2984,12 @@
                 });
                 this.inputField.addEventListener('input', () => this._clearError());
 
+                // Auto-focus após render
+                requestAnimationFrame(() => {
+                    const field = this.element.querySelector('.text-input__field');
+                    if (field) field.focus();
+                });
+
                 return this.element;
             }
 
@@ -2997,6 +3055,14 @@
                 if (!this.inputField) return;
 
                 const value = this.inputField.value;
+                const trimmed = value.trim();
+
+                // Validar resposta não vazia
+                if (!trimmed || trimmed.length === 0) {
+                    DEBUG.warn('TextInput', 'Resposta vazia ignorada');
+                    return;
+                }
+
                 const validation = this.validate(value);
 
                 if (!validation.valid) {
@@ -3005,7 +3071,7 @@
                 }
 
                 this._clearError();
-                this.onSubmit(value.trim());
+                this.onSubmit(trimmed);
             }
 
             /**
@@ -3145,6 +3211,10 @@
              * Trata a seleção
              */
             _handleSelect(value, buttonEl) {
+                // Proteção contra clique duplo
+                if (this.isSelecting) return;
+                this.isSelecting = true;
+
                 // Remover seleção anterior
                 const allButtons = this.element.querySelectorAll('.single-choice__option');
                 allButtons.forEach(btn => btn.classList.remove('single-choice__option--selected'));
@@ -3158,6 +3228,7 @@
                 const label = option ? option.label : value;
 
                 // Callback após pequeno delay (para ver a animação)
+                this.isSelecting = false;
                 setTimeout(() => {
                     this.onSelect(value, label, option);
                 }, 150);
@@ -4059,20 +4130,19 @@
              * Salva rascunho no localStorage
              */
             _saveDraft() {
+                const draft = {
+                    version: '1.0',
+                    timestamp: new Date().toISOString(),
+                    currentSectionIndex: this.currentSectionIndex,
+                    sectionsState: this.sectionsState,
+                    apiIds: this.api.getIds(),
+                };
+
                 try {
-                    const draft = {
-                        version: '1.0',
-                        timestamp: new Date().toISOString(),
-                        currentSectionIndex: this.currentSectionIndex,
-                        sectionsState: this.sectionsState,
-                        apiIds: this.api.getIds(),
-                    };
-
                     localStorage.setItem(this.autoSaveKey, JSON.stringify(draft));
-                    console.log('[BOApp] Rascunho salvo');
-
-                } catch (error) {
-                    console.error('[BOApp] Erro ao salvar rascunho:', error);
+                    DEBUG.log('BOApp', 'Rascunho salvo');
+                } catch (e) {
+                    DEBUG.warn('BOApp', 'Erro ao salvar rascunho (localStorage pode estar cheio)', e.message);
                 }
             }
 
@@ -6855,6 +6925,16 @@
             messageDiv.appendChild(bubbleDiv);
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Scroll automático para última mensagem
+            requestAnimationFrame(() => {
+                if (chatContainer) {
+                    chatContainer.scrollTo({
+                        top: chatContainer.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            });
         }
 
         function editAnswer(step, currentText, messageDiv, bubbleDiv) {

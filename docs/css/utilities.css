@@ -1,0 +1,129 @@
+/**
+ * utilities.css - Loading, Toasts, Safe Areas e Acessibilidade
+ * BO Inteligente v1.0
+ */
+
+/* ============================================ */
+/* SAFE AREAS (iOS) */
+/* ============================================ */
+
+/* Suporte a env() para dispositivos com notch */
+@supports (padding: env(safe-area-inset-top)) {
+    header {
+        padding-top: calc(12px + env(safe-area-inset-top));
+    }
+
+    main {
+        padding-left: calc(12px + env(safe-area-inset-left));
+        padding-right: calc(12px + env(safe-area-inset-right));
+    }
+
+    .input-component {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .final-screen__actions {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* ============================================ */
+/* LOADING E TOASTS - ESTILOS */
+/* ============================================ */
+
+#app-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+#app-loading-overlay .loading-content {
+    background: white;
+    padding: 24px 32px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+#app-loading-overlay .loading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+#app-loading-overlay .loading-message {
+    font-size: 15px;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Toast de aviso */
+.app-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    animation: slideInRight 0.3s ease;
+}
+
+.app-toast--warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.app-toast--error {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+.app-toast--success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================ */
+/* ACESSIBILIDADE */
+/* ============================================ */
+
+/* Focus visível para navegação por teclado */
+button:focus-visible,
+input:focus-visible,
+.progress-node:focus-visible,
+.single-choice__option:focus-visible,
+.multiple-choice__option:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Remover outline padrão mas manter focus-visible */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+    outline: none;
+}

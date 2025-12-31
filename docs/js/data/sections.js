@@ -18,6 +18,16 @@
  * - multiple_choice: Seleção múltipla (checkboxes)
  */
 
+// Versionamento do esquema de seções
+const SECTIONS_VERSION = '1.0';
+const SECTIONS_SCHEMA = {
+    version: SECTIONS_VERSION,
+    lastUpdated: '2025-12-31',
+    totalSections: 8,
+    totalQuestions: 53,
+    description: 'Schema inicial - BO Tráfico de Drogas v1.0'
+};
+
 const SECTIONS_DATA = [
   // ========================================
   // SEÇÃO 1: CONTEXTO DA OCORRÊNCIA

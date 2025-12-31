@@ -1,0 +1,577 @@
+/**
+ * responsive.css - Media Queries e Responsividade
+ * BO Inteligente v1.0
+ */
+
+/* ============================================ */
+/* RESPONSIVIDADE GLOBAL */
+/* ============================================ */
+
+/* Header responsivo */
+@media (max-width: 480px) {
+    header {
+        padding: 12px 16px;
+    }
+
+    header h1 {
+        font-size: 18px;
+    }
+
+    header p {
+        font-size: 12px;
+    }
+}
+
+/* Container principal responsivo */
+@media (max-width: 768px) {
+    main {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    main {
+        padding: 8px;
+    }
+}
+
+/* Mobile: Sidebar colapsável */
+@media (max-width: 768px) {
+    #sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        height: 100vh;
+        z-index: 50;
+        transition: left 0.3s ease;
+    }
+
+    #sidebar.open {
+        left: 0;
+    }
+
+    #sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+    }
+
+    #sidebar-overlay.open {
+        display: block;
+    }
+
+    .feedback-btn {
+        min-width: 56px;
+        min-height: 56px;
+        font-size: 24px;
+    }
+
+    /* Container de textos gerados: sections collapsed por padrão em mobile */
+    #generated-sections-container details {
+        margin-bottom: 0.5rem;
+    }
+
+    #generated-sections-container details[open] summary {
+        border-bottom: 1px solid #e5e7eb;
+    }
+}
+
+/* Badges de step em mobile - font menor */
+@media (max-width: 768px) {
+    #questions-list [id^="icon-"] {
+        font-size: 0.65rem;
+        width: 2rem;
+    }
+}
+
+/* -------------------------------------------- */
+/* PROGRESSBAR - RESPONSIVIDADE */
+/* -------------------------------------------- */
+
+@media (max-width: 1024px) {
+    .progress-bar {
+        gap: 4px;
+    }
+
+    .progress-node {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .progress-line-container {
+        height: 3px;
+    }
+}
+
+@media (max-width: 768px) {
+    #progress-bar-container {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .progress-bar {
+        gap: 2px;
+    }
+
+    .progress-node {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .progress-line-container {
+        height: 2px;
+        min-width: 16px;
+    }
+
+    .progress-tooltip {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    #progress-bar-container {
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .progress-bar {
+        gap: 1px;
+    }
+
+    .progress-node {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+
+    .progress-line-container {
+        min-width: 10px;
+        flex: 1;
+    }
+
+    /* Em telas muito pequenas, esconder números e mostrar só ícones */
+    .progress-node__number {
+        display: none;
+    }
+
+    .progress-node--completed::after,
+    .progress-node--skipped::after {
+        font-size: 12px;
+    }
+}
+
+/* Modo paisagem em mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    #progress-bar-container {
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+
+    .progress-node {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* -------------------------------------------- */
+/* SECTION CONTAINER - RESPONSIVIDADE */
+/* -------------------------------------------- */
+
+@media (max-width: 768px) {
+    .section-container {
+        height: calc(100vh - 160px);
+        min-height: 350px;
+        border-radius: 12px;
+    }
+
+    .section-header {
+        padding: 12px 16px;
+    }
+
+    .section-header__title {
+        font-size: 15px;
+        gap: 8px;
+    }
+
+    .section-header__emoji {
+        font-size: 20px;
+    }
+
+    .section-header__badge {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    .section-chat {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .chat-message--bot,
+    .chat-message--user {
+        max-width: 90%;
+    }
+
+    .chat-message__bubble--bot,
+    .chat-message__bubble--user {
+        padding: 12px 14px;
+        border-radius: 12px 12px 12px 4px;
+    }
+
+    .chat-message__text {
+        font-size: 14px;
+    }
+
+    .chat-message__hint {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-container {
+        height: calc(100vh - 140px);
+        min-height: 300px;
+        border-radius: 8px;
+    }
+
+    .section-header {
+        padding: 10px 12px;
+    }
+
+    .section-header__title {
+        font-size: 14px;
+    }
+
+    .section-header__emoji {
+        font-size: 18px;
+    }
+
+    .section-chat {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .chat-message--bot,
+    .chat-message--user {
+        max-width: 95%;
+    }
+
+    .chat-message__bubble--bot,
+    .chat-message__bubble--user {
+        padding: 10px 12px;
+    }
+
+    .chat-message__text {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    /* Área de texto gerado */
+    .section-generated {
+        padding: 12px;
+    }
+
+    .section-generated__text {
+        padding: 12px;
+        font-size: 13px;
+        max-height: 150px;
+    }
+
+    /* Transição */
+    .section-transition {
+        padding: 12px;
+    }
+
+    .section-transition__preview {
+        padding: 12px;
+    }
+
+    .section-transition__preview-emoji {
+        font-size: 24px;
+    }
+
+    .section-transition__preview-name {
+        font-size: 14px;
+    }
+}
+
+/* Teclado virtual aberto (viewport reduzido) */
+@media (max-height: 400px) {
+    .section-container {
+        height: calc(100vh - 100px);
+        min-height: 200px;
+    }
+
+    .section-chat {
+        max-height: 150px;
+    }
+}
+
+/* -------------------------------------------- */
+/* INPUTS - RESPONSIVIDADE */
+/* -------------------------------------------- */
+
+@media (max-width: 768px) {
+    .input-component {
+        padding: 12px;
+    }
+
+    /* Text Input */
+    .text-input {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .text-input__field {
+        padding: 14px 16px;
+        font-size: 16px; /* Evita zoom no iOS */
+        border-radius: 10px;
+    }
+
+    .text-input__button {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 16px;
+        min-height: 48px; /* Touch target */
+    }
+
+    .text-input__error {
+        font-size: 13px;
+    }
+
+    /* Single Choice */
+    .single-choice {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .single-choice__option {
+        max-width: none;
+        width: 100%;
+        padding: 16px 20px;
+        min-height: 52px; /* Touch target */
+        font-size: 16px;
+    }
+
+    .single-choice__icon {
+        font-size: 22px;
+    }
+
+    /* Multiple Choice */
+    .multiple-choice__option {
+        padding: 14px 16px;
+        min-height: 52px; /* Touch target */
+    }
+
+    .multiple-choice__checkbox {
+        width: 26px;
+        height: 26px;
+    }
+
+    .multiple-choice__label {
+        font-size: 15px;
+    }
+
+    .multiple-choice__confirm {
+        padding: 14px 20px;
+        font-size: 16px;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-component {
+        padding: 10px;
+    }
+
+    .text-input__field {
+        padding: 12px 14px;
+    }
+
+    .single-choice__option {
+        padding: 14px 16px;
+    }
+
+    .multiple-choice__option {
+        padding: 12px 14px;
+    }
+
+    .multiple-choice__checkbox {
+        width: 24px;
+        height: 24px;
+    }
+
+    .multiple-choice__hint {
+        font-size: 12px;
+    }
+}
+
+/* -------------------------------------------- */
+/* LOADING E TOASTS - RESPONSIVIDADE */
+/* -------------------------------------------- */
+
+@media (max-width: 480px) {
+    #app-loading-overlay .loading-content {
+        padding: 20px 24px;
+        margin: 0 16px;
+        border-radius: 10px;
+    }
+
+    #app-loading-overlay .loading-message {
+        font-size: 14px;
+    }
+
+    .app-toast {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        text-align: center;
+    }
+}
+
+/* -------------------------------------------- */
+/* TELA FINAL - RESPONSIVIDADE COMPLETA */
+/* -------------------------------------------- */
+
+@media (max-width: 768px) {
+    .final-screen__header {
+        padding: 24px 16px;
+    }
+
+    .final-screen__icon {
+        font-size: 48px;
+    }
+
+    .final-screen__title {
+        font-size: 24px;
+    }
+
+    .final-screen__subtitle {
+        font-size: 14px;
+    }
+
+    .final-screen__content {
+        padding: 16px;
+    }
+
+    .final-screen__summary {
+        padding: 16px;
+    }
+
+    .final-screen__section-item {
+        padding: 12px;
+    }
+
+    .final-screen__section-name {
+        font-size: 13px;
+    }
+
+    .final-screen__text-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .final-screen__copy-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .final-screen__text-content {
+        max-height: 300px;
+        font-size: 13px;
+    }
+
+    .final-screen__actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .final-screen__action-btn {
+        padding: 16px 20px;
+        font-size: 15px;
+        min-height: 52px;
+    }
+
+    .final-screen__stats {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .final-screen__header {
+        padding: 20px 12px;
+    }
+
+    .final-screen__icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+    }
+
+    .final-screen__title {
+        font-size: 20px;
+    }
+
+    .final-screen__content {
+        padding: 12px;
+    }
+
+    .final-screen__summary {
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .final-screen__summary-title {
+        font-size: 14px;
+    }
+
+    .final-screen__section-item {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .final-screen__section-icon {
+        font-size: 16px;
+    }
+
+    .final-screen__section-name {
+        font-size: 12px;
+    }
+
+    .final-screen__section-status {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+
+    .final-screen__text-box {
+        margin-bottom: 16px;
+    }
+
+    .final-screen__text-header {
+        padding: 12px;
+    }
+
+    .final-screen__text-title {
+        font-size: 14px;
+    }
+
+    .final-screen__text-content {
+        padding: 12px;
+        max-height: 250px;
+    }
+
+    .final-screen__text-section-title {
+        font-size: 13px;
+    }
+
+    .final-screen__stat {
+        font-size: 13px;
+    }
+}

@@ -1,0 +1,168 @@
+/**
+ * progress-bar.css - Barra de Progresso
+ * BO Inteligente v1.0
+ */
+
+/* ============================================ */
+/* BARRA DE PROGRESSO - ESTILOS */
+/* ============================================ */
+
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    position: relative;
+}
+
+.progress-node-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.progress-node {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+}
+
+/* Estados das bolinhas */
+.progress-node--pending {
+    background-color: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.progress-node--in-progress {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+    animation: pulse-progress 2s infinite;
+}
+
+.progress-node--completed {
+    background-color: #10b981;
+    color: white;
+    border-color: #059669;
+}
+
+.progress-node--completed:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.progress-node--skipped {
+    background-color: #9ca3af;
+    color: white;
+    border-color: #6b7280;
+}
+
+.progress-node--skipped::after {
+    content: '⏭️';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 12px;
+}
+
+/* Checkmark para seções completas */
+.progress-node--completed::before {
+    content: '✓';
+    font-size: 18px;
+}
+
+/* Esconder número quando completo */
+.progress-node--completed .node-number,
+.progress-node--skipped .node-number {
+    display: none;
+}
+
+/* Linha de conexão entre bolinhas */
+.progress-line-container {
+    flex: 1;
+    height: 6px;
+    background-color: #e5e7eb;
+    margin: 0 -5px;
+    position: relative;
+    z-index: 1;
+}
+
+.progress-line-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+/* Animação de pulsação para seção atual */
+@keyframes pulse-progress {
+    0%, 100% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1);
+    }
+}
+
+/* Tooltip */
+.progress-tooltip {
+    position: absolute;
+    background-color: #1f2937;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    transform: translateX(-50%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.progress-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1f2937;
+}
+
+.progress-tooltip .tooltip-emoji {
+    margin-right: 6px;
+}
+
+.progress-tooltip .tooltip-status {
+    margin-left: 8px;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+/* Label abaixo da bolinha (número da seção) */
+.progress-node-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.progress-node--in-progress + .progress-node-label,
+.progress-node-wrapper:has(.progress-node--in-progress) .progress-node-label {
+    color: #3b82f6;
+    font-weight: 700;
+}

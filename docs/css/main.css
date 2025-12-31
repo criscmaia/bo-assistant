@@ -1,0 +1,77 @@
+/**
+ * main.css - Estilos Globais
+ * BO Inteligente v1.0
+ */
+
+/* Animações suaves */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar customizada */
+#chat-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#chat-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}
+
+#chat-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Botões de feedback */
+.feedback-btn {
+    min-width: 40px;
+    min-height: 40px;
+    display: none; /* Temporariamente ocultado - Issue #19 */
+    font-size: 18px;
+    padding: 6px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.feedback-btn:hover {
+    transform: scale(1.1);
+    border-color: #3b82f6;
+}
+
+.feedback-btn:active {
+    transform: scale(0.95);
+}
+
+.feedback-btn.clicked {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Modal de rascunho */
+.draft-modal {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading state */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

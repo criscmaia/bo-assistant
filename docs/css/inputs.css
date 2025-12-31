@@ -1,0 +1,292 @@
+/**
+ * inputs.css - Componentes de Input
+ * BO Inteligente v1.0
+ */
+
+/* ============================================ */
+/* COMPONENTES DE INPUT - ESTILOS */
+/* ============================================ */
+
+/* Container genérico de input */
+.input-component {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+/* -------------------------------------------- */
+/* TEXT INPUT */
+/* -------------------------------------------- */
+
+.text-input {
+    display: flex;
+    gap: 12px;
+}
+
+.text-input__field {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.text-input__field:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.text-input__field::placeholder {
+    color: #9ca3af;
+}
+
+.text-input__field--error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.text-input__field--error:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.text-input__button {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.text-input__button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.text-input__button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.text-input__button:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.text-input__error {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc2626;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.text-input__error::before {
+    content: '⚠️';
+}
+
+/* -------------------------------------------- */
+/* SINGLE CHOICE */
+/* -------------------------------------------- */
+
+.single-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.single-choice__option {
+    flex: 1;
+    min-width: 120px;
+    max-width: 200px;
+    padding: 16px 24px;
+    background: white;
+    border: 3px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.single-choice__option:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.single-choice__option:active {
+    transform: translateY(0);
+}
+
+.single-choice__option--selected {
+    border-color: #10b981;
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.single-choice__option--yes {
+    border-color: #10b981;
+}
+
+.single-choice__option--yes:hover {
+    background: #d1fae5;
+    border-color: #059669;
+}
+
+.single-choice__option--no {
+    border-color: #f87171;
+}
+
+.single-choice__option--no:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.single-choice__option--primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border-color: transparent;
+}
+
+.single-choice__option--primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.single-choice__icon {
+    font-size: 20px;
+}
+
+/* -------------------------------------------- */
+/* MULTIPLE CHOICE */
+/* -------------------------------------------- */
+
+.multiple-choice {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.multiple-choice__options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.multiple-choice__option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.multiple-choice__option:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+}
+
+.multiple-choice__option--selected {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.multiple-choice__checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.multiple-choice__option--selected .multiple-choice__checkbox {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.multiple-choice__checkmark {
+    color: white;
+    font-size: 14px;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s ease;
+}
+
+.multiple-choice__option--selected .multiple-choice__checkmark {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.multiple-choice__label {
+    font-size: 15px;
+    color: #374151;
+    flex: 1;
+}
+
+.multiple-choice__option--selected .multiple-choice__label {
+    color: #1e40af;
+    font-weight: 500;
+}
+
+.multiple-choice__confirm {
+    margin-top: 12px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.multiple-choice__confirm:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.multiple-choice__confirm:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.multiple-choice__hint {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+    text-align: center;
+}

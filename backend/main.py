@@ -51,7 +51,7 @@ except ImportError:
     from backend.logger import BOLogger, now_brasilia
 
 # Versão do sistema
-APP_VERSION = "0.12.11"
+APP_VERSION = "0.12.12"
 
 app = FastAPI(title="BO Inteligente API", version=APP_VERSION)
 

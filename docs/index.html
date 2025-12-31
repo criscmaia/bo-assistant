@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BO Inteligente - Tráfico de Drogas</title>
     <!-- Dados das seções -->
     <script src="js/data/sections.js"></script>
@@ -65,7 +65,63 @@
             color: white;
             border-color: #3b82f6;
         }
-        
+
+        /* ============================================ */
+        /* SAFE AREAS (iOS) */
+        /* ============================================ */
+
+        /* Suporte a env() para dispositivos com notch */
+        @supports (padding: env(safe-area-inset-top)) {
+            header {
+                padding-top: calc(12px + env(safe-area-inset-top));
+            }
+
+            main {
+                padding-left: calc(12px + env(safe-area-inset-left));
+                padding-right: calc(12px + env(safe-area-inset-right));
+            }
+
+            .input-component {
+                padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            }
+
+            .final-screen__actions {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+
+        /* ============================================ */
+        /* RESPONSIVIDADE GLOBAL */
+        /* ============================================ */
+
+        /* Header responsivo */
+        @media (max-width: 480px) {
+            header {
+                padding: 12px 16px;
+            }
+
+            header h1 {
+                font-size: 18px;
+            }
+
+            header p {
+                font-size: 12px;
+            }
+        }
+
+        /* Container principal responsivo */
+        @media (max-width: 768px) {
+            main {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            main {
+                padding: 8px;
+            }
+        }
+
         /* Mobile: Sidebar colapsável */
         @media (max-width: 768px) {
             #sidebar {
@@ -291,10 +347,34 @@
             font-weight: 700;
         }
 
-        /* Responsividade Mobile */
-        @media (max-width: 768px) {
+        /* -------------------------------------------- */
+        /* PROGRESSBAR - RESPONSIVIDADE */
+        /* -------------------------------------------- */
+
+        @media (max-width: 1024px) {
             .progress-bar {
-                padding: 8px 10px;
+                gap: 4px;
+            }
+
+            .progress-node {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .progress-line-container {
+                height: 3px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #progress-bar-container {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .progress-bar {
+                gap: 2px;
             }
 
             .progress-node {
@@ -304,11 +384,8 @@
             }
 
             .progress-line-container {
-                height: 4px;
-            }
-
-            .progress-node-label {
-                font-size: 10px;
+                height: 2px;
+                min-width: 16px;
             }
 
             .progress-tooltip {
@@ -318,20 +395,47 @@
         }
 
         @media (max-width: 480px) {
+            #progress-bar-container {
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            .progress-bar {
+                gap: 1px;
+            }
+
             .progress-node {
                 width: 28px;
                 height: 28px;
                 font-size: 11px;
             }
 
-            .progress-node--completed::before {
-                font-size: 14px;
+            .progress-line-container {
+                min-width: 10px;
+                flex: 1;
             }
 
+            /* Em telas muito pequenas, esconder números e mostrar só ícones */
+            .progress-node__number {
+                display: none;
+            }
+
+            .progress-node--completed::after,
             .progress-node--skipped::after {
-                font-size: 10px;
-                top: -6px;
-                right: -6px;
+                font-size: 12px;
+            }
+        }
+
+        /* Modo paisagem em mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #progress-bar-container {
+                padding: 8px;
+                margin-bottom: 8px;
+            }
+
+            .progress-node {
+                width: 28px;
+                height: 28px;
             }
         }
 
@@ -743,12 +847,15 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsividade */
+        /* -------------------------------------------- */
+        /* SECTION CONTAINER - RESPONSIVIDADE */
+        /* -------------------------------------------- */
+
         @media (max-width: 768px) {
             .section-container {
-                height: calc(100vh - 180px);
-                min-height: 400px;
-                border-radius: 8px;
+                height: calc(100vh - 160px);
+                min-height: 350px;
+                border-radius: 12px;
             }
 
             .section-header {
@@ -756,12 +863,66 @@
             }
 
             .section-header__title {
-                font-size: 16px;
+                font-size: 15px;
+                gap: 8px;
+            }
+
+            .section-header__emoji {
+                font-size: 20px;
+            }
+
+            .section-header__badge {
+                font-size: 11px;
+                padding: 3px 8px;
             }
 
             .section-chat {
-                padding: 16px;
+                padding: 12px;
                 gap: 12px;
+            }
+
+            .chat-message--bot,
+            .chat-message--user {
+                max-width: 90%;
+            }
+
+            .chat-message__bubble--bot,
+            .chat-message__bubble--user {
+                padding: 12px 14px;
+                border-radius: 12px 12px 12px 4px;
+            }
+
+            .chat-message__text {
+                font-size: 14px;
+            }
+
+            .chat-message__hint {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section-container {
+                height: calc(100vh - 140px);
+                min-height: 300px;
+                border-radius: 8px;
+            }
+
+            .section-header {
+                padding: 10px 12px;
+            }
+
+            .section-header__title {
+                font-size: 14px;
+            }
+
+            .section-header__emoji {
+                font-size: 18px;
+            }
+
+            .section-chat {
+                padding: 10px;
+                gap: 10px;
             }
 
             .chat-message--bot,
@@ -769,24 +930,54 @@
                 max-width: 95%;
             }
 
-            .section-input {
-                padding: 12px 16px;
+            .chat-message__bubble--bot,
+            .chat-message__bubble--user {
+                padding: 10px 12px;
             }
 
-            .section-input__form {
-                flex-direction: column;
+            .chat-message__text {
+                font-size: 14px;
+                line-height: 1.4;
             }
 
-            .section-input__button {
-                width: 100%;
+            /* Área de texto gerado */
+            .section-generated {
+                padding: 12px;
             }
 
-            .section-transition__buttons {
-                flex-direction: column;
+            .section-generated__text {
+                padding: 12px;
+                font-size: 13px;
+                max-height: 150px;
             }
 
-            .section-transition__btn {
-                width: 100%;
+            /* Transição */
+            .section-transition {
+                padding: 12px;
+            }
+
+            .section-transition__preview {
+                padding: 12px;
+            }
+
+            .section-transition__preview-emoji {
+                font-size: 24px;
+            }
+
+            .section-transition__preview-name {
+                font-size: 14px;
+            }
+        }
+
+        /* Teclado virtual aberto (viewport reduzido) */
+        @media (max-height: 400px) {
+            .section-container {
+                height: calc(100vh - 100px);
+                min-height: 200px;
+            }
+
+            .section-chat {
+                max-height: 150px;
             }
         }
 
@@ -1083,29 +1274,88 @@
         }
 
         /* -------------------------------------------- */
-        /* RESPONSIVIDADE */
+        /* INPUTS - RESPONSIVIDADE */
         /* -------------------------------------------- */
 
         @media (max-width: 768px) {
             .input-component {
-                padding: 12px 16px;
+                padding: 12px;
             }
 
+            /* Text Input */
             .text-input {
                 flex-direction: column;
+                gap: 10px;
+            }
+
+            .text-input__field {
+                padding: 14px 16px;
+                font-size: 16px; /* Evita zoom no iOS */
+                border-radius: 10px;
             }
 
             .text-input__button {
                 width: 100%;
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 48px; /* Touch target */
             }
 
+            .text-input__error {
+                font-size: 13px;
+            }
+
+            /* Single Choice */
             .single-choice {
                 flex-direction: column;
+                gap: 10px;
             }
 
             .single-choice__option {
                 max-width: none;
                 width: 100%;
+                padding: 16px 20px;
+                min-height: 52px; /* Touch target */
+                font-size: 16px;
+            }
+
+            .single-choice__icon {
+                font-size: 22px;
+            }
+
+            /* Multiple Choice */
+            .multiple-choice__option {
+                padding: 14px 16px;
+                min-height: 52px; /* Touch target */
+            }
+
+            .multiple-choice__checkbox {
+                width: 26px;
+                height: 26px;
+            }
+
+            .multiple-choice__label {
+                font-size: 15px;
+            }
+
+            .multiple-choice__confirm {
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 48px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .input-component {
+                padding: 10px;
+            }
+
+            .text-input__field {
+                padding: 12px 14px;
+            }
+
+            .single-choice__option {
+                padding: 14px 16px;
             }
 
             .multiple-choice__option {
@@ -1113,8 +1363,12 @@
             }
 
             .multiple-choice__checkbox {
-                width: 22px;
-                height: 22px;
+                width: 24px;
+                height: 24px;
+            }
+
+            .multiple-choice__hint {
+                font-size: 12px;
             }
         }
 
@@ -1200,6 +1454,29 @@
             to {
                 opacity: 1;
                 transform: translateX(0);
+            }
+        }
+
+        /* -------------------------------------------- */
+        /* LOADING E TOASTS - RESPONSIVIDADE */
+        /* -------------------------------------------- */
+
+        @media (max-width: 480px) {
+            #app-loading-overlay .loading-content {
+                padding: 20px 24px;
+                margin: 0 16px;
+                border-radius: 10px;
+            }
+
+            #app-loading-overlay .loading-message {
+                font-size: 14px;
+            }
+
+            .app-toast {
+                left: 16px;
+                right: 16px;
+                bottom: 16px;
+                text-align: center;
             }
         }
 
@@ -1464,7 +1741,10 @@
             color: #1e3a5f;
         }
 
-        /* Responsividade */
+        /* -------------------------------------------- */
+        /* TELA FINAL - RESPONSIVIDADE COMPLETA */
+        /* -------------------------------------------- */
+
         @media (max-width: 768px) {
             .final-screen__header {
                 padding: 24px 16px;
@@ -1478,17 +1758,128 @@
                 font-size: 24px;
             }
 
+            .final-screen__subtitle {
+                font-size: 14px;
+            }
+
             .final-screen__content {
                 padding: 16px;
             }
 
+            .final-screen__summary {
+                padding: 16px;
+            }
+
+            .final-screen__section-item {
+                padding: 12px;
+            }
+
+            .final-screen__section-name {
+                font-size: 13px;
+            }
+
+            .final-screen__text-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .final-screen__copy-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .final-screen__text-content {
+                max-height: 300px;
+                font-size: 13px;
+            }
+
             .final-screen__actions {
                 flex-direction: column;
+                gap: 12px;
+            }
+
+            .final-screen__action-btn {
+                padding: 16px 20px;
+                font-size: 15px;
+                min-height: 52px;
             }
 
             .final-screen__stats {
-                flex-wrap: wrap;
-                gap: 12px;
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .final-screen__header {
+                padding: 20px 12px;
+            }
+
+            .final-screen__icon {
+                font-size: 40px;
+                margin-bottom: 12px;
+            }
+
+            .final-screen__title {
+                font-size: 20px;
+            }
+
+            .final-screen__content {
+                padding: 12px;
+            }
+
+            .final-screen__summary {
+                padding: 12px;
+                margin-bottom: 16px;
+            }
+
+            .final-screen__summary-title {
+                font-size: 14px;
+            }
+
+            .final-screen__section-item {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+
+            .final-screen__section-icon {
+                font-size: 16px;
+            }
+
+            .final-screen__section-name {
+                font-size: 12px;
+            }
+
+            .final-screen__section-status {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+
+            .final-screen__text-box {
+                margin-bottom: 16px;
+            }
+
+            .final-screen__text-header {
+                padding: 12px;
+            }
+
+            .final-screen__text-title {
+                font-size: 14px;
+            }
+
+            .final-screen__text-content {
+                padding: 12px;
+                max-height: 250px;
+            }
+
+            .final-screen__text-section-title {
+                font-size: 13px;
+            }
+
+            .final-screen__stat {
+                font-size: 13px;
             }
         }
 

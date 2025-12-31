@@ -1633,6 +1633,23 @@
             }
         }
 
+        // Obter resposta da sidebar por step
+        function getSidebarAnswer(step) {
+            return answersState[step] || '';
+        }
+
+        // Contar quantas perguntas foram respondidas na sidebar (Seção 1)
+        function getAnsweredStepsFromSidebar() {
+            const section1Steps = ['1.1', '1.2', '1.3', '1.4', '1.5', '1.5.1', '1.5.2', '1.6', '1.7', '1.8', '1.9', '1.9.1', '1.9.2'];
+            let count = 0;
+            section1Steps.forEach(step => {
+                if (answersState[step]) {
+                    count++;
+                }
+            });
+            return count;
+        }
+
         // Atualizar progresso na sidebar
         function updateSidebarProgress(answered, total) {
             const percentage = (answered / total) * 100;
@@ -3620,9 +3637,29 @@
                 // Calcular progresso baseado na seção atual
                 let progress, totalQuestions;
                 if (currentSection === 1) {
-                    // Seção 1: Usar progresso dinâmico do backend (9-13 perguntas dependendo das condicionais)
-                    progress = data.progress ? data.progress.answered : 0;
-                    totalQuestions = data.progress ? data.progress.total : 9;
+                    // Seção 1: Calcular progresso localmente baseado no step
+                    // updateSidebarAnswer já foi chamado acima, então answersState já inclui a resposta atual
+                    const answeredSteps = getAnsweredStepsFromSidebar();
+                    progress = answeredSteps; // Já inclui a resposta atual (não precisa +1)
+
+                    // Calcular total dinâmico baseado nas respostas anteriores
+                    totalQuestions = 9; // Base: 9 perguntas obrigatórias
+
+                    // Verificar se 1.5 foi respondido como SIM (verifica sidebar ou resposta atual)
+                    const answer_1_5_sidebar = getSidebarAnswer('1.5');
+                    const justAnswered_1_5 = displayStep === '1.5' ? finalMessage : null;
+                    const answer_1_5 = justAnswered_1_5 || answer_1_5_sidebar || '';
+                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answer_1_5.toUpperCase().trim())) {
+                        totalQuestions += 2; // Adiciona 1.5.1 e 1.5.2
+                    }
+
+                    // Verificar se 1.9 foi respondido como SIM
+                    const answer_1_9_sidebar = getSidebarAnswer('1.9');
+                    const justAnswered_1_9 = displayStep === '1.9' ? finalMessage : null;
+                    const answer_1_9 = justAnswered_1_9 || answer_1_9_sidebar || '';
+                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answer_1_9.toUpperCase().trim())) {
+                        totalQuestions += 2; // Adiciona 1.9.1 e 1.9.2
+                    }
                 } else if (currentSection === 2) {
                     progress = data.current_step === 'complete' ? 13 : parseInt(data.current_step.split('.')[1]);
                     totalQuestions = 13;
@@ -3651,18 +3688,17 @@
                 updateSidebarProgress(progress, totalQuestions);
 
                 // ✅ ADICIONAR PERGUNTAS CONDICIONAIS DINAMICAMENTE (Seção 1)
+                // Usar finalMessage (resposta local) em vez de data.submitted_answer (não existe no backend)
                 if (currentSection === 1 && displayStep === '1.5') {
                     // Se resposta em 1.5 foi SIM, adicionar 1.5.1 e 1.5.2 após 1.5
-                    const answer_1_5 = data.submitted_answer || '';
-                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answer_1_5.toUpperCase().trim())) {
+                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(finalMessage.toUpperCase().trim())) {
                         const question_1_6 = document.getElementById('question-item-1.6');
                         addQuestionToSidebar('1.5.1', SECTION1_QUESTIONS['1.5.1'], question_1_6);
                         addQuestionToSidebar('1.5.2', SECTION1_QUESTIONS['1.5.2'], question_1_6);
                     }
                 } else if (currentSection === 1 && displayStep === '1.9') {
                     // Se resposta em 1.9 foi SIM, adicionar 1.9.1 e 1.9.2 após 1.9
-                    const answer_1_9 = data.submitted_answer || '';
-                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answer_1_9.toUpperCase().trim())) {
+                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(finalMessage.toUpperCase().trim())) {
                         const section2Preview = document.getElementById('section-preview-2');
                         addQuestionToSidebar('1.9.1', SECTION1_QUESTIONS['1.9.1'], section2Preview);
                         addQuestionToSidebar('1.9.2', SECTION1_QUESTIONS['1.9.2'], section2Preview);

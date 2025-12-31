@@ -919,6 +919,26 @@
                     updateSidebarStatus(step, 'answered');
                 });
 
+                // ✅ ADICIONAR PERGUNTAS CONDICIONAIS AO RESTAURAR RASCUNHO (Seção 1)
+                if (currentSection === 1) {
+                    // Verificar se 1.5 foi respondida com SIM e adicionar 1.5.1, 1.5.2
+                    if (answersState['1.5'] && ['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answersState['1.5'].toUpperCase().trim())) {
+                        const question_1_6 = document.getElementById('question-item-1.6');
+                        if (question_1_6) {
+                            addQuestionToSidebar('1.5.1', SECTION1_QUESTIONS['1.5.1'], question_1_6);
+                            addQuestionToSidebar('1.5.2', SECTION1_QUESTIONS['1.5.2'], question_1_6);
+                        }
+                    }
+                    // Verificar se 1.9 foi respondida com SIM e adicionar 1.9.1, 1.9.2
+                    if (answersState['1.9'] && ['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answersState['1.9'].toUpperCase().trim())) {
+                        const section2Preview = document.getElementById('section-preview-2');
+                        if (section2Preview) {
+                            addQuestionToSidebar('1.9.1', SECTION1_QUESTIONS['1.9.1'], section2Preview);
+                            addQuestionToSidebar('1.9.2', SECTION1_QUESTIONS['1.9.2'], section2Preview);
+                        }
+                    }
+                }
+
                 // Atualizar progresso
                 if (currentSection === 8) {
                     updateSidebarProgress(section8Count, 6);
@@ -1492,33 +1512,52 @@
             8: { emoji: '⚖️', name: 'Condução e Pós-Ocorrência', questions: SECTION8_QUESTIONS }
         };
 
+        // Adicionar uma pergunta à sidebar (usado tanto na inicialização quanto dinamicamente)
+        function addQuestionToSidebar(step, question, insertBefore = null) {
+            // Verificar se já existe
+            if (document.getElementById(`question-item-${step}`)) {
+                return;
+            }
+
+            const questionItem = document.createElement('div');
+            questionItem.id = `question-item-${step}`;
+            questionItem.className = 'border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors mb-2';
+            questionItem.dataset.step = step;
+
+            questionItem.innerHTML = `
+                <div class="flex items-start gap-2">
+                    <div class="flex-shrink-0 w-8 h-6 rounded flex items-center justify-center text-xs font-bold bg-gray-100 text-gray-600 mt-0.5" id="icon-${step}">
+                        ${step}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-700 mb-1">${question}</p>
+                        <p class="text-xs text-gray-500 truncate" id="answer-${step}">
+                            <span class="italic">Aguardando...</span>
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            questionItem.addEventListener('click', () => toggleQuestionExpand(step));
+
+            if (insertBefore) {
+                questionsList.insertBefore(questionItem, insertBefore);
+            } else {
+                questionsList.appendChild(questionItem);
+            }
+        }
+
         // Inicializar sidebar
         function initializeSidebar() {
             questionsList.innerHTML = ''; // Limpar
 
-            // Adicionar perguntas da Seção 1 (sem header, pois já está no topo da sidebar)
-            Object.entries(QUESTIONS).forEach(([step, question]) => {
-                const questionItem = document.createElement('div');
-                questionItem.id = `question-item-${step}`;
-                questionItem.className = 'border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors mb-2';
-                questionItem.dataset.step = step;
+            // Perguntas obrigatórias da Seção 1 (excluir condicionais 1.5.1, 1.5.2, 1.9.1, 1.9.2)
+            const mandatorySteps = ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9'];
 
-                questionItem.innerHTML = `
-                    <div class="flex items-start gap-2">
-                        <div class="flex-shrink-0 w-8 h-6 rounded flex items-center justify-center text-xs font-bold bg-gray-100 text-gray-600 mt-0.5" id="icon-${step}">
-                            ${step}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-700 mb-1">${question}</p>
-                            <p class="text-xs text-gray-500 truncate" id="answer-${step}">
-                                <span class="italic">Aguardando...</span>
-                            </p>
-                        </div>
-                    </div>
-                `;
-
-                questionItem.addEventListener('click', () => toggleQuestionExpand(step));
-                questionsList.appendChild(questionItem);
+            mandatorySteps.forEach(step => {
+                if (QUESTIONS[step]) {
+                    addQuestionToSidebar(step, QUESTIONS[step]);
+                }
             });
 
             // Seções futuras (2-8) - Apenas preview
@@ -3610,6 +3649,25 @@
                 // Atualizar sidebar com step que FOI VALIDADO (displayStep)
                 updateSidebarStatus(displayStep, 'answered');
                 updateSidebarProgress(progress, totalQuestions);
+
+                // ✅ ADICIONAR PERGUNTAS CONDICIONAIS DINAMICAMENTE (Seção 1)
+                if (currentSection === 1 && displayStep === '1.5') {
+                    // Se resposta em 1.5 foi SIM, adicionar 1.5.1 e 1.5.2 após 1.5
+                    const answer_1_5 = data.submitted_answer || '';
+                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answer_1_5.toUpperCase().trim())) {
+                        const question_1_6 = document.getElementById('question-item-1.6');
+                        addQuestionToSidebar('1.5.1', SECTION1_QUESTIONS['1.5.1'], question_1_6);
+                        addQuestionToSidebar('1.5.2', SECTION1_QUESTIONS['1.5.2'], question_1_6);
+                    }
+                } else if (currentSection === 1 && displayStep === '1.9') {
+                    // Se resposta em 1.9 foi SIM, adicionar 1.9.1 e 1.9.2 após 1.9
+                    const answer_1_9 = data.submitted_answer || '';
+                    if (['SIM', 'S', 'AFIRMATIVO', 'SÃO'].includes(answer_1_9.toUpperCase().trim())) {
+                        const section2Preview = document.getElementById('section-preview-2');
+                        addQuestionToSidebar('1.9.1', SECTION1_QUESTIONS['1.9.1'], section2Preview);
+                        addQuestionToSidebar('1.9.2', SECTION1_QUESTIONS['1.9.2'], section2Preview);
+                    }
+                }
 
                 if (data.is_section_complete) {
                     // ✅ LIMPAR RASCUNHO ao completar (ANTES de qualquer outra ação)

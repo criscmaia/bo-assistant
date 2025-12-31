@@ -9,19 +9,25 @@ Date: 19/12/2025
 from typing import Dict, Optional
 
 
-# Perguntas da Seção 2 (fonte: REGRAS GERAIS - GPT Tráfico, material do Claudio)
+# Perguntas da Seção 2 (fonte: Seções Revisadas 2025-12-30.md - Claudio Moreira)
+# v0.12.9: Expandido de 11 para 13 perguntas + reordenação (contexto antes de placa)
 SECTION2_QUESTIONS = {
-    "2.1": "Havia veículo?",
-    "2.2": "Marca/modelo/cor/placa.",
-    "2.3": "Onde foi visto?",
-    "2.4": "Qual policial percebeu e o que viu?",
-    "2.5": "Como foi dada a ordem de parada?",
-    "2.6": "Parou ou houve perseguição?",
-    "2.7": "Como foi a abordagem e busca?",
-    "2.8": "Haviam irregularidades? Veículo furtado/roubado/clonado?"
+    "2.1": "Havia veículo envolvido na ocorrência?",
+    "2.2": "Onde e em que contexto o veículo foi visualizado?",
+    "2.3": "Qual a marca, modelo, cor e placa do veículo?",
+    "2.4": "Quem da equipe viu o veículo? (nome do policial + o que chamou atenção)",
+    "2.5": "Descreva se houve reação do motorista ou ocupantes (manobra brusca, tentativa de fuga, descarte de objeto).",
+    "2.6": "Quem deu a ordem de parada e como? (sirene, apito, gesto, farol)",
+    "2.7": "O veículo parou imediatamente ou houve perseguição?",
+    "2.8": "Se houve perseguição, por qual motivo o veículo parou? (desistiu, cercado, bateu, capotou)",
+    "2.9": "Descreva como foi a abordagem (quem mandou descer, posicionamento)",
+    "2.10": "Quem realizou a busca veicular e em quais partes do veículo?",
+    "2.11": "Quem realizou a busca pessoal nos ocupantes?",
+    "2.12": "O que foi localizado, com quem ou em qual parte do veículo/corpo estava cada material?",
+    "2.13": "O veículo apresentava irregularidade? (furto, roubo, clonagem, adulteração)"
 }
 
-SECTION2_STEPS = ["2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "complete"]
+SECTION2_STEPS = ["2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10", "2.11", "2.12", "2.13", "complete"]
 
 
 class BOStateMachineSection2:

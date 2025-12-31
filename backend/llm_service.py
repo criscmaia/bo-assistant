@@ -115,7 +115,7 @@ class LLMService:
             "1.6": "Local exato da ocorrência",
             "1.7": "Histórico do local (ponto de tráfico)",
             "1.8": "Facção criminosa",
-            "1.9": "Proximidade de espaço de interesse público (Art. 40)",
+            "1.9": "Proximidade de espaço de interesse público",
             "1.9.1": "Nome do estabelecimento",
             "1.9.2": "Distância aproximada"
         }
@@ -149,6 +149,7 @@ REGRAS DE REDAÇÃO (nunca violar):
 5. Substituições obrigatórias: "veio a óbito"→"foi a óbito"; "caiu ao solo"→"caiu no chão"
 6. Individualizar locais: use o endereço FORNECIDO, não invente números ou nomes
 7. Evitar repetições: use pronomes ou sinônimos ("a guarnição", "os militares", "a equipe")
+8. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos ou códigos (Ex: Art. 33, Lei 11.343/06, CPP). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
 ⚠️ OBSERVAÇÃO CRÍTICA DO CLAUDIO:
 "Não existe patrulhamento de rotina, operação de rotina... É sempre a atividade seguida do objetivo."
@@ -170,7 +171,7 @@ ESTRUTURA ESPERADA (baseada nos modelos do Claudio):
 7. Detalhar local: Use EXATAMENTE o que foi fornecido - "O local indicado foi..." ou "no endereço..."
 8. Histórico do local (se aplicável): "O endereço consta em registros anteriores..." ou "O local possui histórico..." [resposta 1.7]
 9. Facção (se aplicável): "A área é dominada pela facção..." [resposta 1.8]
-10. Agravante de proximidade (Art. 40, inciso III): Se resposta 1.9 = SIM, incluir: "O local da ocorrência situa-se a aproximadamente [1.9.2] do/da [1.9.1], configurando a circunstância agravante prevista no Art. 40, inciso III da Lei 11.343/06."
+10. Proximidade de interesse público: Se resposta 1.9 = SIM, incluir: "O local da ocorrência situa-se a aproximadamente [1.9.2] do/da [1.9.1]." (NÃO mencione leis ou artigos)
 
 EXEMPLOS DE QUALIDADE (do manual do Claudio):
 
@@ -334,9 +335,9 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 3. Escreva em terceira pessoa, tempo passado
 4. Use linguagem técnica, objetiva e norma culta
 5. Descreva PASSO A PASSO: visualização → comportamento → ordem de parada → reação → busca
-6. Siga jurisprudência do STF HC 261029 (fundada suspeita requer descrição concreta)
-7. Gere texto em parágrafo único, fluido, SEM quebras de linha
-8. NÃO use juridiquês, gerúndio ou termos vagos como "atitude suspeita"
+6. Gere texto em parágrafo único, fluido, SEM quebras de linha
+7. NÃO use juridiquês, gerúndio ou termos vagos como "atitude suspeita"
+8. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos ou códigos (Ex: Art. 33, Lei 11.343/06, CPP, STF). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
 DADOS FORNECIDOS PELO USUÁRIO:
 
@@ -538,9 +539,9 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 3. Escreva em terceira pessoa, tempo passado
 4. Use linguagem técnica, objetiva e norma culta
 5. Descreva ATOS CONCRETOS observados, NÃO impressões subjetivas
-6. Conecte observações à fundada suspeita conforme STF 2025
-7. Gere texto em 2-3 parágrafos fluidos
-8. NÃO use juridiquês, gerúndio ou termos vagos como "atitude suspeita"
+6. Gere texto em 2-3 parágrafos fluidos
+7. NÃO use juridiquês, gerúndio ou termos vagos como "atitude suspeita"
+8. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos ou códigos (Ex: Art. 33, Lei 11.343/06, CPP, STF). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
 DADOS FORNECIDOS PELO USUÁRIO:
 
@@ -724,12 +725,13 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 2. Use APENAS os dados das respostas fornecidas abaixo
 3. Escreva em terceira pessoa, tempo passado
 4. Use linguagem técnica, objetiva e norma culta
-5. A JUSTA CAUSA deve vir ANTES da entrada (STF - inviolabilidade de domicílio)
+5. A JUSTA CAUSA deve vir ANTES da entrada no texto narrativo
 6. Descreva FATOS CONCRETOS observados (não impressões subjetivas)
 7. Gere texto em 2-3 parágrafos fluidos
 8. NÃO use juridiquês, gerúndio ou termos vagos
+9. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos, códigos ou jurisprudência (Ex: Art. 33, Lei 11.343/06, CPP, STF). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
-FUNDAMENTO JURÍDICO (STF):
+CONTEXTO TÉCNICO (para sua compreensão, NÃO incluir no texto gerado):
 
 O ingresso em domicílio sem mandado judicial só é legítimo quando houver FUNDADAS RAZÕES, devidamente justificadas, de que ocorre flagrante delito no interior do imóvel. A justa causa deve existir ANTES da entrada. Não basta alegar que "encontrou drogas depois".
 
@@ -1021,8 +1023,9 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 5. Descreva FATOS CONCRETOS observados (não impressões subjetivas)
 6. Gere texto em 2-3 parágrafos fluidos
 7. NÃO use juridiquês, gerúndio ou termos vagos como "em atitude suspeita"
+8. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos, códigos ou jurisprudência (Ex: Art. 33, Lei 11.343/06, CPP, STF, HC). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
-FUNDAMENTO JURÍDICO - FUNDADA SUSPEITA (STF HC 261029, Art. 244 CPP):
+CONTEXTO TÉCNICO (para sua compreensão, NÃO incluir no texto gerado):
 
 A busca pessoal exige INDÍCIOS CONCRETOS E OBJETIVOS, não sendo suficiente:
 - Nervosismo isolado (sem contexto)
@@ -1236,18 +1239,11 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 5. Descreva AÇÕES CONCRETAS (não impressões subjetivas)
 6. Gere texto em 4 parágrafos fluidos e objetivos
 7. PROIBIDO usar expressões genéricas como "resistiu ativamente", "uso moderado da força", "ficou agressivo"
+8. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos, códigos, súmulas ou jurisprudência (Ex: Art. 33, Lei 11.343/06, Súmula Vinculante 11, STF, Decreto). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
-FUNDAMENTO JURÍDICO - USO DA FORÇA E ALGEMAS:
+CONTEXTO TÉCNICO (para sua compreensão, NÃO incluir no texto gerado):
 
-SÚMULA VINCULANTE 11 (STF):
-"Só é lícito o uso de algemas em caso de resistência, fundado receio de fuga ou perigo
-à integridade física própria ou alheia, devendo ser justificada por escrito,
-sob pena de responsabilidade."
-
-DECRETO 8.858/2016 - PRINCÍPIOS FUNDAMENTAIS:
-1. A força e as algemas são REAÇÕES, nunca decisões prévias
-2. Deve-se narrar comportamentos CONCRETOS que geraram a necessidade
-3. Sem clichês ou termos vagos
+O uso de algemas só é lícito em caso de resistência, fundado receio de fuga ou perigo à integridade física própria ou alheia. A força e as algemas são REAÇÕES, nunca decisões prévias. Deve-se narrar comportamentos CONCRETOS que geraram a necessidade, sem clichês ou termos vagos.
 
 ESTRUTURA NARRATIVA OBRIGATÓRIA (4 PARÁGRAFOS):
 
@@ -1449,17 +1445,11 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 5. A CADEIA DE CUSTÓDIA é CRÍTICA: quem encontrou + onde + como acondicionou + para onde levou
 6. Gere texto em 2-3 parágrafos fluidos
 7. NÃO use juridiquês ou termos genéricos como "foi apreendido material ilícito"
+8. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos, códigos ou jurisprudência (Ex: Art. 33, Lei 11.343/06, CPP). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
-FUNDAMENTO JURÍDICO - APREENSÕES E CADEIA DE CUSTÓDIA:
+CONTEXTO TÉCNICO (para sua compreensão, NÃO incluir no texto gerado):
 
-LEI 11.343/06 (Lei de Drogas):
-- Art. 33: Tráfico de drogas
-- Art. 35: Associação para o tráfico (2+ pessoas)
-- Art. 40: Agravantes (armas, menores, escolas)
-
-CPP Arts. 240§2 e 244:
-"A cadeia de custódia assegura a integridade de drogas apreendidas desde a
-apreensão até o depósito, documentando QUEM a detinha, QUANDO, ONDE e COMO."
+A cadeia de custódia assegura a integridade de drogas apreendidas desde a apreensão até o depósito, documentando QUEM a detinha, QUANDO, ONDE e COMO.
 
 PRINCÍPIOS DA CADEIA DE CUSTÓDIA (obrigatórios):
 1. Identificar QUEM encontrou o material (graduação + nome)
@@ -1674,26 +1664,17 @@ REGRAS OBRIGATÓRIAS (Claudio Moreira - autor de "Polícia na Prática"):
 4. Use linguagem técnica, objetiva e norma culta
 5. Gere texto em 3-4 parágrafos fluidos
 6. NÃO use juridiquês ou termos genéricos
+7. ⚠️ NUNCA CITAR LEIS: Não mencione artigos, leis, incisos, códigos ou jurisprudência (Ex: Art. 33, Lei 11.343/06, CPP, Lei 13.869/19). O policial apenas DESCREVE OS FATOS, a tipificação legal é feita pelo delegado.
 
-FUNDAMENTO JURÍDICO - CONDUÇÃO E PÓS-OCORRÊNCIA:
+CONTEXTO TÉCNICO (para sua compreensão, NÃO incluir no texto gerado):
 
-LEI 11.343/06 (Lei de Drogas):
-- Art. 33: Tráfico de drogas
-- Art. 35: Associação para o tráfico (2+ pessoas)
-- Art. 40: Agravantes (armas, menores, escolas, associação)
-
-LEI 13.869/19 (Lei de Abuso de Autoridade):
-- Arts. 1-5: Garantias constitucionais do preso (direitos lidos, integridade física)
-
-CPP Arts. 282-284 (Prisão em flagrante):
-"A prisão em flagrante deve ser documentada com voz de prisão, leitura de direitos
-constitucionais, verificação de integridade física e condução adequada."
+A prisão em flagrante deve ser documentada com voz de prisão, leitura de direitos constitucionais, verificação de integridade física e condução adequada.
 
 ESTRUTURA NARRATIVA (3-4 PARÁGRAFOS):
 
 PARÁGRAFO 1 - VOZ DE PRISÃO E TRANSPORTE:
 - QUEM deu voz de prisão (graduação + nome)
-- Por QUAL CRIME (art. 33 da Lei 11.343/06)
+- Por QUAL CRIME (descrever o fato, NÃO citar artigo de lei)
 - Como foi transportado (viatura, prefixo, posição)
 
 PARÁGRAFO 2 - DECLARAÇÕES E PERFIL DO PRESO:

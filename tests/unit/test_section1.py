@@ -119,12 +119,13 @@ class TestSection1StateMachine:
         """Testa cálculo de progresso"""
         sm = BOStateMachine()
 
-        # Sem respostas
+        # Sem respostas - deve ser 9 (base)
         progress = sm.get_progress()
-        assert progress['total'] == 13, "Total deve ser 13"
+        assert progress['total'] == 9, "Total inicial deve ser 9 (perguntas obrigatórias)"
+        assert progress['total_base'] == 9, "Total base deve ser sempre 9"
         assert progress['answered'] == 0, "Respondidas deve ser 0"
 
-        # Com 3 respostas
+        # Com 3 respostas (1.1, 1.2, 1.3)
         sm.store_answer("Resposta 1")
         sm.next_step()
         sm.store_answer("Resposta 2")
@@ -133,7 +134,55 @@ class TestSection1StateMachine:
 
         progress = sm.get_progress()
         assert progress['answered'] == 3, "Respondidas deve ser 3"
-        assert progress['percentage'] == 23, "Percentual deve ser 23"  # 3/13 * 100 = 23.07...
+        assert progress['total'] == 9, "Total deve continuar 9 até responder condicional"
+        assert progress['percentage'] == 33, "Percentual deve ser 33"  # 3/9 * 100 = 33.33...
+
+    def test_get_progress_dynamic_with_conditionals(self):
+        """Testa cálculo dinâmico de progresso com perguntas condicionais"""
+        sm = BOStateMachine()
+
+        # Responder até 1.4
+        for step in ["1.1", "1.2", "1.3", "1.4"]:
+            sm.store_answer(f"Resposta {step}")
+            sm.next_step()
+
+        progress = sm.get_progress()
+        assert progress['answered'] == 4, "Deve ter 4 respostas"
+        assert progress['total'] == 9, "Total deve ser 9 (ainda não respondeu condicionais)"
+
+        # Responder SIM em 1.5 - deve aumentar total para 11
+        sm.store_answer("SIM")
+        sm.next_step()
+
+        progress = sm.get_progress()
+        assert progress['answered'] == 5, "Deve ter 5 respostas"
+        assert progress['total'] == 11, "Total deve mudar para 11 após SIM em 1.5"
+
+        # Responder 1.5.1 e 1.5.2
+        sm.store_answer("Resposta 1.5.1")
+        sm.next_step()
+        sm.store_answer("Resposta 1.5.2")
+        sm.next_step()
+
+        progress = sm.get_progress()
+        assert progress['answered'] == 7, "Deve ter 7 respostas"
+        assert progress['total'] == 11, "Total deve continuar 11"
+
+        # Pular para 1.9 respondendo 1.6, 1.7, 1.8
+        for step in ["1.6", "1.7", "1.8"]:
+            assert sm.current_step == step
+            sm.store_answer(f"Resposta {step}")
+            sm.next_step()
+
+        # Responder SIM em 1.9 - deve aumentar total para 13
+        assert sm.current_step == "1.9"
+        sm.store_answer("SIM")
+        sm.next_step()
+
+        progress = sm.get_progress()
+        assert progress['answered'] == 11, "Deve ter 11 respostas"
+        assert progress['total'] == 13, "Total deve mudar para 13 após SIM em 1.9"
+        assert progress['percentage'] == 84, "Percentual deve ser 84"  # 11/13 * 100 = 84.61...
 
 
 class TestSection1Validator:
@@ -240,6 +289,12 @@ if __name__ == "__main__":
         print_test("test_get_progress", True)
     except AssertionError as e:
         print_test("test_get_progress", False, str(e))
+
+    try:
+        t.test_get_progress_dynamic_with_conditionals()
+        print_test("test_get_progress_dynamic_with_conditionals", True)
+    except AssertionError as e:
+        print_test("test_get_progress_dynamic_with_conditionals", False, str(e))
 
     try:
         t.test_skip_logic_1_5()

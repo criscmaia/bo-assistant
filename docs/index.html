@@ -180,7 +180,7 @@
                     <h2 class="font-bold text-lg text-gray-800 mb-2">📝 Seção 1 - Contexto da Ocorrência</h2>
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-gray-600">Progresso</span>
-                        <span id="sidebar-progress-text" class="font-semibold text-blue-600">0/6</span>
+                        <span id="sidebar-progress-text" class="font-semibold text-blue-600">0/9</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
                         <div id="sidebar-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
@@ -935,7 +935,15 @@
                 } else if (currentSection === 2) {
                     updateSidebarProgress(section2Count, 13);
                 } else {
-                    updateSidebarProgress(section1Count, 11);
+                    // Seção 1: Calcular total dinamicamente baseado em condicionais
+                    let section1Total = 9;  // Base: 9 perguntas obrigatórias
+                    if (answersState['1.5'] && ['SIM', 'S', 'AFIRMATIVO'].includes(answersState['1.5'].toUpperCase().trim())) {
+                        section1Total += 2;  // Adiciona 1.5.1, 1.5.2
+                    }
+                    if (answersState['1.9'] && ['SIM', 'S', 'AFIRMATIVO'].includes(answersState['1.9'].toUpperCase().trim())) {
+                        section1Total += 2;  // Adiciona 1.9.1, 1.9.2
+                    }
+                    updateSidebarProgress(section1Count, section1Total);
                 }
 
                 // 8. Mostrar próxima pergunta OU desabilitar se completo
@@ -3573,11 +3581,12 @@
                 // Calcular progresso baseado na seção atual
                 let progress, totalQuestions;
                 if (currentSection === 1) {
-                    progress = data.current_step === 'complete' ? 6 : parseInt(data.current_step.split('.')[1]);
-                    totalQuestions = 6;
+                    // Seção 1: Usar progresso dinâmico do backend (9-13 perguntas dependendo das condicionais)
+                    progress = data.progress ? data.progress.answered : 0;
+                    totalQuestions = data.progress ? data.progress.total : 9;
                 } else if (currentSection === 2) {
-                    progress = data.current_step === 'complete' ? 8 : parseInt(data.current_step.split('.')[1]);
-                    totalQuestions = 8;
+                    progress = data.current_step === 'complete' ? 13 : parseInt(data.current_step.split('.')[1]);
+                    totalQuestions = 13;
                 } else if (currentSection === 3) {
                     progress = data.current_step === 'complete' ? 8 : parseInt(data.current_step.split('.')[1]);
                     totalQuestions = 8;

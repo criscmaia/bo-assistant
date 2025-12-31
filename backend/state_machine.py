@@ -111,13 +111,33 @@ class BOStateMachine:
     def get_progress(self) -> Dict[str, any]:
         """
         Retorna progresso atual (útil para UI mostrar barra de progresso).
+
+        Calcula dinamicamente o total de perguntas baseado em respostas condicionais:
+        - Base: 9 perguntas obrigatórias (1.1-1.4, 1.6-1.9)
+        - Se 1.5 = SIM: +2 (1.5.1, 1.5.2)
+        - Se 1.9 = SIM: +2 (1.9.1, 1.9.2)
+        - Máximo: 13 perguntas (se ambas SIM)
         """
-        total_questions = len(self.QUESTIONS)
+        base_questions = 9  # Perguntas obrigatórias
         answered = len(self.answers)
-        
+
+        # Calcular total baseado em respostas condicionais
+        total = base_questions
+
+        # Se resposta 1.5 = SIM, adiciona 2 perguntas condicionais
+        answer_1_5 = self.answers.get("1.5", "").strip().upper()
+        if answer_1_5 in ["SIM", "S", "AFIRMATIVO", "SÃO"]:
+            total += 2
+
+        # Se resposta 1.9 = SIM, adiciona 2 perguntas condicionais
+        answer_1_9 = self.answers.get("1.9", "").strip().upper()
+        if answer_1_9 in ["SIM", "S", "AFIRMATIVO", "SÃO"]:
+            total += 2
+
         return {
-            "total": total_questions,
+            "total": total,              # 9, 11, ou 13 dependendo das respostas
+            "total_base": base_questions, # Sempre 9 (perguntas obrigatórias)
             "answered": answered,
-            "percentage": int((answered / total_questions) * 100),
+            "percentage": int((answered / total) * 100) if total > 0 else 0,
             "current_question": self.current_step
         }

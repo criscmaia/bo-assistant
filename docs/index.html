@@ -793,6 +793,334 @@
         /* ============================================ */
         /* FIM CONTAINER DE SEÇÃO - ESTILOS */
         /* ============================================ */
+
+        /* ============================================ */
+        /* COMPONENTES DE INPUT - ESTILOS */
+        /* ============================================ */
+
+        /* Container genérico de input */
+        .input-component {
+            padding: 16px 20px;
+            border-top: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+
+        /* -------------------------------------------- */
+        /* TEXT INPUT */
+        /* -------------------------------------------- */
+
+        .text-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        .text-input__field {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .text-input__field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .text-input__field::placeholder {
+            color: #9ca3af;
+        }
+
+        .text-input__field--error {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .text-input__field--error:focus {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
+
+        .text-input__button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .text-input__button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .text-input__button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .text-input__button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .text-input__error {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            color: #dc2626;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .text-input__error::before {
+            content: '⚠️';
+        }
+
+        /* -------------------------------------------- */
+        /* SINGLE CHOICE */
+        /* -------------------------------------------- */
+
+        .single-choice {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .single-choice__option {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+            padding: 16px 24px;
+            background: white;
+            border: 3px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .single-choice__option:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .single-choice__option:active {
+            transform: translateY(0);
+        }
+
+        .single-choice__option--selected {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .single-choice__option--yes {
+            border-color: #10b981;
+        }
+
+        .single-choice__option--yes:hover {
+            background: #d1fae5;
+            border-color: #059669;
+        }
+
+        .single-choice__option--no {
+            border-color: #f87171;
+        }
+
+        .single-choice__option--no:hover {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .single-choice__option--primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .single-choice__option--primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .single-choice__icon {
+            font-size: 20px;
+        }
+
+        /* -------------------------------------------- */
+        /* MULTIPLE CHOICE */
+        /* -------------------------------------------- */
+
+        .multiple-choice {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .multiple-choice__options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .multiple-choice__option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .multiple-choice__option:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+
+        .multiple-choice__option--selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .multiple-choice__checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .multiple-choice__option--selected .multiple-choice__checkbox {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .multiple-choice__checkmark {
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+        }
+
+        .multiple-choice__option--selected .multiple-choice__checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .multiple-choice__label {
+            font-size: 15px;
+            color: #374151;
+            flex: 1;
+        }
+
+        .multiple-choice__option--selected .multiple-choice__label {
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        .multiple-choice__confirm {
+            margin-top: 12px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .multiple-choice__confirm:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .multiple-choice__confirm:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .multiple-choice__hint {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        /* -------------------------------------------- */
+        /* RESPONSIVIDADE */
+        /* -------------------------------------------- */
+
+        @media (max-width: 768px) {
+            .input-component {
+                padding: 12px 16px;
+            }
+
+            .text-input {
+                flex-direction: column;
+            }
+
+            .text-input__button {
+                width: 100%;
+            }
+
+            .single-choice {
+                flex-direction: column;
+            }
+
+            .single-choice__option {
+                max-width: none;
+                width: 100%;
+            }
+
+            .multiple-choice__option {
+                padding: 12px 14px;
+            }
+
+            .multiple-choice__checkbox {
+                width: 22px;
+                height: 22px;
+            }
+        }
+
+        /* ============================================ */
+        /* FIM COMPONENTES DE INPUT - ESTILOS */
+        /* ============================================ */
     </style>
 </head>
 <body class="bg-gray-50">
@@ -1281,24 +1609,10 @@
                         ${this._renderMessages()}
                     </div>
 
-                    <!-- Input (oculto se readonly ou completed) -->
+                    <!-- Área de Input Dinâmica -->
                     ${!this.isReadOnly && this.state === 'in_progress' ? `
-                    <div class="section-input" id="section-input">
-                        <div class="section-input__form">
-                            <input
-                                type="text"
-                                id="section-input-field"
-                                class="section-input__field"
-                                placeholder="Digite sua resposta..."
-                            >
-                            <button
-                                type="button"
-                                id="section-input-btn"
-                                class="section-input__button"
-                            >
-                                Enviar
-                            </button>
-                        </div>
+                    <div id="section-input-area">
+                        <!-- Input será renderizado pelo _renderInput() -->
                     </div>
                     ` : ''}
 
@@ -1423,22 +1737,134 @@
             }
 
             /**
+             * Cria o componente de input correto baseado na pergunta
+             */
+            _createInputComponent(question) {
+                const inputType = question.inputType || 'text';
+
+                switch (inputType) {
+                    case 'single_choice':
+                        return new SingleChoice({
+                            options: question.options || [
+                                { value: 'sim', label: 'SIM' },
+                                { value: 'nao', label: 'NÃO' }
+                            ],
+                            onSelect: (value, label, option) => {
+                                this._handleInputSubmit(label, question, option);
+                            }
+                        });
+
+                    case 'multiple_choice':
+                        return new MultipleChoice({
+                            options: question.options || [],
+                            minSelections: question.validation?.minSelections || 1,
+                            maxSelections: question.validation?.maxSelections || null,
+                            onConfirm: (values, labels) => {
+                                this._handleInputSubmit(labels.join(', '), question);
+                            }
+                        });
+
+                    case 'text':
+                    default:
+                        return new TextInput({
+                            placeholder: question.hint || 'Digite sua resposta...',
+                            validation: question.validation || {},
+                            onSubmit: (value) => {
+                                this._handleInputSubmit(value, question);
+                            }
+                        });
+                }
+            }
+
+            /**
+             * Trata resposta do componente de input
+             */
+            _handleInputSubmit(answer, question, option = null) {
+                // Verificar se deve pular seção (para skipQuestion)
+                if (option?.skipsSection) {
+                    this._addUserMessage(answer);
+                    setTimeout(() => {
+                        this._skipSection();
+                    }, 300);
+                    return;
+                }
+
+                // Adicionar mensagem do usuário
+                this._addUserMessage(answer);
+
+                // Salvar resposta
+                this.answers[question.id] = answer;
+                this.onAnswer(question.id, answer);
+
+                // Verificar follow-up
+                if (question.followUp && question.followUp.condition) {
+                    const conditionMet = answer.toLowerCase().includes(question.followUp.condition.toLowerCase());
+                    if (conditionMet && question.followUp.question) {
+                        // Mostrar follow-up
+                        setTimeout(() => {
+                            this._showQuestion(question.followUp.question);
+                        }, 500);
+                        return;
+                    }
+                }
+
+                // Avançar para próxima pergunta
+                this.currentQuestionIndex++;
+                this._updateBadge();
+
+                setTimeout(() => {
+                    this._showCurrentQuestion();
+                }, 500);
+            }
+
+            /**
+             * Mostra uma pergunta específica com o input correto
+             */
+            _showQuestion(question) {
+                // Adicionar mensagem do bot
+                this._addBotMessage(question.text, question.hint);
+
+                // Renderizar input correto
+                this._renderInput(question);
+            }
+
+            /**
+             * Renderiza o input na área de input
+             */
+            _renderInput(question) {
+                // Remover input anterior
+                const inputArea = this.container.querySelector('#section-input-area');
+                if (inputArea) {
+                    inputArea.innerHTML = '';
+
+                    // Criar novo componente
+                    this.currentInputComponent = this._createInputComponent(question);
+                    const inputEl = this.currentInputComponent.render();
+                    inputArea.appendChild(inputEl);
+
+                    // Focar se for TextInput
+                    if (this.currentInputComponent instanceof TextInput) {
+                        this.currentInputComponent.focus();
+                    }
+                }
+            }
+
+            /**
              * Bind de eventos
              */
             _bindEvents() {
-                // Input - enviar resposta
-                const inputBtn = this.container.querySelector('#section-input-btn');
-                if (inputBtn) {
-                    inputBtn.addEventListener('click', () => this._handleSubmit());
-                }
-
-                if (this.inputFieldEl) {
-                    this.inputFieldEl.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') this._handleSubmit();
-                    });
-                    // Focar no input
-                    setTimeout(() => this.inputFieldEl.focus(), 100);
-                }
+                // CÓDIGO ANTIGO DE INPUT - COMENTADO (agora usa componentes)
+                // const inputBtn = this.container.querySelector('#section-input-btn');
+                // if (inputBtn) {
+                //     inputBtn.addEventListener('click', () => this._handleSubmit());
+                // }
+                //
+                // if (this.inputFieldEl) {
+                //     this.inputFieldEl.addEventListener('keypress', (e) => {
+                //         if (e.key === 'Enter') this._handleSubmit();
+                //     });
+                //     setTimeout(() => this.inputFieldEl.focus(), 100);
+                // }
 
                 // Copiar texto gerado
                 const copyBtn = this.container.querySelector('#section-copy-btn');
@@ -1482,7 +1908,7 @@
                 // Verificar se tem skipQuestion primeiro
                 if (this.sectionData.skipQuestion && this.currentQuestionIndex === 0 && !this.answers[this.sectionData.skipQuestion.id]) {
                     const skipQ = this.sectionData.skipQuestion;
-                    this._addBotMessage(skipQ.text, skipQ.hint);
+                    this._showQuestion(skipQ);
                     return;
                 }
 
@@ -1491,7 +1917,7 @@
 
                 if (realIndex >= 0 && realIndex < questions.length) {
                     const question = questions[realIndex];
-                    this._addBotMessage(question.text, question.hint);
+                    this._showQuestion(question);
                 } else if (realIndex >= questions.length) {
                     // Todas as perguntas respondidas
                     this._completeSection();
@@ -1534,55 +1960,55 @@
             }
 
             /**
-             * Trata envio de resposta
+             * MÉTODO ANTIGO _handleSubmit - COMENTADO (substituído por _handleInputSubmit)
              */
-            _handleSubmit() {
-                if (!this.inputFieldEl) return;
-
-                const answer = this.inputFieldEl.value.trim();
-                if (!answer) return;
-
-                // Limpar input
-                this.inputFieldEl.value = '';
-
-                // Adicionar mensagem do usuário
-                this._addUserMessage(answer);
-
-                // Determinar qual pergunta foi respondida
-                let questionId;
-                if (this.sectionData.skipQuestion && this.currentQuestionIndex === 0) {
-                    questionId = this.sectionData.skipQuestion.id;
-
-                    // Verificar se deve pular seção
-                    const skipQ = this.sectionData.skipQuestion;
-                    const skipOption = skipQ.options?.find(o => o.skipsSection && o.label.toUpperCase() === answer.toUpperCase());
-                    if (skipOption) {
-                        this._skipSection();
-                        return;
-                    }
-                } else {
-                    const realIndex = this.sectionData.skipQuestion ? this.currentQuestionIndex - 1 : this.currentQuestionIndex;
-                    const question = this.sectionData.questions[realIndex];
-                    questionId = question?.id;
-                }
-
-                // Salvar resposta
-                if (questionId) {
-                    this.answers[questionId] = answer;
-                    this.onAnswer(questionId, answer);
-                }
-
-                // Avançar para próxima pergunta
-                this.currentQuestionIndex++;
-
-                // Atualizar badge
-                this._updateBadge();
-
-                // Mostrar próxima pergunta após delay
-                setTimeout(() => {
-                    this._showCurrentQuestion();
-                }, 500);
-            }
+            // _handleSubmit() {
+            //     if (!this.inputFieldEl) return;
+            //
+            //     const answer = this.inputFieldEl.value.trim();
+            //     if (!answer) return;
+            //
+            //     // Limpar input
+            //     this.inputFieldEl.value = '';
+            //
+            //     // Adicionar mensagem do usuário
+            //     this._addUserMessage(answer);
+            //
+            //     // Determinar qual pergunta foi respondida
+            //     let questionId;
+            //     if (this.sectionData.skipQuestion && this.currentQuestionIndex === 0) {
+            //         questionId = this.sectionData.skipQuestion.id;
+            //
+            //         // Verificar se deve pular seção
+            //         const skipQ = this.sectionData.skipQuestion;
+            //         const skipOption = skipQ.options?.find(o => o.skipsSection && o.label.toUpperCase() === answer.toUpperCase());
+            //         if (skipOption) {
+            //             this._skipSection();
+            //             return;
+            //         }
+            //     } else {
+            //         const realIndex = this.sectionData.skipQuestion ? this.currentQuestionIndex - 1 : this.currentQuestionIndex;
+            //         const question = this.sectionData.questions[realIndex];
+            //         questionId = question?.id;
+            //     }
+            //
+            //     // Salvar resposta
+            //     if (questionId) {
+            //         this.answers[questionId] = answer;
+            //         this.onAnswer(questionId, answer);
+            //     }
+            //
+            //     // Avançar para próxima pergunta
+            //     this.currentQuestionIndex++;
+            //
+            //     // Atualizar badge
+            //     this._updateBadge();
+            //
+            //     // Mostrar próxima pergunta após delay
+            //     setTimeout(() => {
+            //         this._showCurrentQuestion();
+            //     }, 500);
+            // }
 
             /**
              * Atualiza badge de status
@@ -1687,6 +2113,469 @@
 
         // ============================================
         // FIM CLASSE SECTIONCONTAINER
+        // ============================================
+
+        // ============================================
+        // CLASSE TEXTINPUT - INPUT DE TEXTO
+        // ============================================
+
+        class TextInput {
+            /**
+             * Componente de input de texto com validação
+             */
+            constructor(options = {}) {
+                this.placeholder = options.placeholder || 'Digite sua resposta...';
+                this.hint = options.hint || null;
+                this.validation = options.validation || {};
+                this.onSubmit = options.onSubmit || (() => {});
+
+                this.element = null;
+                this.inputField = null;
+                this.errorEl = null;
+                this.isValid = true;
+            }
+
+            /**
+             * Renderiza o componente e retorna o elemento
+             */
+            render() {
+                this.element = document.createElement('div');
+                this.element.className = 'input-component';
+
+                this.element.innerHTML = `
+                    <div class="text-input">
+                        <input
+                            type="text"
+                            class="text-input__field"
+                            placeholder="${this.placeholder}"
+                        >
+                        <button type="button" class="text-input__button">
+                            Enviar
+                        </button>
+                    </div>
+                    <div class="text-input__error" style="display: none;"></div>
+                `;
+
+                this.inputField = this.element.querySelector('.text-input__field');
+                this.errorEl = this.element.querySelector('.text-input__error');
+                const button = this.element.querySelector('.text-input__button');
+
+                // Eventos
+                button.addEventListener('click', () => this._handleSubmit());
+                this.inputField.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this._handleSubmit();
+                });
+                this.inputField.addEventListener('input', () => this._clearError());
+
+                return this.element;
+            }
+
+            /**
+             * Foca no input
+             */
+            focus() {
+                if (this.inputField) {
+                    setTimeout(() => this.inputField.focus(), 100);
+                }
+            }
+
+            /**
+             * Limpa o input
+             */
+            clear() {
+                if (this.inputField) {
+                    this.inputField.value = '';
+                }
+                this._clearError();
+            }
+
+            /**
+             * Valida o valor
+             */
+            validate(value) {
+                const trimmed = value.trim();
+
+                // Required
+                if (this.validation.required && !trimmed) {
+                    return { valid: false, error: 'Este campo é obrigatório.' };
+                }
+
+                // Min length
+                if (this.validation.minLength && trimmed.length < this.validation.minLength) {
+                    return {
+                        valid: false,
+                        error: `Mínimo de ${this.validation.minLength} caracteres.`
+                    };
+                }
+
+                // Pattern (datetime)
+                if (this.validation.pattern === 'datetime') {
+                    const hasDate = /\d{1,2}\/\d{1,2}/.test(trimmed) ||
+                                   /(janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)/i.test(trimmed);
+                    const hasTime = /\d{1,2}[h:]\d{0,2}/.test(trimmed);
+
+                    if (!hasDate || !hasTime) {
+                        return {
+                            valid: false,
+                            error: 'Informe data e hora. Ex: 22/03/2025, às 19h03'
+                        };
+                    }
+                }
+
+                return { valid: true };
+            }
+
+            /**
+             * Trata o envio
+             */
+            _handleSubmit() {
+                if (!this.inputField) return;
+
+                const value = this.inputField.value;
+                const validation = this.validate(value);
+
+                if (!validation.valid) {
+                    this._showError(validation.error);
+                    return;
+                }
+
+                this._clearError();
+                this.onSubmit(value.trim());
+            }
+
+            /**
+             * Mostra erro
+             */
+            _showError(message) {
+                if (this.errorEl) {
+                    this.errorEl.textContent = message;
+                    this.errorEl.style.display = 'flex';
+                }
+                if (this.inputField) {
+                    this.inputField.classList.add('text-input__field--error');
+                }
+                this.isValid = false;
+            }
+
+            /**
+             * Limpa erro
+             */
+            _clearError() {
+                if (this.errorEl) {
+                    this.errorEl.style.display = 'none';
+                }
+                if (this.inputField) {
+                    this.inputField.classList.remove('text-input__field--error');
+                }
+                this.isValid = true;
+            }
+
+            /**
+             * Desabilita o input
+             */
+            disable() {
+                if (this.inputField) {
+                    this.inputField.disabled = true;
+                }
+                const button = this.element?.querySelector('.text-input__button');
+                if (button) {
+                    button.disabled = true;
+                }
+            }
+
+            /**
+             * Habilita o input
+             */
+            enable() {
+                if (this.inputField) {
+                    this.inputField.disabled = false;
+                }
+                const button = this.element?.querySelector('.text-input__button');
+                if (button) {
+                    button.disabled = false;
+                }
+            }
+        }
+
+        // ============================================
+        // FIM CLASSE TEXTINPUT
+        // ============================================
+
+        // ============================================
+        // CLASSE SINGLECHOICE - SELEÇÃO ÚNICA
+        // ============================================
+
+        class SingleChoice {
+            /**
+             * Componente de seleção única com botões
+             */
+            constructor(options = {}) {
+                this.options = options.options || [
+                    { value: 'sim', label: 'SIM' },
+                    { value: 'nao', label: 'NÃO' }
+                ];
+                this.onSelect = options.onSelect || (() => {});
+
+                this.element = null;
+                this.selectedValue = null;
+            }
+
+            /**
+             * Renderiza o componente e retorna o elemento
+             */
+            render() {
+                this.element = document.createElement('div');
+                this.element.className = 'input-component';
+
+                const optionsHtml = this.options.map(opt => {
+                    // Determinar classe especial
+                    let specialClass = '';
+                    const labelUpper = opt.label.toUpperCase();
+
+                    if (labelUpper === 'SIM' || labelUpper === 'YES') {
+                        specialClass = 'single-choice__option--yes';
+                    } else if (labelUpper === 'NÃO' || labelUpper === 'NAO' || labelUpper === 'NO') {
+                        specialClass = 'single-choice__option--no';
+                    }
+
+                    // Determinar ícone
+                    let icon = '';
+                    if (labelUpper === 'SIM' || labelUpper === 'YES') {
+                        icon = '<span class="single-choice__icon">✅</span>';
+                    } else if (labelUpper === 'NÃO' || labelUpper === 'NAO' || labelUpper === 'NO') {
+                        icon = '<span class="single-choice__icon">❌</span>';
+                    }
+
+                    return `
+                        <button
+                            type="button"
+                            class="single-choice__option ${specialClass}"
+                            data-value="${opt.value}"
+                        >
+                            ${icon}
+                            <span>${opt.label}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                this.element.innerHTML = `
+                    <div class="single-choice">
+                        ${optionsHtml}
+                    </div>
+                `;
+
+                // Eventos
+                const buttons = this.element.querySelectorAll('.single-choice__option');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const value = btn.dataset.value;
+                        this._handleSelect(value, btn);
+                    });
+                });
+
+                return this.element;
+            }
+
+            /**
+             * Trata a seleção
+             */
+            _handleSelect(value, buttonEl) {
+                // Remover seleção anterior
+                const allButtons = this.element.querySelectorAll('.single-choice__option');
+                allButtons.forEach(btn => btn.classList.remove('single-choice__option--selected'));
+
+                // Marcar como selecionado
+                buttonEl.classList.add('single-choice__option--selected');
+                this.selectedValue = value;
+
+                // Encontrar o label correspondente
+                const option = this.options.find(o => o.value === value);
+                const label = option ? option.label : value;
+
+                // Callback após pequeno delay (para ver a animação)
+                setTimeout(() => {
+                    this.onSelect(value, label, option);
+                }, 150);
+            }
+
+            /**
+             * Retorna valor selecionado
+             */
+            getValue() {
+                return this.selectedValue;
+            }
+
+            /**
+             * Desabilita todas as opções
+             */
+            disable() {
+                const buttons = this.element?.querySelectorAll('.single-choice__option');
+                buttons?.forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.6';
+                });
+            }
+        }
+
+        // ============================================
+        // FIM CLASSE SINGLECHOICE
+        // ============================================
+
+        // ============================================
+        // CLASSE MULTIPLECHOICE - SELEÇÃO MÚLTIPLA
+        // ============================================
+
+        class MultipleChoice {
+            /**
+             * Componente de seleção múltipla com checkboxes
+             */
+            constructor(options = {}) {
+                this.options = options.options || [];
+                this.minSelections = options.minSelections || 1;
+                this.maxSelections = options.maxSelections || null;
+                this.onConfirm = options.onConfirm || (() => {});
+
+                this.element = null;
+                this.selectedValues = new Set();
+            }
+
+            /**
+             * Renderiza o componente e retorna o elemento
+             */
+            render() {
+                this.element = document.createElement('div');
+                this.element.className = 'input-component';
+
+                const optionsHtml = this.options.map(opt => `
+                    <div class="multiple-choice__option" data-value="${opt.value}">
+                        <div class="multiple-choice__checkbox">
+                            <span class="multiple-choice__checkmark">✓</span>
+                        </div>
+                        <span class="multiple-choice__label">${opt.label}</span>
+                    </div>
+                `).join('');
+
+                this.element.innerHTML = `
+                    <div class="multiple-choice">
+                        <div class="multiple-choice__options">
+                            ${optionsHtml}
+                        </div>
+                        <button
+                            type="button"
+                            class="multiple-choice__confirm"
+                            disabled
+                        >
+                            ✓ Confirmar seleção
+                        </button>
+                        <div class="multiple-choice__hint">
+                            Selecione ${this.minSelections === 1 ? 'pelo menos 1 opção' : `pelo menos ${this.minSelections} opções`}
+                        </div>
+                    </div>
+                `;
+
+                // Eventos - opções
+                const optionEls = this.element.querySelectorAll('.multiple-choice__option');
+                optionEls.forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        const value = opt.dataset.value;
+                        this._toggleOption(value, opt);
+                    });
+                });
+
+                // Evento - confirmar
+                const confirmBtn = this.element.querySelector('.multiple-choice__confirm');
+                confirmBtn.addEventListener('click', () => this._handleConfirm());
+
+                return this.element;
+            }
+
+            /**
+             * Toggle de opção
+             */
+            _toggleOption(value, optionEl) {
+                if (this.selectedValues.has(value)) {
+                    // Desmarcar
+                    this.selectedValues.delete(value);
+                    optionEl.classList.remove('multiple-choice__option--selected');
+                } else {
+                    // Verificar limite máximo
+                    if (this.maxSelections && this.selectedValues.size >= this.maxSelections) {
+                        return;
+                    }
+
+                    // Marcar
+                    this.selectedValues.add(value);
+                    optionEl.classList.add('multiple-choice__option--selected');
+                }
+
+                this._updateConfirmButton();
+            }
+
+            /**
+             * Atualiza estado do botão confirmar
+             */
+            _updateConfirmButton() {
+                const confirmBtn = this.element?.querySelector('.multiple-choice__confirm');
+                if (confirmBtn) {
+                    const isValid = this.selectedValues.size >= this.minSelections;
+                    confirmBtn.disabled = !isValid;
+
+                    // Atualizar texto
+                    const count = this.selectedValues.size;
+                    if (count === 0) {
+                        confirmBtn.textContent = '✓ Confirmar seleção';
+                    } else {
+                        confirmBtn.textContent = `✓ Confirmar (${count} selecionado${count > 1 ? 's' : ''})`;
+                    }
+                }
+            }
+
+            /**
+             * Trata confirmação
+             */
+            _handleConfirm() {
+                if (this.selectedValues.size < this.minSelections) return;
+
+                // Converter Set para Array
+                const values = Array.from(this.selectedValues);
+
+                // Encontrar labels
+                const labels = values.map(v => {
+                    const opt = this.options.find(o => o.value === v);
+                    return opt ? opt.label : v;
+                });
+
+                // Callback
+                this.onConfirm(values, labels);
+            }
+
+            /**
+             * Retorna valores selecionados
+             */
+            getValues() {
+                return Array.from(this.selectedValues);
+            }
+
+            /**
+             * Desabilita o componente
+             */
+            disable() {
+                const options = this.element?.querySelectorAll('.multiple-choice__option');
+                options?.forEach(opt => {
+                    opt.style.pointerEvents = 'none';
+                    opt.style.opacity = '0.6';
+                });
+
+                const confirmBtn = this.element?.querySelector('.multiple-choice__confirm');
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                }
+            }
+        }
+
+        // ============================================
+        // FIM CLASSE MULTIPLECHOICE
         // ============================================
 
         // Configuração da API

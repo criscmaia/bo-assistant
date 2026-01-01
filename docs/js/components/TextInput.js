@@ -148,11 +148,21 @@ class TextInput {
                     };
                 }
             }
-            // Detectar padrão de prefixo/viatura
+            // Detectar padrão de prefixo/viatura (pergunta 1.2 - composição da guarnição)
             else if (keywords.some(k => ['prefixo', 'viatura'].includes(k.toLowerCase()))) {
-                // Pelo menos UM keyword deve estar presente
-                const hasAtLeastOne = keywords.some(k => lowerValue.includes(k.toLowerCase()));
-                if (!hasAtLeastOne) {
+                // Validar que tem: (1) graduação militar E (2) prefixo OU viatura
+                const rankPatterns = ['sargento', 'soldado', 'cabo', 'tenente', 'capitão', 'sgt', 'sd', 'cb', 'ten', 'cap'];
+                const hasRank = rankPatterns.some(rank => lowerValue.includes(rank.toLowerCase()));
+                const hasPrefixOrViatura = keywords.some(k => lowerValue.includes(k.toLowerCase()));
+
+                if (!hasRank) {
+                    return {
+                        valid: false,
+                        error: 'Informe a graduação militar dos policiais (Ex: Sargento, Soldado, Cabo)'
+                    };
+                }
+
+                if (!hasPrefixOrViatura) {
                     return {
                         valid: false,
                         error: this.validation.errorMessage || 'Informe prefixo ou viatura.'

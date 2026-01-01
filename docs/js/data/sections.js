@@ -51,12 +51,14 @@ const SECTIONS_DATA = [
       },
       {
         id: "1.2",
-        text: "Composição da guarnição e prefixo.",
-        hint: "Ex: Sgt João Silva e Cb Pedro Santos, prefixo 1234",
+        text: "Composição da guarnição e prefixo da viatura.",
+        hint: "Ex: Sargento João Silva, Cabo Pedro Almeida e Soldado Carlos Faria, viatura 2234",
         inputType: "text",
         validation: {
           required: true,
-          minLength: 15
+          minLength: 15,
+          requiredKeywords: ["prefixo", "viatura"],
+          errorMessage: "Informe graduação + nome completo de TODOS os policiais + prefixo/viatura. Ex: 'Sgt João Silva e Cb Pedro Santos, prefixo 1234'"
         }
       },
       {
@@ -86,7 +88,9 @@ const SECTIONS_DATA = [
         inputType: "text",
         validation: {
           required: true,
-          minLength: 20
+          minLength: 20,
+          requiredKeywords: ["rua", "numero", "bairro"],
+          errorMessage: "Informe endereço completo com logradouro (rua/avenida), número e bairro. Ex: 'Rua das Flores, nº 123, Bairro Centro'"
         }
       },
       {

@@ -393,8 +393,8 @@ class BOApp {
 
         const sectionState = this.sectionsState[sectionId];
 
-        // Só permitir navegar para seções já visitadas
-        if (sectionState.status === 'pending' && sectionId > this.currentSectionIndex + 1) {
+        // Só permitir navegar para seções já visitadas (não pending)
+        if (sectionState.status === 'pending') {
             console.log('[BOApp] Seção ainda não disponível');
             return;
         }
@@ -419,9 +419,6 @@ class BOApp {
         // Fade out
         await this.sectionContainer.fadeOut();
 
-        // Atualizar índice
-        this.currentSectionIndex = sectionIndex;
-
         // Carregar seção
         const sectionData = SECTIONS_DATA[sectionIndex];
         const sectionState = this.sectionsState[sectionId];
@@ -429,6 +426,11 @@ class BOApp {
         // Determinar se é read-only
         const shouldBeReadOnly = isReadOnly ||
             (sectionState.status === 'completed' && sectionId < this._getCurrentActiveSectionId());
+
+        // Atualizar índice APENAS se não for read-only (navegação real, não visualização)
+        if (!shouldBeReadOnly) {
+            this.currentSectionIndex = sectionIndex;
+        }
 
         // Marcar como em progresso se necessário
         if (sectionState.status === 'pending') {

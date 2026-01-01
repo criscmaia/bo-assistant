@@ -1,8 +1,10 @@
 # 🛟 Recovery Guide - BO Inteligente
 
-**Versão Estável:** v0.12.10-ux-complete
+**Versão Estável Atual:** v0.12.11-sections-1-2-complete
+**Versão Anterior:** v0.12.10-ux-complete
 **Branch:** feature/ux-redesign-v1
 **Data:** 2026-01-01
+**Último Commit:** e75d14a
 
 ---
 
@@ -18,6 +20,7 @@ Esta versão contém **TODAS** as funcionalidades UX implementadas e validadas:
 ✅ Input clearing híbrido
 ✅ Auto-skip da pergunta x.1
 ✅ Validações rigorosas de keywords
+✅ **Seção 1 com 11 perguntas corretas do TESTING.md (13 com condicionais)** 🆕
 ✅ Seção 2 com 13 perguntas corretas do TESTING.md
 
 ---
@@ -30,31 +33,41 @@ Esta versão contém **TODAS** as funcionalidades UX implementadas e validadas:
 # Descartar mudanças não commitadas
 git reset --hard
 
-# Voltar para a tag estável
+# Voltar para a tag estável MAIS RECENTE (recomendado)
+git checkout v0.12.11-sections-1-2-complete
+
+# OU voltar para a tag anterior
 git checkout v0.12.10-ux-complete
 
 # Se quiser criar uma branch a partir da tag
-git checkout -b recovery-from-tag v0.12.10-ux-complete
+git checkout -b recovery-from-tag v0.12.11-sections-1-2-complete
 ```
 
 ### Opção 2: Restaurar Via Commit Hash
 
 ```bash
-# Voltar para o último commit bom
-git reset --hard 352f498
+# Voltar para o último commit bom (MAIS RECENTE)
+git reset --hard e75d14a
+
+# OU voltar para commits anteriores
+git reset --hard 295b133  # Section 1 fix
+git reset --hard 352f498  # Section 2 fix
 
 # Ou criar branch a partir dele
-git checkout -b recovery-from-commit 352f498
+git checkout -b recovery-from-commit e75d14a
 ```
 
 ### Opção 3: Recuperar Arquivos Específicos
 
 ```bash
-# Recuperar um arquivo específico da tag
-git checkout v0.12.10-ux-complete -- docs/js/data/sections.js
+# Recuperar um arquivo específico da tag MAIS RECENTE
+git checkout v0.12.11-sections-1-2-complete -- docs/js/data/sections.js
 
 # Recuperar múltiplos arquivos
-git checkout v0.12.10-ux-complete -- docs/js/components/TextInput.js docs/js/components/SectionContainer.js
+git checkout v0.12.11-sections-1-2-complete -- docs/js/components/TextInput.js docs/js/components/SectionContainer.js
+
+# OU recuperar da tag anterior
+git checkout v0.12.10-ux-complete -- docs/js/data/sections.js
 ```
 
 ### Opção 4: Recuperar Backups do Stash
@@ -76,6 +89,8 @@ git stash pop stash@{0}
 
 | Hash | Descrição | Importância |
 |------|-----------|-------------|
+| `e75d14a` | Status final v0.12.11 | 🟢 DOCS |
+| `295b133` | Restaura Seção 1 completa | 🔴 CRÍTICO |
 | `352f498` | Restaura Seção 2 completa | 🔴 CRÍTICO |
 | `b7250fa` | Validação rigorosa 1.2 | 🔴 CRÍTICO |
 | `ca4d3cb` | Todas validações UX | 🔴 CRÍTICO |
@@ -98,7 +113,10 @@ git status
 # Ver tags disponíveis
 git tag -l
 
-# Ver informações da tag
+# Ver informações da tag (mais recente)
+git show v0.12.11-sections-1-2-complete
+
+# Ver informações da tag anterior
 git show v0.12.10-ux-complete
 ```
 
@@ -109,7 +127,7 @@ git show v0.12.10-ux-complete
 ❌ **NUNCA** use `git checkout -- .` sem ter certeza
 ❌ **NUNCA** use `git reset --hard` sem backup
 ❌ **NUNCA** force push para main/master
-❌ **NUNCA** delete a tag v0.12.10-ux-complete
+❌ **NUNCA** delete as tags v0.12.11-sections-1-2-complete ou v0.12.10-ux-complete
 
 ---
 
@@ -158,24 +176,27 @@ git checkout <hash-do-reflog>
 
 | Arquivo | Status | Validado |
 |---------|--------|----------|
-| `docs/js/data/sections.js` | ✅ Seção 2 correta (13 perguntas) | SIM |
+| `docs/js/data/sections.js` | ✅ Seções 1 e 2 corretas (TESTING.md) | SIM |
 | `docs/js/components/TextInput.js` | ✅ Todas validações | SIM |
 | `docs/js/components/SectionContainer.js` | ✅ Auto-skip + prefill | SIM |
 | `docs/js/components/DraftModal.js` | ✅ Modal customizado | SIM |
 | `docs/js/BOApp.js` | ✅ Integração completa | SIM |
 | `docs/css/inputs.css` | ✅ Error acima + animação | SIM |
 | `docs/css/draft-modal.css` | ✅ Estilos do modal | SIM |
+| `STATUS-FINAL-v0.12.11.md` | ✅ Documento de status completo | SIM |
 
 ---
 
 ## 📚 Links Úteis
 
-- **Tag no GitHub:** https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.10-ux-complete
+- **Tag Atual no GitHub:** https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.11-sections-1-2-complete
+- **Tag Anterior no GitHub:** https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.10-ux-complete
 - **Branch:** https://github.com/criscmaia/bo-assistant/tree/feature/ux-redesign-v1
-- **Último Commit:** https://github.com/criscmaia/bo-assistant/commit/352f498
+- **Último Commit:** https://github.com/criscmaia/bo-assistant/commit/e75d14a
+- **Status Final:** STATUS-FINAL-v0.12.11.md
 
 ---
 
 **Criado em:** 2026-01-01
 **Por:** Claude Code
-**Versão do Guia:** 1.0
+**Versão do Guia:** 1.1 (atualizado)

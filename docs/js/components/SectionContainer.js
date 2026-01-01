@@ -216,7 +216,13 @@ class SectionContainer {
      */
     _getStatusLabel() {
         switch (this.state) {
-            case 'in_progress': return `${Object.keys(this.answers).length}/${this.sectionData.questions.length} perguntas`;
+            case 'in_progress': {
+                const answeredCount = Object.keys(this.answers).length;
+                const totalQuestions = window.calculateSectionTotal
+                    ? window.calculateSectionTotal(this.sectionId, this.answers)
+                    : this.sectionData.questions.length + (this.sectionData.skipQuestion ? 1 : 0);
+                return `${answeredCount}/${totalQuestions} perguntas`;
+            }
             case 'completed': return '✓ Completa';
             case 'skipped': return '⏭️ Pulada';
             default: return 'Pendente';

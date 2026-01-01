@@ -1,10 +1,10 @@
 # 🛟 Recovery Guide - BO Inteligente
 
-**Versão Estável Atual:** v0.12.14-button-restore-fix
-**Versão Anterior:** v0.12.13-draft-fixes
+**Versão Estável Atual:** v0.12.15-groq-and-render-fix
+**Versão Anterior:** v0.12.14-button-restore-fix
 **Branch:** feature/ux-redesign-v1
 **Data:** 2026-01-01
-**Último Commit:** bec8fe8
+**Último Commit:** ec0049a
 
 ---
 
@@ -26,6 +26,8 @@ Esta versão contém **TODAS** as funcionalidades UX implementadas e validadas +
 ✅ **Restauração de rascunho com input e próxima pergunta** 🆕
 ✅ **Auto-save sem perder última resposta** 🆕
 ✅ **Botões (single_choice) com follow-ups restauram corretamente** 🆕
+✅ **Groq como LLM padrão (respostas quase instantâneas)** 🆕
+✅ **Texto gerado renderiza para TODAS as seções (não só seção 1)** 🆕
 
 ---
 
@@ -38,46 +40,45 @@ Esta versão contém **TODAS** as funcionalidades UX implementadas e validadas +
 git reset --hard
 
 # Voltar para a tag estável MAIS RECENTE (recomendado)
-git checkout v0.12.14-button-restore-fix
+git checkout v0.12.15-groq-and-render-fix
 
 # OU voltar para tags anteriores
+git checkout v0.12.14-button-restore-fix
 git checkout v0.12.13-draft-fixes
 git checkout v0.12.12-conditional-questions-fix
-git checkout v0.12.11-sections-1-2-complete
 
 # Se quiser criar uma branch a partir da tag
-git checkout -b recovery-from-tag v0.12.14-button-restore-fix
+git checkout -b recovery-from-tag v0.12.15-groq-and-render-fix
 ```
 
 ### Opção 2: Restaurar Via Commit Hash
 
 ```bash
 # Voltar para o último commit bom (MAIS RECENTE)
-git reset --hard bec8fe8
+git reset --hard ec0049a
 
 # OU voltar para commits anteriores
+git reset --hard bec8fe8  # Button restore fix
 git reset --hard 1adcae7  # Auto-save timing fix
 git reset --hard d9732db  # Draft restoration fix
 git reset --hard 47f8962  # Conditional questions fix
-git reset --hard 295b133  # Section 1 fix
-git reset --hard 352f498  # Section 2 fix
 
 # Ou criar branch a partir dele
-git checkout -b recovery-from-commit bec8fe8
+git checkout -b recovery-from-commit ec0049a
 ```
 
 ### Opção 3: Recuperar Arquivos Específicos
 
 ```bash
 # Recuperar um arquivo específico da tag MAIS RECENTE
-git checkout v0.12.14-button-restore-fix -- docs/js/components/SectionContainer.js
+git checkout v0.12.15-groq-and-render-fix -- docs/js/BOApp.js
 
-# Recuperar múltiplos arquivos
-git checkout v0.12.14-button-restore-fix -- docs/js/components/TextInput.js docs/js/components/SectionContainer.js docs/js/data/sections.js
+# Recuperar múltiplos arquivos (backend + frontend)
+git checkout v0.12.15-groq-and-render-fix -- backend/main.py backend/llm_service.py docs/js/BOApp.js docs/js/services/APIClient.js
 
 # OU recuperar de tags anteriores
-git checkout v0.12.13-draft-fixes -- docs/js/components/SectionContainer.js
-git checkout v0.12.11-sections-1-2-complete -- docs/js/data/sections.js
+git checkout v0.12.14-button-restore-fix -- docs/js/components/SectionContainer.js
+git checkout v0.12.13-draft-fixes -- docs/js/BOApp.js
 ```
 
 ### Opção 4: Recuperar Backups do Stash
@@ -99,6 +100,7 @@ git stash pop stash@{0}
 
 | Hash | Descrição | Importância |
 |------|-----------|-------------|
+| `ec0049a` | Fix Groq default + render text all sections | 🔴 CRÍTICO |
 | `bec8fe8` | Fix button restore com follow-ups | 🔴 CRÍTICO |
 | `1adcae7` | Fix auto-save timing (sem perder dados) | 🔴 CRÍTICO |
 | `d9732db` | Fix draft restore mostrar input | 🔴 CRÍTICO |
@@ -140,7 +142,7 @@ git show v0.12.10-ux-complete
 ❌ **NUNCA** use `git checkout -- .` sem ter certeza
 ❌ **NUNCA** use `git reset --hard` sem backup
 ❌ **NUNCA** force push para main/master
-❌ **NUNCA** delete as tags v0.12.14-button-restore-fix, v0.12.13-draft-fixes, v0.12.12-conditional-questions-fix
+❌ **NUNCA** delete as tags v0.12.15-groq-and-render-fix, v0.12.14-button-restore-fix, v0.12.13-draft-fixes
 
 ---
 
@@ -202,14 +204,14 @@ git checkout <hash-do-reflog>
 
 ## 📚 Links Úteis
 
-- **Tag Atual no GitHub:** https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.14-button-restore-fix
+- **Tag Atual no GitHub:** https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.15-groq-and-render-fix
 - **Tags Anteriores:**
+  - v0.12.14-button-restore-fix: https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.14-button-restore-fix
   - v0.12.13-draft-fixes: https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.13-draft-fixes
   - v0.12.12-conditional-questions-fix: https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.12-conditional-questions-fix
-  - v0.12.11-sections-1-2-complete: https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.11-sections-1-2-complete
 - **Branch:** https://github.com/criscmaia/bo-assistant/tree/feature/ux-redesign-v1
-- **Último Commit:** https://github.com/criscmaia/bo-assistant/commit/bec8fe8
-- **Status Final:** STATUS-FINAL-v0.12.14.md
+- **Último Commit:** https://github.com/criscmaia/bo-assistant/commit/ec0049a
+- **Status Final:** STATUS-FINAL-v0.12.15.md
 
 ---
 

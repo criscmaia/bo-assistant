@@ -74,9 +74,51 @@ class SectionContainer {
                     this._showCurrentQuestion();
                 }
             } else {
-                // Restaurando rascunho: mostrar próxima pergunta
-                // currentQuestionIndex já está correto do estado salvo
+                // Restaurando rascunho: verificar se precisa reconstruir follow-up queue
+                this._restoreFollowUpState();
+                // Mostrar próxima pergunta
                 this._showCurrentQuestion();
+            }
+        }
+    }
+
+    /**
+     * Restaura estado de follow-ups ao carregar um rascunho
+     * Se a pergunta atual já foi respondida e tem follow-ups pendentes, reconstrói a fila
+     */
+    _restoreFollowUpState() {
+        if (!this.sectionData) return;
+
+        const questions = this.sectionData.questions;
+
+        // Calcular índice real da pergunta atual
+        const realIndex = this.sectionData.skipQuestion ? this.currentQuestionIndex - 1 : this.currentQuestionIndex;
+
+        if (realIndex < 0 || realIndex >= questions.length) return;
+
+        const currentQuestion = questions[realIndex];
+
+        // Verificar se esta pergunta já foi respondida
+        const savedAnswer = this.answers[currentQuestion.id];
+        if (!savedAnswer) return;
+
+        // Verificar se tem follow-ups
+        if (!currentQuestion.followUp || !currentQuestion.followUp.condition) return;
+
+        // Verificar se a condição foi atendida
+        const conditionMet = savedAnswer.toLowerCase().includes(currentQuestion.followUp.condition.toLowerCase());
+        if (!conditionMet) return;
+
+        // Verificar quais follow-ups ainda não foram respondidas
+        if (currentQuestion.followUp.questions && currentQuestion.followUp.questions.length > 0) {
+            const pendingFollowUps = currentQuestion.followUp.questions.filter(
+                followUpQ => !this.answers[followUpQ.id]
+            );
+
+            if (pendingFollowUps.length > 0) {
+                // Reconstruir fila com follow-ups pendentes
+                this.followUpQueue = [...pendingFollowUps];
+                console.log('[SectionContainer] Follow-up queue restaurada:', this.followUpQueue.map(q => q.id));
             }
         }
     }
@@ -483,6 +525,13 @@ class SectionContainer {
     _showCurrentQuestion() {
         if (!this.sectionData) return;
 
+        // Verificar se há follow-ups pendentes na fila (ex: após restaurar rascunho)
+        if (this.followUpQueue.length > 0) {
+            console.log('[SectionContainer] Mostrando follow-up da fila:', this.followUpQueue[0].id);
+            this._showNextFollowUp();
+            return;
+        }
+
         const questions = this.sectionData.questions;
 
         // Verificar se tem skipQuestion primeiro
@@ -497,7 +546,16 @@ class SectionContainer {
 
         if (realIndex >= 0 && realIndex < questions.length) {
             const question = questions[realIndex];
-            this._showQuestion(question);
+            // Verificar se esta pergunta já foi respondida (pode acontecer ao restaurar rascunho)
+            if (this.answers[question.id]) {
+                // Pergunta já respondida, avançar para próxima
+                console.log('[SectionContainer] Pergunta já respondida:', question.id, '- avançando...');
+                this.currentQuestionIndex++;
+                this._updateBadge();
+                this._showCurrentQuestion(); // Recursão para mostrar próxima
+            } else {
+                this._showQuestion(question);
+            }
         } else if (realIndex >= questions.length) {
             // Todas as perguntas respondidas
             this._completeSection();

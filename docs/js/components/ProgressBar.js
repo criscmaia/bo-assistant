@@ -152,19 +152,17 @@ class ProgressBar {
      * Define a seção atual (em progresso)
      */
     setCurrentSection(sectionId) {
-        // Remover status in_progress da seção anterior
-        if (this.currentSectionId && this.sectionStates[this.currentSectionId]) {
-            const oldState = this.sectionStates[this.currentSectionId];
-            if (oldState.status === 'in_progress') {
-                oldState.status = 'pending';
-                const oldNode = this.container.querySelector(`[data-section-id="${this.currentSectionId}"]`);
-                if (oldNode) this._applyNodeState(oldNode, this.currentSectionId);
-            }
-        }
+        // Não mudar status da seção anterior - apenas atualizar highlight visual
+        // A seção anterior pode estar completed/in_progress e deve manter esse status
 
         // Definir nova seção atual
         this.currentSectionId = sectionId;
-        this.updateSection(sectionId, 'in_progress');
+
+        // Atualizar visual de todas as seções
+        this.container.querySelectorAll('.progress-bar__section').forEach(node => {
+            const id = parseInt(node.dataset.sectionId);
+            this._applyNodeState(node, id);
+        });
     }
 
     /**

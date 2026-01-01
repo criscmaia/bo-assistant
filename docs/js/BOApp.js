@@ -334,9 +334,9 @@ class BOApp {
     /**
      * Callback: navegar para próxima seção
      */
-    _onNavigateNext(nextSectionId) {
-        console.log('[BOApp] Navegar para seção:', nextSectionId);
-        this._navigateToSection(nextSectionId);
+    _onNavigateNext(nextSectionId, options = {}) {
+        console.log('[BOApp] Navegar para seção:', nextSectionId, 'com opções:', options);
+        this._navigateToSection(nextSectionId, false, options);
     }
 
     /**
@@ -366,8 +366,11 @@ class BOApp {
 
     /**
      * Navega para uma seção específica
+     *
+     * options:
+     *   - preAnswerSkipQuestion: Valor para auto-responder o skipQuestion (sem mostrar no chat)
      */
-    async _navigateToSection(sectionId, isReadOnly = false) {
+    async _navigateToSection(sectionId, isReadOnly = false, options = {}) {
         const sectionIndex = sectionId - 1;
 
         if (sectionIndex < 0 || sectionIndex >= SECTIONS_DATA.length) {
@@ -405,6 +408,7 @@ class BOApp {
             currentQuestionIndex: sectionState.currentQuestionIndex,
             generatedText: sectionState.generatedText,
             isReadOnly: shouldBeReadOnly,
+            preAnswerSkipQuestion: options.preAnswerSkipQuestion,
         });
 
         // Fade in

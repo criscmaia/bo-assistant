@@ -41,6 +41,10 @@ class SectionContainer {
 
     /**
      * Carrega dados de uma seção
+     *
+     * options:
+     *   - preAnswerSkipQuestion: Se fornecido, auto-responde o skipQuestion com este valor
+     *     sem mostrar no chat (útil quando o usuário veio de um botão de transição tipo "Sim, havia veículo")
      */
     loadSection(sectionData, options = {}) {
         this.sectionData = sectionData;
@@ -56,7 +60,17 @@ class SectionContainer {
 
         // Se não for read-only e não tiver mensagens, mostrar primeira pergunta
         if (!this.isReadOnly && this.messages.length === 0 && this.state === 'in_progress') {
-            this._showCurrentQuestion();
+            // Se houver uma resposta pré-definida para o skipQuestion, salvar e pular
+            if (options.preAnswerSkipQuestion && this.sectionData.skipQuestion) {
+                const skipQ = this.sectionData.skipQuestion;
+                this.answers[skipQ.id] = options.preAnswerSkipQuestion;
+                this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
+                // Avançar para próxima pergunta sem mostrar no chat
+                this.currentQuestionIndex = 1; // Pular o skipQuestion
+                this._showCurrentQuestion();
+            } else {
+                this._showCurrentQuestion();
+            }
         }
     }
 
@@ -374,7 +388,8 @@ class SectionContainer {
         const startNextBtn = this.container.querySelector('#section-start-next');
         if (startNextBtn) {
             startNextBtn.addEventListener('click', () => {
-                this.onNavigateNext(this.sectionId + 1);
+                // Passar "sim" como resposta pré-definida para o skipQuestion da próxima seção
+                this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'sim' });
             });
         }
 

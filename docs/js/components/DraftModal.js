@@ -64,27 +64,76 @@ class DraftModal {
         const savedTime = new Date(draft.timestamp);
         const formattedTime = savedTime.toLocaleString('pt-BR');
 
-        let previewText = `<strong>Salvo em:</strong> ${formattedTime}<br>`;
+        let html = '';
 
-        if (draft.currentSectionIndex !== undefined) {
-            previewText += `<strong>Seção atual:</strong> ${draft.currentSectionIndex + 1}<br>`;
-        }
-
-        // Contar seções completadas
-        let completedCount = 0;
-        let skippedCount = 0;
+        // Informações de progresso por seção
         if (draft.sectionsState) {
-            Object.values(draft.sectionsState).forEach(state => {
-                if (state.status === 'completed') completedCount++;
-                if (state.status === 'skipped') skippedCount++;
+            Object.entries(draft.sectionsState).forEach(([sectionId, state]) => {
+                const answeredCount = Object.keys(state.answers || {}).length;
+
+                if (answeredCount > 0) {
+                    const statusText = state.status === 'completed' ? 'perguntas respondidas' :
+                                      state.status === 'skipped' ? 'pulada' :
+                                      'perguntas respondidas';
+
+                    html += `<div class="draft-section-summary">
+                        <strong>Seção ${sectionId}:</strong> ${answeredCount}/${answeredCount} ${statusText}
+                    </div>`;
+                }
             });
         }
 
-        if (completedCount > 0 || skippedCount > 0) {
-            previewText += `<strong>Progresso:</strong> ${completedCount} completa(s), ${skippedCount} pulada(s)`;
+        html += `<div class="draft-meta">Salvo em ${formattedTime}</div>`;
+
+        // Lista de respostas (scrollable)
+        html += '<div class="draft-answers-list">';
+
+        if (draft.sectionsState) {
+            // Ordenar seções por ID
+            const sortedSections = Object.entries(draft.sectionsState)
+                .sort(([a], [b]) => parseInt(a) - parseInt(b));
+
+            sortedSections.forEach(([sectionId, state]) => {
+                if (state.answers && Object.keys(state.answers).length > 0) {
+                    // Ordenar respostas por ID (1.1, 1.2, etc)
+                    const sortedAnswers = Object.entries(state.answers)
+                        .sort(([a], [b]) => {
+                            const aParts = a.split('.').map(Number);
+                            const bParts = b.split('.').map(Number);
+                            for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+                                if (aParts[i] !== bParts[i]) {
+                                    return (aParts[i] || 0) - (bParts[i] || 0);
+                                }
+                            }
+                            return 0;
+                        });
+
+                    sortedAnswers.forEach(([questionId, answer]) => {
+                        // Truncar resposta se muito longa
+                        const truncated = answer.length > 60 ? answer.substring(0, 60) + '...' : answer;
+                        html += `
+                            <div class="draft-answer-item">
+                                <span class="draft-answer-id">${questionId}:</span>
+                                <span class="draft-answer-text">${this._escapeHtml(truncated)}</span>
+                            </div>
+                        `;
+                    });
+                }
+            });
         }
 
-        return previewText;
+        html += '</div>';
+
+        return html;
+    }
+
+    /**
+     * Escapa HTML para prevenir XSS
+     */
+    _escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**

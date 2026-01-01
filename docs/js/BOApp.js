@@ -404,7 +404,8 @@ class BOApp {
             return;
         }
 
-        this._navigateToSection(sectionId, true);
+        // Não forçar read-only - deixar _navigateToSection decidir baseado no status
+        this._navigateToSection(sectionId, false);
     }
 
     /**

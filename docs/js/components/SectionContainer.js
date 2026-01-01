@@ -91,8 +91,10 @@ class SectionContainer {
                 // Apenas renderizar input da próxima pergunta (sem adicionar mensagem de novo)
                 const nextQuestion = this._getCurrentQuestionForInput();
                 if (nextQuestion) {
-                    console.log('[SectionContainer] Renderizando input para pergunta:', nextQuestion.id);
+                    console.log('[SectionContainer] Renderizando input para pergunta:', nextQuestion.id, '- currentQuestionIndex:', this.currentQuestionIndex);
                     this._renderInput(nextQuestion);
+                } else {
+                    console.log('[SectionContainer] Nenhuma pergunta pendente - seção completa');
                 }
             }
         }

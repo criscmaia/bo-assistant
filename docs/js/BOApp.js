@@ -14,6 +14,7 @@ class BOApp {
         this.api = new APIClient();
         this.progressBar = null;
         this.sectionContainer = null;
+        this.draftModal = null;
 
         // Estado global
         this.currentSectionIndex = 0;
@@ -59,6 +60,9 @@ class BOApp {
         // Inicializar SectionContainer
         this._initSectionContainer();
 
+        // Inicializar DraftModal
+        this._initDraftModal();
+
         // Verificar conexão com API
         await this._checkApiConnection();
 
@@ -68,10 +72,10 @@ class BOApp {
         if (!hasDraft) {
             // Iniciar nova sessão
             await this._startNewSession();
+            // Carregar primeira seção
+            this._loadCurrentSection();
         }
-
-        // Carregar primeira seção (ou seção do rascunho)
-        this._loadCurrentSection();
+        // Se hasDraft é true, o modal será mostrado e seus callbacks vão chamar _loadCurrentSection()
 
         console.log('[BOApp] Inicialização completa!');
     }
@@ -115,6 +119,14 @@ class BOApp {
         });
 
         window.sectionContainer = this.sectionContainer; // Debug
+    }
+
+    /**
+     * Inicializa DraftModal
+     */
+    _initDraftModal() {
+        this.draftModal = new DraftModal('draft-modal-container');
+        window.draftModal = this.draftModal; // Debug
     }
 
     /**
@@ -547,38 +559,42 @@ class BOApp {
                 return false;
             }
 
-            // Perguntar ao usuário
-            const shouldRestore = confirm(
-                '📝 Encontramos um rascunho salvo.\n\n' +
-                `Salvo em: ${savedTime.toLocaleString()}\n\n` +
-                'Deseja continuar de onde parou?'
+            // Mostrar modal customizado
+            this.draftModal.show(
+                draft,
+                // onContinue - continuar do rascunho
+                () => {
+                    // Restaurar estado
+                    this.currentSectionIndex = draft.currentSectionIndex;
+                    this.sectionsState = draft.sectionsState;
+
+                    // Restaurar sessão API se disponível
+                    if (draft.apiIds?.sessionId) {
+                        this.api.restoreSession(draft.apiIds.sessionId, draft.apiIds.boId);
+                    }
+
+                    // Atualizar ProgressBar com estados salvos
+                    Object.entries(this.sectionsState).forEach(([id, state]) => {
+                        const sectionId = parseInt(id);
+                        if (state.status === 'completed') {
+                            this.progressBar.markCompleted(sectionId);
+                        } else if (state.status === 'skipped') {
+                            this.progressBar.markSkipped(sectionId);
+                        }
+                    });
+
+                    console.log('[BOApp] Rascunho restaurado');
+                    this._loadCurrentSection();
+                },
+                // onDiscard - descartar e começar novo
+                async () => {
+                    localStorage.removeItem(this.autoSaveKey);
+                    console.log('[BOApp] Rascunho descartado');
+                    await this._startNewSession();
+                    this._loadCurrentSection();
+                }
             );
 
-            if (!shouldRestore) {
-                localStorage.removeItem(this.autoSaveKey);
-                return false;
-            }
-
-            // Restaurar estado
-            this.currentSectionIndex = draft.currentSectionIndex;
-            this.sectionsState = draft.sectionsState;
-
-            // Restaurar sessão API se disponível
-            if (draft.apiIds?.sessionId) {
-                this.api.restoreSession(draft.apiIds.sessionId, draft.apiIds.boId);
-            }
-
-            // Atualizar ProgressBar com estados salvos
-            Object.entries(this.sectionsState).forEach(([id, state]) => {
-                const sectionId = parseInt(id);
-                if (state.status === 'completed') {
-                    this.progressBar.markCompleted(sectionId);
-                } else if (state.status === 'skipped') {
-                    this.progressBar.markSkipped(sectionId);
-                }
-            });
-
-            console.log('[BOApp] Rascunho restaurado');
             return true;
 
         } catch (error) {

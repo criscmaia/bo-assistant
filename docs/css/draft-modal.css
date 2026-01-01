@@ -1,0 +1,156 @@
+/* ============================================ */
+/* DRAFT MODAL STYLES */
+/* ============================================ */
+
+.draft-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.draft-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 420px;
+    width: 100%;
+    padding: 2rem;
+    animation: slideUp 0.3s ease-out;
+}
+
+.draft-modal__header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.draft-modal__icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.draft-modal__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.draft-modal__subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+}
+
+.draft-modal__preview {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.draft-modal__preview strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.draft-modal__actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.draft-modal__btn {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.draft-modal__btn--continue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.draft-modal__btn--continue:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.draft-modal__btn--continue:active {
+    transform: translateY(0);
+}
+
+.draft-modal__btn--discard {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.draft-modal__btn--discard:hover {
+    background: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.draft-modal__btn--discard:active {
+    transform: translateY(0);
+}
+
+.draft-modal__hint {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin: 0;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+    .draft-modal {
+        padding: 1.5rem;
+    }
+
+    .draft-modal__title {
+        font-size: 1.25rem;
+    }
+
+    .draft-modal__actions {
+        flex-direction: column;
+    }
+}

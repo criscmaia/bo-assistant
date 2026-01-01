@@ -88,10 +88,24 @@ class SectionContainer {
                 // Restaurando rascunho ou voltando para seção em andamento
                 this._restoreFollowUpState();
 
-                // Apenas renderizar input da próxima pergunta (sem adicionar mensagem de novo)
+                // Obter próxima pergunta
                 const nextQuestion = this._getCurrentQuestionForInput();
                 if (nextQuestion) {
                     console.log('[SectionContainer] Renderizando input para pergunta:', nextQuestion.id, '- currentQuestionIndex:', this.currentQuestionIndex);
+
+                    // Verificar se a pergunta já está no chat
+                    const questionText = `${nextQuestion.id}) ${nextQuestion.text}`;
+                    const questionAlreadyInChat = this.messages.some(msg =>
+                        msg.type === 'bot' && msg.text === questionText
+                    );
+
+                    // Se não estiver no chat, adicionar
+                    if (!questionAlreadyInChat) {
+                        console.log('[SectionContainer] Pergunta não está no chat, adicionando:', nextQuestion.id);
+                        this._addBotMessage(questionText, nextQuestion.hint);
+                    }
+
+                    // Renderizar input
                     this._renderInput(nextQuestion);
                 } else {
                     console.log('[SectionContainer] Nenhuma pergunta pendente - seção completa');

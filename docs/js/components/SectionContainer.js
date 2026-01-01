@@ -392,8 +392,29 @@ class SectionContainer {
         }
 
         // Chamar callback DEPOIS de incrementar (para auto-save capturar índice correto)
-        this.onAnswer(question.id, answer);
+        // Se a seção vai completar, aguardar para pegar texto gerado da API
+        const willComplete = !hasFollowUp &&
+                            (!isFollowUp || this.followUpQueue.length === 0) &&
+                            this.currentQuestionIndex >= this.sectionData.questions.length;
 
+        if (willComplete && !this.isReadOnly) {
+            // Aguardar onAnswer para obter texto gerado se seção completar
+            this.onAnswer(question.id, answer).then(() => {
+                // Após onAnswer, processar follow-ups ou completar seção
+                this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);
+            });
+            return;
+        } else {
+            this.onAnswer(question.id, answer);
+        }
+
+        this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);
+    }
+
+    /**
+     * Continua processamento após onAnswer (follow-ups ou próxima pergunta)
+     */
+    _continueAfterAnswer(question, answer, isFollowUp, hasFollowUp) {
         // Processar follow-ups
         if (isFollowUp && this.followUpQueue.length > 0) {
             // Ainda há follow-ups na fila
@@ -613,10 +634,8 @@ class SectionContainer {
     async _completeSection() {
         this.state = 'completed';
 
-        // Simular texto gerado (será substituído pela API real na Fase 4)
-        this.generatedText = `[Texto da Seção ${this.sectionId} será gerado pela API]\n\nRespostas coletadas:\n${
-            Object.entries(this.answers).map(([k, v]) => `- ${k}: ${v}`).join('\n')
-        }`;
+        // NÃO setar placeholder aqui - o texto já foi ou será setado por onComplete
+        // Se por algum motivo não houver texto (offline), o placeholder será setado em _onSectionComplete do BOApp
 
         // Callback - AGUARDAR conclusão antes de renderizar
         await this.onComplete(this.sectionId, this.answers);

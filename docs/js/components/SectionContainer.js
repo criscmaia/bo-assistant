@@ -325,12 +325,34 @@ class SectionContainer {
 
         // Salvar resposta
         this.answers[question.id] = answer;
-        this.onAnswer(question.id, answer);
 
         // Verificar se é uma pergunta follow-up (tem mais de um ponto no ID)
         const dotCount = (question.id.match(/\./g) || []).length;
         const isFollowUp = dotCount > 1;  // Ex: "1.5.1" tem 2 pontos, "1.5" tem 1 ponto
 
+        // Verificar follow-up da pergunta atual
+        let hasFollowUp = false;
+        if (question.followUp && question.followUp.condition) {
+            const conditionMet = answer.toLowerCase().includes(question.followUp.condition.toLowerCase());
+            hasFollowUp = conditionMet && (
+                (question.followUp.questions && question.followUp.questions.length > 0) ||
+                question.followUp.question
+            );
+        }
+
+        // Incrementar currentQuestionIndex ANTES de onAnswer (para auto-save capturar valor correto)
+        // EXCETO se for follow-up ou houver follow-up pendente
+        if (!isFollowUp || this.followUpQueue.length === 0) {
+            if (!hasFollowUp) {
+                this.currentQuestionIndex++;
+                this._updateBadge();
+            }
+        }
+
+        // Chamar callback DEPOIS de incrementar (para auto-save capturar índice correto)
+        this.onAnswer(question.id, answer);
+
+        // Processar follow-ups
         if (isFollowUp && this.followUpQueue.length > 0) {
             // Ainda há follow-ups na fila
             setTimeout(() => {
@@ -339,7 +361,6 @@ class SectionContainer {
             return;
         }
 
-        // Verificar follow-up da pergunta atual
         if (question.followUp && question.followUp.condition) {
             const conditionMet = answer.toLowerCase().includes(question.followUp.condition.toLowerCase());
 
@@ -363,10 +384,7 @@ class SectionContainer {
             }
         }
 
-        // Avançar para próxima pergunta
-        this.currentQuestionIndex++;
-        this._updateBadge();
-
+        // Mostrar próxima pergunta
         setTimeout(() => {
             this._showCurrentQuestion();
         }, 500);
@@ -381,6 +399,7 @@ class SectionContainer {
             this._showQuestion(nextQuestion);
         } else {
             // Todas as follow-ups respondidas, avançar para próxima pergunta principal
+            // Incrementar currentQuestionIndex (já que não foi incrementado antes)
             this.currentQuestionIndex++;
             this._updateBadge();
             setTimeout(() => {

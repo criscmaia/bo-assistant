@@ -331,8 +331,9 @@ class SectionContainer {
      * Mostra uma pergunta específica com o input correto
      */
     _showQuestion(question) {
-        // Adicionar mensagem do bot
-        this._addBotMessage(question.text, question.hint);
+        // Adicionar mensagem do bot com o número da pergunta
+        const questionWithNumber = `${question.id}) ${question.text}`;
+        this._addBotMessage(questionWithNumber, question.hint);
 
         // Renderizar input correto
         this._renderInput(question);

@@ -179,11 +179,16 @@ class BOApp {
      * Atualiza progresso de todas as seções
      */
     _updateAllSectionsProgress() {
+        console.log('[BOApp] _updateAllSectionsProgress - sectionsState:', this.sectionsState);
+
         Object.entries(this.sectionsState).forEach(([id, state]) => {
             const sectionId = parseInt(id);
             const answeredCount = Object.keys(state.answers || {}).length;
 
-            if (answeredCount > 0) {
+            console.log('[BOApp] Seção', sectionId, '- status:', state.status, ', answeredCount:', answeredCount);
+
+            // Atualizar progresso para seções com respostas ou completas
+            if (answeredCount > 0 || state.status === 'completed') {
                 const totalQuestions = window.calculateSectionTotal
                     ? window.calculateSectionTotal(sectionId, state.answers)
                     : answeredCount;

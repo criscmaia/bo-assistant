@@ -155,11 +155,19 @@ class ProgressBar {
         // Não mudar status da seção anterior - apenas atualizar highlight visual
         // A seção anterior pode estar completed/in_progress e deve manter esse status
 
+        console.log('[ProgressBar] setCurrentSection:', sectionId);
+
         // Definir nova seção atual
         this.currentSectionId = sectionId;
 
+        // Atualizar status no sectionStates para in_progress se estava pending
+        if (this.sectionStates[sectionId] && this.sectionStates[sectionId].status === 'pending') {
+            console.log('[ProgressBar] Mudando status de pending → in_progress para seção:', sectionId);
+            this.sectionStates[sectionId].status = 'in_progress';
+        }
+
         // Atualizar visual de todas as seções
-        this.container.querySelectorAll('.progress-bar__section').forEach(node => {
+        this.container.querySelectorAll('.progress-node').forEach(node => {
             const id = parseInt(node.dataset.sectionId);
             this._applyNodeState(node, id);
         });
@@ -239,10 +247,14 @@ class ProgressBar {
     _handleNodeClick(sectionId) {
         const state = this.sectionStates[sectionId];
 
+        console.log('[ProgressBar] Clique na bolinha:', { sectionId, status: state.status, isPending: state.status === 'pending' });
+
         // Permitir clicar em qualquer seção já visitada (não-pending)
         // Isso inclui: in_progress, completed, skipped
         if (state.status !== 'pending') {
             this.onSectionClick(sectionId);
+        } else {
+            console.log('[ProgressBar] Bolinha bloqueada - status é pending');
         }
     }
 

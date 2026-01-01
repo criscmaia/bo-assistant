@@ -189,6 +189,33 @@ class SectionContainer {
 
         const canSkip = nextSection.skippable !== false;
 
+        // Textos específicos para cada seção (contexto-aware)
+        const startTexts = {
+            2: 'Sim, havia veículo',
+            3: 'Sim, houve campana',
+            4: 'Sim, houve entrada em domicílio',
+            5: 'Sim, houve fundada suspeita',
+            6: 'Sim, houve resistência',
+            7: 'Sim, houve apreensão',
+            8: 'Iniciar Seção 8 (FINAL)'
+        };
+
+        const skipTexts = {
+            2: 'Não havia veículo',
+            3: 'Não houve campana',
+            4: 'Não houve entrada em domicílio',
+            5: 'Não houve fundada suspeita',
+            6: 'Não houve resistência',
+            7: 'Não houve apreensão'
+        };
+
+        const nextSectionId = nextSection.id;
+        const startButtonText = startTexts[nextSectionId] || `Iniciar Seção ${nextSectionId}`;
+        const skipButtonText = skipTexts[nextSectionId] || 'Pular';
+
+        // Icon para o botão de início
+        const startButtonIcon = nextSectionId === 8 ? '▶️' : '✅';
+
         return `
             <div class="section-transition">
                 <div class="section-transition__preview">
@@ -200,11 +227,11 @@ class SectionContainer {
                 </div>
                 <div class="section-transition__buttons">
                     <button class="section-transition__btn section-transition__btn--start" id="section-start-next">
-                        ▶️ Iniciar Seção ${nextSection.id}
+                        ${startButtonIcon} ${startButtonText}
                     </button>
                     ${canSkip ? `
                     <button class="section-transition__btn section-transition__btn--skip" id="section-skip-next">
-                        ⏭️ Pular
+                        ⏭️ ${skipButtonText}
                     </button>
                     ` : ''}
                 </div>
@@ -242,11 +269,18 @@ class SectionContainer {
 
             case 'text':
             default:
+                // Para pergunta 1.1, pré-preencher com data/hora atual
+                let defaultValue = null;
+                if (question.id === '1.1') {
+                    defaultValue = this._generateCurrentDateTime();
+                }
+
                 return new TextInput({
                     placeholder: question.hint || 'Digite sua resposta...',
                     validation: question.validation || {},
-                    onSubmit: (value) => {
-                        this._handleInputSubmit(value, question);
+                    defaultValue: defaultValue,
+                    onSubmit: (value, onError) => {
+                        this._handleInputSubmit(value, question, null, onError);
                     }
                 });
         }
@@ -435,7 +469,7 @@ class SectionContainer {
     /**
      * Completa a seção
      */
-    _completeSection() {
+    async _completeSection() {
         this.state = 'completed';
 
         // Simular texto gerado (será substituído pela API real na Fase 4)
@@ -443,10 +477,10 @@ class SectionContainer {
             Object.entries(this.answers).map(([k, v]) => `- ${k}: ${v}`).join('\n')
         }`;
 
-        // Callback
-        this.onComplete(this.sectionId, this.answers);
+        // Callback - AGUARDAR conclusão antes de renderizar
+        await this.onComplete(this.sectionId, this.answers);
 
-        // Re-renderizar
+        // Re-renderizar SOMENTE depois que onComplete terminar
         this.render();
     }
 
@@ -503,9 +537,11 @@ class SectionContainer {
      */
     setGeneratedText(text) {
         this.generatedText = text;
-        if (this.state === 'completed') {
-            this.render();
-        }
+        // Não precisa renderizar aqui - _completeSection() já vai renderizar após onComplete
+        // Se precisar atualizar em outros contextos, pode descomentar:
+        // if (this.state === 'completed') {
+        //     this.render();
+        // }
     }
 
     /**
@@ -520,5 +556,30 @@ class SectionContainer {
             currentQuestionIndex: this.currentQuestionIndex,
             generatedText: this.generatedText
         };
+    }
+
+    /**
+     * Gera string com data e hora atual no formato: "31/12/2025, 14h30, terça-feira"
+     * Usada como pré-preenchimento para pergunta 1.1
+     */
+    _generateCurrentDateTime() {
+        const now = new Date();
+
+        // Formatar dia/mês
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const date = `${day}/${month}/${year}`;
+
+        // Formatar hora
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+        const time = `${hour}h${minute}`;
+
+        // Dia da semana em português
+        const daysOfWeek = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+        const dayOfWeek = daysOfWeek[now.getDay()];
+
+        return `${date}, ${time}, ${dayOfWeek}`;
     }
 }

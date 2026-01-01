@@ -177,6 +177,8 @@ class ProgressBar {
             state.totalCount = totalCount;
         }
 
+        console.log('[ProgressBar] updateProgress:', { sectionId, answeredCount, totalCount, status: state.status });
+
         // Atualizar linha correspondente
         this._updateLineFill(sectionId);
     }
@@ -203,7 +205,10 @@ class ProgressBar {
      */
     _updateLineFill(sectionId) {
         const lineFill = document.getElementById(`line-fill-${sectionId}`);
-        if (!lineFill) return;
+        if (!lineFill) {
+            console.warn('[ProgressBar] line-fill element not found for section:', sectionId);
+            return;
+        }
 
         const state = this.sectionStates[sectionId];
         let percentage = 0;
@@ -213,6 +218,8 @@ class ProgressBar {
         } else if (state.status === 'in_progress' && state.totalCount > 0) {
             percentage = (state.answeredCount / state.totalCount) * 100;
         }
+
+        console.log('[ProgressBar] _updateLineFill:', { sectionId, percentage, answeredCount: state.answeredCount, totalCount: state.totalCount, status: state.status });
 
         lineFill.style.width = `${percentage}%`;
     }
@@ -232,9 +239,9 @@ class ProgressBar {
     _handleNodeClick(sectionId) {
         const state = this.sectionStates[sectionId];
 
-        // Só permite clicar em seções já visitadas (completed ou skipped)
-        // ou na seção atual
-        if (state.status === 'completed' || state.status === 'skipped' || sectionId === this.currentSectionId) {
+        // Permitir clicar em qualquer seção já visitada (não-pending)
+        // Isso inclui: in_progress, completed, skipped
+        if (state.status !== 'pending') {
             this.onSectionClick(sectionId);
         }
     }

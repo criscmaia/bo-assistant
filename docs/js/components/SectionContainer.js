@@ -85,10 +85,15 @@ class SectionContainer {
                     this._showCurrentQuestion();
                 }
             } else {
-                // Restaurando rascunho: verificar se precisa reconstruir follow-up queue
+                // Restaurando rascunho ou voltando para seção em andamento
                 this._restoreFollowUpState();
-                // Mostrar próxima pergunta
-                this._showCurrentQuestion();
+
+                // Apenas renderizar input da próxima pergunta (sem adicionar mensagem de novo)
+                const nextQuestion = this._getCurrentQuestionForInput();
+                if (nextQuestion) {
+                    console.log('[SectionContainer] Renderizando input para pergunta:', nextQuestion.id);
+                    this._renderInput(nextQuestion);
+                }
             }
         }
     }
@@ -601,6 +606,43 @@ class SectionContainer {
             // Todas as perguntas respondidas
             this._completeSection();
         }
+    }
+
+    /**
+     * Retorna a pergunta atual para renderizar input (sem adicionar mensagem)
+     * Usado ao restaurar rascunho ou voltar para seção em andamento
+     */
+    _getCurrentQuestionForInput() {
+        if (!this.sectionData) return null;
+
+        // Se há follow-ups pendentes, retornar próximo da fila
+        if (this.followUpQueue.length > 0) {
+            return this.followUpQueue[0];
+        }
+
+        const questions = this.sectionData.questions;
+
+        // Verificar skipQuestion
+        if (this.sectionData.skipQuestion && this.currentQuestionIndex === 0 && !this.answers[this.sectionData.skipQuestion.id]) {
+            return this.sectionData.skipQuestion;
+        }
+
+        // Calcular índice real
+        const realIndex = this.sectionData.skipQuestion ? this.currentQuestionIndex - 1 : this.currentQuestionIndex;
+
+        if (realIndex >= 0 && realIndex < questions.length) {
+            const question = questions[realIndex];
+            // Se pergunta já respondida, avançar recursivamente
+            if (this.answers[question.id]) {
+                this.currentQuestionIndex++;
+                this._updateBadge();
+                return this._getCurrentQuestionForInput(); // Recursão
+            }
+            return question;
+        }
+
+        // Seção completa
+        return null;
     }
 
     /**

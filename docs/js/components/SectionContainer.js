@@ -59,17 +59,23 @@ class SectionContainer {
 
         this.render();
 
-        // Se não for read-only e não tiver mensagens, mostrar primeira pergunta
-        if (!this.isReadOnly && this.messages.length === 0 && this.state === 'in_progress') {
-            // Se houver uma resposta pré-definida para o skipQuestion, salvar e pular
-            if (options.preAnswerSkipQuestion && this.sectionData.skipQuestion) {
-                const skipQ = this.sectionData.skipQuestion;
-                this.answers[skipQ.id] = options.preAnswerSkipQuestion;
-                this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
-                // Avançar para próxima pergunta sem mostrar no chat
-                this.currentQuestionIndex = 1; // Pular o skipQuestion
-                this._showCurrentQuestion();
+        // Se não for read-only e estado é in_progress, garantir que mostra próxima pergunta
+        if (!this.isReadOnly && this.state === 'in_progress') {
+            if (this.messages.length === 0) {
+                // Seção nova: mostrar primeira pergunta
+                if (options.preAnswerSkipQuestion && this.sectionData.skipQuestion) {
+                    const skipQ = this.sectionData.skipQuestion;
+                    this.answers[skipQ.id] = options.preAnswerSkipQuestion;
+                    this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
+                    // Avançar para próxima pergunta sem mostrar no chat
+                    this.currentQuestionIndex = 1; // Pular o skipQuestion
+                    this._showCurrentQuestion();
+                } else {
+                    this._showCurrentQuestion();
+                }
             } else {
+                // Restaurando rascunho: mostrar próxima pergunta
+                // currentQuestionIndex já está correto do estado salvo
                 this._showCurrentQuestion();
             }
         }

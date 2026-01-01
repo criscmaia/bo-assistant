@@ -1,0 +1,181 @@
+# 🛟 Recovery Guide - BO Inteligente
+
+**Versão Estável:** v0.12.10-ux-complete
+**Branch:** feature/ux-redesign-v1
+**Data:** 2026-01-01
+
+---
+
+## 🎯 Estado Atual Protegido
+
+Esta versão contém **TODAS** as funcionalidades UX implementadas e validadas:
+
+✅ Modal customizado de rascunho
+✅ Mensagens de erro acima do input
+✅ Números das perguntas (1.1), 1.2), etc)
+✅ Texto específico nos botões por contexto
+✅ Prefill de data/hora na pergunta 1.1
+✅ Input clearing híbrido
+✅ Auto-skip da pergunta x.1
+✅ Validações rigorosas de keywords
+✅ Seção 2 com 13 perguntas corretas do TESTING.md
+
+---
+
+## 🚨 Como Restaurar Se Algo Der Errado
+
+### Opção 1: Restaurar Via Tag (Recomendado)
+
+```bash
+# Descartar mudanças não commitadas
+git reset --hard
+
+# Voltar para a tag estável
+git checkout v0.12.10-ux-complete
+
+# Se quiser criar uma branch a partir da tag
+git checkout -b recovery-from-tag v0.12.10-ux-complete
+```
+
+### Opção 2: Restaurar Via Commit Hash
+
+```bash
+# Voltar para o último commit bom
+git reset --hard 352f498
+
+# Ou criar branch a partir dele
+git checkout -b recovery-from-commit 352f498
+```
+
+### Opção 3: Recuperar Arquivos Específicos
+
+```bash
+# Recuperar um arquivo específico da tag
+git checkout v0.12.10-ux-complete -- docs/js/data/sections.js
+
+# Recuperar múltiplos arquivos
+git checkout v0.12.10-ux-complete -- docs/js/components/TextInput.js docs/js/components/SectionContainer.js
+```
+
+### Opção 4: Recuperar Backups do Stash
+
+```bash
+# Listar stashes
+git stash list
+
+# Aplicar o stash de backup (sem remover)
+git stash apply stash@{0}
+
+# Ou aplicar e remover
+git stash pop stash@{0}
+```
+
+---
+
+## 📦 Commits Importantes
+
+| Hash | Descrição | Importância |
+|------|-----------|-------------|
+| `352f498` | Restaura Seção 2 completa | 🔴 CRÍTICO |
+| `b7250fa` | Validação rigorosa 1.2 | 🔴 CRÍTICO |
+| `ca4d3cb` | Todas validações UX | 🔴 CRÍTICO |
+| `df6cf99` | Modal customizado | 🟡 IMPORTANTE |
+| `5f25e52` | Auto-skip x.1 | 🟡 IMPORTANTE |
+| `ebc9a08` | Números das perguntas | 🟢 FEATURE |
+| `419fce1` | Botões por contexto | 🟢 FEATURE |
+
+---
+
+## 🔍 Verificar Estado Atual
+
+```bash
+# Ver branch atual e último commit
+git log --oneline -5
+
+# Ver status das mudanças
+git status
+
+# Ver tags disponíveis
+git tag -l
+
+# Ver informações da tag
+git show v0.12.10-ux-complete
+```
+
+---
+
+## ⚠️ NUNCA Faça Isso
+
+❌ **NUNCA** use `git checkout -- .` sem ter certeza
+❌ **NUNCA** use `git reset --hard` sem backup
+❌ **NUNCA** force push para main/master
+❌ **NUNCA** delete a tag v0.12.10-ux-complete
+
+---
+
+## ✅ Sempre Faça Isso Antes de Mudanças Grandes
+
+```bash
+# 1. Commit tudo primeiro
+git add .
+git commit -m "WIP: salvando trabalho antes de mudança"
+
+# 2. Criar branch de backup
+git branch backup-$(date +%Y%m%d-%H%M%S)
+
+# 3. Verificar que está tudo commitado
+git status
+
+# 4. Agora pode fazer a mudança arriscada
+```
+
+---
+
+## 📞 Em Caso de Emergência
+
+Se você perdeu algo e não sabe como recuperar:
+
+1. **NÃO ENTRE EM PÂNICO**
+2. **NÃO FAÇA MAIS NADA** (não commite, não resete, não delete)
+3. Use `git reflog` para ver TUDO que foi feito
+4. Procure o commit certo no reflog
+5. Restaure com `git checkout <hash>`
+
+```bash
+# Ver histórico completo de TUDO
+git reflog
+
+# Encontrar o commit que você quer
+git reflog | grep "commit message"
+
+# Voltar para ele
+git checkout <hash-do-reflog>
+```
+
+---
+
+## 🎯 Status dos Arquivos Críticos
+
+| Arquivo | Status | Validado |
+|---------|--------|----------|
+| `docs/js/data/sections.js` | ✅ Seção 2 correta (13 perguntas) | SIM |
+| `docs/js/components/TextInput.js` | ✅ Todas validações | SIM |
+| `docs/js/components/SectionContainer.js` | ✅ Auto-skip + prefill | SIM |
+| `docs/js/components/DraftModal.js` | ✅ Modal customizado | SIM |
+| `docs/js/BOApp.js` | ✅ Integração completa | SIM |
+| `docs/css/inputs.css` | ✅ Error acima + animação | SIM |
+| `docs/css/draft-modal.css` | ✅ Estilos do modal | SIM |
+
+---
+
+## 📚 Links Úteis
+
+- **Tag no GitHub:** https://github.com/criscmaia/bo-assistant/releases/tag/v0.12.10-ux-complete
+- **Branch:** https://github.com/criscmaia/bo-assistant/tree/feature/ux-redesign-v1
+- **Último Commit:** https://github.com/criscmaia/bo-assistant/commit/352f498
+
+---
+
+**Criado em:** 2026-01-01
+**Por:** Claude Code
+**Versão do Guia:** 1.0

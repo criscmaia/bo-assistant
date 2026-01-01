@@ -586,6 +586,13 @@ class BOApp {
                             this.progressBar.markCompleted(sectionId);
                         } else if (state.status === 'skipped') {
                             this.progressBar.markSkipped(sectionId);
+                        } else if (state.status === 'in_progress') {
+                            // Atualizar progresso da seção em andamento
+                            const answeredCount = Object.keys(state.answers || {}).length;
+                            const totalQuestions = window.calculateSectionTotal
+                                ? window.calculateSectionTotal(sectionId, state.answers)
+                                : answeredCount;
+                            this.progressBar.updateProgress(sectionId, answeredCount, totalQuestions);
                         }
                     });
 

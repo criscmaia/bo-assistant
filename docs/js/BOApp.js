@@ -227,15 +227,20 @@ class BOApp {
             this._saveDraft();
         }
 
-        // Se online e seção 1, enviar para API (validação)
-        // NOTA: Backend atual só suporta seção 1
-        if (this.isOnline && sectionId === 1) {
+        // Se online, enviar para API (validação + texto gerado se seção completa)
+        if (this.isOnline) {
             try {
-                const response = await this.api.sendAnswer(answer);
+                const response = await this.api.sendAnswer(answer, 'groq', sectionId);
 
                 if (response.validation_error) {
                     // Mostrar erro de validação
                     this._showValidationError(response.validation_error);
+                }
+
+                // Se seção completou e tem texto gerado, armazenar
+                if (response.is_section_complete && response.generated_text) {
+                    sectionState.generatedText = response.generated_text;
+                    console.log('[BOApp] Texto gerado recebido do backend:', response.generated_text.substring(0, 100));
                 }
             } catch (error) {
                 console.error('[BOApp] Erro ao enviar resposta:', error);
@@ -258,11 +263,11 @@ class BOApp {
         // Marcar na barra de progresso
         this.progressBar.markCompleted(sectionId);
 
-        // Gerar texto (se online e seção 1)
-        if (this.isOnline && sectionId === 1) {
+        // Gerar texto (se online, para todas as seções)
+        if (this.isOnline) {
             await this._generateSectionText(sectionId);
         } else {
-            // Texto placeholder para outras seções
+            // Texto placeholder para modo offline
             sectionState.generatedText = this._generatePlaceholderText(sectionId, answers);
             this.sectionContainer.setGeneratedText(sectionState.generatedText);
         }
@@ -280,14 +285,13 @@ class BOApp {
         this._showLoading('Gerando texto...');
 
         try {
-            // O backend já gera o texto quando a seção completa
-            // Buscar do último response
-            const status = await this.api.getSessionStatus();
-
-            // Por enquanto, usar placeholder
-            // TODO: Integrar com geração real quando backend suportar
             const sectionState = this.sectionsState[sectionId];
-            sectionState.generatedText = this._generatePlaceholderText(sectionId, sectionState.answers);
+
+            // O texto já foi gerado e armazenado em _onAnswer quando a última resposta foi enviada
+            // Se não existir (modo offline ou erro), usar placeholder
+            if (!sectionState.generatedText) {
+                sectionState.generatedText = this._generatePlaceholderText(sectionId, sectionState.answers);
+            }
 
             this.sectionContainer.setGeneratedText(sectionState.generatedText);
 

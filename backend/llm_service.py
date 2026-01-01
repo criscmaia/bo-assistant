@@ -198,7 +198,7 @@ GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
     async def generate_section_text(
         self,
         section_data: Dict[str, str],
-        provider: str = "gemini"
+        provider: str = "groq"
     ) -> str:
         """
         Gera o texto da seção usando o LLM escolhido.
@@ -404,7 +404,7 @@ Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
 
         return prompt
 
-    def generate_section2_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+    def generate_section2_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
         Gera texto narrativo da Seção 2 (Abordagem a Veículo).
 
@@ -592,7 +592,7 @@ Gere APENAS o texto da Seção 3 agora (2-3 parágrafos fluidos):"""
 
         return prompt
 
-    def generate_section3_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+    def generate_section3_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
         Gera texto narrativo da Seção 3 (Campana - Vigilância Velada).
 
@@ -787,7 +787,7 @@ Gere APENAS o texto da Seção 4 agora (2-3 parágrafos fluidos):"""
 
         return prompt
 
-    def generate_section4_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+    def generate_section4_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
         Gera texto narrativo da Seção 4 (Entrada em Domicílio).
 
@@ -892,7 +892,7 @@ Gere APENAS o texto da Seção 4 agora (2-3 parágrafos fluidos):"""
     # SEÇÃO 5: FUNDADA SUSPEITA
     # ========================================================================
 
-    def generate_section5_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+    def generate_section5_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
         Gera texto narrativo da Seção 5 (Fundada Suspeita).
 
@@ -1106,7 +1106,7 @@ GERE AGORA O TEXTO DA SEÇÃO 5, seguindo RIGOROSAMENTE as regras acima:"""
     # SEÇÃO 6: REAÇÃO E USO DA FORÇA
     # ========================================================================
 
-    def generate_section6_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+    def generate_section6_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
         Gera texto narrativo da Seção 6 (Reação e Uso da Força).
 
@@ -1313,7 +1313,7 @@ GERE AGORA O TEXTO DA SEÇÃO 6, seguindo RIGOROSAMENTE as regras acima:"""
     # SEÇÃO 7: APREENSÕES E CADEIA DE CUSTÓDIA
     # ========================================================================
 
-    def generate_section7_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+    def generate_section7_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
         Gera texto narrativo da Seção 7 (Apreensões e Cadeia de Custódia).
 
@@ -1535,7 +1535,7 @@ GERE AGORA O TEXTO DA SEÇÃO 7, seguindo RIGOROSAMENTE as regras acima:"""
     # SEÇÃO 8: Condução e Pós-Ocorrência (ÚLTIMA SEÇÃO - MARCA BO COMPLETO)
     # ========================================================================
 
-    def generate_section8_text(self, section_data: Dict[str, str], provider: str = "gemini") -> str:
+    def generate_section8_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
         Gera texto narrativo da Seção 8 (Condução e Pós-Ocorrência) - ÚLTIMA SEÇÃO.
 

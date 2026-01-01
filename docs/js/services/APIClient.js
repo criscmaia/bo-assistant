@@ -99,7 +99,7 @@ class APIClient {
      * NOTA: O backend atual só suporta Seção 1. Para outras seções,
      * usaremos modo offline temporariamente.
      */
-    async sendAnswer(message, llmProvider = 'gemini') {
+    async sendAnswer(message, llmProvider = 'groq', currentSection = 1) {
         if (!this.sessionId) {
             throw new APIError('Sessão não iniciada', 400);
         }
@@ -110,6 +110,7 @@ class APIClient {
                 session_id: this.sessionId,
                 message: message,
                 llm_provider: llmProvider,
+                current_section: currentSection,
             }),
         });
 
@@ -119,7 +120,7 @@ class APIClient {
     /**
      * Edita uma resposta anterior
      */
-    async editAnswer(step, message, llmProvider = 'gemini') {
+    async editAnswer(step, message, llmProvider = 'groq') {
         if (!this.sessionId) {
             throw new APIError('Sessão não iniciada', 400);
         }

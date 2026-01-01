@@ -94,7 +94,7 @@ class ChatRequest(BaseModel):
     session_id: str
     message: str
     current_section: Optional[int] = 1  # Novo campo
-    llm_provider: Optional[str] = "gemini"
+    llm_provider: Optional[str] = "groq"
 
 class ChatResponse(BaseModel):
     session_id: str
@@ -115,7 +115,7 @@ class NewSessionResponse(BaseModel):
 
 class UpdateAnswerRequest(BaseModel):
     message: str
-    llm_provider: Optional[str] = "gemini"
+    llm_provider: Optional[str] = "groq"
 
 class FeedbackRequest(BaseModel):
     bo_id: str

@@ -596,7 +596,9 @@ class BOApp {
                     console.log('[BOApp] Rascunho descartado');
                     await this._startNewSession();
                     this._loadCurrentSection();
-                }
+                },
+                // sectionsData - para calcular total de perguntas
+                SECTIONS_DATA
             );
 
             return true;

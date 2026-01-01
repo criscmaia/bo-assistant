@@ -46,6 +46,16 @@
     color: #6b7280;
     font-size: 0.95rem;
     margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+.draft-modal__timestamp {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+    text-align: center;
+    font-style: italic;
 }
 
 .draft-modal__preview {
@@ -121,17 +131,10 @@
 
 /* Estilos para preview de respostas */
 .draft-section-summary {
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid #e5e7eb;
     font-size: 0.9rem;
-}
-
-.draft-meta {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-bottom: 0.75rem;
-    font-style: italic;
 }
 
 .draft-answers-list {

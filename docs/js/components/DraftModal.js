@@ -16,7 +16,7 @@ class DraftModal {
     /**
      * Exibe o modal com dados do rascunho
      */
-    show(draft, onContinue, onDiscard) {
+    show(draft, onContinue, onDiscard, sectionsData) {
         this.onContinue = onContinue;
         this.onDiscard = onDiscard;
 
@@ -32,10 +32,13 @@ class DraftModal {
                         <p class="draft-modal__subtitle">
                             Você tem um BO em andamento. Deseja continuar de onde parou?
                         </p>
+                        <p class="draft-modal__timestamp">
+                            Salvo em ${formattedTime}
+                        </p>
                     </div>
 
                     <div class="draft-modal__preview">
-                        ${this._formatDraftPreview(draft)}
+                        ${this._formatDraftPreview(draft, sectionsData)}
                     </div>
 
                     <div class="draft-modal__actions">
@@ -60,30 +63,29 @@ class DraftModal {
     /**
      * Formata preview do rascunho
      */
-    _formatDraftPreview(draft) {
-        const savedTime = new Date(draft.timestamp);
-        const formattedTime = savedTime.toLocaleString('pt-BR');
-
+    _formatDraftPreview(draft, sectionsData) {
         let html = '';
 
         // Informações de progresso por seção
-        if (draft.sectionsState) {
+        if (draft.sectionsState && sectionsData) {
             Object.entries(draft.sectionsState).forEach(([sectionId, state]) => {
                 const answeredCount = Object.keys(state.answers || {}).length;
 
                 if (answeredCount > 0) {
+                    // Encontrar dados da seção para pegar total de perguntas
+                    const sectionInfo = sectionsData.find(s => s.id === parseInt(sectionId));
+                    const totalQuestions = sectionInfo ? sectionInfo.questions.length + (sectionInfo.skipQuestion ? 1 : 0) : answeredCount;
+
                     const statusText = state.status === 'completed' ? 'perguntas respondidas' :
                                       state.status === 'skipped' ? 'pulada' :
                                       'perguntas respondidas';
 
                     html += `<div class="draft-section-summary">
-                        <strong>Seção ${sectionId}:</strong> ${answeredCount}/${answeredCount} ${statusText}
+                        <strong>Seção ${sectionId}:</strong> ${answeredCount}/${totalQuestions} ${statusText}
                     </div>`;
                 }
             });
         }
-
-        html += `<div class="draft-meta">Salvo em ${formattedTime}</div>`;
 
         // Lista de respostas (scrollable)
         html += '<div class="draft-answers-list">';

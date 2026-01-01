@@ -41,12 +41,13 @@ const SECTIONS_DATA = [
       {
         id: "1.1",
         text: "Dia, data e hora do acionamento.",
-        hint: "Ex: 22/03/2025, às 19h03",
+        hint: "Ex: 19/12/2025, 14h30min, quinta-feira",
         inputType: "text",
         validation: {
           required: true,
           minLength: 10,
-          pattern: "datetime"
+          pattern: "datetime",
+          errorMessage: "Informe data, hora e dia da semana. Ex: '19/12/2025, 14h30min, quinta-feira'"
         }
       },
       {
@@ -63,28 +64,67 @@ const SECTIONS_DATA = [
       },
       {
         id: "1.3",
-        text: "Natureza do empenho.",
-        hint: "Ex: Tráfico de drogas, Flagrante de tráfico",
+        text: "Como foi acionado?",
+        hint: "Ex: Via 190, DDU, Patrulhamento preventivo, Mandado de prisão",
         inputType: "text",
         validation: {
           required: true,
-          minLength: 10
+          minLength: 3,
+          errorMessage: "Informe como a guarnição foi acionada. Ex: 'Via 190', 'DDU', 'Patrulhamento preventivo'"
         }
       },
       {
         id: "1.4",
-        text: "O que constava na ordem de serviço, informações do COPOM, DDU.",
-        hint: "Descreva o que foi informado no acionamento",
+        text: "Descreva as informações recebidas no acionamento.",
+        hint: "Ex: Ordem de serviço nº 145/2025 determinava patrulhamento no Bairro Santa Rita. COPOM informou denúncia anônima de veículo transportando drogas na região.",
         inputType: "text",
         validation: {
           required: true,
-          minLength: 20
+          minLength: 30,
+          errorMessage: "Descreva detalhadamente o que constava na ordem de serviço, informações do COPOM ou DDU"
         }
       },
       {
         id: "1.5",
-        text: "Local exato da ocorrência (logradouro, número, bairro).",
-        hint: "Ex: Rua das Acácias, nº 123, bairro Centro",
+        text: "Houve deslocamento entre o ponto de acionamento e o local da ocorrência?",
+        hint: "Responda SIM ou NÃO",
+        inputType: "single_choice",
+        options: [
+          { value: "sim", label: "SIM" },
+          { value: "nao", label: "NÃO" }
+        ],
+        followUp: {
+          condition: "sim",
+          questions: [
+            {
+              id: "1.5.1",
+              text: "Local de onde a guarnição partiu:",
+              hint: "Ex: Base Operacional do 16º BPM, localizada na Avenida Brasil, 1234, Bairro Centro",
+              inputType: "text",
+              validation: {
+                required: true,
+                minLength: 20,
+                errorMessage: "Informe o local completo de onde a guarnição partiu"
+              }
+            },
+            {
+              id: "1.5.2",
+              text: "Houve alguma alteração durante o percurso?",
+              hint: "Ex: Não houve alterações OU Passou por radar a 10 km/h acima da velocidade",
+              inputType: "text",
+              validation: {
+                required: true,
+                minLength: 10,
+                errorMessage: "Descreva se houve alterações durante o deslocamento"
+              }
+            }
+          ]
+        }
+      },
+      {
+        id: "1.6",
+        text: "Local exato da ocorrência:",
+        hint: "Ex: Rua das Acácias, altura do número 789, Bairro Santa Rita, Contagem/MG",
         inputType: "text",
         validation: {
           required: true,
@@ -94,19 +134,31 @@ const SECTIONS_DATA = [
         }
       },
       {
-        id: "1.6",
-        text: "O local é ponto de tráfico? Quais evidências anteriores? Há facção?",
-        hint: "Se não houver histórico, escreva 'NÃO'",
+        id: "1.7",
+        text: "O local é conhecido como ponto de tráfico?",
+        hint: "Ex: Sim, local consta em 12 registros anteriores de tráfico. OU: Não há registros anteriores.",
         inputType: "text",
         validation: {
           required: true,
-          minLength: 3
+          minLength: 10,
+          errorMessage: "Informe se o local é conhecido como ponto de tráfico e cite evidências (registros anteriores, denúncias, etc)"
         }
       },
       {
-        id: "1.7",
-        text: "O local fica próximo a escola, hospital, ou transporte público?",
-        hint: "Relevante para o Art. 40 da Lei de Drogas",
+        id: "1.8",
+        text: "O local é dominado por facção criminosa? Qual?",
+        hint: "Ex: Área sob influência da facção Comando Vermelho OU Não há evidências de dominação por facção",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 10,
+          errorMessage: "Informe se há dominação por facção criminosa e qual, ou responda que não há evidências"
+        }
+      },
+      {
+        id: "1.9",
+        text: "O local é ou fica próximo de espaço de interesse público qualificado?",
+        hint: "Ex: escola, hospital, transporte público (Art. 40 da Lei de Drogas)",
         inputType: "single_choice",
         options: [
           { value: "sim", label: "SIM" },
@@ -114,16 +166,30 @@ const SECTIONS_DATA = [
         ],
         followUp: {
           condition: "sim",
-          question: {
-            id: "1.7.1",
-            text: "Qual estabelecimento e a que distância aproximada?",
-            hint: "Ex: Escola Municipal João XXIII, a aproximadamente 50 metros",
-            inputType: "text",
-            validation: {
-              required: true,
-              minLength: 10
+          questions: [
+            {
+              id: "1.9.1",
+              text: "Nome do estabelecimento:",
+              hint: "Ex: Escola Estadual João XXIII",
+              inputType: "text",
+              validation: {
+                required: true,
+                minLength: 5,
+                errorMessage: "Informe o nome do estabelecimento próximo"
+              }
+            },
+            {
+              id: "1.9.2",
+              text: "Distância aproximada:",
+              hint: "Ex: Aproximadamente 300 metros OU Dois quarteirões",
+              inputType: "text",
+              validation: {
+                required: true,
+                minLength: 5,
+                errorMessage: "Informe a distância aproximada do estabelecimento"
+              }
             }
-          }
+          ]
         }
       }
     ]

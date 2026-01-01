@@ -72,16 +72,12 @@ class DraftModal {
                 const answeredCount = Object.keys(state.answers || {}).length;
 
                 if (answeredCount > 0) {
-                    // Encontrar dados da seção para pegar total de perguntas
-                    const sectionInfo = sectionsData.find(s => s.id === parseInt(sectionId));
-                    const totalQuestions = sectionInfo ? sectionInfo.questions.length + (sectionInfo.skipQuestion ? 1 : 0) : answeredCount;
-
-                    const statusText = state.status === 'completed' ? 'perguntas respondidas' :
+                    const statusText = state.status === 'completed' ? 'completa' :
                                       state.status === 'skipped' ? 'pulada' :
-                                      'perguntas respondidas';
+                                      'em andamento';
 
                     html += `<div class="draft-section-summary">
-                        <strong>Seção ${sectionId}:</strong> ${answeredCount}/${totalQuestions} ${statusText}
+                        <strong>Seção ${sectionId}:</strong> ${answeredCount} ${answeredCount === 1 ? 'pergunta respondida' : 'perguntas respondidas'} (${statusText})
                     </div>`;
                 }
             });

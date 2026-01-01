@@ -176,6 +176,23 @@ class BOApp {
     }
 
     /**
+     * Atualiza progresso de todas as seções
+     */
+    _updateAllSectionsProgress() {
+        Object.entries(this.sectionsState).forEach(([id, state]) => {
+            const sectionId = parseInt(id);
+            const answeredCount = Object.keys(state.answers || {}).length;
+
+            if (answeredCount > 0) {
+                const totalQuestions = window.calculateSectionTotal
+                    ? window.calculateSectionTotal(sectionId, state.answers)
+                    : answeredCount;
+                this.progressBar.updateProgress(sectionId, answeredCount, totalQuestions);
+            }
+        });
+    }
+
+    /**
      * Carrega a seção atual
      */
     _loadCurrentSection() {
@@ -189,6 +206,9 @@ class BOApp {
 
         // Atualizar ProgressBar
         this.progressBar.setCurrentSection(sectionData.id);
+
+        // Atualizar progresso de todas as seções (preservar barras completas)
+        this._updateAllSectionsProgress();
 
         // Carregar no container
         this.sectionContainer.loadSection(sectionData, {
@@ -417,6 +437,9 @@ class BOApp {
 
         // Atualizar ProgressBar
         this.progressBar.setCurrentSection(sectionId);
+
+        // Atualizar progresso de todas as seções (preservar barras completas)
+        this._updateAllSectionsProgress();
 
         // Carregar no container
         this.sectionContainer.loadSection(sectionData, {

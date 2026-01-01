@@ -65,11 +65,22 @@ class SectionContainer {
                 // Seção nova: mostrar primeira pergunta
                 if (options.preAnswerSkipQuestion && this.sectionData.skipQuestion) {
                     const skipQ = this.sectionData.skipQuestion;
-                    this.answers[skipQ.id] = options.preAnswerSkipQuestion;
-                    this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
-                    // Avançar para próxima pergunta sem mostrar no chat
-                    this.currentQuestionIndex = 1; // Pular o skipQuestion
-                    this._showCurrentQuestion();
+
+                    // Mostrar pergunta skipQuestion no chat
+                    this._showQuestion(skipQ);
+
+                    // Auto-responder após delay
+                    setTimeout(() => {
+                        this.answers[skipQ.id] = options.preAnswerSkipQuestion;
+                        this._addUserMessage(options.preAnswerSkipQuestion);
+                        this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
+
+                        // Avançar para próxima pergunta
+                        this.currentQuestionIndex = 1;
+                        setTimeout(() => {
+                            this._showCurrentQuestion();
+                        }, 500);
+                    }, 300);
                 } else {
                     this._showCurrentQuestion();
                 }
@@ -246,6 +257,9 @@ class SectionContainer {
      * Renderiza área de transição
      */
     _renderTransition() {
+        // Não mostrar botões de transição em modo read-only
+        if (this.isReadOnly) return '';
+
         const nextSection = window.SECTIONS_DATA ? window.SECTIONS_DATA.find(s => s.id === this.sectionId + 1) : null;
 
         if (!nextSection) return '';

@@ -215,10 +215,12 @@ class BOApp {
         sectionState.currentQuestionIndex = this.sectionContainer.currentQuestionIndex;
         sectionState.messages = [...this.sectionContainer.messages];
 
-        // Atualizar progresso
+        // Atualizar progresso (com cálculo dinâmico de total)
         const section = SECTIONS_DATA[this.currentSectionIndex];
         const answeredCount = Object.keys(sectionState.answers).length;
-        const totalQuestions = section.questions.length + (section.skipQuestion ? 1 : 0);
+        const totalQuestions = window.calculateSectionTotal
+            ? window.calculateSectionTotal(sectionId, sectionState.answers)
+            : section.questions.length + (section.skipQuestion ? 1 : 0);
 
         this.progressBar.updateProgress(sectionId, answeredCount, totalQuestions);
 

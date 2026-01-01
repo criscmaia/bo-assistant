@@ -72,12 +72,17 @@ class DraftModal {
                 const answeredCount = Object.keys(state.answers || {}).length;
 
                 if (answeredCount > 0) {
+                    // Calcular total dinâmico baseado nas respostas (considera follow-ups ativados)
+                    const totalQuestions = window.calculateSectionTotal
+                        ? window.calculateSectionTotal(parseInt(sectionId), state.answers || {})
+                        : answeredCount;
+
                     const statusText = state.status === 'completed' ? 'completa' :
                                       state.status === 'skipped' ? 'pulada' :
                                       'em andamento';
 
                     html += `<div class="draft-section-summary">
-                        <strong>Seção ${sectionId}:</strong> ${answeredCount} ${answeredCount === 1 ? 'pergunta respondida' : 'perguntas respondidas'} (${statusText})
+                        <strong>Seção ${sectionId}:</strong> ${answeredCount}/${totalQuestions} ${answeredCount === 1 ? 'pergunta respondida' : 'perguntas respondidas'} (${statusText})
                     </div>`;
                 }
             });

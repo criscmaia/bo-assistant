@@ -945,9 +945,47 @@ function getQuestionById(questionId) {
   return null;
 }
 
+// Função para calcular total de perguntas de uma seção baseado nas respostas
+function calculateSectionTotal(sectionId, answers = {}) {
+  const section = getSectionById(sectionId);
+  if (!section) return 0;
+
+  let total = 0;
+
+  // Contar skipQuestion se existir
+  if (section.skipQuestion) {
+    total++;
+  }
+
+  // Contar perguntas principais
+  section.questions.forEach(question => {
+    total++;
+
+    // Verificar se follow-up foi ativado pela resposta
+    if (question.followUp && question.followUp.condition) {
+      const answer = answers[question.id];
+      if (answer) {
+        const conditionMet = answer.toLowerCase().includes(question.followUp.condition.toLowerCase());
+
+        if (conditionMet) {
+          // Contar follow-ups (suporta singular e array)
+          if (question.followUp.questions && question.followUp.questions.length > 0) {
+            total += question.followUp.questions.length;
+          } else if (question.followUp.question) {
+            total += 1;
+          }
+        }
+      }
+    }
+  });
+
+  return total;
+}
+
 // Exportar funções auxiliares
 window.countTotalQuestions = countTotalQuestions;
 window.getSectionById = getSectionById;
 window.getQuestionById = getQuestionById;
+window.calculateSectionTotal = calculateSectionTotal;
 
 console.log(`[sections.js] Carregado: ${SECTIONS_DATA.length} seções, ~${countTotalQuestions()} perguntas`);

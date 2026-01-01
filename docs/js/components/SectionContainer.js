@@ -23,6 +23,7 @@ class SectionContainer {
         this.currentQuestionIndex = 0;
         this.generatedText = null;
         this.isReadOnly = false;
+        this.followUpQueue = []; // Fila de perguntas follow-up (1.5.1, 1.5.2, etc)
 
         // Callbacks
         this.onAnswer = options.onAnswer || ((questionId, answer) => {});
@@ -303,7 +304,7 @@ class SectionContainer {
     /**
      * Trata resposta do componente de input
      */
-    _handleInputSubmit(answer, question, option = null) {
+    _handleInputSubmit(answer, question, option = null, onError = null) {
         // Verificar se deve pular seção (para skipQuestion)
         if (option?.skipsSection) {
             this._addUserMessage(answer);
@@ -320,15 +321,39 @@ class SectionContainer {
         this.answers[question.id] = answer;
         this.onAnswer(question.id, answer);
 
-        // Verificar follow-up
+        // Verificar se é uma pergunta follow-up (tem mais de um ponto no ID)
+        const dotCount = (question.id.match(/\./g) || []).length;
+        const isFollowUp = dotCount > 1;  // Ex: "1.5.1" tem 2 pontos, "1.5" tem 1 ponto
+
+        if (isFollowUp && this.followUpQueue.length > 0) {
+            // Ainda há follow-ups na fila
+            setTimeout(() => {
+                this._showNextFollowUp();
+            }, 500);
+            return;
+        }
+
+        // Verificar follow-up da pergunta atual
         if (question.followUp && question.followUp.condition) {
             const conditionMet = answer.toLowerCase().includes(question.followUp.condition.toLowerCase());
-            if (conditionMet && question.followUp.question) {
-                // Mostrar follow-up
-                setTimeout(() => {
-                    this._showQuestion(question.followUp.question);
-                }, 500);
-                return;
+
+            if (conditionMet) {
+                // Suportar múltiplas perguntas (questions array)
+                if (question.followUp.questions && question.followUp.questions.length > 0) {
+                    // Adicionar todas as perguntas follow-up à fila
+                    this.followUpQueue = [...question.followUp.questions];
+                    setTimeout(() => {
+                        this._showNextFollowUp();
+                    }, 500);
+                    return;
+                }
+                // Suportar uma única pergunta (question singular) - backward compatibility
+                else if (question.followUp.question) {
+                    setTimeout(() => {
+                        this._showQuestion(question.followUp.question);
+                    }, 500);
+                    return;
+                }
             }
         }
 
@@ -339,6 +364,23 @@ class SectionContainer {
         setTimeout(() => {
             this._showCurrentQuestion();
         }, 500);
+    }
+
+    /**
+     * Mostra próxima pergunta follow-up da fila
+     */
+    _showNextFollowUp() {
+        if (this.followUpQueue.length > 0) {
+            const nextQuestion = this.followUpQueue.shift();
+            this._showQuestion(nextQuestion);
+        } else {
+            // Todas as follow-ups respondidas, avançar para próxima pergunta principal
+            this.currentQuestionIndex++;
+            this._updateBadge();
+            setTimeout(() => {
+                this._showCurrentQuestion();
+            }, 500);
+        }
     }
 
     /**

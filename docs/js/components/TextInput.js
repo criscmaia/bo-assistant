@@ -15,6 +15,7 @@ class TextInput {
         this.placeholder = options.placeholder || 'Digite sua resposta...';
         this.hint = options.hint || null;
         this.validation = options.validation || {};
+        this.defaultValue = options.defaultValue || null;
         this.onSubmit = options.onSubmit || (() => {});
 
         this.element = null;
@@ -31,17 +32,18 @@ class TextInput {
         this.element.className = 'input-component';
 
         this.element.innerHTML = `
+            <div class="text-input__error" style="display: none;"></div>
             <div class="text-input">
                 <input
                     type="text"
                     class="text-input__field"
                     placeholder="${this.placeholder}"
+                    value="${this.defaultValue || ''}"
                 >
                 <button type="button" class="text-input__button">
                     Enviar
                 </button>
             </div>
-            <div class="text-input__error" style="display: none;"></div>
         `;
 
         this.inputField = this.element.querySelector('.text-input__field');
@@ -116,6 +118,81 @@ class TextInput {
             }
         }
 
+        // Required Keywords - Intelligent validation
+        if (this.validation.requiredKeywords && this.validation.requiredKeywords.length > 0) {
+            const lowerValue = trimmed.toLowerCase();
+            const keywords = this.validation.requiredKeywords;
+
+            // Detectar padrão de localização (rua + numero + bairro)
+            const isLocationPattern = keywords.some(k => ['rua', 'numero', 'bairro'].includes(k.toLowerCase()));
+
+            if (isLocationPattern) {
+                // Validação de localização: TODOS os keywords devem estar presentes com variações de regex
+                const patterns = {
+                    rua: /(rua|avenida|travessa|alameda|via|rodovia|estrada|praça|largo)/i,
+                    numero: /n[úu]mero|n[°º]|nº|número|num\.|no\s+\d+|\d+/i,
+                    bairro: /bairro|região|setor|quadra|vila/i
+                };
+
+                const missingPatterns = [];
+                for (const [key, pattern] of Object.entries(patterns)) {
+                    if (!pattern.test(lowerValue)) {
+                        missingPatterns.push(key);
+                    }
+                }
+
+                if (missingPatterns.length > 0) {
+                    return {
+                        valid: false,
+                        error: this.validation.errorMessage || `Informe endereço completo (rua, número e bairro).`
+                    };
+                }
+            }
+            // Detectar padrão de prefixo/viatura
+            else if (keywords.some(k => ['prefixo', 'viatura'].includes(k.toLowerCase()))) {
+                // Pelo menos UM keyword deve estar presente
+                const hasAtLeastOne = keywords.some(k => lowerValue.includes(k.toLowerCase()));
+                if (!hasAtLeastOne) {
+                    return {
+                        valid: false,
+                        error: this.validation.errorMessage || 'Informe prefixo ou viatura.'
+                    };
+                }
+            }
+            // Detectar padrão de graduação militar
+            else if (keywords.some(k => ['sargento', 'soldado', 'cabo', 'tenente', 'capitão'].includes(k.toLowerCase()))) {
+                // Pelo menos UM keyword deve estar presente
+                const hasAtLeastOne = keywords.some(k => lowerValue.includes(k.toLowerCase()));
+                if (!hasAtLeastOne) {
+                    return {
+                        valid: false,
+                        error: this.validation.errorMessage || 'Informe a graduação militar.'
+                    };
+                }
+            }
+            // Padrão genérico: TODOS keywords obrigatórios
+            else {
+                const missingKeywords = keywords.filter(k => !lowerValue.includes(k.toLowerCase()));
+                if (missingKeywords.length > 0) {
+                    return {
+                        valid: false,
+                        error: this.validation.errorMessage || `Palavras obrigatórias: ${missingKeywords.join(', ')}`
+                    };
+                }
+            }
+        }
+
+        // Mercosul Plate Pattern
+        if (this.validation.pattern === 'mercosul_plate') {
+            const mercosulPattern = /[A-Z]{3}[-\s]?[0-9][A-Z][0-9]{2}/i;
+            if (!mercosulPattern.test(trimmed)) {
+                return {
+                    valid: false,
+                    error: 'Placa inválida. Use formato Mercosul: ABC-1D23'
+                };
+            }
+        }
+
         return { valid: true };
     }
 
@@ -138,11 +215,24 @@ class TextInput {
 
         if (!validation.valid) {
             this._showError(validation.error);
+            // NÃO limpar input - deixar usuário corrigir o erro
             return;
         }
 
         this._clearError();
-        this.onSubmit(trimmed);
+
+        // Limpar input IMEDIATAMENTE após validação bem-sucedida
+        const originalValue = value;
+        this.inputField.value = '';
+
+        // Callback com onError para restaurar input caso API falhe
+        const onError = () => {
+            if (this.inputField) {
+                this.inputField.value = originalValue;
+            }
+        };
+
+        this.onSubmit(trimmed, onError);
     }
 
     /**

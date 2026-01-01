@@ -138,7 +138,7 @@ const SECTIONS_DATA = [
     emoji: "🚗",
     skippable: true,
     skipQuestion: {
-      id: "2.0",
+      id: "2.1",
       text: "Havia veículo envolvido na ocorrência?",
       hint: "Se não havia veículo, esta seção será pulada",
       inputType: "single_choice",
@@ -149,9 +149,42 @@ const SECTIONS_DATA = [
     },
     questions: [
       {
-        id: "2.1",
-        text: "Qual o tipo, marca, modelo e cor do veículo?",
-        hint: "Ex: Motocicleta Honda CG 160, cor vermelha",
+        id: "2.2",
+        text: "Onde e em que contexto o veículo foi visualizado?",
+        hint: "Ex: Na Rua das Acácias, esquina com Avenida Brasil, próximo ao Bar do João, Bairro Santa Rita. O veículo estava parado...",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 30
+        }
+      },
+      {
+        id: "2.3",
+        text: "Qual a marca, modelo, cor e placa do veículo?",
+        hint: "Ex: VW Gol branco, placa ABC-1D23, ano 2018",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 15,
+          pattern: "mercosul_plate"
+        }
+      },
+      {
+        id: "2.4",
+        text: "Quem da equipe viu o veículo?",
+        hint: "Ex: O Sargento Silva visualizou o veículo transitando em alta velocidade pela Rua das Acácias. O condutor mudou bruscamente o sentido...",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 40,
+          requiredKeywords: ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+          errorMessage: "Informe: QUEM viu (graduação + nome), DE ONDE viu e O QUE exatamente observou. Mínimo 40 caracteres."
+        }
+      },
+      {
+        id: "2.5",
+        text: "Descreva se houve reação do motorista ou ocupantes:",
+        hint: "Ex: O condutor acelerou bruscamente tentando fugir. O passageiro descartou uma sacola branca pela janela OU Não houve reação, o veículo parou imediatamente",
         inputType: "text",
         validation: {
           required: true,
@@ -159,86 +192,90 @@ const SECTIONS_DATA = [
         }
       },
       {
-        id: "2.2",
-        text: "Qual a placa do veículo?",
-        hint: "Ex: ABC-1234 ou ABC1D23",
-        inputType: "text",
-        validation: {
-          required: true,
-          minLength: 7
-        }
-      },
-      {
-        id: "2.3",
-        text: "Qual o número do Renavam?",
-        hint: "Se não souber, escreva 'NÃO INFORMADO'",
-        inputType: "text",
-        validation: {
-          required: true,
-          minLength: 3
-        }
-      },
-      {
-        id: "2.4",
-        text: "Qual o número do Chassi?",
-        hint: "Se não souber, escreva 'NÃO INFORMADO'",
-        inputType: "text",
-        validation: {
-          required: true,
-          minLength: 3
-        }
-      },
-      {
-        id: "2.5",
-        text: "O condutor apresentou CNH?",
-        inputType: "single_choice",
-        options: [
-          { value: "sim", label: "SIM" },
-          { value: "nao", label: "NÃO" }
-        ],
-        followUp: {
-          condition: "sim",
-          question: {
-            id: "2.5.1",
-            text: "Qual o número da CNH e categoria?",
-            hint: "Ex: CNH 12345678900, categoria AB",
-            inputType: "text",
-            validation: {
-              required: true,
-              minLength: 10
-            }
-          }
-        }
-      },
-      {
         id: "2.6",
-        text: "O veículo tinha irregularidades?",
-        hint: "Documentação vencida, adulterações, etc.",
-        inputType: "single_choice",
-        options: [
-          { value: "sim", label: "SIM" },
-          { value: "nao", label: "NÃO" }
-        ],
-        followUp: {
-          condition: "sim",
-          question: {
-            id: "2.6.1",
-            text: "Quais irregularidades foram constatadas?",
-            inputType: "text",
-            validation: {
-              required: true,
-              minLength: 10
-            }
-          }
+        text: "Quem deu a ordem de parada e como?",
+        hint: "Ex: Foi acionada a sirene da viatura e o Sargento Silva utilizou o megafone ordenando 'Parado, Polícia Militar! Encoste o veículo imediatamente!'",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 20,
+          requiredKeywords: ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+          errorMessage: "Informe QUEM deu a ordem (graduação + nome) e COMO (sirene, apito, gesto, farol). Mínimo 20 caracteres."
         }
       },
       {
         id: "2.7",
-        text: "Onde as drogas foram encontradas no veículo?",
-        hint: "Ex: sob o banco do motorista, no porta-malas, no console",
+        text: "O veículo parou imediatamente ou houve perseguição?",
+        hint: "Ex: O condutor acelerou tentando fugir pela Avenida Brasil, percorreu aproximadamente 300 metros em alta velocidade... OU O veículo parou imediatamente",
         inputType: "text",
         validation: {
           required: true,
+          minLength: 10
+        }
+      },
+      {
+        id: "2.8",
+        text: "Se houve perseguição, por qual motivo o veículo parou?",
+        hint: "Ex: Só parou após cercar o veículo em um beco sem saída OU Desistiu da fuga voluntariamente após 500 metros OU Bateu em um poste na Rua das Flores",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 10
+        }
+      },
+      {
+        id: "2.9",
+        text: "Quem procedeu à busca veicular?",
+        hint: "Ex: O Soldado Carvalho procedeu à busca, enquanto o Sargento Silva fazia a segurança",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 15,
+          requiredKeywords: ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+          errorMessage: "Informe QUEM fez a busca (graduação + nome). Mínimo 15 caracteres."
+        }
+      },
+      {
+        id: "2.10",
+        text: "Quem encontrou as drogas/evidências e onde estavam?",
+        hint: "Ex: O Soldado Carvalho encontrou 10 porções de crack envoltas em papel alumínio, escondidas sob o banco do motorista",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 30,
+          requiredKeywords: ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+          errorMessage: "Informe QUEM encontrou (graduação + nome) e ONDE estavam as drogas. Mínimo 30 caracteres."
+        }
+      },
+      {
+        id: "2.11",
+        text: "O que o condutor/ocupantes disseram quando questionados?",
+        hint: "Ex: O condutor afirmou que não sabia da existência das drogas OU Permaneceu em silêncio",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 10
+        }
+      },
+      {
+        id: "2.12",
+        text: "Quem deu voz de prisão e qual foi a reação?",
+        hint: "Ex: O Sargento Silva deu voz de prisão em flagrante por tráfico de drogas. O condutor não resistiu",
+        inputType: "text",
+        validation: {
+          required: true,
+          minLength: 20,
+          requiredKeywords: ["sargento", "soldado", "cabo", "tenente", "capitão", "sgt", "sd", "cb", "ten", "cap"],
+          errorMessage: "Informe QUEM deu voz de prisão (graduação + nome) e qual foi a reação. Mínimo 20 caracteres."
+        }
+      },
+      {
+        id: "2.13",
+        text: "Observações adicionais sobre a abordagem ao veículo:",
+        hint: "Ex: O veículo estava com documentação regular. Não havia outros ocupantes além do condutor",
+        inputType: "text",
+        validation: {
+          required: false,
           minLength: 10
         }
       }

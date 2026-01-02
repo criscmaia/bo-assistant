@@ -178,7 +178,10 @@ class SectionContainer {
                 </span>
             </div>
 
-            <!-- Chat -->
+            <!-- Chat (Accordion) -->
+            <button class="section-chat-toggle section-chat-toggle--collapsed" id="section-chat-toggle">
+                Histórico do Chat (${this.messages.length} mensagens)
+            </button>
             <div class="section-chat" id="section-chat">
                 ${this._renderMessages()}
             </div>
@@ -230,9 +233,6 @@ class SectionContainer {
 
         // Bind eventos
         this._bindEvents();
-
-        // Scroll para o final do chat
-        this._scrollToBottom();
     }
 
     /**
@@ -552,6 +552,15 @@ class SectionContainer {
      * Bind de eventos
      */
     _bindEvents() {
+        // Toggle do chat (accordion)
+        const chatToggle = this.container.querySelector('#section-chat-toggle');
+        if (chatToggle) {
+            chatToggle.addEventListener('click', () => {
+                this.chatEl.classList.toggle('section-chat--expanded');
+                chatToggle.classList.toggle('section-chat-toggle--collapsed');
+            });
+        }
+
         // Copiar texto gerado
         const copyBtn = this.container.querySelector('#section-copy-btn');
         if (copyBtn) {
@@ -686,16 +695,6 @@ class SectionContainer {
     _updateChat() {
         if (this.chatEl) {
             this.chatEl.innerHTML = this._renderMessages();
-            this._scrollToBottom();
-        }
-    }
-
-    /**
-     * Scroll para o final do chat
-     */
-    _scrollToBottom() {
-        if (this.chatEl) {
-            this.chatEl.scrollTop = this.chatEl.scrollHeight;
         }
     }
 

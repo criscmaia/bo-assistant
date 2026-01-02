@@ -13,7 +13,7 @@ from backend.validators.strategies import (
     YesNoValidator,
     KeywordsValidator
 )
-from backend.validators.factory import get_validator, ValidationFactory
+from backend.validators.factory import get_validator, validate_answer, ValidationFactory
 
 __all__ = [
     'ValidationStrategy',
@@ -25,5 +25,6 @@ __all__ = [
     'YesNoValidator',
     'KeywordsValidator',
     'get_validator',
+    'validate_answer',
     'ValidationFactory'
 ]

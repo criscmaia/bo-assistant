@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventBus Integration Tests - BO Inteligente v0.13.1</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .test-suite {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ddd;
+            background: #f9f9f9;
+        }
+        .test-case.pass {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        .test-case.fail {
+            border-left-color: #f44336;
+            background: #fef1f0;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .summary {
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .summary-item {
+            text-align: center;
+        }
+        .summary-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .summary-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0b7dda;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 EventBus Integration Tests</h1>
+
+    <div class="info-box">
+        <strong>Objetivo:</strong> Validar integração completa do EventBus entre componentes (ProgressBar, SectionContainer, BOApp)
+        <br><strong>Sprint:</strong> Sprint 6 - Mediator Pattern
+        <br><strong>Versão:</strong> v0.13.1
+    </div>
+
+    <button onclick="runAllTests()">▶ Executar Todos os Testes</button>
+    <button onclick="runComponentTests()">🧩 Apenas Componentes</button>
+    <button onclick="runFlowTests()">🔄 Apenas Fluxos</button>
+
+    <div id="test-results"></div>
+    <div id="test-summary"></div>
+
+    <!-- Dependências -->
+    <script src="../../docs/js/EventBus.js"></script>
+
+    <script>
+        // ============================================
+        // TEST FRAMEWORK SIMPLES
+        // ============================================
+
+        class TestRunner {
+            constructor() {
+                this.tests = [];
+                this.results = [];
+            }
+
+            test(name, fn, suite = 'default') {
+                this.tests.push({ name, fn, suite });
+            }
+
+            async run(suiteFilter = null) {
+                this.results = [];
+                const resultsDiv = document.getElementById('test-results');
+                resultsDiv.innerHTML = '';
+
+                const filteredTests = suiteFilter
+                    ? this.tests.filter(t => t.suite === suiteFilter)
+                    : this.tests;
+
+                for (const test of filteredTests) {
+                    const result = await this.runTest(test);
+                    this.results.push(result);
+                    this.renderTestResult(result, resultsDiv);
+                }
+
+                this.renderSummary();
+            }
+
+            async runTest(test) {
+                try {
+                    await test.fn();
+                    return { name: test.name, pass: true, error: null, suite: test.suite };
+                } catch (error) {
+                    return { name: test.name, pass: false, error: error.message, suite: test.suite };
+                }
+            }
+
+            renderTestResult(result, container) {
+                const testDiv = document.createElement('div');
+                testDiv.className = `test-case ${result.pass ? 'pass' : 'fail'}`;
+                testDiv.innerHTML = `
+                    <div class="test-name">${result.pass ? '✅' : '❌'} ${result.name}</div>
+                    ${result.error ? `<div class="test-result">Error: ${result.error}</div>` : ''}
+                `;
+                container.appendChild(testDiv);
+            }
+
+            renderSummary() {
+                const passed = this.results.filter(r => r.pass).length;
+                const failed = this.results.filter(r => !r.pass).length;
+                const total = this.results.length;
+
+                const summaryDiv = document.getElementById('test-summary');
+                summaryDiv.innerHTML = `
+                    <div class="summary">
+                        <div class="summary-item">
+                            <div class="summary-number">${total}</div>
+                            <div class="summary-label">Total</div>
+                        </div>
+                        <div class="summary-item" style="color: #4CAF50;">
+                            <div class="summary-number">${passed}</div>
+                            <div class="summary-label">Passaram</div>
+                        </div>
+                        <div class="summary-item" style="color: #f44336;">
+                            <div class="summary-number">${failed}</div>
+                            <div class="summary-label">Falharam</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEqual(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, got ${actual}`);
+            }
+        }
+
+        // ============================================
+        // MOCK COMPONENTS
+        // ============================================
+
+        class MockProgressBar {
+            constructor() {
+                this.eventBus = EventBus.getInstance();
+                this._eventBusUnsubscribers = [];
+                this.clicks = [];
+            }
+
+            simulateClick(sectionId) {
+                this.clicks.push(sectionId);
+                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, { sectionId });
+            }
+
+            dispose() {
+                this._eventBusUnsubscribers.forEach(unsub => unsub());
+                this._eventBusUnsubscribers = [];
+            }
+        }
+
+        class MockSectionContainer {
+            constructor() {
+                this.eventBus = EventBus.getInstance();
+                this._eventBusUnsubscribers = [];
+                this.answers = [];
+            }
+
+            simulateAnswer(questionId, answer) {
+                this.answers.push({ questionId, answer });
+                this.eventBus.emit(Events.ANSWER_SAVED, {
+                    sectionId: 1,
+                    questionId,
+                    answer
+                });
+            }
+
+            simulateComplete(sectionId, answers) {
+                this.eventBus.emit(Events.SECTION_COMPLETED, {
+                    sectionId,
+                    answers
+                });
+            }
+
+            simulateSkip(sectionId, reason) {
+                this.eventBus.emit('section:skipped', {
+                    sectionId,
+                    skipReason: reason
+                });
+            }
+
+            dispose() {
+                this._eventBusUnsubscribers.forEach(unsub => unsub());
+                this._eventBusUnsubscribers = [];
+            }
+        }
+
+        class MockBOApp {
+            constructor() {
+                this.eventBus = EventBus.getInstance();
+                this._eventBusUnsubscribers = [];
+                this.navigationRequests = [];
+                this.answersSaved = [];
+                this.completions = [];
+                this.skips = [];
+                this._setupListeners();
+            }
+
+            _setupListeners() {
+                const unsub1 = this.eventBus.on(Events.SECTION_CHANGE_REQUESTED, (data) => {
+                    this.navigationRequests.push(data.sectionId);
+                });
+                this._eventBusUnsubscribers.push(unsub1);
+
+                const unsub2 = this.eventBus.on(Events.ANSWER_SAVED, (data) => {
+                    this.answersSaved.push(data);
+                });
+                this._eventBusUnsubscribers.push(unsub2);
+
+                const unsub3 = this.eventBus.on(Events.SECTION_COMPLETED, (data) => {
+                    this.completions.push(data.sectionId);
+                });
+                this._eventBusUnsubscribers.push(unsub3);
+
+                const unsub4 = this.eventBus.on('section:skipped', (data) => {
+                    this.skips.push(data);
+                });
+                this._eventBusUnsubscribers.push(unsub4);
+            }
+
+            dispose() {
+                this._eventBusUnsubscribers.forEach(unsub => unsub());
+                this._eventBusUnsubscribers = [];
+            }
+        }
+
+        // ============================================
+        // TESTES DE INTEGRAÇÃO
+        // ============================================
+
+        const runner = new TestRunner();
+
+        // Suite 1: Component Communication
+        runner.test('ProgressBar → BOApp: navegação via EventBus', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const progressBar = new MockProgressBar();
+            const boApp = new MockBOApp();
+
+            progressBar.simulateClick(3);
+
+            assertEqual(boApp.navigationRequests.length, 1);
+            assertEqual(boApp.navigationRequests[0], 3);
+
+            progressBar.dispose();
+            boApp.dispose();
+        }, 'component');
+
+        runner.test('SectionContainer → BOApp: resposta salva via EventBus', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const container = new MockSectionContainer();
+            const boApp = new MockBOApp();
+
+            container.simulateAnswer('1.1', 'Test answer');
+
+            assertEqual(boApp.answersSaved.length, 1);
+            assertEqual(boApp.answersSaved[0].questionId, '1.1');
+            assertEqual(boApp.answersSaved[0].answer, 'Test answer');
+
+            container.dispose();
+            boApp.dispose();
+        }, 'component');
+
+        runner.test('SectionContainer → BOApp: seção completa via EventBus', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const container = new MockSectionContainer();
+            const boApp = new MockBOApp();
+
+            container.simulateComplete(2, { '2.1': 'SIM', '2.2': 'Test' });
+
+            assertEqual(boApp.completions.length, 1);
+            assertEqual(boApp.completions[0], 2);
+
+            container.dispose();
+            boApp.dispose();
+        }, 'component');
+
+        runner.test('SectionContainer → BOApp: seção pulada via EventBus', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const container = new MockSectionContainer();
+            const boApp = new MockBOApp();
+
+            container.simulateSkip(4, 'Não se aplica');
+
+            assertEqual(boApp.skips.length, 1);
+            assertEqual(boApp.skips[0].sectionId, 4);
+            assertEqual(boApp.skips[0].skipReason, 'Não se aplica');
+
+            container.dispose();
+            boApp.dispose();
+        }, 'component');
+
+        // Suite 2: Flow Tests (Múltiplos Eventos)
+        runner.test('Fluxo completo: navegação + respostas + conclusão', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const progressBar = new MockProgressBar();
+            const container = new MockSectionContainer();
+            const boApp = new MockBOApp();
+
+            // 1. Usuário clica para ir para seção 2
+            progressBar.simulateClick(2);
+            assertEqual(boApp.navigationRequests[0], 2);
+
+            // 2. Usuário responde perguntas
+            container.simulateAnswer('2.1', 'SIM');
+            container.simulateAnswer('2.2', 'ABC1234');
+            assertEqual(boApp.answersSaved.length, 2);
+
+            // 3. Seção completada
+            container.simulateComplete(2, { '2.1': 'SIM', '2.2': 'ABC1234' });
+            assertEqual(boApp.completions[0], 2);
+
+            progressBar.dispose();
+            container.dispose();
+            boApp.dispose();
+        }, 'flow');
+
+        runner.test('Fluxo de skip: navegação + skip + próxima seção', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const progressBar = new MockProgressBar();
+            const container = new MockSectionContainer();
+            const boApp = new MockBOApp();
+
+            // 1. Navegar para seção 5
+            progressBar.simulateClick(5);
+            assertEqual(boApp.navigationRequests[0], 5);
+
+            // 2. Responder skip question com NÃO
+            container.simulateAnswer('5.skip', 'NÃO');
+
+            // 3. Seção pulada
+            container.simulateSkip(5, 'Fundada suspeita não se aplica');
+            assertEqual(boApp.skips.length, 1);
+
+            // 4. Navegar para próxima
+            progressBar.simulateClick(6);
+            assertEqual(boApp.navigationRequests[1], 6);
+
+            progressBar.dispose();
+            container.dispose();
+            boApp.dispose();
+        }, 'flow');
+
+        runner.test('Múltiplos componentes ouvindo mesmo evento', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const container = new MockSectionContainer();
+            const boApp1 = new MockBOApp();
+            const boApp2 = new MockBOApp();
+
+            container.simulateAnswer('1.1', 'Test');
+
+            // Ambos BOApps devem receber o evento
+            assertEqual(boApp1.answersSaved.length, 1);
+            assertEqual(boApp2.answersSaved.length, 1);
+
+            container.dispose();
+            boApp1.dispose();
+            boApp2.dispose();
+        }, 'flow');
+
+        // Suite 3: Memory Leak Prevention
+        runner.test('Dispose deve remover listeners e prevenir memory leaks', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            const boApp = new MockBOApp();
+
+            // Antes do dispose, deve ter 4 listeners
+            const statsBefore = bus.getStats();
+            assert(statsBefore.totalEvents >= 4, 'Deve ter pelo menos 4 eventos registrados');
+
+            boApp.dispose();
+
+            // Simular evento - não deve chamar handler
+            bus.emit(Events.ANSWER_SAVED, { test: true });
+            assertEqual(boApp.answersSaved.length, 0, 'Handler não deve ser chamado após dispose');
+        }, 'memory');
+
+        runner.test('Re-criação de componente não acumula listeners', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            // Criar e destruir múltiplos BOApps
+            for (let i = 0; i < 5; i++) {
+                const boApp = new MockBOApp();
+                boApp.dispose();
+            }
+
+            // Criar um novo
+            const finalApp = new MockBOApp();
+            const container = new MockSectionContainer();
+
+            container.simulateAnswer('1.1', 'Test');
+
+            // Deve ter recebido apenas 1 evento, não 6
+            assertEqual(finalApp.answersSaved.length, 1);
+
+            finalApp.dispose();
+            container.dispose();
+        }, 'memory');
+
+        // Suite 4: Error Handling
+        runner.test('Erro em handler não deve afetar outros handlers', async () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let call1 = false, call2 = false;
+
+            bus.on(Events.ANSWER_SAVED, () => {
+                call1 = true;
+                throw new Error('Test error');
+            });
+
+            bus.on(Events.ANSWER_SAVED, () => {
+                call2 = true;
+            });
+
+            bus.emit(Events.ANSWER_SAVED, { test: true });
+
+            assert(call1, 'Primeiro handler deve ter sido chamado');
+            assert(call2, 'Segundo handler deve ter sido chamado apesar do erro');
+        }, 'error');
+
+        // ============================================
+        // RUN TESTS
+        // ============================================
+
+        async function runAllTests() {
+            console.log('Executando TODOS os testes de integração...');
+            await runner.run();
+            console.log('Testes concluídos!');
+        }
+
+        async function runComponentTests() {
+            console.log('Executando testes de componentes...');
+            await runner.run('component');
+            console.log('Testes de componentes concluídos!');
+        }
+
+        async function runFlowTests() {
+            console.log('Executando testes de fluxo...');
+            await runner.run('flow');
+            console.log('Testes de fluxo concluídos!');
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            console.log('Página carregada. Clique em um botão para executar testes.');
+        });
+    </script>
+</body>
+</html>

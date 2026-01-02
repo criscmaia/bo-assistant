@@ -381,8 +381,8 @@ class BOApp {
         // Marcar na barra de progresso com a razão
         this.progressBar.markSkipped(sectionId, skipReason);
 
-        // Avançar para próxima
-        this._navigateToNextSection();
+        // NÃO avançar automaticamente - deixar usuário ver mensagem de skip e decidir
+        // this._navigateToNextSection();
 
         // Auto-save
         if (this.autoSave) {

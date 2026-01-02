@@ -572,7 +572,10 @@ _updateSectionState(sectionId, updates) {
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Arquitetura técnica detalhada
 - [docs/API.md](docs/API.md) - Referência completa de endpoints
 - [docs/ROADMAP.md](docs/ROADMAP.md) - Planejamento de features futuras
+- [docs/CLAUDE_CODE.md](docs/CLAUDE_CODE.md) - Guia completo Claude Code (modelos, custos, comandos)
+- [docs/TESTING.md](docs/TESTING.md) - Guia completo de testes
 - [CHANGELOG.md](CHANGELOG.md) - Histórico completo de versões
+- [docs/archive/](docs/archive/) - Documentação de versões anteriores (v0.12.9, propostas redesign)
 
 ---
 

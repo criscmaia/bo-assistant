@@ -13,8 +13,20 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    overflow: visible;
     transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Durante in_progress: container tem altura fixa para o chat ter scroll */
+.section-container[data-state="in_progress"] {
+    height: calc(100vh - 240px);
+    overflow: hidden;
+}
+
+/* Durante completed: container volta ao tamanho do conteúdo */
+.section-container[data-state="completed"],
+.section-container[data-state="skipped"] {
+    height: auto;
+    overflow: visible;
 }
 
 .section-container--hidden {
@@ -37,6 +49,7 @@
     align-items: center;
     justify-content: space-between;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    flex: 0 0 auto;
 }
 
 .section-header__title {
@@ -74,19 +87,6 @@
     color: #6b7280;
 }
 
-/* Área de chat - Accordion (colapsável) */
-.section-chat {
-    padding: 0;
-    display: none;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.section-chat--expanded {
-    display: flex;
-    padding: 24px;
-}
-
 /* Botão para expandir/colapsar chat */
 .section-chat-toggle {
     width: 100%;
@@ -102,6 +102,29 @@
     align-items: center;
     gap: 8px;
     transition: background 0.2s;
+    flex: 0 0 auto;
+}
+
+/* Área de chat - Accordion (colapsável) */
+.section-chat {
+    padding: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+/* Durante in_progress: chat ocupa espaço com flex e scroll */
+.section-container[data-state="in_progress"] .section-chat {
+    flex: 1;
+    display: flex; /* Garante que aparece mesmo sem --expanded */
+}
+
+.section-chat--expanded {
+    display: flex;
+    min-height: 400px;
 }
 
 .section-chat-toggle:hover {
@@ -187,6 +210,7 @@
     padding: 16px 20px;
     border-top: 1px solid #e5e7eb;
     background: #f8fafc;
+    flex: 0 0 auto;
 }
 
 .section-input__form {
@@ -292,20 +316,22 @@
 
 /* Área de transição (próxima seção) */
 .section-transition {
-    padding: 20px;
+    padding: 12px;
     background: #f8fafc;
     border-top: 1px solid #e5e7eb;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    margin: 16px;
 }
 
 .section-transition__preview {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-    padding: 16px;
+    padding: 12px;
     background: white;
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .section-transition__preview-emoji {
@@ -313,7 +339,7 @@
 }
 
 .section-transition__preview-info {
-    flex: 1;
+    text-align: center;
 }
 
 .section-transition__preview-label {
@@ -329,10 +355,23 @@
     color: #1e3a5f;
 }
 
+.section-transition__question {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e3a5f;
+    padding: 8px 12px;
+    margin: 6px 0;
+}
+
 .section-transition__buttons {
     display: flex;
     flex-direction: row-reverse;
     gap: 12px;
+    margin-top: 8px;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .section-transition__btn {
@@ -394,6 +433,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex: 0 0 auto;
 }
 
 .section-readonly-notice__text {
@@ -433,6 +473,38 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-right: 12px;
+}
+
+/* Mensagem para seção pulada (chat vazio) */
+.section-skipped-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.section-skipped-message span {
+    font-size: 20px;
+}
+
+/* Mensagem de skip (pre tag) */
+.section-skip-message {
+    padding: 16px 20px;
+    margin: 16px;
+    background: #f9fafb;
+    border-left: 3px solid #d1d5db;
+    color: #6b7280;
+    font-size: 0.95rem;
+    font-weight: 400;
+    font-family: inherit;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: left;
 }
 
 /* ============================================ */

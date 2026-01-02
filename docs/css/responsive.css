@@ -300,6 +300,14 @@
     }
 }
 
+/* Desktop: Altura maior disponível */
+@media (min-width: 1024px) {
+    .section-container {
+        height: calc(100vh - 260px);
+        max-height: 85vh;
+    }
+}
+
 /* Teclado virtual aberto (viewport reduzido) */
 @media (max-height: 400px) {
     .section-container {

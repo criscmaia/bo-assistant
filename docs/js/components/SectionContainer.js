@@ -57,6 +57,7 @@ class SectionContainer {
         this.currentQuestionIndex = options.currentQuestionIndex || 0;
         this.generatedText = options.generatedText || null;
         this.isReadOnly = options.isReadOnly || false;
+        this.skipReason = options.skipReason || null;
 
         this.render();
 
@@ -164,8 +165,13 @@ class SectionContainer {
 
         const section = this.sectionData;
 
-        // Adicionar data-section-id para estilização contextual
+        // Adicionar data-section-id e data-state para estilização contextual
         this.container.setAttribute('data-section-id', section.id);
+        this.container.setAttribute('data-state', this.state);
+
+        // Determinar se o chat accordion deve estar aberto no início
+        // Fica aberto se a seção está em progresso e há mensagens
+        const shouldChatBeExpanded = this.state === 'in_progress' && this.messages.length > 0;
 
         this.container.innerHTML = `
             <!-- Header da Seção -->
@@ -179,13 +185,19 @@ class SectionContainer {
                 </span>
             </div>
 
-            <!-- Chat (Accordion) -->
-            <button class="section-chat-toggle section-chat-toggle--collapsed" id="section-chat-toggle">
+            <!-- Chat (Accordion) - Oculto se seção foi pulada -->
+            ${this.state !== 'skipped' ? `
+            <button class="section-chat-toggle ${shouldChatBeExpanded ? '' : 'section-chat-toggle--collapsed'}" id="section-chat-toggle">
                 Histórico do Chat (${this.messages.length} mensagens)
             </button>
-            <div class="section-chat" id="section-chat">
+            <div class="section-chat ${shouldChatBeExpanded ? 'section-chat--expanded' : ''}" id="section-chat">
                 ${this._renderMessages()}
             </div>
+            ` : `
+            <!-- Mensagem customizada para seção pulada -->
+            <pre id="section-skip-message" class="section-skip-message whitespace-pre-wrap text-sm text-gray-800 mb-3 italic text-gray-500" style="font-size: 0.95rem;">Não se aplica (${this.skipReason || 'motivo não especificado'})</pre>
+            `}
+
 
             <!-- Área de Input Dinâmica -->
             ${!this.isReadOnly && this.state === 'in_progress' ? `
@@ -209,8 +221,8 @@ class SectionContainer {
             </div>
             ` : ''}
 
-            <!-- Transição para próxima seção (se completed e não for última) -->
-            ${this.state === 'completed' && this.sectionId < 8 ? this._renderTransition() : ''}
+            <!-- Transição para próxima seção (se completed/skipped e não for última) -->
+            ${(this.state === 'completed' || this.state === 'skipped') && this.sectionId < 8 ? this._renderTransition() : ''}
 
             <!-- Aviso de modo leitura -->
             ${this.isReadOnly ? `
@@ -234,6 +246,11 @@ class SectionContainer {
 
         // Bind eventos
         this._bindEvents();
+
+        // Scroll para final do chat (se há mensagens)
+        if (this.messages.length > 0) {
+            this._scrollChatToBottom();
+        }
     }
 
     /**
@@ -259,6 +276,11 @@ class SectionContainer {
      */
     _renderMessages() {
         if (this.messages.length === 0) {
+            // Se seção foi pulada, mostrar motivo em vez de "Carregando..."
+            if (this.state === 'skipped') {
+                const skipMessage = this.skipReason || 'Não se aplica';
+                return `<div class="section-skipped-message"><span>⃠</span> ${skipMessage}</div>`;
+            }
             return '<div class="section-loading"><span class="section-loading__spinner"></span> Carregando...</div>';
         }
 
@@ -327,12 +349,26 @@ class SectionContainer {
             7: 'Não houve apreensão'
         };
 
+        // Perguntas contextuais para cada transição
+        const transitionQuestions = {
+            2: 'Havia veículo envolvido na ocorrência?',
+            3: 'Houve campana?',
+            4: 'Houve entrada em domicílio?',
+            5: 'Houve fundada suspeita?',
+            6: 'Houve resistência?',
+            7: 'Houve apreensão?',
+            8: null
+        };
+
         const nextSectionId = nextSection.id;
         const startButtonText = startTexts[nextSectionId] || `Iniciar Seção ${nextSectionId}`;
         const skipButtonText = skipTexts[nextSectionId] || 'Pular';
 
         // Icon para o botão de início
         const startButtonIcon = nextSectionId === 8 ? '▶️' : '✅';
+
+        // Obter pergunta para esta transição
+        const transitionQuestion = transitionQuestions[nextSectionId];
 
         return `
             <div class="section-transition">
@@ -343,6 +379,7 @@ class SectionContainer {
                         <div class="section-transition__preview-name">Seção ${nextSection.id}: ${nextSection.name}</div>
                     </div>
                 </div>
+                ${transitionQuestion ? `<div class="section-transition__question">${transitionQuestion}</div>` : ''}
                 <div class="section-transition__buttons">
                     <button class="section-transition__btn section-transition__btn--start" id="section-start-next">
                         ${startButtonIcon} ${startButtonText}
@@ -411,9 +448,21 @@ class SectionContainer {
         // Verificar se deve pular seção (para skipQuestion)
         if (option?.skipsSection) {
             this._addUserMessage(answer);
-            setTimeout(() => {
-                this._skipSection(answer);
-            }, 300);
+
+            // Salvar resposta
+            this.answers[question.id] = answer;
+
+            // Chamar onAnswer que vai enviar para API e retornar skip reason
+            this.onAnswer(question.id, answer, { isSkipQuestion: true }).then(() => {
+                // Após API responder, a skip reason já foi definida em _setSkipReason
+                // Apenas renderizar e chamar o callback de skip
+                setTimeout(() => {
+                    this._skipSection();
+                }, 300);
+            }).catch((error) => {
+                console.error('Erro ao enviar skip question:', error);
+                if (onError) onError();
+            });
             return;
         }
 
@@ -706,6 +755,20 @@ class SectionContainer {
     _updateChat() {
         if (this.chatEl) {
             this.chatEl.innerHTML = this._renderMessages();
+            // Scroll automático para o final quando há nova mensagem
+            this._scrollChatToBottom();
+        }
+    }
+
+    /**
+     * Faz scroll automático para o final do chat
+     */
+    _scrollChatToBottom() {
+        if (this.chatEl) {
+            // Usar requestAnimationFrame para garantir que o DOM foi atualizado
+            requestAnimationFrame(() => {
+                this.chatEl.scrollTop = this.chatEl.scrollHeight;
+            });
         }
     }
 
@@ -743,6 +806,13 @@ class SectionContainer {
         this.skipReason = skipReason || null;
         this.onSkip(this.sectionId);
         this.render();
+    }
+
+    /**
+     * Define a razão do skip (chamado pela API após skip question)
+     */
+    setSkipReason(skipReasonMessage) {
+        this.skipReason = skipReasonMessage || null;
     }
 
     /**

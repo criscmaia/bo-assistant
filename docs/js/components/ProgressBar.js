@@ -234,6 +234,12 @@ class ProgressBar {
         console.log('[ProgressBar] _updateLineFill:', { sectionId, percentage, answeredCount: state.answeredCount, totalCount: state.totalCount, status: state.status });
 
         lineFill.style.width = `${percentage}%`;
+
+        // Atualizar atributo data-section-status no container pai para styling tracejado
+        const lineContainer = lineFill.parentElement;
+        if (lineContainer) {
+            lineContainer.dataset.sectionStatus = state.status;
+        }
     }
 
     /**

@@ -91,6 +91,7 @@ class BOApp {
                 messages: [],
                 currentQuestionIndex: 0,
                 generatedText: null,
+                skipReason: null,
             };
         });
     }
@@ -222,6 +223,7 @@ class BOApp {
             answers: sectionState.answers,
             currentQuestionIndex: sectionState.currentQuestionIndex,
             generatedText: sectionState.generatedText,
+            skipReason: sectionState.skipReason || null,
             isReadOnly: false,
         });
     }
@@ -229,7 +231,7 @@ class BOApp {
     /**
      * Callback: resposta enviada
      */
-    async _onAnswer(questionId, answer) {
+    async _onAnswer(questionId, answer, options = {}) {
         console.log('[BOApp] Resposta:', questionId, '=', answer);
 
         const sectionId = this.currentSectionIndex + 1;
@@ -264,8 +266,16 @@ class BOApp {
                     this._showValidationError(response.validation_error);
                 }
 
+                // Se seção foi pulada, armazenar a razão do skip
+                if (response.section_skipped && response.generated_text) {
+                    sectionState.generatedText = response.generated_text;
+                    sectionState.skipReason = response.generated_text;
+                    // Passar o skip reason para o SectionContainer para exibição
+                    this.sectionContainer.setSkipReason(response.generated_text);
+                    console.log('[BOApp] Seção pulada. Razão:', response.generated_text);
+                }
                 // Se seção completou e tem texto gerado, armazenar
-                if (response.is_section_complete && response.generated_text) {
+                else if (response.is_section_complete && response.generated_text) {
                     sectionState.generatedText = response.generated_text;
                     console.log('[BOApp] Texto gerado recebido do backend:', response.generated_text.substring(0, 100));
                 }

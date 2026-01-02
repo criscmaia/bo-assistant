@@ -1,11 +1,27 @@
-# Claude Code: Guia de Otimização de Custos
+# Claude Code: Guia Completo
 
-**Versão**: 3.0  
-**Data**: Dezembro 2025
+**Versão**: 3.0
+**Última Atualização**: 2 de janeiro de 2026
+
+Este documento unifica todas as informações sobre uso do Claude Code no projeto BO Inteligente, incluindo comandos customizados, otimização de custos e workflow recomendado.
 
 ---
 
-## Modelos Disponíveis e Preços
+## 📋 Índice
+
+1. [Modelos e Custos](#-modelos-e-custos)
+2. [Configuração](#-configuração)
+3. [Alternando Modelos](#-alternando-modelos)
+4. [Estratégia de Uso](#-estratégia-de-uso)
+5. [Workflow Recomendado](#-workflow-recomendado)
+6. [Comandos Customizados](#-comandos-customizados)
+7. [Referências](#-referências)
+
+---
+
+## 💰 Modelos e Custos
+
+### Modelos Disponíveis
 
 | Modelo | Nome Completo | Input/MTok | Output/MTok | Velocidade |
 |--------|---------------|------------|-------------|------------|
@@ -15,17 +31,42 @@
 
 > **Fonte**: https://claude.com/pricing#api
 
+### Estimativa de Economia
+
+**Distribuição Recomendada:**
+
+| Modelo | % do Uso | Tipos de Tarefa |
+|--------|----------|-----------------|
+| Haiku 4.5 | 60% | Exploração, git, implementações simples |
+| Sonnet 4.5 | 35% | Planejamento, review, implementações complexas |
+| Opus 4.5 | 5% | Arquitetura, debugging crítico |
+
+**Comparação de Custos (10M tokens/dia):**
+
+| Estratégia | Custo Diário | Custo Mensal |
+|------------|--------------|--------------|
+| 100% Sonnet 4.5 | ~$78 | ~$2,340 |
+| 100% Haiku 4.5 | ~$26 | ~$780 |
+| Mix 60/35/5 | ~$42 | ~$1,260 |
+
+**Economia com estratégia híbrida**: ~45% comparado a 100% Sonnet
+
 ---
 
-## Configuração no VS Code
+## ⚙️ Configuração
 
 ### Estrutura de Arquivos
 
 ```
-seu-projeto/
+bo-assistant/
 ├── .claude/
 │   ├── settings.json           ← Compartilhado com equipe (git)
-│   └── settings.local.json     ← Configurações pessoais (ignorado pelo git)
+│   ├── settings.local.json     ← Configurações pessoais (ignorado pelo git)
+│   ├── COMMIT_GUIDELINES.md    ← Padrões de commit
+│   └── commands/               ← Comandos customizados (ver seção abaixo)
+│       ├── test-local.sh
+│       ├── fix-issue.md
+│       └── validate-docs.md
 └── ...
 ```
 
@@ -50,12 +91,17 @@ Crie o arquivo `.claude/settings.local.json` no seu projeto:
       "Bash(curl:*)",
       "Bash(ls:*)",
       "Bash(cat:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
     ]
   }
 }
 ```
 
-> **Importante**: No arquivo de configuração, use sempre o **nome completo do modelo** (ex: `claude-haiku-4-5-20251001`), não aliases como "haiku".
+> **Importante**: Use sempre o **nome completo do modelo** (ex: `claude-haiku-4-5-20251001`), não aliases.
 
 ### Hierarquia de Configuração
 
@@ -67,9 +113,18 @@ As configurações são aplicadas nesta ordem de prioridade (maior para menor):
 4. **Shared Project Settings** - `.claude/settings.json`
 5. **User Settings** - `~/.claude/settings.json`
 
+### Por que .claude está no .gitignore?
+
+A pasta `.claude/` contém:
+- **settings.json**: Configurações locais do Claude Code (pode conter dados sensíveis)
+- **commands/**: Scripts e comandos customizados locais
+- **estado local**: Cache, histórico, etc.
+
+Por isso é recomendado manter no `.gitignore` e fazer o setup manual em cada clone do repositório.
+
 ---
 
-## Alternando Modelos Durante o Trabalho
+## 🔄 Alternando Modelos
 
 ### Importante: Extensão VS Code vs CLI
 
@@ -124,9 +179,26 @@ export ANTHROPIC_MODEL="claude-haiku-4-5-20251001"
 claude
 ```
 
+### Verificação da Configuração
+
+**Na Extensão VS Code:**
+
+Como `/status` não funciona na extensão, use uma destas alternativas:
+
+- **Pergunte diretamente ao Claude**: "Qual modelo você está usando agora?"
+- **Verifique o arquivo de configuração**: O modelo definido em `.claude/settings.local.json` será usado automaticamente
+
+**No Terminal (CLI):**
+
+```
+/status
+```
+
+O output mostrará qual modelo está em uso.
+
 ---
 
-## Estratégia de Uso por Tipo de Tarefa
+## 🎯 Estratégia de Uso
 
 ### Haiku 4.5 — Tarefas Simples e Repetitivas
 
@@ -151,7 +223,7 @@ claude
 - Refatoração de médio porte
 - Planejamento de implementação
 - Implementações com lógica de negócio
-- Debugging de issues conhecidos
+- Debugging de issues conhecidas
 - Tarefas multi-etapas com contexto
 
 **Justificativa**: Sonnet 4.5 é o modelo mais equilibrado, oferecendo excelente raciocínio e capacidade de código a um custo moderado. É o padrão recomendado para desenvolvimento geral.
@@ -172,9 +244,9 @@ claude
 
 ---
 
-## Workflow Recomendado: Exemplo Prático
+## 🚀 Workflow Recomendado
 
-### Cenário: Implementar Nova Feature
+### Cenário 1: Implementar Nova Feature
 
 ```
 1. EXPLORAÇÃO (Haiku)
@@ -205,7 +277,7 @@ claude
 TOTAL: ~$0.25-0.65
 ```
 
-### Cenário: Debugging Crítico
+### Cenário 2: Debugging Crítico
 
 ```
 1. COLETA DE INFORMAÇÕES (Haiku)
@@ -229,109 +301,137 @@ TOTAL: ~$0.25-0.65
 
 ---
 
-## Estimativa de Economia
+## 🛠️ Comandos Customizados
 
-### Distribuição Recomendada
+Este projeto possui 3 comandos customizados configurados via Claude Code skills.
 
-| Modelo | % do Uso | Tipos de Tarefa |
-|--------|----------|-----------------|
-| Haiku 4.5 | 60% | Exploração, git, implementações simples |
-| Sonnet 4.5 | 35% | Planejamento, review, implementações complexas |
-| Opus 4.5 | 5% | Arquitetura, debugging crítico |
+### `/test-local` - Mover Issue para Teste Local
 
-### Comparação de Custos
+Move uma issue do GitHub para a coluna "Teste Local" no Kanban automaticamente.
 
-**Cenário: 10M tokens/dia de uso**
+**Setup:**
 
-| Estratégia | Custo Diário | Custo Mensal |
-|------------|--------------|--------------|
-| 100% Sonnet 4.5 | ~$78 | ~$2,340 |
-| 100% Haiku 4.5 | ~$26 | ~$780 |
-| Mix 60/35/5 | ~$42 | ~$1,260 |
-
-**Economia com estratégia híbrida**: ~45% comparado a 100% Sonnet
-
----
-
-## Verificação da Configuração
-
-### Na Extensão VS Code
-
-Como `/status` não funciona na extensão, use uma destas alternativas:
-
-**Pergunte diretamente ao Claude:**
-```
-Qual modelo você está usando agora?
+1. Crie a pasta de comandos:
+```bash
+mkdir -p .claude/commands
 ```
 
-**Ou verifique o arquivo de configuração:**
-O modelo definido em `.claude/settings.local.json` será usado automaticamente.
+2. Crie o arquivo `.claude/commands/test-local.sh`:
+```bash
+#!/bin/bash
+# Move issue to "Teste Local" column in Kanban
 
-### No Terminal (CLI)
+if [ -z "$1" ]; then
+    echo "❌ Erro: Número da issue é obrigatório"
+    echo "Uso: /test-local <numero>"
+    exit 1
+fi
 
-Se estiver usando o CLI no terminal integrado:
+ISSUE_NUMBER=$1
 
+echo "🔍 Procurando issue #$ISSUE_NUMBER..."
+
+# Passo 1: Encontrar o Item ID
+ITEM_ID=$(gh project item-list 1 --owner criscmaia --format json | \
+    jq -r ".items[] | select(.content.number==$ISSUE_NUMBER) | .id" | \
+    head -1)
+
+if [ -z "$ITEM_ID" ]; then
+    echo "❌ Issue #$ISSUE_NUMBER não encontrada no Kanban"
+    exit 1
+fi
+
+echo "✅ Item ID encontrado: $ITEM_ID"
+
+# Passo 2: Mover para "Teste Local"
+echo "📋 Movendo para coluna 'Teste Local'..."
+
+gh project item-edit \
+    --project-id PVT_kwHOAIpvJs4BLOCq \
+    --id "$ITEM_ID" \
+    --field-id PVTSSF_lAHOAIpvJs4BLOCqzg62_Ms \
+    --single-select-option-id f19d663f
+
+if [ $? -eq 0 ]; then
+    echo "✅ Issue #$ISSUE_NUMBER movida para 'Teste Local' com sucesso!"
+else
+    echo "❌ Erro ao mover issue"
+    exit 1
+fi
 ```
-/status
+
+3. Torne o script executável:
+```bash
+chmod +x .claude/commands/test-local.sh
 ```
 
-O output mostrará qual modelo está em uso.
-
-### Command Palette do VS Code
-
-Use `Ctrl+Shift+P` e procure por comandos do Claude Code disponíveis.
-
----
-
-## Configurações Adicionais Úteis
-
-### Limitar Permissões Sensíveis
-
+4. Configure o hook no `.claude/settings.json`:
 ```json
 {
-  "model": "claude-haiku-4-5-20251001",
-  "permissions": {
-    "allow": [
-      "Bash(git:*)",
-      "Bash(python:*)"
-    ],
-    "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Read(./secrets/**)"
-    ]
-  }
+    "hooks": {
+        "UserPromptSubmit": [
+            {
+                "matcher": "/test-local",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash .claude/commands/test-local.sh $ARGUMENTS",
+                        "statusMessage": "🧪 Movendo issue para Teste Local..."
+                    }
+                ]
+            }
+        ]
+    }
 }
 ```
 
-### Configuração para Equipe
-
-Arquivo `.claude/settings.json` (compartilhado via git):
-
-```json
-{
-  "permissions": {
-    "deny": [
-      "Read(./.env)",
-      "Read(./secrets/**)"
-    ]
-  }
-}
+**Uso:**
+```
+/test-local 5
 ```
 
-Arquivo `.claude/settings.local.json` (pessoal):
+Isso move a issue #5 para a coluna "Teste Local" no Kanban.
 
-```json
-{
-  "model": "claude-haiku-4-5-20251001"
-}
+### `/fix-issue` - Ler e Corrigir Bugs da Issue
+
+Lê uma issue do GitHub Projects e corrige os bugs descritos nela.
+
+**Uso:**
 ```
+/fix-issue 7
+```
+
+Lê a issue #7 e implementa as correções necessárias.
+
+### `/validate-docs` - Validar Consistência de Versão
+
+Valida se todos os documentos do projeto estão com a versão correta e consistente.
+
+**Uso:**
+```
+/validate-docs
+```
+
+Verifica todos os arquivos `.md` e reporta inconsistências de versão.
 
 ---
 
-## Referências
+## 📚 Referências
+
+### Documentação Oficial
 
 - **Documentação Claude Code**: https://code.claude.com/docs/en/settings
 - **Preços API**: https://claude.com/pricing#api
 - **Configuração de Modelos**: https://docs.claude.com/en/docs/claude-code/model-config
 - **Help Center**: https://support.claude.com/en/articles/11940350-claude-code-model-configuration
+
+### Documentação Interna
+
+- [COMMIT_GUIDELINES.md](../.claude/COMMIT_GUIDELINES.md) - Padrões de commit do projeto
+- [DEVELOPMENT.md](../DEVELOPMENT.md) - Guia de desenvolvimento
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Arquitetura técnica
+
+---
+
+**Última atualização:** 2 de janeiro de 2026
+**Versão do projeto:** v0.13.0

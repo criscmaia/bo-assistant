@@ -265,7 +265,7 @@ class BOApp {
                 }
 
                 // Se seção completou e tem texto gerado, armazenar
-                if (response.is_section_complete && response.generated_text) {
+                if (response.section_complete && response.generated_text) {
                     sectionState.generatedText = response.generated_text;
                     console.log('[BOApp] Texto gerado recebido do backend:', response.generated_text.substring(0, 100));
                 }

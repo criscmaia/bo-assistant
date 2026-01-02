@@ -9,7 +9,7 @@
 
 /* Container genérico de input */
 .input-component {
-    padding: 16px 20px;
+    padding: 20px 24px;
     border-top: 1px solid #e5e7eb;
     background: #f8fafc;
 }
@@ -54,7 +54,7 @@
 
 .text-input__button {
     padding: 14px 28px;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -67,7 +67,7 @@
 
 .text-input__button:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .text-input__button:active:not(:disabled) {
@@ -116,6 +116,7 @@
 .single-choice {
     display: flex;
     flex-wrap: wrap;
+    flex-direction: row-reverse;
     gap: 12px;
     justify-content: center;
 }

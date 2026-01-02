@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Progress Bar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1f2937;
+        }
+
+        /* ============================================ */
+        /* PROGRESS BAR */
+        /* ============================================ */
+
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            position: relative;
+        }
+
+        .progress-node-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-node {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        /* Estados das bolinhas */
+        .progress-node--pending {
+            background: transparent;
+            border: solid;
+            border-color: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .progress-node--in-progress {
+            background: #e5e7eb !important;
+            color: white !important;
+            border-color: #3b82f6 !important;
+            animation: pulse-progress 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Metade preenchida azul usando pseudo-elemento - VERTICAL (meio da bolinha) */
+        .progress-node--in-progress::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: #3b82f6;
+            z-index: 0;
+        }
+
+        .progress-node--completed {
+            background-color: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+
+        .progress-node--completed::before {
+            content: '✓';
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-node--skipped {
+            background-color: #e5e7eb;
+            color: white;
+            border-color: #e5e7eb;
+            position: relative;
+        }
+
+        /* Unicode "Circle with backslash" centralizado */
+        .progress-node--skipped::before {
+            content: '⃠';
+            position: absolute;
+            top: 49%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15px;
+            color: #9197a5;
+            z-index: 1;
+        }
+
+        /* Label abaixo da bolinha */
+        .progress-node-label {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .progress-node-wrapper:has(.progress-node--in-progress) .progress-node-label {
+            color: #3b82f6;
+            font-weight: 700;
+        }
+
+        /* Linha de conexão */
+        .progress-line-container {
+            flex: 1;
+            height: 3px;
+            background-color: #e5e7eb;
+            margin: 0 -8px;
+            position: relative;
+            z-index: 1;
+            align-self: flex-start;
+            margin-top: 13px;
+        }
+
+        .progress-line-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* Animação de pulsação - MAIOR e mais EVIDENTE */
+        @keyframes pulse-progress {
+            0%, 100% {
+                box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 0 12px rgba(59, 130, 246, 0);
+            }
+        }
+
+        /* ============================================ */
+        /* TESTE: VARIAÇÕES */
+        /* ============================================ */
+
+        .test-section {
+            margin-bottom: 60px;
+        }
+
+        .test-section h2 {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #fef3c7;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste Isolado - Progress Bar</h1>
+
+        <!-- Teste 1: Todos os estados -->
+        <div class="test-section">
+            <h2>Teste 1: Todos os Estados (Pending, In-Progress, Completed, Skipped)</h2>
+            <div class="progress-bar">
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--completed"></div>
+                    <div class="progress-node-label">Seção 1</div>
+                </div>
+                <div class="progress-line-container">
+                    <div class="progress-line-fill" style="width: 100%;"></div>
+                </div>
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--in-progress"></div>
+                    <div class="progress-node-label">Seção 2</div>
+                </div>
+                <div class="progress-line-container">
+                    <div class="progress-line-fill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--pending"></div>
+                    <div class="progress-node-label">Seção 3</div>
+                </div>
+                <div class="progress-line-container">
+                    <div class="progress-line-fill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--skipped"></div>
+                    <div class="progress-node-label">Seção 4</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teste 2: Múltiplas in-progress para ver o efeito -->
+        <div class="test-section">
+            <h2>Teste 2: Múltiplas Bolinhas "In-Progress" (Testar Efeito Visual)</h2>
+            <div class="progress-bar">
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--in-progress"></div>
+                    <div class="progress-node-label">Seção 1</div>
+                </div>
+                <div class="progress-line-container">
+                    <div class="progress-line-fill" style="width: 50%;"></div>
+                </div>
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--in-progress"></div>
+                    <div class="progress-node-label">Seção 2</div>
+                </div>
+                <div class="progress-line-container">
+                    <div class="progress-line-fill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--in-progress"></div>
+                    <div class="progress-node-label">Seção 3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teste 3: Apenas uma in-progress isolada -->
+        <div class="test-section">
+            <h2>Teste 3: Apenas 1 Bolinha "In-Progress" (Isolada)</h2>
+            <div class="progress-bar">
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--in-progress" style="width: 40px; height: 40px;"></div>
+                    <div class="progress-node-label">GRANDE (40px)</div>
+                </div>
+                <div class="progress-line-container">
+                    <div class="progress-line-fill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--in-progress"></div>
+                    <div class="progress-node-label">NORMAL (28px)</div>
+                </div>
+                <div class="progress-line-container">
+                    <div class="progress-line-fill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-node-wrapper">
+                    <div class="progress-node progress-node--in-progress" style="width: 20px; height: 20px;"></div>
+                    <div class="progress-node-label">PEQUENA (20px)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <strong>O que você deve ver:</strong><br>
+            • Bolinhas "In-Progress" devem ter metade azul (#3b82f6) e metade cinza (#e5e7eb) em diagonal<br>
+            • O triângulo azul deve ir do canto superior esquerdo até o canto inferior esquerdo<br>
+            • Deve haver uma animação de "pulsação" ao redor da bolinha<br>
+            <br>
+            <strong>Se a bolinha aparecer totalmente branca/cinza:</strong><br>
+            Isso indica que o clip-path não está funcionando ou há conflito de CSS.
+        </div>
+    </div>
+</body>
+</html>

@@ -10,7 +10,7 @@
 .section-container {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
     height: calc(100vh - 220px); /* Altura dinâmica */
@@ -33,7 +33,7 @@
 
 /* Header da seção */
 .section-header {
-    padding: 16px 20px;
+    padding: 18px 24px;
     border-bottom: 1px solid #e5e7eb;
     display: flex;
     align-items: center;
@@ -80,10 +80,10 @@
 .section-chat {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
 .section-chat::-webkit-scrollbar {
@@ -197,8 +197,8 @@
 }
 
 .section-input__button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
 }
 
 .section-input__button:active {
@@ -304,6 +304,7 @@
 
 .section-transition__buttons {
     display: flex;
+    flex-direction: row-reverse;
     gap: 12px;
 }
 
@@ -405,4 +406,152 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-right: 12px;
+}
+
+/* ============================================ */
+/* CORES CONTEXTUAIS POR SEÇÃO */
+/* ============================================ */
+
+/* Seção 1 - Verde (Contexto) */
+[data-section-id="1"] .section-header {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+[data-section-id="1"] .section-generated {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-top-color: #34d399;
+}
+
+[data-section-id="1"] .section-generated__copy {
+    background: #059669;
+}
+
+[data-section-id="1"] .section-generated__copy:hover {
+    background: #047857;
+}
+
+/* Seção 2 - Azul (Veículo) */
+[data-section-id="2"] .section-header {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+[data-section-id="2"] .section-generated {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-top-color: #60a5fa;
+}
+
+[data-section-id="2"] .section-generated__copy {
+    background: #2563eb;
+}
+
+[data-section-id="2"] .section-generated__copy:hover {
+    background: #1d4ed8;
+}
+
+/* Seção 3 - Roxo (Suspeitos) */
+[data-section-id="3"] .section-header {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+}
+
+[data-section-id="3"] .section-generated {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    border-top-color: #c084fc;
+}
+
+[data-section-id="3"] .section-generated__copy {
+    background: #9333ea;
+}
+
+[data-section-id="3"] .section-generated__copy:hover {
+    background: #7e22ce;
+}
+
+/* Seção 4 - Laranja (Drogas) */
+[data-section-id="4"] .section-header {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+}
+
+[data-section-id="4"] .section-generated {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    border-top-color: #fb923c;
+}
+
+[data-section-id="4"] .section-generated__copy {
+    background: #ea580c;
+}
+
+[data-section-id="4"] .section-generated__copy:hover {
+    background: #c2410c;
+}
+
+/* Seção 5 - Rosa (Apreensões) */
+[data-section-id="5"] .section-header {
+    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+}
+
+[data-section-id="5"] .section-generated {
+    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+    border-top-color: #f472b6;
+}
+
+[data-section-id="5"] .section-generated__copy {
+    background: #db2777;
+}
+
+[data-section-id="5"] .section-generated__copy:hover {
+    background: #be185d;
+}
+
+/* Seção 6 - Teal (Testemunhas) */
+[data-section-id="6"] .section-header {
+    background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+}
+
+[data-section-id="6"] .section-generated {
+    background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+    border-top-color: #5eead4;
+}
+
+[data-section-id="6"] .section-generated__copy {
+    background: #0d9488;
+}
+
+[data-section-id="6"] .section-generated__copy:hover {
+    background: #0f766e;
+}
+
+/* Seção 7 - Âmbar (Procedimentos) */
+[data-section-id="7"] .section-header {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+[data-section-id="7"] .section-generated {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-top-color: #fbbf24;
+}
+
+[data-section-id="7"] .section-generated__copy {
+    background: #d97706;
+}
+
+[data-section-id="7"] .section-generated__copy:hover {
+    background: #b45309;
+}
+
+/* Seção 8 - Índigo (Observações) */
+[data-section-id="8"] .section-header {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+}
+
+[data-section-id="8"] .section-generated {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    border-top-color: #818cf8;
+}
+
+[data-section-id="8"] .section-generated__copy {
+    background: #4f46e5;
+}
+
+[data-section-id="8"] .section-generated__copy:hover {
+    background: #4338ca;
 }

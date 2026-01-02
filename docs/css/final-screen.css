@@ -10,7 +10,7 @@
 .final-screen {
     background: white;
     border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     animation: fadeIn 0.3s ease;
 }
@@ -224,7 +224,7 @@
 }
 
 .final-screen__action-btn--primary:hover {
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
 .final-screen__action-btn--secondary {

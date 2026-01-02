@@ -163,6 +163,9 @@ class SectionContainer {
 
         const section = this.sectionData;
 
+        // Adicionar data-section-id para estilização contextual
+        this.container.setAttribute('data-section-id', section.id);
+
         this.container.innerHTML = `
             <!-- Header da Seção -->
             <div class="section-header">

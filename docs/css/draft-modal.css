@@ -75,6 +75,7 @@
 
 .draft-modal__actions {
     display: flex;
+    flex-direction: row-reverse;
     gap: 1rem;
     margin-bottom: 1rem;
 }
@@ -93,13 +94,13 @@
 }
 
 .draft-modal__btn--continue {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
 }
 
 .draft-modal__btn--continue:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     transform: translateY(-2px);
 }
 

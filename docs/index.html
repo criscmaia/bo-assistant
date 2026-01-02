@@ -25,11 +25,13 @@
     <!-- =================================== -->
     <header>
         <div class="header-content">
-            <h1 class="header-title">
-                <span class="header-icon">📝</span>
-                BO Inteligente
-            </h1>
-            <p class="header-subtitle">Tráfico de Drogas</p>
+            <div>
+                <h1 class="header-title">
+                    <span class="header-icon">📝</span>
+                    BO Inteligente
+                </h1>
+                <p class="header-subtitle">Tráfico de Drogas</p>
+            </div>
         </div>
     </header>
 
@@ -43,7 +45,11 @@
         </div>
 
         <!-- Tooltip da Barra de Progresso -->
-        <div id="progress-tooltip" class="progress-tooltip"></div>
+        <div id="progress-tooltip" class="progress-tooltip hidden">
+            <span class="tooltip-emoji"></span>
+            <span class="tooltip-name"></span>
+            <span class="tooltip-status"></span>
+        </div>
 
         <!-- Container da Seção Atual -->
         <div id="section-container" class="section-container section-container--visible"></div>

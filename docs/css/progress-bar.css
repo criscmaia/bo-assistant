@@ -11,7 +11,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 16px 24px;
     position: relative;
 }
 
@@ -24,33 +24,54 @@
 }
 
 .progress-node {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     position: relative;
 }
 
 /* Estados das bolinhas */
 .progress-node--pending {
-    background-color: #e5e7eb;
+    background: transparent;
+    border: solid;
+    border-color: #e5e7eb;
     color: #9ca3af;
     cursor: not-allowed;
 }
 
-.progress-node--in-progress {
-    background-color: #3b82f6;
-    color: white;
-    border-color: #1d4ed8;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+.progress-node--in-progress,
+.progress-node--in_progress {
+    background: #e5e7eb !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
     animation: pulse-progress 2s infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Metade preenchida azul usando pseudo-elemento - VERTICAL (meio da bolinha) */
+.progress-node--in-progress::before,
+.progress-node--in_progress::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: #3b82f6;
+    z-index: 0;
+}
+
+/* Garantir que o texto/ícone fique acima */
+.progress-node--in-progress .node-number {
+    position: relative;
+    z-index: 1;
 }
 
 .progress-node--completed {
@@ -65,39 +86,45 @@
 }
 
 .progress-node--skipped {
-    background-color: #9ca3af;
+    background-color: #e5e7eb;
     color: white;
-    border-color: #6b7280;
+    border-color: #e5e7eb;
+    position: relative;
 }
 
-.progress-node--skipped::after {
-    content: '⏭️';
+/* Unicode "Circle with backslash" centralizado */
+.progress-node--skipped::before {
+    content: '⃠';
     position: absolute;
-    top: -8px;
-    right: -8px;
-    font-size: 12px;
+    top: 49%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 15px;
+    color: #9197a5;
+    z-index: 1;
+}
+
+/* Esconder número SEMPRE */
+.node-number {
+    display: none !important;
 }
 
 /* Checkmark para seções completas */
 .progress-node--completed::before {
     content: '✓';
-    font-size: 18px;
-}
-
-/* Esconder número quando completo */
-.progress-node--completed .node-number,
-.progress-node--skipped .node-number {
-    display: none;
+    font-size: 14px;
 }
 
 /* Linha de conexão entre bolinhas */
 .progress-line-container {
     flex: 1;
-    height: 6px;
+    height: 3px;
     background-color: #e5e7eb;
-    margin: 0 -5px;
+    margin: 0 -8px;
     position: relative;
     z-index: 1;
+    align-self: flex-start;
+    margin-top: 13px; /* Centro exato: (28px/2) - (3px/2) = 14 - 1.5 = 12.5, ajustado para 13px */
 }
 
 .progress-line-fill {
@@ -108,13 +135,13 @@
     width: 0%;
 }
 
-/* Animação de pulsação para seção atual */
+/* Animação de pulsação - MAIOR e mais EVIDENTE */
 @keyframes pulse-progress {
     0%, 100% {
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.6);
     }
     50% {
-        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 12px rgba(59, 130, 246, 0);
     }
 }
 
@@ -131,6 +158,17 @@
     pointer-events: none;
     transform: translateX(-50%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.progress-tooltip:not(.hidden) {
+    opacity: 1;
+}
+
+.progress-tooltip.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .progress-tooltip::after {
@@ -155,14 +193,17 @@
 
 /* Label abaixo da bolinha (número da seção) */
 .progress-node-label {
-    margin-top: 6px;
-    font-size: 11px;
+    margin-top: 8px;
+    font-size: 12px;
     color: #6b7280;
-    font-weight: 500;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .progress-node--in-progress + .progress-node-label,
-.progress-node-wrapper:has(.progress-node--in-progress) .progress-node-label {
+.progress-node--in_progress + .progress-node-label,
+.progress-node-wrapper:has(.progress-node--in-progress) .progress-node-label,
+.progress-node-wrapper:has(.progress-node--in_progress) .progress-node-label {
     color: #3b82f6;
     font-weight: 700;
 }

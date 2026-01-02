@@ -937,8 +937,17 @@ function getQuestionById(questionId) {
     }
     for (const question of section.questions) {
       if (question.id === questionId) return question;
-      if (question.followUp && question.followUp.question.id === questionId) {
-        return question.followUp.question;
+
+      // Buscar em follow-ups (suporta array 'questions' e singular legado 'question')
+      if (question.followUp) {
+        if (question.followUp.questions && Array.isArray(question.followUp.questions)) {
+          for (const fq of question.followUp.questions) {
+            if (fq.id === questionId) return fq;
+          }
+        } else if (question.followUp.question && question.followUp.question.id === questionId) {
+          // Suporte legado para singular (será descontinuado)
+          return question.followUp.question;
+        }
       }
     }
   }

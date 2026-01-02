@@ -528,10 +528,17 @@ class SectionContainer {
             this.onAnswer(question.id, answer).then(() => {
                 // Após onAnswer, processar follow-ups ou completar seção
                 this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);
+            }).catch(error => {
+                console.error('Erro ao salvar resposta:', error);
+                this._showError('Não foi possível salvar a resposta. Tente novamente.');
             });
             return;
         } else {
-            this.onAnswer(question.id, answer);
+            // Aguardar Promise mesmo em casos sem conclusão de seção
+            this.onAnswer(question.id, answer).catch(error => {
+                console.error('Erro ao salvar resposta:', error);
+                this._showError('Não foi possível salvar a resposta. Tente novamente.');
+            });
         }
 
         this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);

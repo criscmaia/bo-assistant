@@ -861,24 +861,8 @@ async def start_section(section_number: int, request_body: dict):
         session_data["current_section"] = 6
         state_machine = session_data["sections"][6]
 
-        # Auto-responder pergunta 6.1 como "SIM" (usuário já confirmou ao clicar no botão)
-        state_machine.store_answer("SIM")
-
-        # ✅ Log: registrar resposta auto-respondida 6.1
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="answer_submitted",
-            data={
-                "step": "6.1",
-                "answer": "Sim",
-                "is_valid": True,
-                "auto_responded": True
-            }
-        )
-
-        state_machine.next_step()
-
-        # Agora pega pergunta 6.2 (não 6.1)
+        # 6.1 é pergunta aberta - não auto-responder, aguardar resposta do usuário
+        # O estado machine já está posicionado na 6.1
         first_question = state_machine.get_current_question()
 
         # Log: seção iniciada

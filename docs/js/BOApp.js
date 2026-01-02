@@ -477,6 +477,7 @@ class BOApp {
             answers: sectionState.answers,
             currentQuestionIndex: sectionState.currentQuestionIndex,
             generatedText: sectionState.generatedText,
+            skipReason: sectionState.skipReason || null,
             isReadOnly: shouldBeReadOnly,
             preAnswerSkipQuestion: options.preAnswerSkipQuestion,
         });

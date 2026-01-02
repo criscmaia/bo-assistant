@@ -217,7 +217,7 @@ class SectionContainer {
             </div>
             ` : `
             <!-- Mensagem customizada para seção pulada -->
-            <pre id="section-skip-message" class="section-skip-message whitespace-pre-wrap text-sm text-gray-800 mb-3 italic text-gray-500" style="font-size: 0.95rem;">Não se aplica (${console.log('[SectionContainer] Renderizando skip message - skipReason:', this.skipReason) || this.skipReason || 'motivo não especificado'})</pre>
+            <pre id="section-skip-message" class="section-skip-message whitespace-pre-wrap text-sm text-gray-800 mb-3 italic text-gray-500" style="font-size: 0.95rem;">${this.skipReason || 'Não se aplica (motivo não especificado)'}</pre>
             `}
 
 
@@ -288,7 +288,7 @@ class SectionContainer {
                 return `${answeredCount}/${totalQuestions} perguntas`;
             }
             case 'completed': return '✓ Completa';
-            case 'skipped': return `⃠\u00A0\u00A0\u00A0${this.skipReason || 'Não se aplica'}`;
+            case 'skipped': return '⃠\u00A0\u00A0\u00A0Não se aplica';
             default: return 'Pendente';
         }
     }

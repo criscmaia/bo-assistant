@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventBus Tests - BO Inteligente v0.13.1</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-suite {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ddd;
+            background: #f9f9f9;
+        }
+        .test-case.pass {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        .test-case.fail {
+            border-left-color: #f44336;
+            background: #fef1f0;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .summary {
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .summary-item {
+            text-align: center;
+        }
+        .summary-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .summary-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 EventBus Unit Tests</h1>
+    <button onclick="runAllTests()">▶ Executar Todos os Testes</button>
+
+    <div id="test-results"></div>
+    <div id="test-summary"></div>
+
+    <script src="../../docs/js/EventBus.js"></script>
+    <script>
+        // ============================================
+        // TEST FRAMEWORK SIMPLES
+        // ============================================
+
+        class TestRunner {
+            constructor() {
+                this.tests = [];
+                this.results = [];
+            }
+
+            test(name, fn) {
+                this.tests.push({ name, fn });
+            }
+
+            async run() {
+                this.results = [];
+                const resultsDiv = document.getElementById('test-results');
+                resultsDiv.innerHTML = '';
+
+                for (const test of this.tests) {
+                    const result = await this.runTest(test);
+                    this.results.push(result);
+                    this.renderTestResult(result, resultsDiv);
+                }
+
+                this.renderSummary();
+            }
+
+            async runTest(test) {
+                try {
+                    await test.fn();
+                    return { name: test.name, pass: true, error: null };
+                } catch (error) {
+                    return { name: test.name, pass: false, error: error.message };
+                }
+            }
+
+            renderTestResult(result, container) {
+                const testDiv = document.createElement('div');
+                testDiv.className = `test-case ${result.pass ? 'pass' : 'fail'}`;
+                testDiv.innerHTML = `
+                    <div class="test-name">${result.pass ? '✅' : '❌'} ${result.name}</div>
+                    ${result.error ? `<div class="test-result">Error: ${result.error}</div>` : ''}
+                `;
+                container.appendChild(testDiv);
+            }
+
+            renderSummary() {
+                const passed = this.results.filter(r => r.pass).length;
+                const failed = this.results.filter(r => !r.pass).length;
+                const total = this.results.length;
+
+                const summaryDiv = document.getElementById('test-summary');
+                summaryDiv.innerHTML = `
+                    <div class="summary">
+                        <div class="summary-item">
+                            <div class="summary-number">${total}</div>
+                            <div class="summary-label">Total</div>
+                        </div>
+                        <div class="summary-item" style="color: #4CAF50;">
+                            <div class="summary-number">${passed}</div>
+                            <div class="summary-label">Passaram</div>
+                        </div>
+                        <div class="summary-item" style="color: #f44336;">
+                            <div class="summary-number">${failed}</div>
+                            <div class="summary-label">Falharam</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEqual(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, got ${actual}`);
+            }
+        }
+
+        // ============================================
+        // TESTES DO EVENTBUS
+        // ============================================
+
+        const runner = new TestRunner();
+
+        // Test Suite 1: Singleton
+        runner.test('EventBus deve ser singleton', () => {
+            const instance1 = EventBus.getInstance();
+            const instance2 = EventBus.getInstance();
+            assert(instance1 === instance2, 'Instâncias devem ser iguais');
+        });
+
+        runner.test('Constructor direto deve lançar erro', () => {
+            try {
+                new EventBus();
+                throw new Error('Deveria ter lançado erro');
+            } catch (e) {
+                assert(e.message.includes('singleton'), 'Erro deve mencionar singleton');
+            }
+        });
+
+        // Test Suite 2: on/off/emit
+        runner.test('on() deve registrar handler', () => {
+            const bus = EventBus.getInstance();
+            bus.clear(); // Limpar estado
+
+            let called = false;
+            bus.on('test:event', () => { called = true; });
+            bus.emit('test:event');
+
+            assert(called, 'Handler deve ter sido chamado');
+        });
+
+        runner.test('on() deve retornar função de unsubscribe', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let callCount = 0;
+            const unsubscribe = bus.on('test:event', () => { callCount++; });
+
+            bus.emit('test:event');
+            assertEqual(callCount, 1, 'Deve ter sido chamado 1 vez');
+
+            unsubscribe();
+            bus.emit('test:event');
+            assertEqual(callCount, 1, 'Não deve ter sido chamado novamente');
+        });
+
+        runner.test('off() deve remover handler', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let callCount = 0;
+            const handler = () => { callCount++; };
+
+            bus.on('test:event', handler);
+            bus.emit('test:event');
+            assertEqual(callCount, 1);
+
+            bus.off('test:event', handler);
+            bus.emit('test:event');
+            assertEqual(callCount, 1, 'Handler não deve ser chamado após off()');
+        });
+
+        runner.test('emit() deve passar dados para handlers', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let receivedData = null;
+            bus.on('test:event', (data) => { receivedData = data; });
+
+            const testData = { foo: 'bar', num: 42 };
+            bus.emit('test:event', testData);
+
+            assertEqual(receivedData.foo, 'bar');
+            assertEqual(receivedData.num, 42);
+        });
+
+        runner.test('emit() deve chamar múltiplos handlers', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let call1 = false, call2 = false, call3 = false;
+            bus.on('test:event', () => { call1 = true; });
+            bus.on('test:event', () => { call2 = true; });
+            bus.on('test:event', () => { call3 = true; });
+
+            bus.emit('test:event');
+
+            assert(call1 && call2 && call3, 'Todos handlers devem ser chamados');
+        });
+
+        runner.test('emit() não deve falhar se não há handlers', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            // Não deve lançar erro
+            bus.emit('nonexistent:event', { data: 'test' });
+        });
+
+        // Test Suite 3: once()
+        runner.test('once() deve executar handler apenas uma vez', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let callCount = 0;
+            bus.once('test:event', () => { callCount++; });
+
+            bus.emit('test:event');
+            assertEqual(callCount, 1);
+
+            bus.emit('test:event');
+            assertEqual(callCount, 1, 'Não deve chamar segunda vez');
+        });
+
+        // Test Suite 4: clear()
+        runner.test('clear(event) deve remover handlers de um evento', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let callCount = 0;
+            bus.on('test:event', () => { callCount++; });
+
+            bus.emit('test:event');
+            assertEqual(callCount, 1);
+
+            bus.clear('test:event');
+            bus.emit('test:event');
+            assertEqual(callCount, 1, 'Handler não deve ser chamado após clear');
+        });
+
+        runner.test('clear() sem argumentos deve remover todos handlers', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let call1 = false, call2 = false;
+            bus.on('event1', () => { call1 = true; });
+            bus.on('event2', () => { call2 = true; });
+
+            bus.clear();
+
+            bus.emit('event1');
+            bus.emit('event2');
+
+            assert(!call1 && !call2, 'Nenhum handler deve ser chamado');
+        });
+
+        // Test Suite 5: Error Handling
+        runner.test('emit() deve capturar erros em handlers', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            let call1 = false, call2 = false;
+
+            bus.on('test:event', () => {
+                call1 = true;
+                throw new Error('Test error');
+            });
+
+            bus.on('test:event', () => { call2 = true; });
+
+            // Não deve lançar erro
+            bus.emit('test:event');
+
+            assert(call1, 'Primeiro handler deve ter sido chamado');
+            assert(call2, 'Segundo handler deve ter sido chamado apesar do erro');
+        });
+
+        // Test Suite 6: History
+        runner.test('getHistory() deve retornar eventos recentes', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            bus.emit('event1', { data: 1 });
+            bus.emit('event2', { data: 2 });
+            bus.emit('event3', { data: 3 });
+
+            const history = bus.getHistory(2);
+            assertEqual(history.length, 2, 'Deve retornar 2 eventos');
+            assertEqual(history[0].event, 'event2');
+            assertEqual(history[1].event, 'event3');
+        });
+
+        // Test Suite 7: Stats
+        runner.test('getStats() deve retornar estatísticas', () => {
+            const bus = EventBus.getInstance();
+            bus.clear();
+
+            bus.on('event1', () => {});
+            bus.on('event1', () => {});
+            bus.on('event2', () => {});
+
+            const stats = bus.getStats();
+            assertEqual(stats.totalEvents, 2);
+            assertEqual(stats.events[0].handlerCount, 2);
+            assertEqual(stats.events[1].handlerCount, 1);
+        });
+
+        // Test Suite 8: Events Catalog
+        runner.test('Events deve conter eventos padronizados', () => {
+            assert(Events.SECTION_CHANGE_REQUESTED, 'Deve ter SECTION_CHANGE_REQUESTED');
+            assert(Events.ANSWER_SAVED, 'Deve ter ANSWER_SAVED');
+            assert(Events.PROGRESS_UPDATED, 'Deve ter PROGRESS_UPDATED');
+            assert(Events.BO_COMPLETED, 'Deve ter BO_COMPLETED');
+        });
+
+        // ============================================
+        // RUN TESTS
+        // ============================================
+
+        async function runAllTests() {
+            console.log('Executando testes do EventBus...');
+            await runner.run();
+            console.log('Testes concluídos!');
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            console.log('Página carregada. Clique em "Executar Todos os Testes"');
+        });
+    </script>
+</body>
+</html>

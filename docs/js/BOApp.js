@@ -446,8 +446,13 @@ class BOApp {
         const sectionState = this.sectionsState[sectionId];
 
         // Determinar se é read-only
+        // Uma seção é read-only se:
+        // 1. Explicitamente marcada como read-only (parâmetro)
+        // 2. Está completed/skipped E não é a seção ativa atual
+        const currentActiveSectionId = this.currentSectionIndex + 1;
         const shouldBeReadOnly = isReadOnly ||
-            (sectionState.status === 'completed' && sectionId < this._getCurrentActiveSectionId());
+            ((sectionState.status === 'completed' || sectionState.status === 'skipped') &&
+             sectionId !== currentActiveSectionId);
 
         // Atualizar índice APENAS se não for read-only (navegação real, não visualização)
         if (!shouldBeReadOnly) {

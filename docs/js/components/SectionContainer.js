@@ -71,17 +71,28 @@ class SectionContainer {
                     // Mostrar pergunta skipQuestion no chat
                     this._showQuestion(skipQ);
 
+                    // Verificar se a resposta causa skip da seção
+                    const answerLower = options.preAnswerSkipQuestion.toLowerCase();
+                    const selectedOption = skipQ.options?.find(opt =>
+                        opt.value.toLowerCase() === answerLower ||
+                        opt.label.toLowerCase() === answerLower
+                    );
+                    const willSkipSection = selectedOption?.skipsSection === true;
+
                     // Auto-responder após delay
                     setTimeout(() => {
                         this.answers[skipQ.id] = options.preAnswerSkipQuestion;
                         this._addUserMessage(options.preAnswerSkipQuestion);
                         this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
 
-                        // Avançar para próxima pergunta
-                        this.currentQuestionIndex = 1;
-                        setTimeout(() => {
-                            this._showCurrentQuestion();
-                        }, 500);
+                        // Se vai pular a seção, NÃO mostrar próxima pergunta
+                        if (!willSkipSection) {
+                            // Avançar para próxima pergunta
+                            this.currentQuestionIndex = 1;
+                            setTimeout(() => {
+                                this._showCurrentQuestion();
+                            }, 500);
+                        }
                     }, 300);
                 } else {
                     this._showCurrentQuestion();

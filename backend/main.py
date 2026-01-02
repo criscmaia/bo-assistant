@@ -29,6 +29,7 @@ try:
     from validator_section7 import ResponseValidatorSection7
     from validator_section8 import ResponseValidatorSection8
     from logger import BOLogger, now_brasilia
+    from section_factory import create_section_handler
 except ImportError:
     # Fallback quando roda de fora da pasta backend/ (Render)
     from backend.state_machine import BOStateMachine
@@ -49,6 +50,7 @@ except ImportError:
     from backend.validator_section7 import ResponseValidatorSection7
     from backend.validator_section8 import ResponseValidatorSection8
     from backend.logger import BOLogger, now_brasilia
+    from backend.section_factory import create_section_handler
 
 # Versão do sistema
 APP_VERSION = "0.12.12"
@@ -654,9 +656,12 @@ async def chat(request_body: ChatRequest, request: Request):
 @app.post("/start_section/{section_number}")
 async def start_section(section_number: int, request_body: dict):
     """
-    Inicia uma nova seção do BO.
+    Inicia uma nova seção do BO usando Factory Pattern.
 
     Body: {"session_id": "uuid"}
+
+    Refatorado em v0.13.1 para usar section_factory.py,
+    eliminando 283 linhas de código duplicado.
     """
     session_id = request_body.get("session_id")
 
@@ -670,292 +675,17 @@ async def start_section(section_number: int, request_body: dict):
     bo_id = session_data["bo_id"]
 
     # Validar número da seção
-    if section_number not in [2, 3, 4, 5, 6, 7, 8]:
-        raise HTTPException(status_code=400, detail=f"Seção {section_number} não disponível ainda")
+    if section_number not in [1, 2, 3, 4, 5, 6, 7, 8]:
+        raise HTTPException(status_code=400, detail=f"Seção {section_number} inválida")
 
-    # Inicializar state machine da seção solicitada
-    if section_number == 2:
-        if 2 not in session_data["sections"]:
-            session_data["sections"][2] = BOStateMachineSection2()
-
-        session_data["current_section"] = 2
-        state_machine = session_data["sections"][2]
-
-        # Auto-responder pergunta 2.1 como "SIM" (usuário já confirmou ao clicar no botão)
-        state_machine.store_answer("SIM")
-
-        # ✅ Log: registrar resposta auto-respondida 2.1
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="answer_submitted",
-            data={
-                "step": "2.1",
-                "answer": "Sim",
-                "is_valid": True,
-                "auto_responded": True
-            }
-        )
-
-        state_machine.next_step()
-
-        # Agora pega pergunta 2.2 (não 2.1)
-        first_question = state_machine.get_current_question()
-
-        # Log: seção iniciada
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="section_started",
-            data={
-                "section": section_number,
-                "first_question": first_question
-            }
-        )
-
-        return {
-            "session_id": session_id,
-            "bo_id": bo_id,
-            "section": section_number,
-            "question": first_question,
-            "current_step": state_machine.current_step
-        }
-
-    elif section_number == 3:
-        if 3 not in session_data["sections"]:
-            session_data["sections"][3] = BOStateMachineSection3()
-
-        session_data["current_section"] = 3
-        state_machine = session_data["sections"][3]
-
-        # Auto-responder pergunta 3.1 como "SIM" (usuário já confirmou ao clicar no botão)
-        state_machine.store_answer("SIM")
-
-        # ✅ Log: registrar resposta auto-respondida 3.1
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="answer_submitted",
-            data={
-                "step": "3.1",
-                "answer": "Sim",
-                "is_valid": True,
-                "auto_responded": True
-            }
-        )
-
-        state_machine.next_step()
-
-        # Agora pega pergunta 3.2 (não 3.1)
-        first_question = state_machine.get_current_question()
-
-        # Log: seção iniciada
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="section_started",
-            data={
-                "section": section_number,
-                "first_question": first_question
-            }
-        )
-
-        return {
-            "session_id": session_id,
-            "bo_id": bo_id,
-            "section": section_number,
-            "question": first_question,
-            "current_step": state_machine.current_step
-        }
-
-    elif section_number == 4:
-        if 4 not in session_data["sections"]:
-            session_data["sections"][4] = BOStateMachineSection4()
-
-        session_data["current_section"] = 4
-        state_machine = session_data["sections"][4]
-
-        # Auto-responder pergunta 4.1 como "SIM" (usuário já confirmou ao clicar no botão)
-        state_machine.store_answer("SIM")
-
-        # ✅ Log: registrar resposta auto-respondida 4.1
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="answer_submitted",
-            data={
-                "step": "4.1",
-                "answer": "Sim",
-                "is_valid": True,
-                "auto_responded": True
-            }
-        )
-
-        state_machine.next_step()
-
-        # Agora pega pergunta 4.2 (não 4.1)
-        first_question = state_machine.get_current_question()
-
-        # Log: seção iniciada
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="section_started",
-            data={
-                "section": section_number,
-                "first_question": first_question
-            }
-        )
-
-        return {
-            "session_id": session_id,
-            "bo_id": bo_id,
-            "section": section_number,
-            "question": first_question,
-            "current_step": state_machine.current_step
-        }
-
-    elif section_number == 5:
-        if 5 not in session_data["sections"]:
-            session_data["sections"][5] = BOStateMachineSection5()
-
-        session_data["current_section"] = 5
-        state_machine = session_data["sections"][5]
-
-        # Auto-responder pergunta 5.1 como "SIM" (usuário já confirmou ao clicar no botão)
-        state_machine.store_answer("SIM")
-
-        # ✅ Log: registrar resposta auto-respondida 5.1
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="answer_submitted",
-            data={
-                "step": "5.1",
-                "answer": "Sim",
-                "is_valid": True,
-                "auto_responded": True
-            }
-        )
-
-        state_machine.next_step()
-
-        # Agora pega pergunta 5.2 (não 5.1)
-        first_question = state_machine.get_current_question()
-
-        # Log: seção iniciada
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="section_started",
-            data={
-                "section": section_number,
-                "first_question": first_question
-            }
-        )
-
-        return {
-            "session_id": session_id,
-            "bo_id": bo_id,
-            "section": section_number,
-            "question": first_question,
-            "current_step": state_machine.current_step
-        }
-
-    elif section_number == 6:
-        if 6 not in session_data["sections"]:
-            session_data["sections"][6] = BOStateMachineSection6()
-
-        session_data["current_section"] = 6
-        state_machine = session_data["sections"][6]
-
-        # 6.1 é pergunta aberta - não auto-responder, aguardar resposta do usuário
-        # O estado machine já está posicionado na 6.1
-        first_question = state_machine.get_current_question()
-
-        # Log: seção iniciada
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="section_started",
-            data={
-                "section": section_number,
-                "first_question": first_question
-            }
-        )
-
-        return {
-            "session_id": session_id,
-            "bo_id": bo_id,
-            "section": section_number,
-            "question": first_question,
-            "current_step": state_machine.current_step
-        }
-
-    elif section_number == 7:
-        if 7 not in session_data["sections"]:
-            session_data["sections"][7] = BOStateMachineSection7()
-
-        session_data["current_section"] = 7
-        state_machine = session_data["sections"][7]
-
-        # Auto-responder pergunta 7.1 como "SIM" (usuário já confirmou ao clicar no botão)
-        state_machine.store_answer("SIM")
-
-        # ✅ Log: registrar resposta auto-respondida 7.1
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="answer_submitted",
-            data={
-                "step": "7.1",
-                "answer": "Sim",
-                "is_valid": True,
-                "auto_responded": True
-            }
-        )
-
-        state_machine.next_step()
-
-        # Agora pega pergunta 7.2 (não 7.1)
-        first_question = state_machine.get_current_question()
-
-        # Log: seção iniciada
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="section_started",
-            data={
-                "section": section_number,
-                "first_question": first_question
-            }
-        )
-
-        return {
-            "session_id": session_id,
-            "bo_id": bo_id,
-            "section": section_number,
-            "question": first_question,
-            "current_step": state_machine.current_step
-        }
-
-    elif section_number == 8:
-        if 8 not in session_data["sections"]:
-            session_data["sections"][8] = BOStateMachineSection8()
-
-        session_data["current_section"] = 8
-        state_machine = session_data["sections"][8]
-
-        first_question = state_machine.get_current_question()
-
-        # Log: seção iniciada
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="section_started",
-            data={
-                "section": section_number,
-                "first_question": first_question
-            }
-        )
-
-        return {
-            "session_id": session_id,
-            "bo_id": bo_id,
-            "section": section_number,
-            "question": first_question,
-            "current_step": state_machine.current_step
-        }
-
-    raise HTTPException(status_code=400, detail="Seção inválida")
+    # Usar Factory Pattern para inicializar a seção (v0.13.1+)
+    # Elimina 283 linhas de código duplicado
+    try:
+        handler = create_section_handler(session_id, bo_id, section_number)
+        response = handler.start(session_data)
+        return response
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/skip_section/{section_number}")
 async def skip_section(section_number: int, request_body: dict):

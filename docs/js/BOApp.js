@@ -265,7 +265,7 @@ class BOApp {
                 }
 
                 // Se seção completou e tem texto gerado, armazenar
-                if (response.section_complete && response.generated_text) {
+                if (response.is_section_complete && response.generated_text) {
                     sectionState.generatedText = response.generated_text;
                     console.log('[BOApp] Texto gerado recebido do backend:', response.generated_text.substring(0, 100));
                 }
@@ -362,8 +362,12 @@ class BOApp {
         const sectionState = this.sectionsState[sectionId];
         sectionState.status = 'skipped';
 
-        // Marcar na barra de progresso
-        this.progressBar.markSkipped(sectionId);
+        // Obter razão do skip da SectionContainer
+        const sectionContainer = this.currentSectionContainer;
+        const skipReason = sectionContainer?.skipReason || null;
+
+        // Marcar na barra de progresso com a razão
+        this.progressBar.markSkipped(sectionId, skipReason);
 
         // Avançar para próxima
         this._navigateToNextSection();

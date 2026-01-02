@@ -79,7 +79,7 @@ class FinalScreen {
                             <span>seções completas</span>
                         </div>
                         <div class="final-screen__stat">
-                            <span>⏭️</span>
+                            <span style="display: inline-block; margin-right: 3px;">⃠</span>
                             <span class="final-screen__stat-value">${stats.skipped}</span>
                             <span>seções puladas</span>
                         </div>
@@ -106,8 +106,8 @@ class FinalScreen {
             const isSkipped = state.status === 'skipped';
 
             const statusClass = isCompleted ? 'completed' : (isSkipped ? 'skipped' : 'pending');
-            const statusText = isCompleted ? 'Completa' : (isSkipped ? 'Pulada' : 'Pendente');
-            const statusIcon = isCompleted ? '✅' : (isSkipped ? '⏭️' : '⏳');
+            const statusText = isCompleted ? 'Completa' : (isSkipped ? (state.skipReason || 'Não se aplica') : 'Pendente');
+            const statusIcon = isCompleted ? '✅' : (isSkipped ? '⃠' : '⏳');
 
             return `
                 <div class="final-screen__section-item" data-section-id="${section.id}">
@@ -116,7 +116,7 @@ class FinalScreen {
                         Seção ${section.id}: ${section.name}
                     </span>
                     <span class="final-screen__section-status final-screen__section-status--${statusClass}">
-                        ${statusIcon} ${statusText}
+                        <span style="display: inline-block; margin-right: 3px;">${statusIcon}</span>${statusText}
                     </span>
                 </div>
             `;

@@ -24,6 +24,7 @@ class SectionContainer {
         this.generatedText = null;
         this.isReadOnly = false;
         this.followUpQueue = []; // Fila de perguntas follow-up (1.5.1, 1.5.2, etc)
+        this.skipReason = null; // Razão pela qual a seção foi pulada (ex: "não havia veículo")
 
         // Callbacks
         this.onAnswer = options.onAnswer || ((questionId, answer) => {});
@@ -248,7 +249,7 @@ class SectionContainer {
                 return `${answeredCount}/${totalQuestions} perguntas`;
             }
             case 'completed': return '✓ Completa';
-            case 'skipped': return '⏭️ Pulada';
+            case 'skipped': return `⃠\u00A0\u00A0\u00A0${this.skipReason || 'Não se aplica'}`;
             default: return 'Pendente';
         }
     }
@@ -263,10 +264,20 @@ class SectionContainer {
 
         return this.messages.map(msg => {
             if (msg.type === 'bot') {
+                // Parse question ID from message text (e.g., "1.1) Question text" -> ID: "1.1", text: "Question text")
+                const questionIdMatch = msg.text.match(/^([\d.]+)\)\s(.+)$/);
+                let messageContent = msg.text;
+
+                if (questionIdMatch) {
+                    const questionId = questionIdMatch[1];
+                    const questionText = questionIdMatch[2];
+                    messageContent = `<span class="question-id">${questionId}</span> ${questionText}`;
+                }
+
                 return `
                     <div class="chat-message chat-message--bot">
                         <div class="chat-message__bubble chat-message__bubble--bot">
-                            <div class="chat-message__text">${msg.text}</div>
+                            <div class="chat-message__text">${messageContent}</div>
                             ${msg.hint ? `<div class="chat-message__hint">${msg.hint}</div>` : ''}
                         </div>
                     </div>
@@ -338,7 +349,7 @@ class SectionContainer {
                     </button>
                     ${canSkip ? `
                     <button class="section-transition__btn section-transition__btn--skip" id="section-skip-next">
-                        ⏭️ ${skipButtonText}
+                        <span style="display: inline-block; margin-right: 3px;">⃠</span>${skipButtonText}
                     </button>
                     ` : ''}
                 </div>
@@ -401,7 +412,7 @@ class SectionContainer {
         if (option?.skipsSection) {
             this._addUserMessage(answer);
             setTimeout(() => {
-                this._skipSection();
+                this._skipSection(answer);
             }, 300);
             return;
         }
@@ -727,8 +738,9 @@ class SectionContainer {
     /**
      * Pula a seção
      */
-    _skipSection() {
+    _skipSection(skipReason = null) {
         this.state = 'skipped';
+        this.skipReason = skipReason || null;
         this.onSkip(this.sectionId);
         this.render();
     }

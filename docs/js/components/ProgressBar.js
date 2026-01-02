@@ -30,7 +30,8 @@ class ProgressBar {
             this.sectionStates[s.id] = {
                 status: 'pending', // pending, in_progress, completed, skipped
                 answeredCount: 0,
-                totalCount: s.totalQuestions
+                totalCount: s.totalQuestions,
+                skipReason: null // Razão pela qual a seção foi pulada
             };
         });
 
@@ -205,8 +206,9 @@ class ProgressBar {
     /**
      * Marca seção como pulada
      */
-    markSkipped(sectionId) {
+    markSkipped(sectionId, skipReason = null) {
         this.updateSection(sectionId, 'skipped');
+        this.sectionStates[sectionId].skipReason = skipReason || null;
         this._updateLineFill(sectionId);
     }
 
@@ -284,7 +286,8 @@ class ProgressBar {
                     statusSpan.textContent = '✓ Completa';
                     break;
                 case 'skipped':
-                    statusSpan.textContent = '⏭️ Pulada';
+                    const skipText = state.skipReason || 'Não se aplica';
+                    statusSpan.innerHTML = `<span style="display: inline-block; margin-right: 3px;">⃠</span>${skipText}`;
                     break;
                 case 'in_progress':
                     statusSpan.textContent = `${state.answeredCount}/${state.totalCount}`;

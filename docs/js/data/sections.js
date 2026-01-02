@@ -35,7 +35,7 @@ const SECTIONS_DATA = [
   {
     id: 1,
     name: "Contexto da Ocorrência",
-    emoji: "🚔",
+    emoji: "📝",
     skippable: false,
     questions: [
       {

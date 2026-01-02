@@ -44,13 +44,17 @@ class ProgressBar {
         // Seção atual
         this.currentSectionId = options.currentSection || 1;
 
-        // Callback para navegação
+        // Callback para navegação (DEPRECATED - usar EventBus)
         this.onSectionClick = options.onSectionClick || ((sectionId) => {
             console.log('[ProgressBar] Clicou na seção:', sectionId);
         });
 
+        // EventBus para comunicação desacoplada (v0.13.1+)
+        this.eventBus = typeof window !== 'undefined' && window.eventBus ? window.eventBus : null;
+
         // Dispose Pattern - Rastreamento de listeners para cleanup (v0.13.1+)
         this._eventListeners = [];
+        this._eventBusUnsubscribers = [];
 
         // Renderizar
         if (this.container) {
@@ -283,7 +287,15 @@ class ProgressBar {
         // Permitir clicar em qualquer seção já visitada (não-pending)
         // Isso inclui: in_progress, completed, skipped
         if (state.status !== 'pending') {
-            this.onSectionClick(sectionId);
+            // v0.13.1+: Emitir evento via EventBus (desacoplado)
+            if (this.eventBus && typeof Events !== 'undefined') {
+                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, { sectionId });
+            }
+
+            // Fallback: Manter callback para compatibilidade (DEPRECATED)
+            if (this.onSectionClick) {
+                this.onSectionClick(sectionId);
+            }
         } else {
             console.log('[ProgressBar] Bolinha bloqueada - status é pending');
         }
@@ -348,14 +360,26 @@ class ProgressBar {
      * Deve ser chamado ao destruir a barra ou re-renderizar para evitar memory leaks
      */
     dispose() {
+        // Remover listeners DOM
         if (this._eventListeners && this._eventListeners.length > 0) {
             this._eventListeners.forEach(({ element, event, handler }) => {
                 if (element) {
                     element.removeEventListener(event, handler);
                 }
             });
-            console.log('[ProgressBar] Disposed - listeners removidos:', this._eventListeners.length);
+            console.log('[ProgressBar] Disposed - listeners DOM removidos:', this._eventListeners.length);
             this._eventListeners = [];
+        }
+
+        // Remover listeners EventBus (v0.13.1+)
+        if (this._eventBusUnsubscribers && this._eventBusUnsubscribers.length > 0) {
+            this._eventBusUnsubscribers.forEach(unsubscribe => {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                }
+            });
+            console.log('[ProgressBar] Disposed - listeners EventBus removidos:', this._eventBusUnsubscribers.length);
+            this._eventBusUnsubscribers = [];
         }
     }
 

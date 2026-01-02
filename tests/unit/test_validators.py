@@ -19,7 +19,8 @@ from backend.validators.strategies import (
     DateTimeValidator,
     VehiclePlateValidator,
     InjuryDescriptionValidator,
-    HospitalDestinationValidator
+    HospitalDestinationValidator,
+    MilitaryRankValidator
 )
 from backend.validators.factory import ValidationFactory, get_validator
 
@@ -280,6 +281,33 @@ class TestHospitalDestinationValidator:
         validator = HospitalDestinationValidator()
         result = validator.validate("Foi embora", {})
         assert result.valid is False
+
+
+class TestMilitaryRankValidator:
+    """Testes para MilitaryRankValidator"""
+
+    @pytest.mark.parametrize("answer", [
+        "O Sargento Silva viu o suspeito arremessando a sacola",
+        "O Cabo Rodrigues ouviu duas descargas",
+        "O Soldado Faria visualizou o suspeito",
+        "Sgt Alves tinha visão desobstruída",
+        "O Tenente Costa coordenou a operação"
+    ])
+    def test_valid_with_rank(self, answer):
+        validator = MilitaryRankValidator()
+        result = validator.validate(answer, {})
+        assert result.valid is True
+
+    @pytest.mark.parametrize("answer", [
+        "Silva viu o suspeito",
+        "O policial observou",
+        "Vimos o indivíduo"
+    ])
+    def test_missing_rank(self, answer):
+        validator = MilitaryRankValidator()
+        result = validator.validate(answer, {})
+        assert result.valid is False
+        assert "GRADUAÇÃO" in result.error
 
 
 # ============================================================================

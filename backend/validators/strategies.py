@@ -361,3 +361,34 @@ class HospitalDestinationValidator(ValidationStrategy):
             )
 
         return ValidationResult(valid=True)
+
+
+class MilitaryRankValidator(ValidationStrategy):
+    """
+    Valida presença de graduação militar (Seções 3, 4, 5).
+
+    Verifica que a resposta menciona graduação militar + nome do policial.
+
+    Exemplo:
+        validator = MilitaryRankValidator()
+        result = validator.validate("O Sargento Silva viu...", {})  # valid=True
+        result = validator.validate("Silva viu...", {})  # valid=False
+    """
+
+    MILITARY_RANKS = [
+        "sargento", "soldado", "cabo", "tenente", "capitão",
+        "sgt", "sd", "cb", "ten", "cap", "major", "coronel"
+    ]
+
+    def validate(self, answer: str, context: Dict[str, Any]) -> ValidationResult:
+        answer_lower = answer.lower()
+
+        has_rank = any(rank in answer_lower for rank in self.MILITARY_RANKS)
+
+        if not has_rank:
+            return ValidationResult(
+                valid=False,
+                error="Informe a GRADUAÇÃO + nome do policial (ex: 'O Sargento Silva...')"
+            )
+
+        return ValidationResult(valid=True)

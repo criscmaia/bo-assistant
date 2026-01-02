@@ -19,7 +19,8 @@ from backend.validators.strategies import (
     DateTimeValidator,
     VehiclePlateValidator,
     InjuryDescriptionValidator,
-    HospitalDestinationValidator
+    HospitalDestinationValidator,
+    MilitaryRankValidator
 )
 
 
@@ -174,81 +175,141 @@ class ValidationFactory:
         )
 
         # ====================================================================
-        # SEÇÃO 3: ABORDAGEM A PESSOA
+        # SEÇÃO 3: CAMPANA (VIGILÂNCIA VELADA)
         # ====================================================================
 
-        # 3.1: Havia pessoa abordada? (sim/não)
+        # 3.1: Realizou campana? (sim/não)
         validators["3.1"] = CompositeValidator(
             RequiredFieldValidator(),
             YesNoValidator()
         )
 
-        # 3.2-3.9: Condicionais
-        for q_id in ["3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9"]:
-            validators[q_id] = ConditionalValidator(
-                condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
-                validator=CompositeValidator(
-                    RequiredFieldValidator(),
-                    MinLengthValidator(10)
-                )
+        # 3.2: Local da campana (condicional)
+        validators["3.2"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(30, "Descreva o local exato da campana, ponto de observação e distância aproximada")
             )
+        )
+
+        # 3.3: Quem tinha visão + graduação (condicional)
+        validators["3.3"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(30),
+                MilitaryRankValidator()
+            )
+        )
+
+        # 3.4: Motivo da campana (condicional)
+        validators["3.4"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(20, "Descreva o que motivou a campana")
+            )
+        )
+
+        # 3.5: Duração da campana (condicional)
+        validators["3.5"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(10, "Informe a duração da campana")
+            )
+        )
+
+        # 3.6: O que foi visto (condicional)
+        validators["3.6"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(40, "Descreva o que foi visto durante a campana: entregas, usuários, esconderijos")
+            )
+        )
+
+        # 3.7: Abordagem de usuário? (condicional)
+        validators["3.7"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
+            validator=RequiredFieldValidator()
+        )
+
+        # 3.8: Houve fuga? (condicional)
+        validators["3.8"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("3.1", "").upper() in ["SIM", "S"],
+            validator=RequiredFieldValidator()
+        )
 
         # ====================================================================
-        # SEÇÃO 4: APREENSÃO DE DROGAS E MATERIAIS
+        # SEÇÃO 4: ENTRADA EM DOMICÍLIO
         # ====================================================================
 
-        # 4.1: Houve apreensão? (sim/não)
+        # 4.1: Houve entrada em domicílio? (sim/não)
         validators["4.1"] = CompositeValidator(
             RequiredFieldValidator(),
             YesNoValidator()
         )
 
-        # 4.2-4.10: Condicionais
-        for q_id in ["4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10"]:
-            validators[q_id] = ConditionalValidator(
-                condition=lambda ctx: ctx.get("4.1", "").upper() in ["SIM", "S"],
-                validator=CompositeValidator(
-                    RequiredFieldValidator(),
-                    MinLengthValidator(10)
-                )
+        # 4.2: Justa causa (condicional)
+        validators["4.2"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("4.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(40, "Descreva o que foi visto/ouvido/sentido ANTES da entrada (justa causa)")
             )
+        )
+
+        # 4.3: Quem viu/ouviu + graduação (condicional)
+        validators["4.3"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("4.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(30),
+                MilitaryRankValidator()
+            )
+        )
+
+        # 4.4: Como ocorreu o ingresso (condicional)
+        validators["4.4"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("4.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(30, "Descreva como ocorreu o ingresso")
+            )
+        )
+
+        # 4.5: Ações dentro do imóvel (condicional)
+        validators["4.5"] = ConditionalValidator(
+            condition=lambda ctx: ctx.get("4.1", "").upper() in ["SIM", "S"],
+            validator=CompositeValidator(
+                RequiredFieldValidator(),
+                MinLengthValidator(50, "Descreva ação por ação: quem entrou, por onde, quem ficou na contenção")
+            )
+        )
 
         # ====================================================================
-        # SEÇÃO 5: LESÃO CORPORAL E VÍTIMA
+        # SEÇÃO 5: FUNDADA SUSPEITA
         # ====================================================================
 
-        # 5.1: Houve vítima com lesão? (sim/não)
+        # 5.1: O que a equipe viu ao chegar
         validators["5.1"] = CompositeValidator(
             RequiredFieldValidator(),
-            YesNoValidator()
+            MinLengthValidator(40, "Descreva o que a equipe viu ao chegar no local com detalhes concretos")
         )
 
-        # 5.2-5.10: Condicionais
-        for q_id in ["5.2", "5.3", "5.4", "5.6", "5.7", "5.8", "5.9", "5.10"]:
-            validators[q_id] = ConditionalValidator(
-                condition=lambda ctx: ctx.get("5.1", "").upper() in ["SIM", "S"],
-                validator=CompositeValidator(
-                    RequiredFieldValidator(),
-                    MinLengthValidator(10)
-                )
-            )
-
-        # 5.5: Descrição da lesão (validação específica)
-        validators["5.5"] = ConditionalValidator(
-            condition=lambda ctx: ctx.get("5.1", "").upper() in ["SIM", "S"],
-            validator=CompositeValidator(
-                RequiredFieldValidator(),
-                InjuryDescriptionValidator()
-            )
+        # 5.2: Quem viu + graduação
+        validators["5.2"] = CompositeValidator(
+            RequiredFieldValidator(),
+            MinLengthValidator(30),
+            MilitaryRankValidator()
         )
 
-        # 5.8: Destino hospitalar (validação específica)
-        validators["5.8"] = ConditionalValidator(
-            condition=lambda ctx: ctx.get("5.1", "").upper() in ["SIM", "S"],
-            validator=CompositeValidator(
-                RequiredFieldValidator(),
-                HospitalDestinationValidator()
-            )
+        # 5.3: Descrição individual dos abordados
+        validators["5.3"] = CompositeValidator(
+            RequiredFieldValidator(),
+            MinLengthValidator(50, "Descreva INDIVIDUALMENTE cada abordado: roupa, porte, gestos, identificação completa + vulgo")
         )
 
         # ====================================================================

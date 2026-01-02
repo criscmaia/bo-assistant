@@ -16,6 +16,10 @@ class BOApp {
         // StateManager centralizado (Single Source of Truth)
         this.stateManager = StateManager.getInstance();
 
+        // EventBus para comunicação desacoplada (v0.13.1+)
+        this.eventBus = typeof window !== 'undefined' && window.eventBus ? window.eventBus : null;
+        this._eventBusUnsubscribers = [];
+
         // Componentes
         this.api = new APIClient();
         this.progressBar = null;
@@ -53,7 +57,7 @@ class BOApp {
         // Tracking
         this.sessionStartTime = new Date();
 
-        // Bind de métodos para callbacks
+        // Bind de métodos para callbacks (mantidos para fallback/compatibilidade)
         this._onAnswer = this._onAnswer.bind(this);
         this._onSectionComplete = this._onSectionComplete.bind(this);
         this._onSectionSkip = this._onSectionSkip.bind(this);
@@ -63,6 +67,9 @@ class BOApp {
 
         // Subscrever ao StateManager para sincronizar componentes
         this._setupStateSubscriptions();
+
+        // Subscrever ao EventBus para comunicação desacoplada (v0.13.1+)
+        this._setupEventBusListeners();
     }
 
     /**
@@ -91,6 +98,59 @@ class BOApp {
                     break;
             }
         });
+    }
+
+    /**
+     * Configura listeners no EventBus (v0.13.1+)
+     * Orquestra comunicação desacoplada entre componentes
+     */
+    _setupEventBusListeners() {
+        if (!this.eventBus || typeof Events === 'undefined') {
+            console.log('[BOApp] EventBus não disponível - usando apenas callbacks');
+            return;
+        }
+
+        console.log('[BOApp] Configurando listeners do EventBus...');
+
+        // Evento: SECTION_CHANGE_REQUESTED (de ProgressBar ou SectionContainer)
+        const unsubscribeNavigation = this.eventBus.on(Events.SECTION_CHANGE_REQUESTED, (data) => {
+            console.log('[BOApp] EventBus - SECTION_CHANGE_REQUESTED:', data);
+            const { sectionId, context } = data;
+
+            // Delegar para método de navegação existente
+            if (context) {
+                this._navigateToSection(sectionId, false, context);
+            } else {
+                this._navigateToSection(sectionId, false);
+            }
+        });
+        this._eventBusUnsubscribers.push(unsubscribeNavigation);
+
+        // Evento: ANSWER_SAVED (de SectionContainer)
+        const unsubscribeAnswer = this.eventBus.on(Events.ANSWER_SAVED, (data) => {
+            console.log('[BOApp] EventBus - ANSWER_SAVED:', data);
+            // StateManager já foi atualizado pelo callback _onAnswer
+            // Este evento é para outros componentes que queiram reagir
+        });
+        this._eventBusUnsubscribers.push(unsubscribeAnswer);
+
+        // Evento: SECTION_COMPLETED (de SectionContainer)
+        const unsubscribeComplete = this.eventBus.on(Events.SECTION_COMPLETED, (data) => {
+            console.log('[BOApp] EventBus - SECTION_COMPLETED:', data);
+            // StateManager já foi atualizado pelo callback _onSectionComplete
+            // Este evento é para outros componentes que queiram reagir
+        });
+        this._eventBusUnsubscribers.push(unsubscribeComplete);
+
+        // Evento: section:skipped (de SectionContainer)
+        const unsubscribeSkip = this.eventBus.on('section:skipped', (data) => {
+            console.log('[BOApp] EventBus - section:skipped:', data);
+            // StateManager já foi atualizado pelo callback _onSectionSkip
+            // Este evento é para outros componentes que queiram reagir
+        });
+        this._eventBusUnsubscribers.push(unsubscribeSkip);
+
+        console.log('[BOApp] EventBus listeners configurados:', this._eventBusUnsubscribers.length);
     }
 
     /**
@@ -703,6 +763,36 @@ class BOApp {
     clearDraft() {
         this.stateManager.clearDraft();
         console.log('[BOApp] Rascunho removido via StateManager');
+    }
+
+    /**
+     * Dispose Pattern - Remove todos os event listeners (v0.13.1+)
+     * Deve ser chamado ao destruir a aplicação para evitar memory leaks
+     */
+    dispose() {
+        console.log('[BOApp] Dispose - limpando recursos...');
+
+        // Remover listeners EventBus
+        if (this._eventBusUnsubscribers && this._eventBusUnsubscribers.length > 0) {
+            this._eventBusUnsubscribers.forEach(unsubscribe => {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                }
+            });
+            console.log('[BOApp] Disposed - listeners EventBus removidos:', this._eventBusUnsubscribers.length);
+            this._eventBusUnsubscribers = [];
+        }
+
+        // Dispose dos componentes
+        if (this.progressBar && typeof this.progressBar.dispose === 'function') {
+            this.progressBar.dispose();
+        }
+
+        if (this.sectionContainer && typeof this.sectionContainer.dispose === 'function') {
+            this.sectionContainer.dispose();
+        }
+
+        console.log('[BOApp] Dispose completo');
     }
 
     // ==========================================

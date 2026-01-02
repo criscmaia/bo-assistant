@@ -115,16 +115,18 @@ class ProgressBar {
     _applyNodeState(node, sectionId) {
         const state = this.sectionStates[sectionId];
 
-        // Remover classes anteriores
+        // Remover classes anteriores (com hyphen e underscore)
         node.classList.remove(
             'progress-node--pending',
             'progress-node--in-progress',
+            'progress-node--in_progress',  // Removido o suporte a underscore aqui
             'progress-node--completed',
             'progress-node--skipped'
         );
 
-        // Aplicar classe do estado atual
-        node.classList.add(`progress-node--${state.status}`);
+        // Aplicar classe do estado atual (normalizado com hyphen)
+        const normalizedStatus = state.status.replace('_', '-');
+        node.classList.add(`progress-node--${normalizedStatus}`);
     }
 
     /**

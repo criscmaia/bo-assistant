@@ -17,6 +17,23 @@ Snapshot completo da documentação na versão **v0.12.9** (30 de dezembro de 20
 
 Esta era a versão antes da implementação completa do **Redesign UX** (v0.13.0+).
 
+### `redesign-proposal/`
+Propostas e planos do Redesign UX (12 arquivos), preservados como referência histórica:
+- PROPOSTA_REDESIGN_UX_BO_INTELIGENTE.md
+- PLANO_IMPLEMENTACAO_REDESIGN_UX.md
+- FASE_0_PREPARACAO.md até FASE_8_REFATORACAO.md
+- STATUS_IMPLEMENTACAO.md
+
+Estes documentos representam o planejamento original do redesign que foi implementado na v0.13.0.
+
+### `status-snapshots/`
+Snapshots de status durante o desenvolvimento (3 arquivos):
+- STATUS-FINAL-v0.12.11.md
+- STATUS-FINAL-v0.12.14.md
+- RECOVERY.md
+
+Arquivos históricos de acompanhamento de desenvolvimento, preservados para auditoria.
+
 ## Propósito
 
 - **Referência Histórica**: Entender como o sistema foi documentado em versões anteriores
@@ -34,10 +51,15 @@ diff docs/README.md docs/archive/v0.12.9/README.md
 ## Futuras Versões
 
 Quando o projeto avançar para novas versões principais, novas pastas serão criadas:
-- `v0.13.0/` (quando implementação for concluída)
 - `v0.14.0/` (futuro)
+- `v0.15.0/` (futuro)
 - etc.
 
 ---
 
 **Última atualização:** 2 de janeiro de 2026
+
+**Reorganização da documentação (Passo 6):**
+- Arquivada pasta `redesign/` → `redesign-proposal/`
+- Arquivados arquivos de status → `status-snapshots/`
+- Resultado: 59 → 32 arquivos .md (-46%)

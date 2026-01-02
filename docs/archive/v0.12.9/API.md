@@ -1,6 +1,6 @@
 # 📡 Referência de API - BO Inteligente
 
-**Versão:** v0.13.0
+**Versão:** v0.12.9
 **Base URL (Produção):** `https://bo-assistant-backend.onrender.com`
 **Base URL (Local):** `http://localhost:8000`
 
@@ -14,7 +14,6 @@ Este documento detalha todos os endpoints da API, exemplos de requisições e re
 - [Endpoints de Sessão](#-endpoints-de-sessão)
 - [Endpoints de Logs e Estatísticas](#-endpoints-de-logs-e-estatísticas)
 - [Modelos de Dados](#-modelos-de-dados)
-- [Sistema de Skip (v0.13.0+)](#-sistema-de-skip-v0130)
 - [Códigos de Erro](#-códigos-de-erro)
 
 ---
@@ -213,10 +212,9 @@ POST /start_section/{section_number}
 {
   "message": "Seção 2 iniciada",
   "section": 2,
-  "question": "Havia veículo envolvido na ocorrência?",
+  "question": "Havia veículo?",
   "step": "2.1",
-  "total_steps": 14,
-  "is_skip_question": true
+  "total_steps": 8
 }
 ```
 
@@ -227,8 +225,7 @@ POST /start_section/{section_number}
   "section": 3,
   "question": "A equipe realizou campana antes da abordagem?",
   "step": "3.1",
-  "total_steps": 8,
-  "is_skip_question": true
+  "total_steps": 8
 }
 ```
 
@@ -239,8 +236,7 @@ POST /start_section/{section_number}
   "section": 4,
   "question": "Houve entrada em domicílio durante a ocorrência?",
   "step": "4.1",
-  "total_steps": 5,
-  "is_skip_question": true
+  "total_steps": 5
 }
 ```
 
@@ -251,8 +247,7 @@ POST /start_section/{section_number}
   "section": 5,
   "question": "Houve abordagem por fundada suspeita (sem veículo, campana ou entrada em domicílio)?",
   "step": "5.1",
-  "total_steps": 4,
-  "is_skip_question": true
+  "total_steps": 4
 }
 ```
 
@@ -263,8 +258,7 @@ POST /start_section/{section_number}
   "section": 6,
   "question": "Houve resistência durante a abordagem?",
   "step": "6.1",
-  "total_steps": 5,
-  "is_skip_question": true
+  "total_steps": 5
 }
 ```
 
@@ -308,10 +302,9 @@ curl -X POST https://bo-assistant-backend.onrender.com/start_section/6 \
 {
   "message": "Seção 7 iniciada",
   "section": 7,
-  "question": "Houve apreensão de drogas ou outros materiais?",
+  "question": "Houve apreensão de drogas?",
   "step": "7.1",
-  "total_steps": 4,
-  "is_skip_question": true
+  "total_steps": 4
 }
 ```
 
@@ -748,8 +741,6 @@ GET /api/feedbacks?limit=20&offset=0
   "section": int,            # Número da seção atual
   "generated_text": str,     # Texto gerado (se completo)
   "section_complete": bool,  # True se seção completa
-  "section_skipped": bool,   # True se seção foi pulada
-  "skipReason": str,         # Motivo do skip (se aplicável)
   "next_section": int,       # Próxima seção disponível
   "can_proceed": bool,       # True se pode avançar para próxima seção
   "error": str               # Mensagem de erro (se validação falhou)
@@ -775,44 +766,6 @@ GET /api/feedbacks?limit=20&offset=0
   "feedback_type": str       # "positive" ou "negative"
 }
 ```
-
----
-
-## 🚀 Sistema de Skip (v0.13.0+)
-
-A partir da v0.13.0, seções podem ser puladas com motivos específicos:
-
-### Quando Ocorre o Skip
-- Primeira pergunta de cada seção (exceto Seção 1) é uma "skip question"
-- Se resposta for "NÃO", a seção é pulada automaticamente
-- API retorna `section_skipped: true` com `generated_text` contendo o motivo
-
-### Motivos por Seção
-- **Seção 2**: "Não se aplica (não havia veículo envolvido na ocorrência)"
-- **Seção 3**: "Não se aplica (não houve campana antes da abordagem)"
-- **Seção 4**: "Não se aplica (não houve entrada em domicílio)"
-- **Seção 5**: "Não se aplica (não houve fundada suspeita)"
-- **Seção 6**: "Não se aplica (não houve resistência)"
-- **Seção 7**: "Não se aplica (não houve apreensão)"
-
-### Exemplo de Resposta com Skip
-```json
-{
-  "section_skipped": true,
-  "generated_text": "Não se aplica (não havia veículo envolvido na ocorrência)",
-  "questions": [],
-  "next_question": null
-}
-```
-
-### Estrutura de Seções (v0.13.0)
-- **Seção 1**: 11 perguntas principais + 4 perguntas condicionais (total 15)
-- **Seção 2**: 1 skip question + 13 perguntas (total 14 com skip)
-- **Seção 3**: 1 skip question + perguntas adicionais
-- **Seção 4**: 1 skip question + perguntas adicionais
-- **Seção 5**: 1 skip question + perguntas adicionais
-- **Seção 6**: 1 skip question + perguntas adicionais
-- **Seção 7**: 1 skip question + perguntas adicionais
 
 ---
 

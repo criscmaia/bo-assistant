@@ -1,7 +1,7 @@
 # 🏗️ Arquitetura Técnica - BO Inteligente
 
-**Versão:** v0.13.0
-**Última atualização:** 02/01/2026
+**Versão:** v0.12.9
+**Última atualização:** 29/12/2025
 
 Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de dados e estruturas internas.
 
@@ -11,9 +11,7 @@ Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de
 
 - [Visão Geral](#-visão-geral)
 - [Stack Tecnológica](#-stack-tecnológica)
-- [Arquitetura Frontend (v0.13.0+)](#-arquitetura-frontend-v0130)
 - [Módulos Backend](#-módulos-backend)
-- [Sistema de Skip](#-sistema-de-skip)
 - [Estruturas de Dados](#-estruturas-de-dados)
 - [Fluxos de Dados](#-fluxos-de-dados)
 - [Banco de Dados](#-banco-de-dados)
@@ -33,20 +31,8 @@ Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    GITHUB PAGES                                  │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │                    Frontend Modular (v0.13.0+)           │    │
-│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐     │    │
-│  │  │  BOApp.js    │ │ ProgressBar  │ │ Section      │     │    │
-│  │  │ (Orquestrador)│ │     .js     │ │ Container.js │     │    │
-│  │  └──────────────┘ └──────────────┘ └──────────────┘     │    │
-│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐     │    │
-│  │  │ TextInput.js │ │SingleChoice  │ │MultipleChoice│     │    │
-│  │  │              │ │     .js      │ │     .js      │     │    │
-│  │  └──────────────┘ └──────────────┘ └──────────────┘     │    │
-│  │  ┌──────────────┐ ┌──────────────────────────────┐      │    │
-│  │  │FinalScreen.js│ │ CSS Modular (8 arquivos)     │      │    │
-│  │  └──────────────┘ └──────────────────────────────┘      │    │
-│  └─────────────────────────────────────────────────────────┘    │
+│              docs/index.html + docs/logs.html                    │
+│              (Frontend Estático - Vanilla JS)                    │
 └─────────────────────────┬───────────────────────────────────────┘
                           │ HTTPS (Fetch API)
                           │ POST /new_session
@@ -60,8 +46,12 @@ Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de
 │  │               FastAPI (backend/main.py)                  │    │
 │  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐     │    │
 │  │  │state_machine │ │  validator   │ │ llm_service  │     │    │
-│  │  │ (8 seções)   │ │ (8 seções)   │ │(Gemini+Groq) │     │    │
+│  │  │  (Seção 1)   │ │  (Seção 1)   │ │(Gemini+Groq) │     │    │
 │  │  └──────────────┘ └──────────────┘ └──────┬───────┘     │    │
+│  │  ┌──────────────┐ ┌──────────────┐        │              │    │
+│  │  │state_machine2│ │ validator2   │        │              │    │
+│  │  │  (Seção 2)   │ │  (Seção 2)   │        │              │    │
+│  │  └──────────────┘ └──────────────┘        │              │    │
 │  │  ┌──────────────────────────────────────────────────┐   │    │
 │  │  │              logger.py (BOLogger)                 │   │    │
 │  │  └──────────────────────┬───────────────────────────┘   │    │
@@ -76,16 +66,16 @@ Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      GROQ CLOUD (Principal)                      │
-│                  Llama 3.3 70B Instruct                          │
-│              (14.400 requisições/dia - free tier)                │
-└─────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼ (fallback)
-┌─────────────────────────────────────────────────────────────────┐
-│                    GOOGLE AI STUDIO (Backup)                     │
+│                    GOOGLE AI STUDIO                              │
 │                  Gemini 2.5 Flash API                            │
 │                (20 requisições/dia - free tier)                  │
+└─────────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      GROQ CLOUD                                  │
+│                  Llama 3.3 70B Instruct                          │
+│              (14.400 requisições/dia - free tier)                │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -107,40 +97,15 @@ Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de
 | **Gemini SDK** | - | Cliente para Google AI Studio |
 | **Groq SDK** | - | Cliente para Groq Cloud |
 
-### Frontend (v0.13.0+ - Arquitetura Modular)
+### Frontend
 
 | Tecnologia | Versão | Uso |
 |------------|--------|-----|
-| **HTML5** | - | Estrutura semântica |
-| **JavaScript** | ES6+ | Componentes modulares (7 classes) |
-| **CSS Customizado** | - | 8 arquivos modulares (sem dependências externas) |
+| **HTML5** | - | Estrutura |
+| **JavaScript** | ES6+ | Lógica (vanilla, sem frameworks) |
+| **Tailwind CSS** | 3.x | Estilização (via CDN) |
 | **Fetch API** | - | Requisições HTTP |
 | **localStorage** | - | Sistema de rascunhos |
-
-**Componentes JavaScript (v0.13.0+):**
-
-| Componente | Linhas | Responsabilidade |
-|------------|--------|------------------|
-| `BOApp.js` | ~800 | Orquestrador principal (estado global, API, navegação) |
-| `ProgressBar.js` | ~350 | Barra horizontal com 8 nós + 4 estados visuais |
-| `SectionContainer.js` | ~900 | Gerenciamento independente de seção |
-| `TextInput.js` | ~300 | Input de texto com validação sofisticada |
-| `SingleChoice.js` | ~100 | Botões SIM/NÃO para perguntas binárias |
-| `MultipleChoice.js` | ~150 | Checkboxes para perguntas de múltipla escolha |
-| `FinalScreen.js` | ~200 | Tela de conclusão com resumo e estatísticas |
-
-**CSS Modular (v0.13.0+):**
-
-| Arquivo | Linhas | Responsabilidade |
-|---------|--------|------------------|
-| `main.css` | ~200 | Reset, tipografia, layout global |
-| `progress-bar.css` | ~150 | Estilos da barra de progresso |
-| `section-container.css` | ~570 | Container, chat, badges, transições |
-| `inputs.css` | ~250 | 3 componentes de input |
-| `final-screen.css` | ~100 | Tela de conclusão |
-| `draft-modal.css` | ~80 | Modal de rascunhos |
-| `utilities.css` | ~100 | Helpers, loading, toasts |
-| `responsive.css` | ~200 | Media queries (4 breakpoints) |
 
 ### Infraestrutura
 
@@ -149,200 +114,6 @@ Este documento detalha a arquitetura técnica do sistema, componentes, fluxos de
 | **Render** | Free | Backend + PostgreSQL |
 | **GitHub Pages** | Free | Frontend estático |
 | **GitHub** | Free | Controle de versão |
-
----
-
-## 🎨 Arquitetura Frontend (v0.13.0+)
-
-### Visão Geral
-
-O frontend foi completamente redesenhado na v0.13.0 para uma arquitetura modular baseada em componentes. A mudança principal foi de um layout monolítico (sidebar + container único) para uma arquitetura com componentes independentes e reutilizáveis.
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        index.html                                │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  ProgressBar (8 nós com 4 estados)                         │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  SectionContainer                                          │  │
-│  │  ┌─────────────────────────────────────────────────────┐  │  │
-│  │  │  Header (título + badge de status)                  │  │  │
-│  │  ├─────────────────────────────────────────────────────┤  │  │
-│  │  │  Chat Accordion (histórico de mensagens)            │  │  │
-│  │  ├─────────────────────────────────────────────────────┤  │  │
-│  │  │  Input Component (TextInput/SingleChoice/Multiple)  │  │  │
-│  │  ├─────────────────────────────────────────────────────┤  │  │
-│  │  │  Generated Text (quando seção completa)             │  │  │
-│  │  ├─────────────────────────────────────────────────────┤  │  │
-│  │  │  Transition Box (preview próxima seção)             │  │  │
-│  │  └─────────────────────────────────────────────────────┘  │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  FinalScreen (quando todas 8 seções completadas)          │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Hierarquia de Componentes
-
-```
-BOApp.js (Orquestrador)
-├── ProgressBar.js
-│   └── 8 nós com estados: pending, in_progress, completed, skipped
-│
-├── SectionContainer.js
-│   ├── Header (título, emoji, badge)
-│   ├── Chat Accordion (toggle expandir/colapsar)
-│   │   └── Messages (bot + user)
-│   ├── Input Area
-│   │   ├── TextInput.js (texto livre)
-│   │   ├── SingleChoice.js (SIM/NÃO)
-│   │   └── MultipleChoice.js (checkboxes)
-│   ├── Generated Text
-│   ├── Skip Message (quando seção pulada)
-│   ├── Transition Box (preview + botões)
-│   └── Read-Only Notice (faixa amarela)
-│
-└── FinalScreen.js
-    ├── Header comemorativo
-    ├── Resumo de seções (8 items com status)
-    ├── Texto completo (todas seções)
-    └── Botões (Copiar Tudo, Iniciar Novo)
-```
-
-### Fluxo de Dados entre Componentes
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                            BOApp.js                               │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  State: { sections: {}, currentSectionIndex, sessionId }   │  │
-│  └────────────────────────────────────────────────────────────┘  │
-│                              │                                    │
-│         ┌────────────────────┼────────────────────┐              │
-│         │                    │                    │              │
-│         ▼                    ▼                    ▼              │
-│  ┌─────────────┐      ┌─────────────┐      ┌─────────────┐      │
-│  │ ProgressBar │      │  Section    │      │ FinalScreen │      │
-│  │             │      │  Container  │      │             │      │
-│  └──────┬──────┘      └──────┬──────┘      └─────────────┘      │
-│         │                    │                                    │
-│    Callbacks:           Callbacks:                                │
-│    onClick(id)          onAnswer(qId, answer)                     │
-│         │               onSkip()                                  │
-│         │               onNavigateNext(sectionId, options)        │
-│         │                    │                                    │
-│         └────────────────────┼────────────────────────────────────┘
-│                              │
-│                              ▼
-│                     ┌─────────────────┐
-│                     │   API Backend   │
-│                     │  POST /chat     │
-│                     │  POST /start_   │
-│                     │    section/{n}  │
-│                     └─────────────────┘
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### Estados de Seção
-
-Cada seção pode estar em um dos 4 estados:
-
-| Estado | Cor (ProgressBar) | Badge | Descrição |
-|--------|-------------------|-------|-----------|
-| `pending` | Cinza claro | 🔒 | Seção não iniciada, aguardando anterior |
-| `in_progress` | Azul | - | Seção ativa, respondendo perguntas |
-| `completed` | Verde | ✓ | Seção finalizada com texto gerado |
-| `skipped` | Cinza | ⃠ | Seção pulada com motivo específico |
-
-### Estrutura de Arquivos
-
-```
-docs/
-├── index.html              # HTML principal (~100 linhas)
-├── css/
-│   ├── main.css            # Reset, tipografia, layout
-│   ├── progress-bar.css    # Barra de progresso
-│   ├── section-container.css # Container, chat, badges
-│   ├── inputs.css          # TextInput, SingleChoice, MultipleChoice
-│   ├── final-screen.css    # Tela de conclusão
-│   ├── draft-modal.css     # Modal de rascunhos
-│   ├── utilities.css       # Helpers, loading, toasts
-│   └── responsive.css      # Media queries
-├── js/
-│   ├── BOApp.js            # Orquestrador principal
-│   ├── components/
-│   │   ├── ProgressBar.js
-│   │   ├── SectionContainer.js
-│   │   ├── TextInput.js
-│   │   ├── SingleChoice.js
-│   │   ├── MultipleChoice.js
-│   │   └── FinalScreen.js
-│   └── data/
-│       └── sections.js     # Definição estruturada das 8 seções
-└── archive/                # Documentação de versões antigas
-```
-
-### BOApp.js - Orquestrador Principal
-
-O `BOApp.js` é o componente central que:
-
-1. **Gerencia estado global** de todas as 8 seções
-2. **Coordena comunicação** entre ProgressBar e SectionContainer
-3. **Faz chamadas à API** backend
-4. **Persiste rascunhos** em localStorage
-5. **Controla navegação** entre seções
-
-**Principais Métodos:**
-
-| Método | Descrição |
-|--------|-----------|
-| `init()` | Inicializa aplicação, carrega seções, verifica rascunhos |
-| `_loadCurrentSection()` | Carrega seção atual no SectionContainer |
-| `_navigateToSection(sectionId, options)` | Navega para seção específica |
-| `_onAnswer(questionId, answer)` | Processa resposta do usuário |
-| `_onSectionComplete()` | Chamado quando seção é completada |
-| `_onSectionSkip(reason)` | Chamado quando seção é pulada |
-| `_updateAllSectionsProgress()` | Atualiza visual da ProgressBar |
-| `_saveDraft()` | Salva estado atual em localStorage |
-| `_restoreDraft()` | Restaura rascunho salvo |
-
-### SectionContainer.js - Gerenciador de Seção
-
-O `SectionContainer.js` é responsável por:
-
-1. **Renderizar uma seção** independente
-2. **Gerenciar chat** com histórico de mensagens
-3. **Instanciar componente de input** correto (Text/Single/Multiple)
-4. **Exibir texto gerado** quando seção completa
-5. **Mostrar transição** para próxima seção
-
-**Principais Métodos:**
-
-| Método | Descrição |
-|--------|-----------|
-| `render()` | Renderiza HTML da seção |
-| `loadSection(sectionData, options)` | Carrega dados de uma seção |
-| `_showCurrentQuestion()` | Exibe pergunta atual com input apropriado |
-| `_handleFollowUpQuestions()` | Processa perguntas condicionais |
-| `_addBotMessage(text)` | Adiciona mensagem do bot ao chat |
-| `_addUserMessage(text)` | Adiciona mensagem do usuário ao chat |
-| `_showGeneratedText(text)` | Exibe texto gerado |
-| `_renderTransition(nextSectionId)` | Renderiza box de transição |
-| `_skipSection()` | Marca seção como pulada |
-| `setSkipReason(reason)` | Define motivo do skip |
-
-### Responsividade
-
-O CSS modular inclui 4 breakpoints em `responsive.css`:
-
-| Breakpoint | Largura | Ajustes |
-|------------|---------|---------|
-| Desktop | 1024px+ | Layout padrão |
-| Tablet | 768px - 1023px | Container 90% largura |
-| Mobile | 480px - 767px | ProgressBar compacta, inputs empilhados |
-| Small Mobile | < 480px | Touch targets 44px+, safe areas iOS |
 
 ---
 
@@ -383,13 +154,12 @@ O CSS modular inclui 4 breakpoints em `responsive.css`:
 **Função:** Gerencia o fluxo de perguntas da Seção 1 (Contexto da Ocorrência)
 
 **Responsabilidades:**
-- Definir as 11 perguntas principais + 4 condicionais da Seção 1
+- Definir as 6 perguntas da Seção 1
 - Controlar qual pergunta está ativa
-- Gerenciar follow-up questions condicionais
 - Armazenar respostas do usuário
 - Verificar se seção está completa
 
-**Perguntas (1.1-1.11 + condicionais) - v0.13.0:**
+**Perguntas (1.1-1.6):**
 
 ```python
 QUESTIONS = {
@@ -397,23 +167,10 @@ QUESTIONS = {
     "1.2": "Composição da guarnição e prefixo.",
     "1.3": "Natureza do empenho.",
     "1.4": "O que constava na ordem de serviço, informações do COPOM, DDU.",
-    "1.5": "Houve deslocamento entre o ponto de acionamento e o local?",  # Condicional
-    "1.5.1": "Local de onde a guarnição partiu.",                         # Follow-up
-    "1.5.2": "Houve alguma alteração durante o percurso?",                # Follow-up
-    "1.6": "Local exato da ocorrência (logradouro, número, bairro).",
-    "1.7": "O local é conhecido como ponto de tráfico?",
-    "1.8": "O local é dominado por facção criminosa?",
-    "1.9": "Havia estabelecimento comercial próximo?",                    # Condicional
-    "1.9.1": "Nome do estabelecimento.",                                  # Follow-up
-    "1.9.2": "Distância aproximada.",                                     # Follow-up
-    "1.10": "Agravantes do Art. 40 da Lei de Drogas.",
-    "1.11": "Outras informações relevantes do contexto."
+    "1.5": "Local exato da ocorrência (logradouro, número, bairro).",
+    "1.6": "O local é ponto de tráfico? Quais evidências anteriores? Há facção?"
 }
 ```
-
-**Sistema de Follow-up Questions:**
-- Perguntas 1.5.1 e 1.5.2 só aparecem se 1.5 = "SIM"
-- Perguntas 1.9.1 e 1.9.2 só aparecem se 1.9 = "SIM"
 
 **Principais Métodos:**
 
@@ -424,8 +181,7 @@ QUESTIONS = {
 | `next_step()` | None | Avança para próximo step |
 | `is_section_complete()` | bool | Verifica se todas perguntas respondidas |
 | `get_all_answers()` | Dict | Retorna todas as respostas |
-| `get_progress()` | Dict | Retorna progresso (X/11+, %) |
-| `has_follow_up()` | bool | Verifica se há perguntas condicionais pendentes |
+| `get_progress()` | Dict | Retorna progresso (X/6, %) |
 
 ---
 
@@ -433,38 +189,29 @@ QUESTIONS = {
 
 **Função:** Gerencia o fluxo de perguntas da Seção 2 (Abordagem a Veículo)
 
-**Diferencial:** Suporta lógica condicional - se não houve veículo (pergunta 2.1 = "NÃO"), pula toda a seção com motivo específico.
+**Diferencial:** Suporta lógica condicional - se não houve veículo (pergunta 2.1 = "NÃO"), pula toda a seção.
 
-**Perguntas (2.1-2.13) - v0.13.0:**
+**Perguntas (2.1-2.8):**
 
 ```python
 SECTION2_QUESTIONS = {
-    "2.1": "Havia veículo envolvido na ocorrência?",  # Skip question
-    "2.2": "Contexto: como o veículo foi percebido?",
-    "2.3": "Marca/modelo/cor/placa do veículo.",
-    "2.4": "Onde exatamente o veículo foi visto?",
-    "2.5": "Descreva se houve reação do motorista ou ocupantes.",
-    "2.6": "Qual policial percebeu e o que especificamente viu?",
-    "2.7": "Como foi dada a ordem de parada?",
-    "2.8": "Se houve perseguição, por qual motivo o veículo parou?",
-    "2.9": "Parou imediatamente ou houve perseguição?",
-    "2.10": "Como foi realizada a abordagem aos ocupantes?",
-    "2.11": "Como foi realizada a busca no veículo?",
-    "2.12": "Havia irregularidades? Veículo furtado/roubado/clonado?",
-    "2.13": "Outras informações relevantes sobre o veículo."
+    "2.1": "Havia veículo?",  # Condicional
+    "2.2": "Marca/modelo/cor/placa.",
+    "2.3": "Onde foi visto?",
+    "2.4": "Qual policial percebeu e o que viu?",
+    "2.5": "Como foi dada a ordem de parada?",
+    "2.6": "Parou ou houve perseguição?",
+    "2.7": "Como foi a abordagem e busca?",
+    "2.8": "Haviam irregularidades? Veículo furtado/roubado/clonado?"
 }
 ```
-
-**Sistema de Skip:**
-- Pergunta 2.1 é "skip question" - resposta "NÃO" pula toda a seção
-- Retorna `section_skipped: true` + `generated_text` com motivo
 
 **Método Especial:**
 
 | Método | Retorno | Descrição |
 |--------|---------|-----------|
 | `was_section_skipped()` | bool | Retorna True se não houve veículo |
-| `get_skip_reason()` | str | "Não se aplica (não havia veículo envolvido na ocorrência)" |
+| `get_skip_reason()` | Optional[str] | Texto explicativo se seção foi pulada |
 
 ---
 
@@ -576,118 +323,6 @@ def generate_text(
 
 ---
 
-## ⏭️ Sistema de Skip de Seções
-
-### Conceito
-
-Implementado em v0.12.8+, o sistema de skip permite que usuários pulem seções não aplicáveis à ocorrência, mantendo registro do motivo específico.
-
-### Funcionamento
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    FLUXO DE SKIP                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. Usuário inicia Seção 2+                                     │
-│           │                                                     │
-│           ▼                                                     │
-│  2. Sistema exibe "Skip Question" (primeira pergunta)           │
-│     Ex: "Havia veículo envolvido na ocorrência?"                │
-│           │                                                     │
-│     ┌─────┴─────┐                                               │
-│     │           │                                               │
-│    SIM         NÃO                                              │
-│     │           │                                               │
-│     ▼           ▼                                               │
-│  Continua    3. API retorna:                                    │
-│  seção         section_skipped: true                            │
-│  normal        generated_text: "Não se aplica..."               │
-│                     │                                           │
-│                     ▼                                           │
-│               4. Frontend:                                      │
-│                  - Exibe motivo específico                      │
-│                  - ProgressBar marca como 'skipped'             │
-│                  - Avança para próxima seção                    │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Skip Questions por Seção
-
-| Seção | Pergunta Skip (ID) | Texto da Pergunta |
-|-------|-------------------|-------------------|
-| 2 | 2.1 | "Havia veículo envolvido na ocorrência?" |
-| 3 | 3.1 | "Houve campana antes da abordagem?" |
-| 4 | 4.1 | "Houve entrada em domicílio?" |
-| 5 | 5.1 | "Houve fundada suspeita?" |
-| 6 | 6.1 | "O indivíduo ofereceu resistência ou estava armado?" |
-| 7 | 7.1 | "Houve apreensão de objetos/materiais?" |
-
-**Nota:** Seções 1 e 8 NÃO têm skip question (sempre obrigatórias).
-
-### Motivos de Skip por Seção
-
-Quando uma seção é pulada, o `generated_text` retorna um motivo específico:
-
-| Seção | Motivo Retornado |
-|-------|------------------|
-| 2 | "Não se aplica: não havia veículo envolvido na ocorrência." |
-| 3 | "Não se aplica: não houve campana antes da abordagem." |
-| 4 | "Não se aplica: não houve entrada em domicílio." |
-| 5 | "Não se aplica: não houve fundada suspeita." |
-| 6 | "Não se aplica: não houve resistência ou ameaça." |
-| 7 | "Não se aplica: não houve apreensão de objetos/materiais." |
-
-### Resposta da API (Skip)
-
-```json
-{
-  "response": "Entendido. Esta seção não se aplica.",
-  "section_complete": true,
-  "section_skipped": true,
-  "generated_text": "Não se aplica: não havia veículo envolvido na ocorrência.",
-  "next_section": 3
-}
-```
-
-### Estado no Frontend
-
-```javascript
-// SectionContainer.js - Estado de seção pulada
-{
-    state: 'skipped',           // Estado especial
-    skipReason: 'Não se aplica: não havia veículo...',
-    messages: [...],            // Contém apenas a skip question
-    generatedText: null         // NÃO usa generatedText
-}
-
-// ProgressBar.js - Visualização
-// Seção pulada: nó cinza com ícone ⃠
-```
-
-### Componente Visual (ProgressBar)
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Estados dos nós na ProgressBar:                                │
-│                                                                 │
-│  ● pending      → Cinza claro, clicável                         │
-│  ◉ in_progress  → Azul pulsante, ativo                          │
-│  ✓ completed    → Verde, checkmark                              │
-│  ⃠ skipped      → Cinza escuro, ícone de proibido               │
-│                                                                 │
-│  Exemplo visual:                                                │
-│  [✓]──[⃠]──[✓]──[⃠]──[◉]──[●]──[●]──[●]                         │
-│   1    2    3    4    5    6    7    8                          │
-│  (S1   S2   S3   S4   S5   S6   S7   S8)                        │
-│  done skip done skip prog pend pend pend                        │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
 ## 📊 Estruturas de Dados
 
 ### Sessões em Memória (main.py)
@@ -715,7 +350,7 @@ sessions: Dict[str, Dict] = {
 
 ### Rascunhos (localStorage - Frontend)
 
-**Estrutura (v0.13.0+):**
+**Estrutura:**
 
 ```javascript
 {
@@ -723,47 +358,27 @@ sessions: Dict[str, Dict] = {
     "boId": "BO-20251220-xxxxx",
     "sections": {
         "1": {
-            "state": "completed",           // pending | in_progress | completed | skipped
             "answers": {
                 "1.1": "22/03/2025, às 19h03",
                 "1.2": "Sgt João, prefixo 1234",
-                // ... até 1.11 + condicionais
+                // ...
             },
             "currentStep": "1.3",
-            "generatedText": "No dia 22 de março de 2025...",
-            "skipReason": null              // null para seções não puladas
+            "completed": false,
+            "generatedText": ""
         },
         "2": {
-            "state": "skipped",
-            "answers": {
-                "2.1": "não"                // Apenas skip question respondida
-            },
-            "currentStep": null,
-            "generatedText": null,
-            "skipReason": "Não se aplica: não havia veículo envolvido na ocorrência."
-        },
-        "3": {
-            "state": "in_progress",
             "answers": { ... },
-            "currentStep": "3.5",
-            "generatedText": null,
-            "skipReason": null
+            "currentStep": "2.5",
+            "completed": false,
+            "generatedText": ""
         }
     },
-    "currentSection": 3,
+    "currentSection": 1,
     "timestamp": 1703000000000,  // Para expiração (7 dias)
-    "version": "0.13.0"
+    "version": "0.9.0"
 }
 ```
-
-**Estados de Seção:**
-
-| Estado | Descrição |
-|--------|-----------|
-| `pending` | Seção não iniciada |
-| `in_progress` | Seção com perguntas em andamento |
-| `completed` | Todas as perguntas respondidas, texto gerado |
-| `skipped` | Seção pulada via skip question |
 
 **Expiração:** 7 dias (604.800.000 ms)
 
@@ -900,53 +515,6 @@ sessions: Dict[str, Dict] = {
 
 ---
 
-### Fluxo 5: Pular Seção (Skip via Skip Question)
-
-**Cenário:** Usuário responde "NÃO" na skip question de uma seção.
-
-```
-┌──────────┐   1. POST /chat                  ┌──────────┐
-│ Frontend │   {session_id, message: "não"}   │ Backend  │
-│          │   (resposta à skip question)      │          │
-└──────────┘ ───────────────────────────────> └─────┬────┘
-                                                    │
-                                               2. Detectar skip:
-                                                  is_skip_question(current_step)
-                                                  && answer == "não"
-                                                    │
-                                                    ▼
-                                              ┌──────────────────┐
-                                              │ Gerar skip_reason│
-                                              │ (motivo específico│
-                                              │  por seção)       │
-                                              └──────┬───────────┘
-                                                     │
-                                               3. Marcar seção como pulada
-                                               4. LOG event: section_skipped
-                                                     │
-                                                     ▼
-┌──────────┐   5. Retorna:                    ┌──────────┐
-│ Frontend │   {section_complete: true,       │ Backend  │
-│          │    section_skipped: true,        │          │
-│          │    generated_text: "Não se...",  │          │
-│          │    next_section: N+1}            │          │
-└──────────┘ <───────────────────────────────  └──────────┘
-      │
-      │  6. Frontend processa:
-      │     - state = 'skipped'
-      │     - skipReason = generated_text
-      │     - ProgressBar.updateNode(N, 'skipped')
-      │     - Navega para next_section
-      ▼
-┌─────────────────────────────────────────────────────────┐
-│  ProgressBar: [✓]──[⃠]──[●]──[●]──[●]──[●]──[●]──[●]   │
-│                1    2    3    4    5    6    7    8     │
-│              done  skip                                 │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
 ## 🗄️ Banco de Dados
 
 ### Tabelas
@@ -978,7 +546,6 @@ sessions: Dict[str, Dict] = {
 - `answer_valid` - Resposta aceita
 - `answer_invalid` - Resposta rejeitada
 - `text_generated` - Texto gerado com sucesso
-- `section_skipped` - Seção pulada via skip question (v0.12.8+)
 - `llm_error` - Erro ao gerar texto
 - `session_completed` - Sessão finalizada
 
@@ -1230,8 +797,8 @@ const response = await fetch('/sync_session', {
 ```
 Test Scenario JSON
      │
-     ├─ Section 1 (steps 1.1-1.11 + condicionais)
-     ├─ Section 2 (steps 2.1-2.13)
+     ├─ Section 1 (steps 1.1-1.6)
+     ├─ Section 2 (steps 2.1-2.8)
      └─ Section 3 (steps 3.1-3.8) ← alvo
 
             │
@@ -1311,6 +878,4 @@ Test Scenario JSON
 
 - **Cristiano Maia** - Delivery Manager & Tech Lead
 - **Claudio Moreira** - Especialista em Redação de BOs (Sargento PM)
-- **Claude Sonnet 4** - Implementação core via Claude Code
-- **Claude Opus 4.5** - Arquitetura e documentação avançada
-- **Claude Haiku 4.5** - Automação e tarefas incrementais
+- **Claude Sonnet 4.5** - Implementação via Claude Code

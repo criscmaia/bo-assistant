@@ -1,7 +1,7 @@
 # 🧪 Guia de Testes - BO Inteligente
 
-**Versão:** v0.13.0
-**Última atualização:** 02/01/2026
+**Versão:** v0.12.9
+**Última atualização:** 30/12/2025
 
 Este documento cobre estratégias de teste, casos de teste manuais, automação de screenshots e respostas de teste validadas.
 
@@ -15,8 +15,6 @@ Este documento cobre estratégias de teste, casos de teste manuais, automação 
 - [Respostas de Teste Validadas](#-respostas-de-teste-validadas)
 - [Automação de Screenshots](#-automação-de-screenshots)
 - [Testes de Carga](#-testes-de-carga)
-- [Casos de Teste de Componentes UX (v0.13.0+)](#-casos-de-teste-de-componentes-ux-v0130)
-- [Casos de Teste de Skip (v0.13.0+)](#-casos-de-teste-de-skip-v0130)
 
 ---
 
@@ -175,7 +173,7 @@ pytest tests/unit tests/integration -v --tb=short
 1. Acessar https://criscmaia.github.io/bo-assistant/
 2. Responder pergunta 1.1 (ver [Respostas Validadas](#respostas-validadas-seção-1))
 3. Clicar em "Enviar"
-4. Repetir para perguntas 1.2 até 1.11 (total de 11 perguntas principais + 4 condicionais)
+4. Repetir para perguntas 1.2 até 1.9 (total de 11 perguntas, algumas condicionais)
 5. Aguardar geração de texto (~3-5 segundos)
 6. Verificar texto gerado no card de Seção 1
 
@@ -322,7 +320,7 @@ pytest tests/unit tests/integration -v --tb=short
 **Objetivo:** Validar fluxo completo com todas as quatro seções.
 
 **Passos:**
-1. Completar Seção 1 (perguntas 1.1 a 1.11 - total 11 perguntas principais + 4 condicionais)
+1. Completar Seção 1 (perguntas 1.1 a 1.9 - total 11 perguntas)
 2. Clicar em "Iniciar Seção 2"
 3. Responder pergunta 2.1 com "SIM"
 4. Completar Seção 2 (perguntas 2.2 a 2.13 - total 13 perguntas)
@@ -474,8 +472,8 @@ pytest tests/unit tests/integration -v --tb=short
 **Passos:**
 1. Completar Seções 1 a 5
 2. Clicar em "Iniciar Seção 6"
-3. Responder pergunta 6.1 com "SIM" ou "NÃO" (sobre ameaça/arma)
-4. Completar perguntas 6.2 até 6.6 com respostas válidas
+3. Responder pergunta 6.1 com "SIM"
+4. Completar perguntas 6.2 até 6.5 com respostas válidas
 5. Aguardar geração de texto (~3-5 segundos)
 6. Verificar texto gerado no card de Seção 6
 
@@ -494,8 +492,8 @@ pytest tests/unit tests/integration -v --tb=short
 
 **Passos:**
 1. Completar Seções 1-5 e iniciar Seção 6
-2. Responder 6.1 (ameaça/arma) conforme aplicável
-3. Ao chegar em 6.2 (descrição da resistência), tentar responder com frases genéricas:
+2. Responder 6.1 com "SIM"
+3. Ao chegar em 6.2, tentar responder com frases genéricas:
    - "O autor resistiu ativamente"
    - "Foi necessário uso moderado da força"
    - "O autor estava exaltado"
@@ -520,7 +518,7 @@ pytest tests/unit tests/integration -v --tb=short
 
 **Passos:**
 1. Completar Seções 1-5 e iniciar Seção 6
-2. Responder 6.1 (ameaça/arma) e 6.2 com resposta válida
+2. Responder 6.1 com "SIM" e 6.2 com resposta válida
 3. Ao chegar em 6.3, responder sem graduação:
    - "João aplicou chave de braço"
    - "Técnica de imobilização foi utilizada"
@@ -543,7 +541,7 @@ pytest tests/unit tests/integration -v --tb=short
 
 **Passos:**
 1. Completar Seções 1-5 e iniciar Seção 6
-2. Responder 6.1 (ameaça/arma) e completar 6.2, 6.3, 6.4
+2. Responder 6.1 com "SIM" e completar 6.2, 6.3, 6.4
 3. Ao chegar em 6.5:
 
    **Teste 19a - Sem ferimentos (válido):**
@@ -580,14 +578,14 @@ pytest tests/unit tests/integration -v --tb=short
 **Passos:**
 1. Completar Seções 1 a 5
 2. Clicar em "Iniciar Seção 6"
-3. Na skip question, responder "NÃO" (não houve resistência)
+3. Responder pergunta 6.1 com "NÃO"
 
 **Resultado Esperado:**
 - Texto gerado imediatamente
 - Mensagem: "Não se aplica (não houve resistência durante a abordagem)"
 - Seção 6 marcada como completa
 - BO marcado como "COMPLETO"
-- Sem perguntas adicionais (6.1-6.6)
+- Sem perguntas adicionais (6.2-6.5)
 
 ---
 
@@ -597,17 +595,14 @@ pytest tests/unit tests/integration -v --tb=short
 
 **Passos:**
 1. Completar Seções 1 a 6
-2. Clicar em "Iniciar Seção 6"
-3. Responder pergunta 6.1 com "SIM"
-4. Completar perguntas 6.2 até 6.6 com respostas válidas
-5. Clicar em "Iniciar Seção 7"
-6. Responder pergunta 7.1 com "SIM"
-7. Completar perguntas 7.2 até 7.4 com respostas válidas:
+2. Clicar em "Iniciar Seção 7"
+3. Responder pergunta 7.1 com "SIM"
+4. Completar perguntas 7.2 até 7.4 com respostas válidas:
    - **7.2:** "O Soldado Breno encontrou 14 pedras de substância análoga ao crack dentro de uma lata azul sobre o banco de concreto próximo ao portão da casa 12"
    - **7.3:** "Foram apreendidos R$ 450,00 em notas de R$ 10 e R$ 20, 2 celulares Samsung e 1 balança de precisão"
    - **7.4:** "O Soldado Faria lacrou as substâncias no invólucro 01 e os objetos no invólucro 02, fotografou todos os itens no local e ficou responsável pelo material até a entrega na CEFLAN 2"
-8. Aguardar geração de texto (~3-5 segundos)
-9. Verificar texto gerado no card de Seção 7
+5. Aguardar geração de texto (~3-5 segundos)
+6. Verificar texto gerado no card de Seção 7
 
 **Resultado Esperado:**
 - Todas as respostas aceitas
@@ -692,7 +687,7 @@ Este guia completo contém respostas validadas para TODAS as 8 seções do BO, c
 
 ### Respostas Validadas - Seção 1
 
-**TOTAL: 11 perguntas principais + 4 condicionais (1.5.1, 1.5.2, 1.9.1, 1.9.2)**
+**TOTAL: 11 perguntas (13 incluindo condicionais 1.5.x e 1.9.x)**
 
 **1.1 - Dia, data e hora do acionamento:**
 ```
@@ -1006,7 +1001,7 @@ Homem de camisa vermelha e bermuda jeans azul, porte atlético, aproximadamente 
 
 **TOTAL: 6 perguntas (Reação e Uso da Força)**
 
-**6.1 - Houve ameaça ou uso de arma contra a equipe? Contra quem e como?**
+**6.1 - Houve ameaça ou uso de arma? Contra quem e como?**
 ```
 O autor sacou uma arma de fogo apontando para o Sargento Silva, proferindo ameaças de morte
 ```
@@ -1015,7 +1010,14 @@ OU
 Não houve ameaça ou uso de arma
 ```
 
-**6.2 - Descreva a resistência com fatos concretos:**
+**6.2 - Houve resistência durante a abordagem?**
+```
+SIM
+```
+**Aceita:** SIM, SÃO, sim, Sim, houve resistência, etc.
+**Pulará demais perguntas se:** NÃO, NAO, NÃO houve, Não ocorreu, etc.
+
+**6.3 - Descreva a resistência com fatos concretos:**
 ```
 O autor empurrou o Cabo Rezende com força no peito tentando fugir em direção ao beco lateral, sendo alcançado após aproximadamente 10 metros de perseguição a pé
 ```
@@ -1028,19 +1030,19 @@ O autor empurrou o Cabo Rezende com força no peito tentando fugir em direção 
 - ❌ "Houve resistência"
 - ❌ "Em atitude suspeita"
 
-**6.3 - Qual técnica foi aplicada e qual foi o resultado?**
+**6.4 - Qual técnica foi aplicada e qual foi o resultado?**
 ```
 O Soldado Pires aplicou chave de braço no suspeito, forçando o cotovelo esquerdo e o imobilizou no chão. O Cabo Rezende auxiliou na contenção segurando as pernas do autor até a completa imobilização sem lesões visíveis no momento
 ```
 **Obrigatório:** Graduação militar (Sargento, Cabo, Soldado, Tenente, Capitão) + nome + técnica (chave, cotovelada, empurrão, taser, etc.) + resultado. Mín. 40 caracteres.
 
-**6.4 - Por que foi necessário algemar?**
+**6.5 - Por que foi necessário algemar?**
 ```
 Diante da agressividade demonstrada ao tentar agredir os policiais e o risco de nova tentativa de agressão durante o deslocamento, o autor foi algemado para garantir a segurança da guarnição e evitar lesões a terceiros
 ```
 **Obrigatório:** Justificativa OBJETIVA com fato concreto (risco de fuga, agressividade demonstrada, tentativa de agressão, comportamento ameaçador, etc.). Deve conter uma das palavras-chave: risco, fuga, agressiv, resistência, perigo, tentou, ameaça. Mín. 20 caracteres.
 
-**6.5 - Houve ferimentos durante a ação policial? Descreva quem, tipo de lesão e local de atendimento:**
+**6.6 - Houve ferimentos? Descreva: quem, tipo, local de atendimento:**
 
 **Resposta SEM ferimentos (válida):**
 ```
@@ -1056,12 +1058,6 @@ O autor apresentou escoriação no joelho direito e hematoma no braço esquerdo,
 - Se resposta começa com "Não houve ferimentos": VÁLIDA (não exige hospital)
 - Se mencionar lesão/ferimento (ferimento, lesão, sangramento, escoriação, hematoma, fratura, contusão, etc.): EXIGE hospital/UPA com ficha
 - Ficha pode ser: "ficha nº", "nº", "número", "número da ficha", etc.
-
-**6.6 - Houve algemas? Por quê? Detalhe conforme orientação da Súmula Vinculante 11:**
-```
-Diante da agressividade demonstrada ao tentar agredir os policiais e o risco de nova tentativa de agressão durante o deslocamento, o autor foi algemado para garantir a segurança da guarnição e evitar lesões a terceiros
-```
-**Obrigatório:** Justificativa OBJETIVA com fato concreto (risco de fuga, agressividade demonstrada, tentativa de agressão, comportamento ameaçador, etc.). Deve conter uma das palavras-chave: risco, fuga, agressiv, resistência, perigo, tentou, ameaça. Mín. 20 caracteres.
 
 ---
 
@@ -1440,156 +1436,6 @@ Validar comportamento do sistema sob alta demanda.
 - Cold start do Render (primeira requisição após 15 min)
 
 **Status:** ⏳ Planejado para futuras versões
-
----
-
-## 🎨 Casos de Teste de Componentes UX (v0.13.0+)
-
-### CT-UX-01: ProgressBar - Estados Visuais
-**Objetivo:** Validar que a ProgressBar exibe corretamente os 4 estados possíveis
-
-**Passos:**
-1. Iniciar nova sessão
-2. Verificar Seção 1 em estado `in_progress` (azul)
-3. Completar Seção 1 → verificar `completed` (verde com checkmark)
-4. Navegar para Seção 2, responder "NÃO" na skip question
-5. Verificar Seção 2 em estado `skipped` (cinza com símbolo de skip)
-6. Verificar Seção 3 em estado `pending` (cinza claro com cadeado)
-
-**Resultado esperado:** Cores e ícones corretos para cada estado
-
----
-
-### CT-UX-02: SectionContainer - Chat Accordion
-**Objetivo:** Validar comportamento do accordion de histórico do chat
-
-**Passos:**
-1. Responder primeira pergunta da Seção 1
-2. Verificar que chat está ABERTO (exibindo mensagens)
-3. Clicar no botão "Histórico do Chat (X mensagens)"
-4. Verificar que chat FECHA (accordion collapsed)
-5. Clicar novamente → verificar que ABRE
-
-**Resultado esperado:** Toggle funciona corretamente, seta muda de ▼ para ▶
-
----
-
-### CT-UX-03: Sistema de Skip - Motivo Específico
-**Objetivo:** Validar que skip reason é exibido corretamente
-
-**Passos:**
-1. Completar Seção 1
-2. Na transição para Seção 2, clicar "Não havia veículo"
-3. Verificar badge: "⃠ Não se aplica"
-4. Clicar na Seção 2 pulada
-5. Verificar mensagem: "Não se aplica (não havia veículo envolvido na ocorrência)"
-
-**Resultado esperado:** Motivo específico (não genérico) é exibido
-
----
-
-### CT-UX-04: Follow-up Questions
-**Objetivo:** Validar que perguntas condicionais aparecem corretamente
-
-**Passos:**
-1. Responder 1.5: "SIM, houve deslocamento"
-2. Verificar que 1.5.1 aparece: "Local de onde a guarnição partiu"
-3. Responder 1.5.1
-4. Verificar que 1.5.2 aparece: "Houve alguma alteração durante o percurso?"
-
-**Resultado esperado:** Follow-ups aparecem apenas quando aplicáveis
-
----
-
-### CT-UX-05: Componentes de Input
-**Objetivo:** Validar os 3 tipos de input funcionam corretamente
-
-**Passos:**
-1. **TextInput**: Pergunta 1.1 → digitar texto livre
-2. **SingleChoice**: Pergunta 1.5 → botões SIM/NÃO
-3. **MultipleChoice**: Pergunta 7.X → selecionar múltiplas opções
-
-**Resultado esperado:** Cada tipo de input renderiza e funciona corretamente
-
----
-
-## 🔀 Casos de Teste de Skip (v0.13.0+)
-
-### CT-SK-01: Skip de Seção 2 (Veículo)
-**Objetivo:** Validar skip de Seção 2 quando não há veículo
-
-**Passos:**
-1. Completar Seção 1
-2. Responder "NÃO" na pergunta 2.1 (Havia veículo?)
-3. Verificar que seção é marcada como `skipped` na ProgressBar
-4. Verificar motivo específico exibido: "não havia veículo envolvido na ocorrência"
-
-**Resultado esperado:** Seção 2 pulada com motivo correto
-
----
-
-### CT-SK-02: Skip de Seção 3 (Campana)
-**Objetivo:** Validar skip de Seção 3 quando não houve campana
-
-**Passos:**
-1. Completar Seções 1 e 2
-2. Responder "NÃO" na pergunta 3.1 (Houve campana?)
-3. Verificar que seção é marcada como `skipped` na ProgressBar
-4. Verificar motivo específico exibido: "não houve campana antes da abordagem"
-
-**Resultado esperado:** Seção 3 pulada com motivo correto
-
----
-
-### CT-SK-03: Skip de Seção 4 (Entrada em Domicílio)
-**Objetivo:** Validar skip de Seção 4 quando não houve entrada em domicílio
-
-**Passos:**
-1. Completar Seções 1, 2 e 3
-2. Responder "NÃO" na pergunta 4.1 (Houve entrada em domicílio?)
-3. Verificar que seção é marcada como `skipped` na ProgressBar
-4. Verificar motivo específico exibido: "não houve entrada em domicílio"
-
-**Resultado esperado:** Seção 4 pulada com motivo correto
-
----
-
-### CT-SK-04: Skip de Seção 5 (Fundada Suspeita)
-**Objetivo:** Validar skip de Seção 5 quando não houve fundada suspeita
-
-**Passos:**
-1. Completar Seções 1-4
-2. Responder "NÃO" na pergunta 5.1 (Houve fundada suspeita?)
-3. Verificar que seção é marcada como `skipped` na ProgressBar
-4. Verificar motivo específico exibido: "não houve abordagem por fundada suspeita"
-
-**Resultado esperado:** Seção 5 pulada com motivo correto
-
----
-
-### CT-SK-05: Skip de Seção 6 (Resistência)
-**Objetivo:** Validar skip de Seção 6 quando não houve resistência
-
-**Passos:**
-1. Completar Seções 1-5
-2. Responder "NÃO" na pergunta 6.1 (Houve resistência?)
-3. Verificar que seção é marcada como `skipped` na ProgressBar
-4. Verificar motivo específico exibido: "não houve resistência durante a abordagem"
-
-**Resultado esperado:** Seção 6 pulada com motivo correto
-
----
-
-### CT-SK-06: Skip de Seção 7 (Apreensão)
-**Objetivo:** Validar skip de Seção 7 quando não houve apreensão
-
-**Passos:**
-1. Completar Seções 1-6
-2. Responder "NÃO" na pergunta 7.1 (Houve apreensão?)
-3. Verificar que seção é marcada como `skipped` na ProgressBar
-4. Verificar motivo específico exibido: "não houve apreensão de drogas"
-
-**Resultado esperado:** Seção 7 pulada com motivo correto
 
 ---
 

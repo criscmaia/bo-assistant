@@ -1,38 +1,5 @@
 # Changelog v0.12.9
 
-## [v0.13.0] - 2026-01-02
-
-### ✅ Adicionado
-- **Redesign UX Completo** - Refatoração total do frontend
-  - Componente ProgressBar: Barra horizontal com 8 nós + 4 estados visuais
-  - Componente SectionContainer: Gerenciamento independente de seções
-  - Componentes de Input: TextInput, SingleChoice, MultipleChoice (reutilizáveis)
-  - Componente FinalScreen: Tela de conclusão com resumo e estatísticas
-  - CSS Modular: 8 arquivos (main, progress-bar, section-container, inputs, final-screen, draft-modal, utilities, responsive)
-  - Sistema de Skip aprimorado: Motivos específicos por seção
-  - Follow-up Questions: Sistema de perguntas condicionais robusto
-
-### 🔧 Melhorado
-- Validação de keywords inteligente (localização, guarnição, graduação, placa)
-- Estado management com separação clara de responsabilidades
-- Responsividade completa (mobile-first approach)
-- Performance: CSS modular reduz bloat, carregamento mais rápido
-- Acessibilidade: Touch targets de 44px+, contraste adequado
-
-### ⚠️ Breaking Changes
-- Layout HTML completamente novo (remover sidebar, adicionar ProgressBar)
-- Endpoints de CSS mudaram (Tailwind → CSS customizado modular)
-- Estrutura de componentes JS mudou (novo sistema modular)
-- Dados de seções agora em `sections.js` estruturado
-
-### 📊 Métricas
-- 8 seções funcionais com 53+ perguntas
-- 6 componentes reutilizáveis
-- 8 arquivos CSS modulares
-- 0 dependências externas (vanilla JS + CSS puro)
-
----
-
 ## 📜 Histórico de Features por Fase
 
 ### 🔄 Fase 2 Completa - Seções 3-8 (v0.7.0+)

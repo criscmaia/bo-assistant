@@ -1,7 +1,7 @@
 # 🛠️ Guia de Desenvolvimento - BO Inteligente
 
-**Versão:** v0.13.0
-**Última atualização:** 02/01/2026
+**Versão:** v0.12.9
+**Última atualização:** 29/12/2025
 
 Este documento serve como memória institucional do projeto, documentando decisões arquiteturais, comandos essenciais e guias de debugging para desenvolvedores.
 
@@ -82,9 +82,6 @@ O README.md exibe o status dos testes em tempo real via badge do GitHub Actions.
 3. **Encoding UTF-8** - Sempre usar UTF-8 em arquivos Python (acentos!)
 4. **Código simples** - JavaScript vanilla, sem frameworks complexos
 5. **Testar localmente ANTES** - Não fazer push direto para produção
-6. **Componentes modulares e reutilizáveis** (v0.13.0+)
-7. **CSS modular por funcionalidade** - Sem dependências externas
-8. **Separação clara de responsabilidades** - Entre componentes
 
 ---
 
@@ -199,64 +196,6 @@ sessions[session_id] = {
 
 ---
 
-### ADR-006: Redesign UX Completo (v0.13.0)
-
-**Data:** 02/01/2026
-
-**Contexto:**
-- Sistema anterior tinha layout monolítico com sidebar + container único
-- Crescimento de 6 para 53+ perguntas tornava navegação confusa
-- CSS inline misturado com Tailwind via CDN aumentava complexidade
-- Falta de separação clara entre componentes dificultava manutenção
-- Necessidade de melhor feedback visual de progresso
-
-**Decisão:**
-Implementar redesign completo do frontend com arquitetura modular:
-
-1. **Componentes JavaScript (6):**
-   - `ProgressBar.js`: Barra horizontal com 8 nós + 4 estados visuais
-   - `SectionContainer.js`: Gerenciamento independente de seção
-   - `TextInput.js`: Input de texto com validação sofisticada
-   - `SingleChoice.js`: Botões SIM/NÃO para perguntas binárias
-   - `MultipleChoice.js`: Checkboxes para perguntas de múltipla escolha
-   - `FinalScreen.js`: Tela de conclusão com resumo
-
-2. **CSS Modular (8 arquivos):**
-   - `main.css`: Reset, tipografia, layout global
-   - `progress-bar.css`: Estilos da barra de progresso
-   - `section-container.css`: Container, chat, badges
-   - `inputs.css`: 3 componentes de input
-   - `final-screen.css`: Tela de conclusão
-   - `draft-modal.css`: Modal de rascunhos
-   - `utilities.css`: Helpers, loading, toasts
-   - `responsive.css`: Media queries mobile/tablet
-
-3. **Arquitetura:**
-   - `BOApp.js` como orquestrador central (estado global, API, navegação)
-   - `sections.js` como fonte única de verdade para estrutura de seções
-   - Comunicação via callbacks entre componentes
-   - Estado gerenciado de forma unidirecional
-
-**Consequências:**
-
-✅ **Positivas:**
-- UX significativamente melhorada (navegação visual clara)
-- Código mais organizado e manutenível
-- Reutilização de componentes
-- CSS sem dependências externas (zero bloat)
-- Performance melhorada (carregamento modular)
-- Facilita testes isolados de componentes
-
-⚠️ **Negativas:**
-- Maior complexidade inicial (6 classes JS vs 1 monólito)
-- Breaking changes na estrutura HTML
-- Curva de aprendizado para novos desenvolvedores
-- Mais arquivos para gerenciar (8 CSS + 6 JS)
-
-**Status:** ✅ Implementado (v0.13.0)
-
----
-
 ## 🐛 Guia de Debugging
 
 ### Problema 1: Backend não gera texto (Erro 500)
@@ -352,61 +291,6 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 - Gemini 2.5 Flash: 20 req/dia (free tier)
 - Groq Llama 3.3 70B: 14.400 req/dia (free tier) - **Recomendado para testes**
 - Trocar provider no frontend ([index.html](docs/index.html) linhas 520, 1149, 1408): `llm_provider: 'groq'`
-
----
-
-### Problema 6: ProgressBar não atualiza estados
-
-**Sintoma:** Seções permanecem em estado `pending` mesmo após serem completadas
-
-**Causa:** Estado da seção não está sendo sincronizado com ProgressBar via `setCurrentSection()`
-
-**Solução:**
-1. Verificar se `BOApp._updateAllSectionsProgress()` está sendo chamado após cada mudança de estado
-2. Verificar se `sectionState.status` está sendo atualizado corretamente (`completed`, `skipped`, `in_progress`)
-3. Verificar console para erros em `ProgressBar.updateSectionState()`
-
----
-
-### Problema 7: SectionContainer não renderiza texto gerado
-
-**Sintoma:** Após completar seção, texto gerado não aparece (área vazia)
-
-**Causa:** Campo `generatedText` não está sendo passado para `loadSection()`
-
-**Solução:**
-1. Verificar se API retorna `generated_text` no response
-2. Verificar se `sectionState.generatedText` está sendo salvo no estado global
-3. Verificar se `loadSection()` recebe `generatedText` no objeto options
-4. Adicionar log: `console.log('[SectionContainer] generatedText:', this.generatedText)`
-
----
-
-### Problema 8: Follow-up questions não aparecem
-
-**Sintoma:** Após responder pergunta condicional (ex: 1.5 = "SIM"), próxima pergunta não aparece
-
-**Causa:** Sistema de `followUpQueue` não está sendo processado ou perguntas condicionais não estão configuradas
-
-**Solução:**
-1. Verificar se pergunta tem `followUpQuestions` definido em `sections.js`
-2. Verificar se `_handleFollowUpQuestions()` está sendo chamado após resposta
-3. Verificar se `followUpQueue` está sendo populado: `console.log('[SectionContainer] followUpQueue:', this.followUpQueue)`
-4. Para rascunhos: verificar se `_restoreFollowUpState()` está reconstruindo a fila
-
----
-
-### Problema 9: Skip reason mostra "motivo não especificado"
-
-**Sintoma:** Ao pular seção, mensagem mostra genérica em vez de específica
-
-**Causa:** Campo `skipReason` não está sendo passado ao carregar seção via `_navigateToSection()`
-
-**Solução:**
-1. Verificar se API retorna `generated_text` quando `section_skipped: true`
-2. Verificar se `sectionState.skipReason` está sendo salvo: `console.log('[BOApp] skipReason:', sectionState.skipReason)`
-3. Verificar se `loadSection()` em `_navigateToSection()` passa `skipReason: sectionState.skipReason`
-4. Adicionar log em SectionContainer: `console.log('[SectionContainer] skipReason recebido:', options.skipReason)`
 
 ---
 
@@ -532,36 +416,6 @@ DATABASE_URL=postgresql://...  # Apenas em produção (Render)
 ```
 
 **Nota:** O arquivo `.env` já está no `.gitignore` e não será versionado.
-
----
-
-### Componentes Modulares (v0.13.0+)
-
-**Testar componentes isoladamente:**
-```javascript
-// Teste isolado de TextInput
-const input = new TextInput({
-    placeholder: 'Digite sua resposta...',
-    validation: { required: true, minLength: 5 },
-    onSubmit: (value) => console.log('Resposta:', value)
-});
-document.body.appendChild(input.render());
-```
-
-**Debugar state management:**
-```javascript
-// No BOApp.js, adicionar logs estratégicos
-_updateSectionState(sectionId, updates) {
-    console.log('[BOApp] Updating section', sectionId, 'with:', updates);
-    Object.assign(this.state.sections[sectionId], updates);
-    console.log('[BOApp] New state:', this.state.sections[sectionId]);
-}
-```
-
-**Verificar comunicação entre componentes:**
-- BOApp → ProgressBar: `setCurrentSection()`, `updateSectionState()`
-- BOApp → SectionContainer: `loadSection()`, callbacks `onAnswer`, `onNavigateNext`
-- SectionContainer → Input Components: `render()`, callback `onSubmit`
 
 ---
 

@@ -1,7 +1,7 @@
 # 🛠️ Setup e Deploy - BO Inteligente
 
-**Versão:** v0.13.0
-**Última atualização:** 02/01/2026
+**Versão:** v0.12.9
+**Última atualização:** 29/12/2025
 
 Este documento cobre setup de desenvolvimento local e deploy em produção (Render + GitHub Pages).
 
@@ -251,35 +251,6 @@ services:
 ---
 
 ## 🐛 Troubleshooting
-
-### Estrutura Modular do Frontend (v0.13.0+)
-
-A partir da v0.13.0, o frontend foi reorganizado com componentes modulares:
-
-```
-docs/
-├── css/                    # 8 arquivos CSS modulares
-│   ├── main.css           # Reset, tipografia, layout global
-│   ├── progress-bar.css   # Barra de progresso
-│   ├── section-container.css
-│   ├── inputs.css         # TextInput, SingleChoice, MultipleChoice
-│   ├── final-screen.css   # Tela de conclusão
-│   ├── draft-modal.css    # Modal de rascunhos
-│   ├── utilities.css      # Helpers, loading, toasts
-│   └── responsive.css     # Media queries
-├── js/components/         # Componentes reutilizáveis
-│   ├── ProgressBar.js
-│   ├── SectionContainer.js
-│   ├── TextInput.js
-│   ├── SingleChoice.js
-│   ├── MultipleChoice.js
-│   └── FinalScreen.js
-└── js/data/sections.js    # Definição de todas as 8 seções
-```
-
-Esta estrutura substitui a abordagem anterior de arquivo único.
-
----
 
 ### Problema 1: Backend não conecta / Erro 500
 

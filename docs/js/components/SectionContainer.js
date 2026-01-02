@@ -83,10 +83,21 @@ class SectionContainer {
                     setTimeout(() => {
                         this.answers[skipQ.id] = options.preAnswerSkipQuestion;
                         this._addUserMessage(options.preAnswerSkipQuestion);
-                        this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
 
-                        // Se vai pular a seção, NÃO mostrar próxima pergunta
-                        if (!willSkipSection) {
+                        // Se vai pular a seção, aguardar API e depois chamar _skipSection
+                        if (willSkipSection) {
+                            this.onAnswer(skipQ.id, options.preAnswerSkipQuestion).then(() => {
+                                // Após API responder, a skip reason já foi definida
+                                setTimeout(() => {
+                                    this._skipSection();
+                                }, 300);
+                            }).catch((error) => {
+                                console.error('Erro ao processar skip question:', error);
+                            });
+                        } else {
+                            // Resposta normal, apenas enviar para API
+                            this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
+
                             // Avançar para próxima pergunta
                             this.currentQuestionIndex = 1;
                             setTimeout(() => {

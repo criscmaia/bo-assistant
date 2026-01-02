@@ -267,12 +267,14 @@ class BOApp {
                 }
 
                 // Se seção foi pulada, armazenar a razão do skip
+                console.log('[BOApp] Verificando skip - section_skipped:', response.section_skipped, 'generated_text:', response.generated_text);
                 if (response.section_skipped && response.generated_text) {
                     sectionState.generatedText = response.generated_text;
                     sectionState.skipReason = response.generated_text;
                     // Passar o skip reason para o SectionContainer para exibição
                     this.sectionContainer.setSkipReason(response.generated_text);
                     console.log('[BOApp] Seção pulada. Razão:', response.generated_text);
+                    console.log('[BOApp] SectionContainer skipReason após setSkipReason:', this.sectionContainer.skipReason);
                 }
                 // Se seção completou e tem texto gerado, armazenar
                 else if (response.is_section_complete && response.generated_text) {

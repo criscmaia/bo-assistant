@@ -195,7 +195,7 @@ class SectionContainer {
             </div>
             ` : `
             <!-- Mensagem customizada para seção pulada -->
-            <pre id="section-skip-message" class="section-skip-message whitespace-pre-wrap text-sm text-gray-800 mb-3 italic text-gray-500" style="font-size: 0.95rem;">Não se aplica (${this.skipReason || 'motivo não especificado'})</pre>
+            <pre id="section-skip-message" class="section-skip-message whitespace-pre-wrap text-sm text-gray-800 mb-3 italic text-gray-500" style="font-size: 0.95rem;">Não se aplica (${console.log('[SectionContainer] Renderizando skip message - skipReason:', this.skipReason) || this.skipReason || 'motivo não especificado'})</pre>
             `}
 
 
@@ -802,8 +802,10 @@ class SectionContainer {
      * Pula a seção
      */
     _skipSection(skipReason = null) {
+        console.log('[SectionContainer] _skipSection chamado - skipReason param:', skipReason, 'this.skipReason:', this.skipReason);
         this.state = 'skipped';
-        this.skipReason = skipReason || null;
+        this.skipReason = skipReason || this.skipReason || null;
+        console.log('[SectionContainer] _skipSection - skipReason final:', this.skipReason);
         this.onSkip(this.sectionId);
         this.render();
     }
@@ -812,7 +814,9 @@ class SectionContainer {
      * Define a razão do skip (chamado pela API após skip question)
      */
     setSkipReason(skipReasonMessage) {
+        console.log('[SectionContainer] setSkipReason chamado com:', skipReasonMessage);
         this.skipReason = skipReasonMessage || null;
+        console.log('[SectionContainer] skipReason definido como:', this.skipReason);
     }
 
     /**

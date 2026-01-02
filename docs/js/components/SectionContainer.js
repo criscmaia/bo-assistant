@@ -640,7 +640,9 @@ class SectionContainer {
         const skipNextBtn = this.container.querySelector('#section-skip-next');
         if (skipNextBtn) {
             skipNextBtn.addEventListener('click', () => {
-                this.onSkip(this.sectionId + 1);
+                // Navegar para próxima seção com resposta "não" para o skipQuestion
+                // Isso fará com que a API seja chamada e retorne o skip reason correto
+                this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'não' });
             });
         }
 

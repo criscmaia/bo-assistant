@@ -1,7 +1,7 @@
 # Roadmap - BO Inteligente
 
-## Versão Atual: v0.12.9 (8/8 Seções Completas + Seção 8 Expandida)
-**Última atualização:** 30/12/2024
+## Versão Atual: v0.13.0 (Redesign UX Completo)
+**Última atualização:** 02/01/2026
 
 > **Funcionalidades já implementadas:** Ver [CHANGELOG.md](CHANGELOG.md)
 > **Arquitetura técnica:** Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
@@ -9,6 +9,27 @@
 ---
 
 ## ✅ Funcionalidades Implementadas Recentemente
+
+### Redesign UX Completo (v0.13.0)
+✅ **Implementado em 02/01/2026**
+
+**O que foi feito:**
+- ✅ 8 seções estruturadas com layout modular
+- ✅ ProgressBar com indicador visual de progresso
+- ✅ SectionContainer com componentes reutilizáveis
+- ✅ Chat accordion para interação fluida
+- ✅ Badges para IDs de perguntas
+- ✅ Cadeado nas seções pendentes
+- ✅ Remover scrolls internos (chat accordion e texto gerado fluido)
+- ✅ Interface limpa e intuitiva
+
+**Impacto:**
+- ✅ Experiência do usuário significativamente melhorada
+- ✅ Navegação mais intuitiva entre seções
+- ✅ Visual design alinhado com boas práticas modernas
+- ✅ Componentes modulares facilitam manutenção futura
+
+---
 
 ### CI/CD - GitHub Actions (v0.12.4)
 ✅ **Implementado em 29/12/2025**

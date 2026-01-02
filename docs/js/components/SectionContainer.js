@@ -32,12 +32,15 @@ class SectionContainer {
         this.followUpQueue = []; // Fila de perguntas follow-up (1.5.1, 1.5.2, etc)
         this.skipReason = null; // Razão pela qual a seção foi pulada (ex: "não havia veículo")
 
-        // Callbacks
+        // Callbacks (DEPRECATED - usar EventBus)
         this.onAnswer = options.onAnswer || ((questionId, answer) => {});
         this.onComplete = options.onComplete || ((sectionId, answers) => {});
         this.onSkip = options.onSkip || ((sectionId) => {});
         this.onNavigateNext = options.onNavigateNext || ((nextSectionId) => {});
         this.onNavigateBack = options.onNavigateBack || (() => {});
+
+        // EventBus para comunicação desacoplada (v0.13.1+)
+        this.eventBus = typeof window !== 'undefined' && window.eventBus ? window.eventBus : null;
 
         // Elementos internos
         this.chatEl = null;
@@ -48,6 +51,7 @@ class SectionContainer {
 
         // Dispose Pattern - Rastreamento de listeners para cleanup (v0.13.1+)
         this._eventListeners = [];
+        this._eventBusUnsubscribers = [];
     }
 
     /**
@@ -535,6 +539,15 @@ class SectionContainer {
         if (willComplete && !this.isReadOnly) {
             // Aguardar onAnswer para obter texto gerado se seção completar
             this.onAnswer(question.id, answer).then(() => {
+                // v0.13.1+: Emitir evento ANSWER_SAVED
+                if (this.eventBus && typeof Events !== 'undefined') {
+                    this.eventBus.emit(Events.ANSWER_SAVED, {
+                        sectionId: this.sectionId,
+                        questionId: question.id,
+                        answer: answer
+                    });
+                }
+
                 // Após onAnswer, processar follow-ups ou completar seção
                 this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);
             }).catch(error => {
@@ -544,7 +557,16 @@ class SectionContainer {
             return;
         } else {
             // Aguardar Promise mesmo em casos sem conclusão de seção
-            this.onAnswer(question.id, answer).catch(error => {
+            this.onAnswer(question.id, answer).then(() => {
+                // v0.13.1+: Emitir evento ANSWER_SAVED
+                if (this.eventBus && typeof Events !== 'undefined') {
+                    this.eventBus.emit(Events.ANSWER_SAVED, {
+                        sectionId: this.sectionId,
+                        questionId: question.id,
+                        answer: answer
+                    });
+                }
+            }).catch(error => {
                 console.error('Erro ao salvar resposta:', error);
                 this._showError('Não foi possível salvar a resposta. Tente novamente.');
             });
@@ -676,18 +698,41 @@ class SectionContainer {
         // Iniciar próxima seção
         const startNextBtn = this.container.querySelector('#section-start-next');
         addListener(startNextBtn, 'click', () => {
+            // v0.13.1+: Emitir evento via EventBus para navegação
+            if (this.eventBus && typeof Events !== 'undefined') {
+                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
+                    sectionId: this.sectionId + 1,
+                    context: { preAnswerSkipQuestion: 'sim' }
+                });
+            }
+            // Fallback: Manter callback para compatibilidade (DEPRECATED)
             this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'sim' });
         });
 
         // Pular próxima seção
         const skipNextBtn = this.container.querySelector('#section-skip-next');
         addListener(skipNextBtn, 'click', () => {
+            // v0.13.1+: Emitir evento via EventBus para navegação
+            if (this.eventBus && typeof Events !== 'undefined') {
+                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
+                    sectionId: this.sectionId + 1,
+                    context: { preAnswerSkipQuestion: 'não' }
+                });
+            }
+            // Fallback: Manter callback para compatibilidade (DEPRECATED)
             this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'não' });
         });
 
         // Voltar para seção atual
         const backBtn = this.container.querySelector('#section-back-btn');
         addListener(backBtn, 'click', () => {
+            // v0.13.1+: Emitir evento via EventBus para navegação
+            if (this.eventBus && typeof Events !== 'undefined') {
+                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
+                    sectionId: this.sectionId - 1
+                });
+            }
+            // Fallback: Manter callback para compatibilidade (DEPRECATED)
             this.onNavigateBack();
         });
 
@@ -699,14 +744,26 @@ class SectionContainer {
      * Deve ser chamado ao trocar de seção para evitar memory leaks
      */
     dispose() {
-        if (this._eventListeners.length > 0) {
+        // Remover listeners DOM
+        if (this._eventListeners && this._eventListeners.length > 0) {
             this._eventListeners.forEach(({ element, event, handler }) => {
                 if (element) {
                     element.removeEventListener(event, handler);
                 }
             });
-            console.log('[SectionContainer] Disposed - listeners removidos:', this._eventListeners.length);
+            console.log('[SectionContainer] Disposed - listeners DOM removidos:', this._eventListeners.length);
             this._eventListeners = [];
+        }
+
+        // Remover listeners EventBus (v0.13.1+)
+        if (this._eventBusUnsubscribers && this._eventBusUnsubscribers.length > 0) {
+            this._eventBusUnsubscribers.forEach(unsubscribe => {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                }
+            });
+            console.log('[SectionContainer] Disposed - listeners EventBus removidos:', this._eventBusUnsubscribers.length);
+            this._eventBusUnsubscribers = [];
         }
     }
 
@@ -862,6 +919,14 @@ class SectionContainer {
         // NÃO setar placeholder aqui - o texto já foi ou será setado por onComplete
         // Se por algum motivo não houver texto (offline), o placeholder será setado em _onSectionComplete do BOApp
 
+        // v0.13.1+: Emitir evento via EventBus
+        if (this.eventBus && typeof Events !== 'undefined') {
+            this.eventBus.emit(Events.SECTION_COMPLETED, {
+                sectionId: this.sectionId,
+                answers: this.answers
+            });
+        }
+
         // Callback - AGUARDAR conclusão antes de renderizar
         await this.onComplete(this.sectionId, this.answers);
 
@@ -877,6 +942,15 @@ class SectionContainer {
         this.state = 'skipped';
         this.skipReason = skipReason || this.skipReason || null;
         console.log('[SectionContainer] _skipSection - skipReason final:', this.skipReason);
+
+        // v0.13.1+: Emitir evento via EventBus
+        if (this.eventBus && typeof Events !== 'undefined') {
+            this.eventBus.emit('section:skipped', {
+                sectionId: this.sectionId,
+                skipReason: this.skipReason
+            });
+        }
+
         this.onSkip(this.sectionId);
         this.render();
     }

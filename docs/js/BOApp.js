@@ -1,7 +1,10 @@
 /**
  * BOApp - Aplicação principal do BO Inteligente
  * Gerencia estado global, navegação e integração
- * BO Inteligente v1.0
+ * BO Inteligente v0.13.1
+ *
+ * IMPORTANTE: A partir da v0.13.1, o estado é gerenciado pelo StateManager.
+ * BOApp atua como orquestrador, delegando estado para StateManager.
  */
 
 class BOApp {
@@ -10,25 +13,45 @@ class BOApp {
      * Gerencia estado global, navegação e integração
      */
     constructor() {
+        // StateManager centralizado (Single Source of Truth)
+        this.stateManager = StateManager.getInstance();
+
         // Componentes
         this.api = new APIClient();
         this.progressBar = null;
         this.sectionContainer = null;
         this.draftModal = null;
 
-        // Estado global
-        this.currentSectionIndex = 0;
-        this.sectionsState = {}; // { sectionId: { status, answers, generatedText } }
-        this.isLoading = false;
-        this.isOnline = true;
+        // Estado local (UI only - não duplica StateManager)
+        this.finalScreen = null;
 
-        // Configurações
+        // Getters delegados ao StateManager
+        Object.defineProperty(this, 'currentSectionIndex', {
+            get: () => this.stateManager.getState().currentSectionIndex,
+            set: (val) => this.stateManager.setCurrentSection(val + 1)
+        });
+
+        Object.defineProperty(this, 'sectionsState', {
+            get: () => this.stateManager.getState().sections,
+            set: (val) => console.warn('[BOApp] sectionsState é read-only. Use StateManager.')
+        });
+
+        Object.defineProperty(this, 'isLoading', {
+            get: () => this.stateManager.getState().isLoading,
+            set: (val) => this.stateManager.setLoading(val)
+        });
+
+        Object.defineProperty(this, 'isOnline', {
+            get: () => this.stateManager.getState().isOnline,
+            set: (val) => this.stateManager.setOnlineStatus(val)
+        });
+
+        // Configurações (não migradas - são constantes)
         this.autoSave = true;
         this.autoSaveKey = 'bo_draft';
 
         // Tracking
         this.sessionStartTime = new Date();
-        this.finalScreen = null;
 
         // Bind de métodos para callbacks
         this._onAnswer = this._onAnswer.bind(this);
@@ -37,6 +60,53 @@ class BOApp {
         this._onNavigateNext = this._onNavigateNext.bind(this);
         this._onNavigateBack = this._onNavigateBack.bind(this);
         this._onProgressBarClick = this._onProgressBarClick.bind(this);
+
+        // Subscrever ao StateManager para sincronizar componentes
+        this._setupStateSubscriptions();
+    }
+
+    /**
+     * Configura subscriptions no StateManager
+     */
+    _setupStateSubscriptions() {
+        this.stateManager.subscribe((eventType, data) => {
+            switch (eventType) {
+                case 'sectionComplete':
+                    if (this.progressBar) {
+                        this.progressBar.markCompleted(data.sectionId);
+                    }
+                    break;
+                case 'sectionSkipped':
+                    if (this.progressBar) {
+                        this.progressBar.markSkipped(data.sectionId, data.reason);
+                    }
+                    break;
+                case 'navigation':
+                    if (this.progressBar) {
+                        this.progressBar.setCurrentSection(data.currentId);
+                    }
+                    break;
+                case 'answer':
+                    this._syncProgressOnAnswer(data.sectionId);
+                    break;
+            }
+        });
+    }
+
+    /**
+     * Sincroniza progresso na ProgressBar após resposta
+     */
+    _syncProgressOnAnswer(sectionId) {
+        if (!this.progressBar) return;
+
+        const sectionState = this.stateManager.getSectionState(sectionId);
+        if (sectionState) {
+            const answeredCount = sectionState.answeredCount;
+            const totalQuestions = window.calculateSectionTotal
+                ? window.calculateSectionTotal(sectionId, sectionState.answers)
+                : sectionState.totalCount;
+            this.progressBar.updateProgress(sectionId, answeredCount, totalQuestions);
+        }
     }
 
     /**
@@ -82,18 +152,12 @@ class BOApp {
 
     /**
      * Inicializa estado de todas as seções
+     * Delegado ao StateManager (v0.13.1+)
      */
     _initSectionsState() {
-        SECTIONS_DATA.forEach(section => {
-            this.sectionsState[section.id] = {
-                status: 'pending', // pending, in_progress, completed, skipped
-                answers: {},
-                messages: [],
-                currentQuestionIndex: 0,
-                generatedText: null,
-                skipReason: null,
-            };
-        });
+        // StateManager já inicializa seções automaticamente no construtor
+        // Este método existe para compatibilidade com código legado
+        console.log('[BOApp] Estado das seções já inicializado pelo StateManager');
     }
 
     /**
@@ -178,11 +242,13 @@ class BOApp {
 
     /**
      * Atualiza progresso de todas as seções
+     * Usa StateManager para obter estado (v0.13.1+)
      */
     _updateAllSectionsProgress() {
-        console.log('[BOApp] _updateAllSectionsProgress - sectionsState:', this.sectionsState);
+        const sections = this.stateManager.getState().sections;
+        console.log('[BOApp] _updateAllSectionsProgress via StateManager');
 
-        Object.entries(this.sectionsState).forEach(([id, state]) => {
+        Object.entries(sections).forEach(([id, state]) => {
             const sectionId = parseInt(id);
             const answeredCount = Object.keys(state.answers || {}).length;
 
@@ -200,18 +266,21 @@ class BOApp {
 
     /**
      * Carrega a seção atual
+     * Usa StateManager para obter estado (v0.13.1+)
      */
     _loadCurrentSection() {
-        const sectionData = SECTIONS_DATA[this.currentSectionIndex];
-        const sectionState = this.sectionsState[sectionData.id];
+        const currentSectionId = this.stateManager.getCurrentSectionId();
+        const sectionIndex = currentSectionId - 1;
+        const sectionData = SECTIONS_DATA[sectionIndex];
+        const sectionState = this.stateManager.getSectionState(currentSectionId);
 
-        // Marcar como em progresso se pendente
+        // Marcar como em progresso se pendente (StateManager já faz isso em setCurrentSection)
         if (sectionState.status === 'pending') {
-            sectionState.status = 'in_progress';
+            this.stateManager.setCurrentSection(currentSectionId);
         }
 
         // Atualizar ProgressBar
-        this.progressBar.setCurrentSection(sectionData.id);
+        this.progressBar.setCurrentSection(currentSectionId);
 
         // Atualizar progresso de todas as seções (preservar barras completas)
         this._updateAllSectionsProgress();
@@ -230,34 +299,31 @@ class BOApp {
 
     /**
      * Callback: resposta enviada
+     * Usa StateManager para salvar estado (v0.13.1+)
      */
     async _onAnswer(questionId, answer, options = {}) {
         console.log('[BOApp] Resposta:', questionId, '=', answer);
 
-        const sectionId = this.currentSectionIndex + 1;
-        const sectionState = this.sectionsState[sectionId];
+        const sectionId = this.stateManager.getCurrentSectionId();
 
-        // Salvar resposta no estado
-        sectionState.answers[questionId] = answer;
-        sectionState.currentQuestionIndex = this.sectionContainer.currentQuestionIndex;
-        sectionState.messages = [...this.sectionContainer.messages];
+        // Salvar resposta via StateManager (notifica listeners automaticamente)
+        this.stateManager.saveAnswer(sectionId, questionId, answer);
 
-        // Atualizar progresso (com cálculo dinâmico de total)
-        const section = SECTIONS_DATA[this.currentSectionIndex];
-        const answeredCount = Object.keys(sectionState.answers).length;
-        const totalQuestions = window.calculateSectionTotal
-            ? window.calculateSectionTotal(sectionId, sectionState.answers)
-            : section.questions.length + (section.skipQuestion ? 1 : 0);
-
-        this.progressBar.updateProgress(sectionId, answeredCount, totalQuestions);
-
-        // Auto-save
-        if (this.autoSave) {
-            this._saveDraft();
+        // Sincronizar dados do SectionContainer com StateManager
+        if (this.sectionContainer) {
+            this.stateManager.setCurrentQuestionIndex(sectionId, this.sectionContainer.currentQuestionIndex);
+            // Messages são atualizados pelo SectionContainer diretamente no StateManager
         }
 
+        // Atualizar total de perguntas (perguntas condicionais podem mudar o total)
+        const answers = this.stateManager.getAnswers(sectionId);
+        const totalQuestions = window.calculateSectionTotal
+            ? window.calculateSectionTotal(sectionId, answers)
+            : this.stateManager.getSectionState(sectionId).totalCount;
+        this.stateManager.updateTotalQuestions(sectionId, totalQuestions);
+
         // Se online, enviar para API (validação + texto gerado se seção completa)
-        if (this.isOnline) {
+        if (this.stateManager.getState().isOnline) {
             try {
                 const response = await this.api.sendAnswer(answer, 'groq', sectionId);
 
@@ -269,16 +335,16 @@ class BOApp {
                 // Se seção foi pulada, armazenar a razão do skip
                 console.log('[BOApp] Verificando skip - section_skipped:', response.section_skipped, 'generated_text:', response.generated_text);
                 if (response.section_skipped && response.generated_text) {
-                    sectionState.generatedText = response.generated_text;
-                    sectionState.skipReason = response.generated_text;
+                    this.stateManager.setGeneratedText(sectionId, response.generated_text);
                     // Passar o skip reason para o SectionContainer para exibição
-                    this.sectionContainer.setSkipReason(response.generated_text);
+                    if (this.sectionContainer) {
+                        this.sectionContainer.setSkipReason(response.generated_text);
+                    }
                     console.log('[BOApp] Seção pulada. Razão:', response.generated_text);
-                    console.log('[BOApp] SectionContainer skipReason após setSkipReason:', this.sectionContainer.skipReason);
                 }
                 // Se seção completou e tem texto gerado, armazenar
                 else if (response.is_section_complete && response.generated_text) {
-                    sectionState.generatedText = response.generated_text;
+                    this.stateManager.setGeneratedText(sectionId, response.generated_text);
                     console.log('[BOApp] Texto gerado recebido do backend:', response.generated_text.substring(0, 100));
                 }
             } catch (error) {
@@ -290,57 +356,59 @@ class BOApp {
 
     /**
      * Callback: seção completa
+     * Usa StateManager para salvar estado (v0.13.1+)
      */
     async _onSectionComplete(sectionId, answers) {
         console.log('[BOApp] Seção completa:', sectionId);
 
-        const sectionState = this.sectionsState[sectionId];
-        sectionState.status = 'completed';
-        sectionState.answers = answers;
-        sectionState.messages = [...this.sectionContainer.messages];
-
-        // Marcar na barra de progresso
-        this.progressBar.markCompleted(sectionId);
+        // Marcar seção como completa via StateManager (notifica listeners automaticamente)
+        this.stateManager.markSectionCompleted(sectionId, answers);
 
         // Gerar texto (se online, para todas as seções)
-        if (this.isOnline) {
+        if (this.stateManager.getState().isOnline) {
             await this._generateSectionText(sectionId);
         } else {
             // Texto placeholder para modo offline
-            sectionState.generatedText = this._generatePlaceholderText(sectionId, answers);
-            this.sectionContainer.setGeneratedText(sectionState.generatedText);
-        }
-
-        // Auto-save
-        if (this.autoSave) {
-            this._saveDraft();
+            const generatedText = this._generatePlaceholderText(sectionId, answers);
+            this.stateManager.setGeneratedText(sectionId, generatedText);
+            if (this.sectionContainer) {
+                this.sectionContainer.setGeneratedText(generatedText);
+            }
         }
     }
 
     /**
      * Gera texto via API
+     * Usa StateManager para obter estado (v0.13.1+)
      */
     async _generateSectionText(sectionId) {
         this._showLoading('Gerando texto...');
 
         try {
-            const sectionState = this.sectionsState[sectionId];
-
             // O texto já foi gerado e armazenado em _onAnswer quando a última resposta foi enviada
             // Se não existir (modo offline ou erro), usar placeholder
-            if (!sectionState.generatedText) {
-                sectionState.generatedText = this._generatePlaceholderText(sectionId, sectionState.answers);
+            let generatedText = this.stateManager.getGeneratedText(sectionId);
+
+            if (!generatedText) {
+                const answers = this.stateManager.getAnswers(sectionId);
+                generatedText = this._generatePlaceholderText(sectionId, answers);
+                this.stateManager.setGeneratedText(sectionId, generatedText);
             }
 
-            this.sectionContainer.setGeneratedText(sectionState.generatedText);
+            if (this.sectionContainer) {
+                this.sectionContainer.setGeneratedText(generatedText);
+            }
 
         } catch (error) {
             console.error('[BOApp] Erro ao gerar texto:', error);
 
             // Usar placeholder
-            const sectionState = this.sectionsState[sectionId];
-            sectionState.generatedText = this._generatePlaceholderText(sectionId, sectionState.answers);
-            this.sectionContainer.setGeneratedText(sectionState.generatedText);
+            const answers = this.stateManager.getAnswers(sectionId);
+            const generatedText = this._generatePlaceholderText(sectionId, answers);
+            this.stateManager.setGeneratedText(sectionId, generatedText);
+            if (this.sectionContainer) {
+                this.sectionContainer.setGeneratedText(generatedText);
+            }
 
         } finally {
             this._hideLoading();
@@ -367,27 +435,18 @@ class BOApp {
 
     /**
      * Callback: seção pulada
+     * Usa StateManager para salvar estado (v0.13.1+)
      */
     _onSectionSkip(sectionId) {
         console.log('[BOApp] Seção pulada:', sectionId);
 
-        const sectionState = this.sectionsState[sectionId];
-        sectionState.status = 'skipped';
+        // Obter razão do skip do SectionContainer
+        const skipReason = this.sectionContainer?.skipReason || null;
 
-        // Obter razão do skip da SectionContainer
-        const sectionContainer = this.currentSectionContainer;
-        const skipReason = sectionContainer?.skipReason || null;
-
-        // Marcar na barra de progresso com a razão
-        this.progressBar.markSkipped(sectionId, skipReason);
+        // Marcar seção como pulada via StateManager (notifica listeners automaticamente)
+        this.stateManager.markSectionSkipped(sectionId, skipReason);
 
         // NÃO avançar automaticamente - deixar usuário ver mensagem de skip e decidir
-        // this._navigateToNextSection();
-
-        // Auto-save
-        if (this.autoSave) {
-            this._saveDraft();
-        }
     }
 
     /**
@@ -408,14 +467,15 @@ class BOApp {
 
     /**
      * Callback: clique na barra de progresso
+     * Usa StateManager para verificar status (v0.13.1+)
      */
     _onProgressBarClick(sectionId) {
         console.log('[BOApp] Clique na seção:', sectionId);
 
-        const sectionState = this.sectionsState[sectionId];
+        const status = this.stateManager.getSectionStatus(sectionId);
 
         // Só permitir navegar para seções já visitadas (não pending)
-        if (sectionState.status === 'pending') {
+        if (status === 'pending') {
             console.log('[BOApp] Seção ainda não disponível');
             return;
         }
@@ -426,6 +486,7 @@ class BOApp {
 
     /**
      * Navega para uma seção específica
+     * Usa StateManager para obter estado (v0.13.1+)
      *
      * options:
      *   - preAnswerSkipQuestion: Valor para auto-responder o skipQuestion (sem mostrar no chat)
@@ -443,29 +504,21 @@ class BOApp {
 
         // Carregar seção
         const sectionData = SECTIONS_DATA[sectionIndex];
-        const sectionState = this.sectionsState[sectionId];
+        const sectionState = this.stateManager.getSectionState(sectionId);
 
         // Determinar se é read-only
         // Uma seção é read-only se:
         // 1. Explicitamente marcada como read-only (parâmetro)
         // 2. Está completed/skipped E não é a seção ativa atual
-        const currentActiveSectionId = this.currentSectionIndex + 1;
+        const currentActiveSectionId = this.stateManager.getCurrentSectionId();
         const shouldBeReadOnly = isReadOnly ||
             ((sectionState.status === 'completed' || sectionState.status === 'skipped') &&
              sectionId !== currentActiveSectionId);
 
-        // Atualizar índice APENAS se não for read-only (navegação real, não visualização)
+        // Atualizar seção atual via StateManager APENAS se não for read-only
         if (!shouldBeReadOnly) {
-            this.currentSectionIndex = sectionIndex;
+            this.stateManager.setCurrentSection(sectionId);
         }
-
-        // Marcar como em progresso se necessário
-        if (sectionState.status === 'pending') {
-            sectionState.status = 'in_progress';
-        }
-
-        // Atualizar ProgressBar
-        this.progressBar.setCurrentSection(sectionId);
 
         // Atualizar progresso de todas as seções (preservar barras completas)
         this._updateAllSectionsProgress();
@@ -502,26 +555,22 @@ class BOApp {
 
     /**
      * Retorna ID da seção ativa mais recente
+     * Usa StateManager (v0.13.1+)
      */
     _getCurrentActiveSectionId() {
-        for (let i = SECTIONS_DATA.length - 1; i >= 0; i--) {
-            const state = this.sectionsState[i + 1];
-            if (state.status === 'in_progress') {
-                return i + 1;
-            }
-        }
-        return 1;
+        return this.stateManager.getCurrentSectionId();
     }
 
     /**
      * Mostra tela final (todas seções completas)
+     * Usa StateManager para obter estado (v0.13.1+)
      */
     _showFinalScreen() {
         console.log('[BOApp] Todas as seções completas!');
 
         // Criar e renderizar tela final
         this.finalScreen = new FinalScreen('section-container', {
-            sectionsState: this.sectionsState,
+            sectionsState: this.stateManager.getState().sections,
             startTime: this.sessionStartTime || new Date(),
             onNewBO: () => {
                 this._startNewBO();
@@ -534,37 +583,32 @@ class BOApp {
 
         this.finalScreen.render();
 
-        // Marcar todas seções como completas na barra
+        // Marcar todas seções como completas na barra (já sincronizado via StateManager)
         SECTIONS_DATA.forEach(section => {
-            const state = this.sectionsState[section.id];
-            if (state.status === 'completed') {
+            const status = this.stateManager.getSectionStatus(section.id);
+            if (status === 'completed') {
                 this.progressBar.markCompleted(section.id);
-            } else if (state.status === 'skipped') {
+            } else if (status === 'skipped') {
                 this.progressBar.markSkipped(section.id);
             }
         });
 
         // Limpar rascunho (BO finalizado)
-        this.clearDraft();
+        this.stateManager.clearDraft();
     }
 
     /**
      * Inicia novo BO (limpa tudo)
+     * Usa StateManager para resetar estado (v0.13.1+)
      */
     _startNewBO() {
         console.log('[BOApp] Iniciando novo BO...');
 
-        // Limpar rascunho
-        this.clearDraft();
-
-        // Resetar estado
-        this._initSectionsState();
+        // Resetar estado via StateManager (já limpa rascunho)
+        this.stateManager.reset();
 
         // Resetar barra de progresso
         this.progressBar.reset();
-
-        // Voltar para seção 1
-        this.currentSectionIndex = 0;
 
         // Iniciar nova sessão na API
         this._startNewSession().then(() => {
@@ -574,66 +618,46 @@ class BOApp {
 
     // ==========================================
     // PERSISTÊNCIA (RASCUNHO)
+    // Delegada ao StateManager (v0.13.1+)
     // ==========================================
 
     /**
      * Salva rascunho no localStorage
+     * DEPRECATED: StateManager faz auto-save com debounce
      */
     _saveDraft() {
-        const draft = {
-            version: '1.0',
-            timestamp: new Date().toISOString(),
-            currentSectionIndex: this.currentSectionIndex,
-            sectionsState: this.sectionsState,
-            apiIds: this.api.getIds(),
-        };
-
-        try {
-            localStorage.setItem(this.autoSaveKey, JSON.stringify(draft));
-            DEBUG.log('BOApp', 'Rascunho salvo');
-        } catch (e) {
-            DEBUG.warn('BOApp', 'Erro ao salvar rascunho (localStorage pode estar cheio)', e.message);
-        }
+        // StateManager já persiste automaticamente com debounce
+        // Este método existe para compatibilidade com código legado
+        console.log('[BOApp] _saveDraft() delegado ao StateManager');
     }
 
     /**
      * Tenta restaurar rascunho
+     * Usa StateManager para carregar e restaurar estado (v0.13.1+)
      */
     _tryRestoreDraft() {
         try {
-            const saved = localStorage.getItem(this.autoSaveKey);
+            // Tentar carregar do StateManager
+            const draft = this.stateManager.loadFromPersistence();
 
-            if (!saved) return false;
-
-            const draft = JSON.parse(saved);
-
-            // Verificar se rascunho é recente (menos de 24h)
-            const savedTime = new Date(draft.timestamp);
-            const now = new Date();
-            const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
-
-            if (hoursDiff > 24) {
-                console.log('[BOApp] Rascunho expirado, removendo...');
-                localStorage.removeItem(this.autoSaveKey);
-                return false;
-            }
+            if (!draft) return false;
 
             // Mostrar modal customizado
             this.draftModal.show(
                 draft,
                 // onContinue - continuar do rascunho
                 () => {
-                    // Restaurar estado
-                    this.currentSectionIndex = draft.currentSectionIndex;
-                    this.sectionsState = draft.sectionsState;
+                    // Restaurar estado via StateManager
+                    this.stateManager.restoreFromDraft(draft);
 
                     // Restaurar sessão API se disponível
-                    if (draft.apiIds?.sessionId) {
-                        this.api.restoreSession(draft.apiIds.sessionId, draft.apiIds.boId);
+                    if (draft.sessionId) {
+                        this.api.restoreSession(draft.sessionId, draft.boId);
                     }
 
                     // Atualizar ProgressBar com estados salvos
-                    Object.entries(this.sectionsState).forEach(([id, state]) => {
+                    const sections = this.stateManager.getState().sections;
+                    Object.entries(sections).forEach(([id, state]) => {
                         const sectionId = parseInt(id);
                         if (state.status === 'completed') {
                             this.progressBar.markCompleted(sectionId);
@@ -649,12 +673,12 @@ class BOApp {
                         }
                     });
 
-                    console.log('[BOApp] Rascunho restaurado');
+                    console.log('[BOApp] Rascunho restaurado via StateManager');
                     this._loadCurrentSection();
                 },
                 // onDiscard - descartar e começar novo
                 async () => {
-                    localStorage.removeItem(this.autoSaveKey);
+                    this.stateManager.clearDraft();
                     console.log('[BOApp] Rascunho descartado');
                     await this._startNewSession();
                     this._loadCurrentSection();
@@ -667,17 +691,18 @@ class BOApp {
 
         } catch (error) {
             console.error('[BOApp] Erro ao restaurar rascunho:', error);
-            localStorage.removeItem(this.autoSaveKey);
+            this.stateManager.clearDraft();
             return false;
         }
     }
 
     /**
      * Limpa rascunho
+     * Delegado ao StateManager (v0.13.1+)
      */
     clearDraft() {
-        localStorage.removeItem(this.autoSaveKey);
-        console.log('[BOApp] Rascunho removido');
+        this.stateManager.clearDraft();
+        console.log('[BOApp] Rascunho removido via StateManager');
     }
 
     // ==========================================

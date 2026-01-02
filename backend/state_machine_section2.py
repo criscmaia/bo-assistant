@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 State Machine para Seção 2: Abordagem a Veículo
-Baseado no material de Claudio Moreira
+Refatorado para usar Template Method Pattern (v0.13.1)
 
 Author: Cristiano Maia + Claude (Anthropic)
-Date: 19/12/2025
+Date: 02/01/2026
 """
-from typing import Dict, Optional
+from typing import Dict, List, Optional
+from backend.base_state_machine import BaseStateMachine
 
 
 # Perguntas da Seção 2 (fonte: Seções Revisadas 2025-12-30.md - Claudio Moreira)
@@ -30,129 +31,58 @@ SECTION2_QUESTIONS = {
 SECTION2_STEPS = ["2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10", "2.11", "2.12", "2.13", "complete"]
 
 
-class BOStateMachineSection2:
+class BOStateMachineSection2(BaseStateMachine):
     """
-    State Machine para gerenciar o fluxo de perguntas da Seção 2 (Abordagem a Veículo).
+    State Machine para Seção 2: Abordagem a Veículo.
 
-    Comportamento especial:
-    - Pergunta 2.0 é condicional: se resposta = "NÃO", pula toda a seção
-    - Se resposta = "SIM", percorre perguntas 2.1 até 2.7
+    Características:
+    - Pergunta 2.1 é condicional: se resposta = "NÃO", pula toda a seção
+    - Se resposta = "SIM", percorre perguntas 2.2 até 2.13
+    - Total: 13 perguntas
     """
 
-    def __init__(self):
-        self.current_step = "2.1"
-        self.answers: Dict[str, str] = {}
-        self.step_index = 0
-        self.section_skipped = False  # True se responder "NÃO" na pergunta 2.1
+    # =========================================================================
+    # IMPLEMENTAÇÃO DOS MÉTODOS ABSTRATOS
+    # =========================================================================
 
-    def get_current_question(self) -> str:
-        """Retorna o texto da pergunta atual"""
-        if self.current_step in SECTION2_QUESTIONS:
-            return SECTION2_QUESTIONS[self.current_step]
-        return ""
+    def _get_initial_step(self) -> str:
+        """Retorna step inicial da Seção 2"""
+        return "2.1"
 
-    def store_answer(self, answer: str):
+    def _get_steps(self) -> List[str]:
+        """Retorna lista de steps da Seção 2"""
+        return SECTION2_STEPS
+
+    def _get_questions(self) -> Dict[str, str]:
+        """Retorna dicionário de perguntas da Seção 2"""
+        return SECTION2_QUESTIONS
+
+    # =========================================================================
+    # LÓGICA CONDICIONAL - Sobrescreve hooks
+    # =========================================================================
+
+    def _on_answer_stored(self, step: str, answer: str) -> None:
         """
-        Armazena a resposta da pergunta atual.
+        Hook executado após armazenar resposta.
 
-        Lógica especial para pergunta 2.0:
+        Lógica especial para pergunta 2.1:
         - Se resposta = "NÃO", marca seção como pulada e vai direto para "complete"
-        - Caso contrário, armazena normalmente
         """
-        answer_clean = answer.strip()
+        if step == "2.1" and self._is_negative_answer(answer):
+            # Marcar seção como pulada
+            self.section_skipped = True
+            self.current_step = "complete"
+            self.step_index = len(SECTION2_STEPS) - 1
 
-        # Pergunta 2.1 condicional - verifica se houve veículo
-        if self.current_step == "2.1":
-            answer_upper = answer_clean.upper()
-            # Aceita variações: NÃO, NAO, N, NENHUM, etc.
-            if answer_upper in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
-                self.section_skipped = True
-                self.answers["2.1"] = "NÃO"
-                self.current_step = "complete"
-                self.step_index = len(SECTION2_STEPS) - 1
-                return
-
-        # Armazena resposta normalmente
-        self.answers[self.current_step] = answer_clean
-
-    def next_step(self):
-        """Avança para a próxima pergunta"""
-        # Se seção foi pulada, não avança
-        if self.section_skipped:
-            return
-
-        # Avança para próximo step
-        if self.step_index < len(SECTION2_STEPS) - 1:
-            self.step_index += 1
-            self.current_step = SECTION2_STEPS[self.step_index]
-
-    def is_section_complete(self) -> bool:
-        """Verifica se a seção está completa"""
-        return self.current_step == "complete"
-
-    def was_section_skipped(self) -> bool:
-        """Retorna True se a seção foi pulada (não havia veículo)"""
-        return self.section_skipped
-
-    def get_skip_reason(self) -> Optional[str]:
-        """Retorna texto explicativo se seção foi pulada"""
+    def _get_skip_reason(self) -> Optional[str]:
+        """Retorna razão pela qual seção foi pulada"""
         if self.section_skipped:
             return "Não se aplica (não havia veículo envolvido na ocorrência)"
         return None
 
-    def get_all_answers(self) -> Dict[str, str]:
-        """Retorna todas as respostas coletadas"""
-        return self.answers.copy()
-
-    def get_formatted_answers(self) -> str:
-        """Retorna respostas formatadas para debug/log"""
-        if not self.answers:
-            return "Nenhuma resposta coletada"
-
-        formatted = []
-        for step, answer in self.answers.items():
-            question = SECTION2_QUESTIONS.get(step, "Pergunta desconhecida")
-            formatted.append(f"{step} - {question}\n   Resposta: {answer}")
-
-        return "\n\n".join(formatted)
-
-    def get_progress(self) -> Dict[str, any]:
-        """
-        Retorna informações de progresso para o frontend.
-
-        Returns:
-            {
-                "current_step": "2.3",
-                "total_steps": 8,
-                "completed_steps": 3,
-                "progress_percentage": 37.5,
-                "section_skipped": False
-            }
-        """
-        # Se seção foi pulada, considera 100% completo
-        if self.section_skipped:
-            return {
-                "current_step": "complete",
-                "total_steps": 8,
-                "completed_steps": 8,
-                "progress_percentage": 100.0,
-                "section_skipped": True
-            }
-
-        # Total de steps (excluindo "complete")
-        total_steps = len(SECTION2_STEPS) - 1
-        completed_steps = len(self.answers)
-
-        # Calcula porcentagem
-        progress_percentage = (completed_steps / total_steps) * 100 if total_steps > 0 else 0
-
-        return {
-            "current_step": self.current_step,
-            "total_steps": total_steps,
-            "completed_steps": completed_steps,
-            "progress_percentage": round(progress_percentage, 1),
-            "section_skipped": False
-        }
+    # =========================================================================
+    # MÉTODOS ESPECÍFICOS DA SEÇÃO 2
+    # =========================================================================
 
     def get_answer(self, step: str) -> Optional[str]:
         """Retorna a resposta de uma pergunta específica"""
@@ -168,14 +98,13 @@ class BOStateMachineSection2:
         if step not in SECTION2_QUESTIONS:
             return False
 
-        # Não permite editar se seção foi pulada
+        # Não permite editar se seção foi pulada (exceto 2.1)
         if self.section_skipped and step != "2.1":
             return False
 
         # Se editando 2.1 de "NÃO" para "SIM", precisa resetar seção
         if step == "2.1" and self.section_skipped:
-            answer_upper = new_answer.strip().upper()
-            if answer_upper not in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
+            if not self._is_negative_answer(new_answer):
                 # Resetar seção
                 self.section_skipped = False
                 self.current_step = "2.2"
@@ -188,7 +117,24 @@ class BOStateMachineSection2:
 
     def reset(self):
         """Reseta a state machine para o início da seção"""
-        self.current_step = "2.1"
-        self.answers = {}
-        self.step_index = 0
-        self.section_skipped = False
+        self.__init__()
+
+    # =========================================================================
+    # MÉTODOS LEGADOS (mantidos para compatibilidade)
+    # =========================================================================
+
+    def was_section_skipped(self) -> bool:
+        """
+        Alias para self.section_skipped (compatibilidade).
+
+        DEPRECATED: Use self.section_skipped diretamente
+        """
+        return self.section_skipped
+
+    def get_skip_reason(self) -> Optional[str]:
+        """
+        Alias para _get_skip_reason() (compatibilidade).
+
+        DEPRECATED: Use self.get_skip_reason() do BaseStateMachine
+        """
+        return self._get_skip_reason()

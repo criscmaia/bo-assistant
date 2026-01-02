@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 State Machine para Seção 8: Condução e Pós-Ocorrência
+Refatorado para usar Template Method Pattern (v0.13.1)
+
 Baseado no material de Claudio Moreira (Lei 11.343/06 - Lei de Drogas, Lei 13.869/19)
 
 Author: Cristiano Maia + Claude (Anthropic)
-Date: 23/12/2025
+Date: 02/01/2026
 """
-from typing import Dict, Optional
+from typing import Dict, List, Optional
+from backend.base_state_machine import BaseStateMachine
 
 
 # Perguntas da Seção 8 (fonte: SEÇÃO_8___CONDUÇÃO_E_PÓS-OCORRÊNCIA.md)
@@ -27,9 +30,9 @@ SECTION8_QUESTIONS = {
 SECTION8_STEPS = ["8.1", "8.2", "8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "8.10", "8.11", "complete"]
 
 
-class BOStateMachineSection8:
+class BOStateMachineSection8(BaseStateMachine):
     """
-    State Machine para gerenciar o fluxo de perguntas da Seção 8 (Condução e Pós-Ocorrência).
+    State Machine para Seção 8: Condução e Pós-Ocorrência.
 
     Características:
     - Seção 8 é a ÚLTIMA seção do BO (8/8)
@@ -38,79 +41,25 @@ class BOStateMachineSection8:
     - Fundamento jurídico: Lei 11.343/06 + Lei 13.869/19 + CPP Arts. 282-284
     """
 
-    def __init__(self):
-        self.current_step = "8.1"
-        self.answers: Dict[str, str] = {}
-        self.step_index = 0
+    # =========================================================================
+    # IMPLEMENTAÇÃO DOS MÉTODOS ABSTRATOS
+    # =========================================================================
 
-    def get_current_question(self) -> str:
-        """Retorna o texto da pergunta atual"""
-        if self.current_step in SECTION8_QUESTIONS:
-            return SECTION8_QUESTIONS[self.current_step]
-        return ""
+    def _get_initial_step(self) -> str:
+        """Retorna step inicial da Seção 8"""
+        return "8.1"
 
-    def store_answer(self, answer: str):
-        """
-        Armazena a resposta da pergunta atual.
+    def _get_steps(self) -> List[str]:
+        """Retorna lista de steps da Seção 8"""
+        return SECTION8_STEPS
 
-        Args:
-            answer: Resposta fornecida pelo usuário
-        """
-        answer_clean = answer.strip()
-        self.answers[self.current_step] = answer_clean
+    def _get_questions(self) -> Dict[str, str]:
+        """Retorna dicionário de perguntas da Seção 8"""
+        return SECTION8_QUESTIONS
 
-    def next_step(self):
-        """Avança para a próxima pergunta"""
-        if self.step_index < len(SECTION8_STEPS) - 1:
-            self.step_index += 1
-            self.current_step = SECTION8_STEPS[self.step_index]
-
-    def is_section_complete(self) -> bool:
-        """Verifica se a seção está completa"""
-        return self.current_step == "complete"
-
-    def get_all_answers(self) -> Dict[str, str]:
-        """Retorna todas as respostas coletadas"""
-        return self.answers.copy()
-
-    def get_formatted_answers(self) -> str:
-        """Retorna respostas formatadas para debug/log"""
-        if not self.answers:
-            return "Nenhuma resposta coletada"
-
-        formatted = []
-        for step, answer in self.answers.items():
-            question = SECTION8_QUESTIONS.get(step, "Pergunta desconhecida")
-            formatted.append(f"{step} - {question}\n   Resposta: {answer}")
-
-        return "\n\n".join(formatted)
-
-    def get_progress(self) -> Dict[str, any]:
-        """
-        Retorna informações de progresso para o frontend.
-
-        Returns:
-            {
-                "current_step": "8.3",
-                "total_steps": 11,
-                "completed_steps": 3,
-                "progress_percentage": 27.3,
-                "section_skipped": False
-            }
-        """
-        total_steps = len(SECTION8_STEPS) - 1  # Excluindo "complete"
-        completed_steps = len(self.answers)
-
-        # Calcula porcentagem
-        progress_percentage = (completed_steps / total_steps) * 100 if total_steps > 0 else 0
-
-        return {
-            "current_step": self.current_step,
-            "total_steps": total_steps,
-            "completed_steps": completed_steps,
-            "progress_percentage": round(progress_percentage, 1),
-            "section_skipped": False  # Seção 8 nunca é pulada
-        }
+    # =========================================================================
+    # MÉTODOS ESPECÍFICOS DA SEÇÃO 8
+    # =========================================================================
 
     def get_answer(self, step: str) -> Optional[str]:
         """Retorna a resposta de uma pergunta específica"""
@@ -135,6 +84,4 @@ class BOStateMachineSection8:
 
     def reset(self):
         """Reseta a state machine para o início da seção"""
-        self.current_step = "8.1"
-        self.answers = {}
-        self.step_index = 0
+        self.__init__()

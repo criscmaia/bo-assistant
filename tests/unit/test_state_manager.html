@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Testes - StateManager</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #f0f0f0; }
+        .test { margin: 8px 0; padding: 8px; border-radius: 4px; }
+        .pass { background: #1a4d1a; color: #90EE90; }
+        .fail { background: #4d1a1a; color: #FF6B6B; }
+        .section { margin-top: 20px; padding: 10px; background: #2a2a2a; border-radius: 8px; }
+        .section-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #6B9FFF; }
+        .summary { margin-top: 30px; padding: 15px; background: #2a2a2a; border-radius: 8px; }
+        h1 { color: #6B9FFF; }
+    </style>
+</head>
+<body>
+    <h1>Testes Unitários - StateManager v0.13.1</h1>
+    <div id="results"></div>
+    <div id="summary" class="summary"></div>
+
+    <!-- Carregar dependências -->
+    <script>
+        // Mock do SECTIONS_DATA
+        window.SECTIONS_DATA = [
+            { id: 1, name: 'Contexto', emoji: '📋', questions: [1,2,3,4,5,6,7,8,9,10,11], skipQuestion: null },
+            { id: 2, name: 'Veículo', emoji: '🚗', questions: [1,2,3,4,5,6,7,8,9,10,11,12], skipQuestion: { id: '2.1' } },
+            { id: 3, name: 'Campana', emoji: '👁️', questions: [1,2,3,4,5,6,7], skipQuestion: { id: '3.1' } },
+            { id: 4, name: 'Domicílio', emoji: '🏠', questions: [1,2,3,4,5], skipQuestion: { id: '4.1' } },
+            { id: 5, name: 'Fundada Suspeita', emoji: '🔍', questions: [1,2,3,4,5,6], skipQuestion: { id: '5.1' } },
+            { id: 6, name: 'Uso de Força', emoji: '⚡', questions: [1,2,3,4,5], skipQuestion: null },
+            { id: 7, name: 'Apreensões', emoji: '📦', questions: [1,2,3,4,5,6,7,8], skipQuestion: { id: '7.1' } },
+            { id: 8, name: 'Qualificação', emoji: '📝', questions: [1,2,3,4,5,6], skipQuestion: null },
+        ];
+    </script>
+    <script src="../../docs/js/StateManager.js"></script>
+
+    <script>
+        // Test framework simples
+        const results = { passed: 0, failed: 0, tests: [] };
+
+        function test(name, fn) {
+            try {
+                fn();
+                results.passed++;
+                results.tests.push({ name, passed: true });
+            } catch (error) {
+                results.failed++;
+                results.tests.push({ name, passed: false, error: error.message });
+            }
+        }
+
+        function assert(condition, message) {
+            if (!condition) throw new Error(message || 'Assertion failed');
+        }
+
+        function assertEqual(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, got ${actual}`);
+            }
+        }
+
+        function assertDeepEqual(actual, expected, message) {
+            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                throw new Error(message || `Deep equality failed`);
+            }
+        }
+
+        // =============================================================================
+        // TESTES
+        // =============================================================================
+
+        // Seção: Singleton
+        test('StateManager é singleton', () => {
+            const sm1 = StateManager.getInstance();
+            const sm2 = StateManager.getInstance();
+            assert(sm1 === sm2, 'Instâncias devem ser iguais');
+        });
+
+        test('Múltiplos new retornam mesma instância', () => {
+            const sm1 = new StateManager();
+            const sm2 = new StateManager();
+            assert(sm1 === sm2, 'new deve retornar instância existente');
+        });
+
+        // Seção: Inicialização
+        test('Inicializa com 8 seções', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            const state = sm.getState();
+            assertEqual(Object.keys(state.sections).length, 8);
+        });
+
+        test('Todas seções começam como pending', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            for (let i = 1; i <= 8; i++) {
+                assertEqual(sm.getSectionStatus(i), 'pending');
+            }
+        });
+
+        test('Seção atual inicial é 1', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            assertEqual(sm.getCurrentSectionId(), 1);
+        });
+
+        // Seção: Navegação
+        test('setCurrentSection muda seção atual', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setCurrentSection(3);
+            assertEqual(sm.getCurrentSectionId(), 3);
+        });
+
+        test('setCurrentSection marca seção como in_progress se era pending', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            assertEqual(sm.getSectionStatus(3), 'pending');
+            sm.setCurrentSection(3);
+            assertEqual(sm.getSectionStatus(3), 'in_progress');
+        });
+
+        // Seção: Respostas
+        test('saveAnswer armazena resposta', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setCurrentSection(1);
+            sm.saveAnswer(1, '1.1', 'Teste resposta');
+            assertEqual(sm.getAnswer(1, '1.1'), 'Teste resposta');
+        });
+
+        test('saveAnswer incrementa answeredCount', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setCurrentSection(1);
+            sm.saveAnswer(1, '1.1', 'Resposta 1');
+            sm.saveAnswer(1, '1.2', 'Resposta 2');
+            const state = sm.getSectionState(1);
+            assertEqual(state.answeredCount, 2);
+        });
+
+        test('getAnswers retorna todas respostas de uma seção', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setCurrentSection(1);
+            sm.saveAnswer(1, '1.1', 'A');
+            sm.saveAnswer(1, '1.2', 'B');
+            const answers = sm.getAnswers(1);
+            assertEqual(answers['1.1'], 'A');
+            assertEqual(answers['1.2'], 'B');
+        });
+
+        // Seção: Completar/Skip
+        test('markSectionCompleted muda status para completed', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setCurrentSection(1);
+            sm.markSectionCompleted(1);
+            assertEqual(sm.getSectionStatus(1), 'completed');
+        });
+
+        test('markSectionSkipped muda status para skipped', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setCurrentSection(2);
+            sm.markSectionSkipped(2, 'Não havia veículo');
+            assertEqual(sm.getSectionStatus(2), 'skipped');
+            assertEqual(sm.getSectionState(2).skipReason, 'Não havia veículo');
+        });
+
+        test('isSectionCompleted retorna true para seção completa', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.markSectionCompleted(1);
+            assert(sm.isSectionCompleted(1), 'Seção 1 deve estar completa');
+            assert(!sm.isSectionCompleted(2), 'Seção 2 não deve estar completa');
+        });
+
+        test('getCompletedSections retorna array de IDs', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.markSectionCompleted(1);
+            sm.markSectionCompleted(3);
+            const completed = sm.getCompletedSections();
+            assert(completed.includes(1), 'Deve incluir seção 1');
+            assert(completed.includes(3), 'Deve incluir seção 3');
+            assert(!completed.includes(2), 'Não deve incluir seção 2');
+        });
+
+        // Seção: Texto Gerado
+        test('setGeneratedText armazena texto', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setGeneratedText(1, 'Texto gerado de teste');
+            assertEqual(sm.getGeneratedText(1), 'Texto gerado de teste');
+        });
+
+        // Seção: Mensagens
+        test('addMessage adiciona mensagem à seção', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.addMessage(1, 'bot', 'Olá!', 'Dica');
+            sm.addMessage(1, 'user', 'Resposta');
+            const state = sm.getSectionState(1);
+            assertEqual(state.messages.length, 2);
+            assertEqual(state.messages[0].type, 'bot');
+            assertEqual(state.messages[1].type, 'user');
+        });
+
+        // Seção: Progresso
+        test('getOverallProgress calcula porcentagem', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            assertEqual(sm.getOverallProgress(), 0);
+            sm.markSectionCompleted(1);
+            sm.markSectionCompleted(2);
+            assertEqual(sm.getOverallProgress(), 25); // 2/8 = 25%
+        });
+
+        // Seção: Observers
+        test('subscribe recebe notificações', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            let notified = false;
+            const unsubscribe = sm.subscribe((eventType, data) => {
+                if (eventType === 'answer') notified = true;
+            });
+            sm.saveAnswer(1, '1.1', 'Teste');
+            assert(notified, 'Deve ter sido notificado');
+            unsubscribe();
+        });
+
+        test('unsubscribe para notificações', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            let count = 0;
+            const unsubscribe = sm.subscribe(() => count++);
+            sm.saveAnswer(1, '1.1', 'A');
+            unsubscribe();
+            sm.saveAnswer(1, '1.2', 'B');
+            assertEqual(count, 1, 'Deve ter parado de notificar');
+        });
+
+        test('subscribeToSection notifica apenas seção específica', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            let section1Notified = false;
+            let section2Notified = false;
+            sm.subscribeToSection(1, () => section1Notified = true);
+            sm.subscribeToSection(2, () => section2Notified = true);
+            sm.saveAnswer(1, '1.1', 'Teste');
+            assert(section1Notified, 'Seção 1 deve ser notificada');
+            assert(!section2Notified, 'Seção 2 não deve ser notificada');
+        });
+
+        // Seção: Persistência
+        test('loadFromPersistence retorna null se não há rascunho', () => {
+            const sm = StateManager.getInstance();
+            localStorage.removeItem('bo_draft');
+            const draft = sm.loadFromPersistence();
+            assertEqual(draft, null);
+        });
+
+        // Seção: Imutabilidade
+        test('getState retorna cópia, não referência', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            const state1 = sm.getState();
+            state1.currentSectionId = 999;
+            const state2 = sm.getState();
+            assertEqual(state2.currentSectionId, 1, 'Modificação externa não deve afetar estado interno');
+        });
+
+        test('getSectionState retorna cópia, não referência', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            const section = sm.getSectionState(1);
+            section.status = 'modified';
+            assertEqual(sm.getSectionStatus(1), 'pending', 'Modificação externa não deve afetar estado interno');
+        });
+
+        // Seção: Session
+        test('setSession armazena IDs', () => {
+            const sm = StateManager.getInstance();
+            sm.reset();
+            sm.setSession('sess-123', 'BO-456');
+            const ids = sm.getSessionIds();
+            assertEqual(ids.sessionId, 'sess-123');
+            assertEqual(ids.boId, 'BO-456');
+        });
+
+        // Seção: Reset
+        test('reset limpa todo o estado', () => {
+            const sm = StateManager.getInstance();
+            sm.setCurrentSection(5);
+            sm.saveAnswer(5, '5.1', 'Teste');
+            sm.markSectionCompleted(1);
+            sm.reset();
+            assertEqual(sm.getCurrentSectionId(), 1);
+            assertEqual(sm.getSectionStatus(1), 'pending');
+            assertEqual(sm.getAnswer(5, '5.1'), null);
+        });
+
+        // =============================================================================
+        // RENDERIZAR RESULTADOS
+        // =============================================================================
+
+        function renderResults() {
+            const container = document.getElementById('results');
+            let currentSection = '';
+            let html = '';
+
+            results.tests.forEach(t => {
+                // Detectar seção pelo nome do teste
+                const sectionMatch = t.name.match(/^([A-Za-z\s]+)/);
+                const section = sectionMatch ? sectionMatch[1].trim() : 'Outros';
+
+                if (section !== currentSection) {
+                    if (currentSection) html += '</div>';
+                    html += `<div class="section"><div class="section-title">${section}</div>`;
+                    currentSection = section;
+                }
+
+                const status = t.passed ? '✓' : '✗';
+                const cssClass = t.passed ? 'pass' : 'fail';
+                const error = t.error ? ` - ${t.error}` : '';
+                html += `<div class="test ${cssClass}">${status} ${t.name}${error}</div>`;
+            });
+
+            if (currentSection) html += '</div>';
+            container.innerHTML = html;
+
+            // Summary
+            const summary = document.getElementById('summary');
+            const total = results.passed + results.failed;
+            const percentage = Math.round((results.passed / total) * 100);
+            summary.innerHTML = `
+                <strong>Resultado:</strong> ${results.passed}/${total} testes passaram (${percentage}%)<br>
+                <span style="color: ${results.failed === 0 ? '#90EE90' : '#FF6B6B'}">
+                    ${results.failed === 0 ? '✓ Todos os testes passaram!' : `✗ ${results.failed} teste(s) falharam`}
+                </span>
+            `;
+        }
+
+        renderResults();
+    </script>
+</body>
+</html>

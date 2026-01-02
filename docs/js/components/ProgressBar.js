@@ -1,6 +1,9 @@
 /**
  * ProgressBar - Barra de Progresso Visual
- * BO Inteligente v1.0
+ * BO Inteligente v0.13.1
+ *
+ * NOTA: A partir da v0.13.1, o estado é sincronizado via callbacks do BOApp,
+ * que por sua vez é notificado pelo StateManager.
  */
 
 // ============================================
@@ -16,6 +19,9 @@ class ProgressBar {
         this.container = document.getElementById(containerId);
         this.tooltipEl = document.getElementById('progress-tooltip');
 
+        // Referência ao StateManager (v0.13.1+) - opcional, usado para consultas diretas
+        this.stateManager = typeof StateManager !== 'undefined' ? StateManager.getInstance() : null;
+
         // Dados das seções (do sections.js ou passado por opções)
         this.sections = options.sections || (window.SECTIONS_DATA ? window.SECTIONS_DATA.map(s => ({
             id: s.id,
@@ -24,7 +30,7 @@ class ProgressBar {
             totalQuestions: s.questions.length + (s.skipQuestion ? 1 : 0)
         })) : []);
 
-        // Estado de cada seção
+        // Estado visual de cada seção (sincronizado via callbacks do BOApp)
         this.sectionStates = {};
         this.sections.forEach(s => {
             this.sectionStates[s.id] = {
@@ -43,6 +49,9 @@ class ProgressBar {
             console.log('[ProgressBar] Clicou na seção:', sectionId);
         });
 
+        // Dispose Pattern - Rastreamento de listeners para cleanup (v0.13.1+)
+        this._eventListeners = [];
+
         // Renderizar
         if (this.container) {
             this.render();
@@ -54,6 +63,9 @@ class ProgressBar {
      */
     render() {
         if (!this.container) return;
+
+        // Limpar listeners anteriores (Dispose Pattern - v0.13.1+)
+        this.dispose();
 
         this.container.innerHTML = '';
 
@@ -76,10 +88,19 @@ class ProgressBar {
             // Aplicar estado visual
             this._applyNodeState(node, section.id);
 
-            // Eventos
-            node.addEventListener('click', () => this._handleNodeClick(section.id));
-            node.addEventListener('mouseenter', (e) => this._showTooltip(e, section));
-            node.addEventListener('mouseleave', () => this._hideTooltip());
+            // Eventos com rastreamento para cleanup
+            const clickHandler = () => this._handleNodeClick(section.id);
+            const mouseEnterHandler = (e) => this._showTooltip(e, section);
+            const mouseLeaveHandler = () => this._hideTooltip();
+
+            node.addEventListener('click', clickHandler);
+            node.addEventListener('mouseenter', mouseEnterHandler);
+            node.addEventListener('mouseleave', mouseLeaveHandler);
+
+            // Rastrear listeners para cleanup (Dispose Pattern - v0.13.1+)
+            this._eventListeners.push({ element: node, event: 'click', handler: clickHandler });
+            this._eventListeners.push({ element: node, event: 'mouseenter', handler: mouseEnterHandler });
+            this._eventListeners.push({ element: node, event: 'mouseleave', handler: mouseLeaveHandler });
 
             nodeWrapper.appendChild(node);
 
@@ -319,6 +340,22 @@ class ProgressBar {
     _hideTooltip() {
         if (this.tooltipEl) {
             this.tooltipEl.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Dispose Pattern - Remove todos os event listeners (v0.13.1+)
+     * Deve ser chamado ao destruir a barra ou re-renderizar para evitar memory leaks
+     */
+    dispose() {
+        if (this._eventListeners && this._eventListeners.length > 0) {
+            this._eventListeners.forEach(({ element, event, handler }) => {
+                if (element) {
+                    element.removeEventListener(event, handler);
+                }
+            });
+            console.log('[ProgressBar] Disposed - listeners removidos:', this._eventListeners.length);
+            this._eventListeners = [];
         }
     }
 

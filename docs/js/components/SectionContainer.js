@@ -1,7 +1,10 @@
 /**
  * SectionContainer - Gerencia uma seção do BO
  * Inclui chat, input, texto gerado e transição
- * BO Inteligente v1.0
+ * BO Inteligente v0.13.1
+ *
+ * NOTA: A partir da v0.13.1, o estado é sincronizado com StateManager.
+ * SectionContainer mantém cópia local para renderização, mas sincroniza com StateManager.
  */
 
 class SectionContainer {
@@ -12,11 +15,14 @@ class SectionContainer {
     constructor(containerId, options = {}) {
         this.container = document.getElementById(containerId);
 
+        // Referência ao StateManager (v0.13.1+)
+        this.stateManager = typeof StateManager !== 'undefined' ? StateManager.getInstance() : null;
+
         // Dados da seção atual
         this.sectionData = options.sectionData || null;
         this.sectionId = options.sectionId || 1;
 
-        // Estado
+        // Estado local (sincronizado com StateManager)
         this.state = 'pending'; // pending, in_progress, completed, skipped
         this.messages = []; // Histórico de mensagens do chat
         this.answers = {}; // Respostas do usuário { questionId: answer }
@@ -39,6 +45,9 @@ class SectionContainer {
         this.inputFieldEl = null;
         this.generatedEl = null;
         this.transitionEl = null;
+
+        // Dispose Pattern - Rastreamento de listeners para cleanup (v0.13.1+)
+        this._eventListeners = [];
     }
 
     /**
@@ -638,49 +647,66 @@ class SectionContainer {
     }
 
     /**
-     * Bind de eventos
+     * Bind de eventos com Dispose Pattern
+     * Rastreia todos os listeners para cleanup posteriormente
      */
     _bindEvents() {
+        // Limpar listeners anteriores antes de adicionar novos
+        this.dispose();
+
+        // Helper para rastrear listeners
+        const addListener = (element, event, handler) => {
+            if (!element) return;
+            element.addEventListener(event, handler);
+            this._eventListeners.push({ element, event, handler });
+        };
+
         // Toggle do chat (accordion)
         const chatToggle = this.container.querySelector('#section-chat-toggle');
-        if (chatToggle) {
-            chatToggle.addEventListener('click', () => {
-                this.chatEl.classList.toggle('section-chat--expanded');
-                chatToggle.classList.toggle('section-chat-toggle--collapsed');
-            });
-        }
+        const chatToggleHandler = () => {
+            this.chatEl.classList.toggle('section-chat--expanded');
+            chatToggle.classList.toggle('section-chat-toggle--collapsed');
+        };
+        addListener(chatToggle, 'click', chatToggleHandler);
 
         // Copiar texto gerado
         const copyBtn = this.container.querySelector('#section-copy-btn');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => this._copyGeneratedText());
-        }
+        addListener(copyBtn, 'click', () => this._copyGeneratedText());
 
         // Iniciar próxima seção
         const startNextBtn = this.container.querySelector('#section-start-next');
-        if (startNextBtn) {
-            startNextBtn.addEventListener('click', () => {
-                // Passar "sim" como resposta pré-definida para o skipQuestion da próxima seção
-                this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'sim' });
-            });
-        }
+        addListener(startNextBtn, 'click', () => {
+            this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'sim' });
+        });
 
         // Pular próxima seção
         const skipNextBtn = this.container.querySelector('#section-skip-next');
-        if (skipNextBtn) {
-            skipNextBtn.addEventListener('click', () => {
-                // Navegar para próxima seção com resposta "não" para o skipQuestion
-                // Isso fará com que a API seja chamada e retorne o skip reason correto
-                this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'não' });
-            });
-        }
+        addListener(skipNextBtn, 'click', () => {
+            this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'não' });
+        });
 
         // Voltar para seção atual
         const backBtn = this.container.querySelector('#section-back-btn');
-        if (backBtn) {
-            backBtn.addEventListener('click', () => {
-                this.onNavigateBack();
+        addListener(backBtn, 'click', () => {
+            this.onNavigateBack();
+        });
+
+        console.log('[SectionContainer] Listeners bindados:', this._eventListeners.length);
+    }
+
+    /**
+     * Dispose Pattern - Remove todos os event listeners (v0.13.1+)
+     * Deve ser chamado ao trocar de seção para evitar memory leaks
+     */
+    dispose() {
+        if (this._eventListeners.length > 0) {
+            this._eventListeners.forEach(({ element, event, handler }) => {
+                if (element) {
+                    element.removeEventListener(event, handler);
+                }
             });
+            console.log('[SectionContainer] Disposed - listeners removidos:', this._eventListeners.length);
+            this._eventListeners = [];
         }
     }
 
@@ -766,17 +792,31 @@ class SectionContainer {
 
     /**
      * Adiciona mensagem do bot
+     * Sincroniza com StateManager (v0.13.1+)
      */
     _addBotMessage(text, hint = null) {
         this.messages.push({ type: 'bot', text, hint });
+
+        // Sincronizar com StateManager
+        if (this.stateManager && this.sectionId) {
+            this.stateManager.addMessage(this.sectionId, 'bot', text, hint);
+        }
+
         this._updateChat();
     }
 
     /**
      * Adiciona mensagem do usuário
+     * Sincroniza com StateManager (v0.13.1+)
      */
     _addUserMessage(text) {
         this.messages.push({ type: 'user', text });
+
+        // Sincronizar com StateManager
+        if (this.stateManager && this.sectionId) {
+            this.stateManager.addMessage(this.sectionId, 'user', text);
+        }
+
         this._updateChat();
     }
 

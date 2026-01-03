@@ -72,6 +72,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Servir arquivos estáticos (frontend)
+docs_dir = Path(__file__).parent.parent / "docs"
+app.mount("/docs", StaticFiles(directory=str(docs_dir), html=True), name="docs")
+
 # Armazenamento em memória (session_id -> session_data)
 # Estrutura: {
 #     session_id: {

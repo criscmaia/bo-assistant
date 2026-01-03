@@ -363,7 +363,7 @@ const SECTIONS_DATA = [
     emoji: "👁️",
     skippable: true,
     skipQuestion: {
-      id: "3.0",
+      id: "3.1",
       text: "Houve campana/observação prévia antes da abordagem?",
       hint: "Monitoramento do local antes de agir",
       inputType: "single_choice",
@@ -374,7 +374,7 @@ const SECTIONS_DATA = [
     },
     questions: [
       {
-        id: "3.1",
+        id: "3.2",
         text: "Quanto tempo durou a campana?",
         hint: "Ex: aproximadamente 30 minutos",
         inputType: "text",
@@ -384,7 +384,7 @@ const SECTIONS_DATA = [
         }
       },
       {
-        id: "3.2",
+        id: "3.3",
         text: "De onde a guarnição observava?",
         hint: "Ex: de dentro da viatura, a 50 metros do local",
         inputType: "text",
@@ -394,7 +394,7 @@ const SECTIONS_DATA = [
         }
       },
       {
-        id: "3.3",
+        id: "3.4",
         text: "O que foi observado durante a campana?",
         hint: "Descreva movimentações, pessoas, transações suspeitas",
         inputType: "text",
@@ -404,7 +404,7 @@ const SECTIONS_DATA = [
         }
       },
       {
-        id: "3.4",
+        id: "3.5",
         text: "Quantas pessoas foram vistas no local?",
         inputType: "text",
         validation: {
@@ -413,7 +413,7 @@ const SECTIONS_DATA = [
         }
       },
       {
-        id: "3.5",
+        id: "3.6",
         text: "Foram observadas transações de compra e venda?",
         inputType: "single_choice",
         options: [
@@ -423,7 +423,7 @@ const SECTIONS_DATA = [
         followUp: {
           condition: "sim",
           question: {
-            id: "3.5.1",
+            id: "3.6.1",
             text: "Descreva as transações observadas.",
             hint: "Quantas, entre quem, como ocorreram",
             inputType: "text",

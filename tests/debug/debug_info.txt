@@ -1,0 +1,74 @@
+STATE:
+  header: True
+  progressbar: True
+  section_container: True
+  chat: True
+  input: False
+  SECTIONS_DATA: True
+  ACTIVE_SECTIONS_COUNT: 3
+  app: True
+  progress_items: 0
+  section_html: 
+            <!-- Header da Seção -->
+            <div class="section-header">
+                <div class="section-header__title">
+                    <span class="section-header__emoji">📝</span>
+                    <span>Seção 1: Contexto da Ocorrência</span>
+                </div>
+                <span class="section-header__badge section-header__badge--pending">
+                    Pendente
+                </span>
+            </div>
+
+            <!-- Chat (Accordion) - Oculto se seção foi pulada -->
+            
+            <button class="section-chat-toggle section-chat-toggle--collapsed" id="section-chat-toggle">
+                Histórico do Chat (0 mensagens)
+            </button>
+            <div class="section-chat " id="section-chat">
+                <div class="section-loading"><span class="section-loading__spinner"></span> Carregando...</div>
+            </div>
+            
+
+
+            <!-- Área de Input Dinâmica -->
+            
+
+            <!-- Texto Gerado (se complet
+
+CONSOLE LOGS (33):
+  [log] [sections.js] Carregado: 8 seções, ~69 perguntas (Ativas até seção 3)
+  [log] [StateManager] Inicializado
+  [log] [Init] BO Inteligente v1.0 - Design Modularizado
+  [log] [Init] Inicializando...
+  [log] [BOApp] EventBus não disponível - usando apenas callbacks
+  [log] [BOApp] Inicializando...
+  [log] [BOApp] Estado das seções já inicializado pelo StateManager
+  [log] [ProgressBar] _updateLineFill: {sectionId: 1, percentage: 0, answeredCount: 0, totalCount: 9, status: pending}
+  [log] [ProgressBar] _updateLineFill: {sectionId: 2, percentage: 0, answeredCount: 0, totalCount: 13, status: pending}
+  [warning] [ProgressBar] line-fill element not found for section: 3
+  [log] [API] GET /health
+  [log] [BOApp] API online
+  [log] [API] POST /new_session
+  [error] Failed to load resource: the server responded with a status of 404 (Not Found)
+  [log] [API] Sessão iniciada: BO-20260102-efb916f9
+  [log] [BOApp] Sessão: BO-20260102-efb916f9
+  [log] [ProgressBar] setCurrentSection: 1
+  [log] [ProgressBar] Mudando status de pending → in_progress para seção: 1
+  [log] [ProgressBar] setCurrentSection: 1
+  [log] [BOApp] _updateAllSectionsProgress via StateManager
+  [log] [BOApp] Seção 1 - status: in_progress , answeredCount: 0
+  [log] [BOApp] Seção 2 - status: pending , answeredCount: 0
+  [log] [BOApp] Seção 3 - status: pending , answeredCount: 0
+  [log] [BOApp] Seção 4 - status: pending , answeredCount: 0
+  [log] [BOApp] Seção 5 - status: pending , answeredCount: 0
+  [log] [BOApp] Seção 6 - status: pending , answeredCount: 0
+  [log] [BOApp] Seção 7 - status: pending , answeredCount: 0
+  [log] [BOApp] Seção 8 - status: pending , answeredCount: 0
+  [log] [SectionContainer] Listeners bindados: 1
+  [log] [BOApp] Inicialização completa!
+  [log] [Init] Aplicação pronta!
+  [log] [Init] Use window.app para debug.
+  [log] [StateManager] Estado persistido
+
+ERRORS (0):

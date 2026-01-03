@@ -9,19 +9,18 @@ Date: 19/12/2025
 from typing import Dict, Optional
 
 
-# Perguntas da Seção 3 (fonte: REGRAS GERAIS - GPT Tráfico, material do Claudio)
+# Perguntas da Seção 3 (sincronizado com frontend v0.13.2)
 SECTION3_QUESTIONS = {
-    "3.1": "A equipe realizou campana antes da abordagem?",
-    "3.2": "Onde foi feita a campana? (local, ponto de observação, distância aproximada)",
-    "3.3": "Qual policial tinha visão direta e o que cada um via?",
-    "3.4": "O que motivou a campana?",
-    "3.5": "Quanto tempo durou a campana? (contínua ou alternada)",
-    "3.6": "O que foi observado durante a campana? (descreva atos CONCRETOS)",
-    "3.7": "Houve abordagem de usuários durante a campana?",
-    "3.8": "Houve fuga ao notar a equipe? Como ocorreu?"
+    "3.1": "Houve campana/observação prévia antes da abordagem?",  # Skip question
+    "3.2": "Quanto tempo durou a campana?",
+    "3.3": "De onde a guarnição observava?",
+    "3.4": "O que foi observado durante a campana?",
+    "3.5": "Quantas pessoas foram vistas no local?",
+    "3.6": "Foram observadas transações de compra e venda?",
+    "3.6.1": "Descreva as transações observadas."  # Follow-up de 3.6 (quando resposta = SIM)
 }
 
-SECTION3_STEPS = ["3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "complete"]
+SECTION3_STEPS = ["3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.6.1", "complete"]
 
 
 class BOStateMachineSection3:
@@ -29,8 +28,9 @@ class BOStateMachineSection3:
     State Machine para gerenciar o fluxo de perguntas da Seção 3 (Campana - Vigilância Velada).
 
     Comportamento especial:
-    - Pergunta 3.1 é condicional: se resposta = "NÃO", pula toda a seção
-    - Se resposta = "SIM", percorre perguntas 3.2 até 3.8
+    - Pergunta 3.1 (skip question): se resposta = "NÃO", pula toda a seção
+    - Pergunta 3.6: se resposta = "SIM", inclui follow-up 3.6.1
+    - Se resposta = "SIM" em 3.1, percorre perguntas 3.2 até 3.6 (ou 3.6.1)
     """
 
     def __init__(self):
@@ -49,9 +49,9 @@ class BOStateMachineSection3:
         """
         Armazena a resposta da pergunta atual.
 
-        Lógica especial para pergunta 3.1:
-        - Se resposta = "NÃO", marca seção como pulada e vai direto para "complete"
-        - Caso contrário, armazena normalmente
+        Lógica especial:
+        - Pergunta 3.1: Se resposta = "NÃO", marca seção como pulada e vai direto para "complete"
+        - Pergunta 3.6: Se resposta = "NÃO", pula 3.6.1 e vai para "complete"
         """
         answer_clean = answer.strip()
 
@@ -70,12 +70,21 @@ class BOStateMachineSection3:
         self.answers[self.current_step] = answer_clean
 
     def next_step(self):
-        """Avança para a próxima pergunta"""
+        """Avança para a próxima pergunta (com lógica de follow-up)"""
         # Se seção foi pulada, não avança
         if self.section_skipped:
             return
 
-        # Avança para próximo step
+        # Lógica especial: se acabou de responder 3.6 com "NÃO", pular 3.6.1
+        if self.current_step == "3.6":
+            answer_36 = self.answers.get("3.6", "").strip().upper()
+            if answer_36 in ["NÃO", "NAO", "N", "NEGATIVO"]:
+                # Pular 3.6.1 e ir direto para complete
+                self.current_step = "complete"
+                self.step_index = len(SECTION3_STEPS) - 1
+                return
+
+        # Avança para próximo step normalmente
         if self.step_index < len(SECTION3_STEPS) - 1:
             self.step_index += 1
             self.current_step = SECTION3_STEPS[self.step_index]

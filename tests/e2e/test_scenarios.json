@@ -1,7 +1,7 @@
 {
   "version": "0.5.1",
   "backend_url": "http://localhost:8000",
-  "frontend_url": "http://localhost:3000",
+  "frontend_url": "http://localhost:8000/docs/index.html",
   "browser": "chromium",
   "resolutions": {
     "desktop": {"width": 1280, "height": 720},

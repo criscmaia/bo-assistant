@@ -218,15 +218,17 @@ class DateTimeValidator(ValidationStrategy):
     Aceita formatos:
     - "10/01/2026 às 14:30"
     - "10/01/2026 14:30"
+    - "10/01/2026, 14h30min"
     - "10/01/2026"
 
     Exemplo:
         validator = DateTimeValidator()
         result = validator.validate("10/01/2026 às 14:30", {})  # valid=True
+        result = validator.validate("10/01/2026, 14h30min", {})  # valid=True
     """
 
     DATE_PATTERN = r'\d{2}/\d{2}/\d{4}'
-    TIME_PATTERN = r'\d{1,2}:\d{2}'
+    TIME_PATTERN = r'(\d{1,2}:\d{2}|\d{1,2}h\d{2}min)'
 
     def __init__(
         self,
@@ -235,7 +237,7 @@ class DateTimeValidator(ValidationStrategy):
     ):
         self.require_time = require_time
         self.error_message = error_message or (
-            "Formato esperado: DD/MM/AAAA às HH:MM" if require_time
+            "Formato esperado: DD/MM/AAAA às HH:MM ou DD/MM/AAAA, HHhMMmin" if require_time
             else "Formato esperado: DD/MM/AAAA"
         )
 

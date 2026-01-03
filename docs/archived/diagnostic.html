@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnóstico - BO Inteligente</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #2c3e50; }
+        .test {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .test.success { border-left-color: #27ae60; }
+        .test.error { border-left-color: #e74c3c; }
+        .test.warning { border-left-color: #f39c12; }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.ok { background: #27ae60; color: white; }
+        .status.fail { background: #e74c3c; color: white; }
+        .status.warn { background: #f39c12; color: white; }
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico - BO Inteligente v0.13.2</h1>
+
+    <div style="margin: 20px 0;">
+        <button onclick="runDiagnostics()">▶ Executar Diagnóstico</button>
+        <button onclick="location.href='index.html'">🏠 Ir para Aplicação</button>
+        <button onclick="location.reload()">🔄 Recarregar</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        async function runDiagnostics() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Executando testes...</h2>';
+
+            const tests = [];
+
+            // Test 1: Verificar se sections.js carregou
+            tests.push({
+                name: 'sections.js carregado',
+                check: () => typeof window.SECTIONS_DATA !== 'undefined',
+                details: () => window.SECTIONS_DATA ?
+                    `${window.SECTIONS_DATA.length} seções encontradas` :
+                    'SECTIONS_DATA não está definido'
+            });
+
+            // Test 2: Verificar ACTIVE_SECTIONS_COUNT
+            tests.push({
+                name: 'ACTIVE_SECTIONS_COUNT configurado',
+                check: () => typeof window.ACTIVE_SECTIONS_COUNT !== 'undefined',
+                details: () => `Valor: ${window.ACTIVE_SECTIONS_COUNT || 'undefined'}`
+            });
+
+            // Test 3: Verificar StateManager
+            tests.push({
+                name: 'StateManager disponível',
+                check: () => typeof StateManager !== 'undefined',
+                details: () => StateManager ? 'Classe StateManager carregada' : 'StateManager não encontrado'
+            });
+
+            // Test 4: Verificar APIClient
+            tests.push({
+                name: 'APIClient disponível',
+                check: () => typeof APIClient !== 'undefined',
+                details: () => APIClient ? 'Classe APIClient carregada' : 'APIClient não encontrado'
+            });
+
+            // Test 5: Verificar componentes
+            tests.push({
+                name: 'Componentes carregados',
+                check: () => {
+                    return typeof ProgressBar !== 'undefined' &&
+                           typeof SectionContainer !== 'undefined' &&
+                           typeof FinalScreen !== 'undefined';
+                },
+                details: () => {
+                    const loaded = [];
+                    if (typeof ProgressBar !== 'undefined') loaded.push('ProgressBar');
+                    if (typeof SectionContainer !== 'undefined') loaded.push('SectionContainer');
+                    if (typeof FinalScreen !== 'undefined') loaded.push('FinalScreen');
+                    if (typeof DraftModal !== 'undefined') loaded.push('DraftModal');
+                    return `Carregados: ${loaded.join(', ')}`;
+                }
+            });
+
+            // Test 6: Verificar BOApp
+            tests.push({
+                name: 'BOApp instanciado',
+                check: () => typeof window.app !== 'undefined',
+                details: () => window.app ?
+                    `Seção atual: ${window.app.currentSectionIndex + 1}` :
+                    'window.app não está definido'
+            });
+
+            // Test 7: Verificar backend
+            tests.push({
+                name: 'Backend online',
+                check: async () => {
+                    try {
+                        const response = await fetch('http://localhost:8000/health');
+                        const data = await response.json();
+                        return data.status === 'ok';
+                    } catch (error) {
+                        return false;
+                    }
+                },
+                details: async () => {
+                    try {
+                        const response = await fetch('http://localhost:8000/health');
+                        const data = await response.json();
+                        return `Status: ${JSON.stringify(data)}`;
+                    } catch (error) {
+                        return `Erro: ${error.message}`;
+                    }
+                }
+            });
+
+            // Test 8: Verificar se ACTIVE_SECTIONS_COUNT == 3
+            tests.push({
+                name: 'ACTIVE_SECTIONS_COUNT = 3',
+                check: () => window.ACTIVE_SECTIONS_COUNT === 3,
+                details: () => `Esperado: 3, Atual: ${window.ACTIVE_SECTIONS_COUNT}`,
+                expectedFail: window.ACTIVE_SECTIONS_COUNT !== 3
+            });
+
+            // Test 9: Verificar ProgressBar renderizada
+            tests.push({
+                name: 'ProgressBar renderizada',
+                check: () => {
+                    const bar = document.getElementById('progress-bar');
+                    return bar && bar.children.length > 0;
+                },
+                details: () => {
+                    const bar = document.getElementById('progress-bar');
+                    return bar ? `${bar.children.length} bolinhas renderizadas` : 'Barra não encontrada';
+                }
+            });
+
+            // Test 10: Verificar SectionContainer renderizado
+            tests.push({
+                name: 'SectionContainer renderizado',
+                check: () => {
+                    const container = document.getElementById('section-container');
+                    return container && container.innerHTML.length > 0;
+                },
+                details: () => {
+                    const container = document.getElementById('section-container');
+                    return container ?
+                        `Container tem ${container.innerHTML.length} caracteres` :
+                        'Container não encontrado';
+                }
+            });
+
+            // Executar testes
+            let html = '<h2>Resultados</h2>';
+            let passCount = 0;
+            let failCount = 0;
+
+            for (const test of tests) {
+                const result = typeof test.check === 'function' && test.check.constructor.name === 'AsyncFunction' ?
+                    await test.check() : test.check();
+
+                const details = typeof test.details === 'function' && test.details.constructor.name === 'AsyncFunction' ?
+                    await test.details() : test.details();
+
+                const status = result ? 'success' : (test.expectedFail ? 'warning' : 'error');
+                const statusText = result ? 'OK' : (test.expectedFail ? 'WARN' : 'FAIL');
+                const statusClass = result ? 'ok' : (test.expectedFail ? 'warn' : 'fail');
+
+                if (result) passCount++;
+                else failCount++;
+
+                html += `
+                    <div class="test ${status}">
+                        <strong>${test.name}</strong>
+                        <span class="status ${statusClass}">${statusText}</span>
+                        <br>
+                        <small>${details}</small>
+                    </div>
+                `;
+            }
+
+            // Resumo
+            html = `
+                <div style="background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: white;">Resumo</h3>
+                    <p style="margin: 10px 0 0 0; font-size: 18px;">
+                        ✅ ${passCount} testes passaram | ❌ ${failCount} testes falharam
+                    </p>
+                </div>
+            ` + html;
+
+            // Console do navegador
+            html += `
+                <h2>Console do Navegador</h2>
+                <div class="test">
+                    <p>Abra o DevTools (F12) para ver erros JavaScript detalhados</p>
+                    <p><strong>Atalho:</strong> F12 ou Ctrl+Shift+I</p>
+                    <p><strong>Aba:</strong> Console</p>
+                </div>
+            `;
+
+            results.innerHTML = html;
+        }
+
+        // Auto-executar ao carregar
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostics, 500);
+        });
+    </script>
+
+    <!-- Carregar scripts da aplicação para testar -->
+    <script src="js/data/sections.js"></script>
+    <script src="js/StateManager.js"></script>
+    <script src="js/services/APIClient.js"></script>
+    <script src="js/components/ProgressBar.js"></script>
+    <script src="js/components/TextInput.js"></script>
+    <script src="js/components/SingleChoice.js"></script>
+    <script src="js/components/MultipleChoice.js"></script>
+    <script src="js/components/SectionContainer.js"></script>
+    <script src="js/components/FinalScreen.js"></script>
+    <script src="js/components/DraftModal.js"></script>
+    <script src="js/BOApp.js"></script>
+</body>
+</html>

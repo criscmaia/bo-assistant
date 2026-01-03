@@ -15,8 +15,12 @@ class DraftModal {
 
     /**
      * Exibe o modal com dados do rascunho
+     * @param {Object} draft - Dados do rascunho
+     * @param {Array} sectionsData - Dados das seções (metadata)
+     * @param {Function} onContinue - Callback ao continuar
+     * @param {Function} onDiscard - Callback ao descartar
      */
-    show(draft, onContinue, onDiscard, sectionsData) {
+    show(draft, sectionsData, onContinue, onDiscard) {
         this.onContinue = onContinue;
         this.onDiscard = onDiscard;
 
@@ -67,8 +71,8 @@ class DraftModal {
         let html = '';
 
         // Informações de progresso por seção
-        if (draft.sectionsState && sectionsData) {
-            Object.entries(draft.sectionsState).forEach(([sectionId, state]) => {
+        if (draft.sections && sectionsData) {
+            Object.entries(draft.sections).forEach(([sectionId, state]) => {
                 const answeredCount = Object.keys(state.answers || {}).length;
 
                 if (answeredCount > 0) {
@@ -91,9 +95,9 @@ class DraftModal {
         // Lista de respostas (scrollable)
         html += '<div class="draft-answers-list">';
 
-        if (draft.sectionsState) {
+        if (draft.sections) {
             // Ordenar seções por ID
-            const sortedSections = Object.entries(draft.sectionsState)
+            const sortedSections = Object.entries(draft.sections)
                 .sort(([a], [b]) => parseInt(a) - parseInt(b));
 
             sortedSections.forEach(([sectionId, state]) => {

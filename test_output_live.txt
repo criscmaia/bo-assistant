@@ -1,0 +1,9 @@
+[   1.2s] ============================================================
+[   1.2s] TESTE FINAL COMPLETO - 3 SECOES
+[   1.2s] ============================================================
+[   4.9s] 
+### SECAO 1: Contexto da Ocorrencia
+[   4.9s] 1.1: 19/12/2025, 14h30min, quinta-feira...
+[  14.9s]   EXCECAO: Page.wait_for_selector: Timeout 10000ms exceeded.
+
+[  14.9s] ABORTADO em 1.1

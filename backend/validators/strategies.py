@@ -214,21 +214,33 @@ class NumericRangeValidator(ValidationStrategy):
 class DateTimeValidator(ValidationStrategy):
     """
     Valida data e hora no formato brasileiro.
+    Restaurado v0.13.2: Validação completa de hora/minuto inválidos.
 
-    Aceita formatos:
+    Aceita formatos flexíveis:
     - "10/01/2026 às 14:30"
-    - "10/01/2026 14:30"
     - "10/01/2026, 14h30min"
-    - "10/01/2026"
+    - "10/01, 14h30" (ano opcional)
+    - "14h30, dia 10/01" (ordem flexível)
+    - "15 de janeiro de 2026, 14h30" (nome do mês)
+
+    Rejeita:
+    - Hora inválida (26h)
+    - Minuto inválido (61min)
 
     Exemplo:
-        validator = DateTimeValidator()
+        validator = DateTimeValidator(require_time=True)
         result = validator.validate("10/01/2026 às 14:30", {})  # valid=True
-        result = validator.validate("10/01/2026, 14h30min", {})  # valid=True
+        result = validator.validate("03/01, 17h41", {})  # valid=True
+        result = validator.validate("03/01/2026, 26h41", {})  # valid=False (hora > 23)
     """
 
-    DATE_PATTERN = r'\d{2}/\d{2}/\d{4}'
-    TIME_PATTERN = r'(\d{1,2}:\d{2}|\d{1,2}h\d{2}min)'
+    # Data flexível: DD/MM ou DD/MM/AAAA
+    DATE_PATTERN = r'\d{1,2}/\d{1,2}'
+    # Nomes de meses em português
+    MONTH_NAMES = [
+        'janeiro', 'fevereiro', 'março', 'marco', 'abril', 'maio',
+        'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ]
 
     def __init__(
         self,
@@ -236,20 +248,38 @@ class DateTimeValidator(ValidationStrategy):
         error_message: Optional[str] = None
     ):
         self.require_time = require_time
-        self.error_message = error_message or (
-            "Formato esperado: DD/MM/AAAA às HH:MM ou DD/MM/AAAA, HHhMMmin" if require_time
-            else "Formato esperado: DD/MM/AAAA"
-        )
+        self.error_message = error_message or "Faltou a data. Ex: 03/01/2026, 17h30"
 
     def validate(self, answer: str, context: Dict[str, Any]) -> ValidationResult:
-        has_date = bool(re.search(self.DATE_PATTERN, answer))
-        has_time = bool(re.search(self.TIME_PATTERN, answer))
+        # Data: DD/MM ou nome do mês
+        has_date = bool(re.search(self.DATE_PATTERN, answer)) or \
+                   any(mes in answer.lower() for mes in self.MONTH_NAMES)
 
         if not has_date:
             return ValidationResult(valid=False, error=self.error_message)
 
-        if self.require_time and not has_time:
-            return ValidationResult(valid=False, error="Informar também a hora (HH:MM)")
+        # Hora: extrair valores para validar
+        time_match = re.search(r'(\d{1,2})[h:](\d{0,2})', answer)
+
+        if self.require_time and not time_match:
+            return ValidationResult(valid=False, error="Faltou o horário. Ex: 17h30 ou 17:30")
+
+        # Validar hora (0-23) e minuto (0-59)
+        if time_match:
+            hour = int(time_match.group(1))
+            minute_str = time_match.group(2)
+            minute = int(minute_str) if minute_str else 0
+
+            if hour > 23:
+                return ValidationResult(
+                    valid=False,
+                    error=f"Hora inválida ({hour}h). Use formato 24h (0-23). Ex: 21h03"
+                )
+            if minute > 59:
+                return ValidationResult(
+                    valid=False,
+                    error=f"Minuto inválido ({minute}min). Use 0-59. Ex: 21h03"
+                )
 
         return ValidationResult(valid=True)
 

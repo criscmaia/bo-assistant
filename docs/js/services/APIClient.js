@@ -118,6 +118,29 @@ class APIClient {
     }
 
     /**
+     * v0.13.2 (Opção B): Gera texto para uma seção que completou todas as perguntas.
+     * Chamado pelo frontend APÓS sendAnswer retornar will_generate_now=true.
+     *
+     * @param {number} sectionNumber - Número da seção (1-8)
+     * @param {string} llmProvider - Provider LLM (default: 'groq')
+     * @returns {Object} - { generated_text, section, generation_time_ms }
+     */
+    async generateText(sectionNumber, llmProvider = 'groq') {
+        if (!this.sessionId) {
+            throw new APIError('Sessão não iniciada', 400);
+        }
+
+        const data = await this._request(`/generate/${this.sessionId}/${sectionNumber}`, {
+            method: 'POST',
+            body: JSON.stringify({
+                llm_provider: llmProvider
+            }),
+        });
+
+        return data;
+    }
+
+    /**
      * Edita uma resposta anterior
      */
     async editAnswer(step, message, llmProvider = 'groq') {

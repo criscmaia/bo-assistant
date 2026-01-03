@@ -327,16 +327,42 @@ class FinalScreen {
      * Inicia novo BO
      */
     _handleNewBO() {
-        const confirm = window.confirm(
-            '🔄 Iniciar Novo BO\n\n' +
-            'Isso vai limpar todos os dados atuais.\n' +
-            'Certifique-se de ter copiado o texto antes de continuar.\n\n' +
-            'Deseja continuar?'
-        );
+        // Usar modal customizado ao invés de window.confirm()
+        const confirmationModal = window.confirmationModal || window.boApp?.confirmationModal;
 
-        if (confirm) {
-            this.onNewBO();
+        if (!confirmationModal) {
+            // Fallback para window.confirm() se modal não estiver disponível
+            const confirm = window.confirm(
+                '🔄 Iniciar Novo BO\n\n' +
+                'Isso vai limpar todos os dados atuais.\n' +
+                'Certifique-se de ter copiado o texto antes de continuar.\n\n' +
+                'Deseja continuar?'
+            );
+            if (confirm) {
+                this.onNewBO();
+            }
+            return;
         }
+
+        // Usar modal customizado
+        confirmationModal.show(
+            {
+                title: 'Iniciar Novo BO',
+                message: 'Isso vai limpar todos os dados atuais.\n\nCertifique-se de ter copiado o texto antes de continuar.\n\nDeseja continuar?',
+                icon: '🔄',
+                confirmText: '✅ Sim, Iniciar Novo',
+                cancelText: '❌ Cancelar',
+                confirmStyle: 'danger'
+            },
+            () => {
+                // Confirmado
+                this.onNewBO();
+            },
+            () => {
+                // Cancelado (nenhuma ação necessária)
+                console.log('[FinalScreen] Novo BO cancelado pelo usuário');
+            }
+        );
     }
 
     /**

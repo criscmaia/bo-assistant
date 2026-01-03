@@ -103,6 +103,46 @@ class BOStateMachineSection3:
             return "Não se aplica (não houve campana antes da abordagem)"
         return None
 
+    def will_next_response_complete(self) -> bool:
+        """
+        Verifica se a resposta à pergunta ATUAL PODE completar a seção.
+
+        v0.13.2: Usado pelo frontend para mostrar loading antes de enviar resposta.
+
+        Retorna True se:
+        - É a última pergunta principal (sem follow-up), OU
+        - É pergunta com follow-up condicional (pode ou não completar)
+        - É follow-up final
+
+        O frontend deve mostrar loading quando True, e escondê-lo se
+        a resposta não completar (ex: follow-up foi acionado).
+
+        Returns:
+            bool: True se resposta atual PODE gerar texto
+        """
+        if self.current_step == "complete" or self.section_skipped:
+            return False
+
+        # Simular avanço para verificar se próximo step é "complete" ou pode ser pulado
+        test_index = self.step_index
+        while test_index < len(SECTION3_STEPS) - 1:
+            test_index += 1
+            next_step = SECTION3_STEPS[test_index]
+
+            # 3.6.1 é follow-up condicional - pode ser pulado
+            if next_step == "3.6.1":
+                # Se estamos em 3.6, PODE completar (depende da resposta)
+                if self.current_step == "3.6":
+                    return True  # Pode completar se resposta for "NÃO"
+                # Se resposta de 3.6 foi "NÃO", pula 3.6.1
+                answer_36 = self.answers.get("3.6", "").strip().upper()
+                if answer_36 == "NÃO" or answer_36 == "NAO":
+                    continue  # Pula 3.6.1, vai para "complete"
+
+            return next_step == "complete"
+
+        return True  # Se chegou ao final, próximo é "complete"
+
     def get_all_answers(self) -> Dict[str, str]:
         """Retorna todas as respostas coletadas"""
         return self.answers.copy()

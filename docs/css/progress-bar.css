@@ -169,16 +169,16 @@
     }
 }
 
-/* Tooltip */
+/* Tooltip - FIXED para evitar problemas de posicionamento */
 .progress-tooltip {
-    position: absolute;
+    position: fixed;
     background-color: #1f2937;
     color: white;
     padding: 8px 12px;
     border-radius: 8px;
     font-size: 13px;
     white-space: nowrap;
-    z-index: 100;
+    z-index: 1000;
     pointer-events: none;
     transform: translateX(-50%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -195,14 +195,28 @@
     pointer-events: none;
 }
 
-.progress-tooltip::after {
+/* Seta do tooltip - ACIMA da bolinha (padrão) */
+.progress-tooltip--top::after {
     content: '';
     position: absolute;
-    top: 100%;
+    bottom: -6px;
     left: 50%;
     transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: #1f2937;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #1f2937;
+}
+
+/* Seta do tooltip - ABAIXO da bolinha (quando não há espaço acima) */
+.progress-tooltip--bottom::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #1f2937;
 }
 
 .progress-tooltip .tooltip-emoji {
@@ -213,6 +227,60 @@
     margin-left: 8px;
     font-size: 11px;
     opacity: 0.8;
+}
+
+/* ============================================
+   BOLINHA BO FINAL (2 estados: locked/completed)
+   ============================================ */
+
+.progress-node-wrapper--final {
+    /* Mesmo estilo das outras bolinhas */
+}
+
+/* Estado LOCKED (cinza com cadeado) - não clicável */
+.progress-node--final.progress-node--locked {
+    background-color: #e5e7eb;
+    border-color: #d1d5db;
+    cursor: not-allowed !important;
+    transition: all 0.3s ease;
+}
+
+.progress-node--final.progress-node--locked .node-number {
+    display: block !important;
+    color: #9ca3af;
+    font-size: 1rem;
+}
+
+.progress-node--final.progress-node--locked:hover {
+    /* Sem animação quando locked */
+    transform: none;
+    box-shadow: none;
+}
+
+/* Estado COMPLETED (verde com checkmark) - clicável */
+.progress-node--final.progress-node--completed {
+    background-color: #10b981 !important;
+    border-color: #059669 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease;
+}
+
+.progress-node--final.progress-node--completed:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.progress-node--final.progress-node--completed .node-number {
+    display: block !important;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Linha de conexão para BO Final */
+.progress-line-container--final .progress-line-fill {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    transition: width 0.3s ease;
 }
 
 /* Label abaixo da bolinha (número da seção) */

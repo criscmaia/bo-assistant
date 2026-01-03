@@ -200,6 +200,9 @@ class BOApp {
         // Inicializar DraftModal
         this._initDraftModal();
 
+        // Inicializar ConfirmationModal
+        this._initConfirmationModal();
+
         // Verificar conexão com API
         await this._checkApiConnection();
 
@@ -248,6 +251,10 @@ class BOApp {
             onSkip: this._onSectionSkip,
             onNavigateNext: this._onNavigateNext,
             onNavigateBack: this._onNavigateBack,
+            // v0.13.2 (Opção B): Callback para gerar texto via endpoint separado
+            onGenerateText: async (sectionId) => {
+                return await this._generateSectionText(sectionId);
+            },
         });
 
         window.sectionContainer = this.sectionContainer; // Debug
@@ -259,6 +266,14 @@ class BOApp {
     _initDraftModal() {
         this.draftModal = new DraftModal('draft-modal-container');
         window.draftModal = this.draftModal; // Debug
+    }
+
+    /**
+     * Inicializa ConfirmationModal
+     */
+    _initConfirmationModal() {
+        this.confirmationModal = new ConfirmationModal('confirmation-modal-container');
+        window.confirmationModal = this.confirmationModal; // Debug
     }
 
     /**
@@ -370,19 +385,85 @@ class BOApp {
     /**
      * Callback: resposta enviada
      * Usa StateManager para salvar estado (v0.13.1+)
+     *
+     * CORREÇÃO v0.13.2: Retorna { validationError } se validação falhar.
+     * O chamador (SectionContainer) deve verificar e NÃO avançar se houver erro.
      */
     async _onAnswer(questionId, answer, options = {}) {
         console.log('[BOApp] Resposta:', questionId, '=', answer);
 
         const sectionId = this.stateManager.getCurrentSectionId();
 
-        // Salvar resposta via StateManager (notifica listeners automaticamente)
-        this.stateManager.saveAnswer(sectionId, questionId, answer);
+        // Se online, enviar para API PRIMEIRO para validar
+        // Só salvar no StateManager se validação passar
+        if (this.stateManager.getState().isOnline) {
+            try {
+                const response = await this.api.sendAnswer(answer, 'groq', sectionId);
+
+                // CORREÇÃO v0.13.2: Se validação falhou, retornar erro SEM salvar resposta
+                if (response.validation_error) {
+                    console.log('[BOApp] Erro de validação:', response.validation_error);
+                    return { validationError: response.validation_error };
+                }
+
+                // Validação passou - agora sim salvar resposta
+                this.stateManager.saveAnswer(sectionId, questionId, answer);
+
+                // Sincronizar dados do SectionContainer com StateManager
+                if (this.sectionContainer) {
+                    this.stateManager.setCurrentQuestionIndex(sectionId, this.sectionContainer.currentQuestionIndex);
+                }
+
+                // Atualizar total de perguntas (perguntas condicionais podem mudar o total)
+                const answers = this.stateManager.getAnswers(sectionId);
+                const totalQuestions = window.calculateSectionTotal
+                    ? window.calculateSectionTotal(sectionId, answers)
+                    : this.stateManager.getSectionState(sectionId).totalCount;
+                this.stateManager.updateTotalQuestions(sectionId, totalQuestions);
+
+                // Se seção foi pulada, armazenar a razão do skip
+                console.log('[BOApp] Verificando skip - section_skipped:', response.section_skipped, 'generated_text:', response.generated_text);
+                if (response.section_skipped && response.generated_text) {
+                    this.stateManager.setGeneratedText(sectionId, response.generated_text);
+                    console.log('[BOApp] Seção pulada. Razão:', response.generated_text);
+                    return { skipReason: response.generated_text };
+                }
+
+                // v0.13.2 (Opção B): Se seção completou e backend sinalizou para gerar texto
+                // Retornar willGenerateNow para frontend mostrar loading e chamar _generateSectionText
+                if (response.will_generate_now) {
+                    console.log('[BOApp] Backend sinalizou will_generate_now - frontend deve mostrar loading e chamar _generateSectionText');
+                    return {
+                        willGenerateNow: true,
+                        isComplete: true,
+                        currentStep: response.current_step
+                    };
+                }
+
+                // v0.13.2: Retornar dados do backend para arquitetura backend-driven
+                return {
+                    isComplete: response.is_section_complete || false,
+                    currentStep: response.current_step,
+                    willGenerateText: response.will_generate_text || false
+                };
+            } catch (error) {
+                console.error('[BOApp] Erro ao enviar resposta:', error);
+                // Em caso de erro de rede/API, salvar localmente e continuar
+                this.stateManager.saveAnswer(sectionId, questionId, answer);
+
+                // Se foi erro de API (rate limit, etc), retornar para mostrar no texto gerado
+                if (error.message) {
+                    return { apiError: error.message };
+                }
+            }
+        } else {
+            // Modo offline - salvar localmente sem validação
+            this.stateManager.saveAnswer(sectionId, questionId, answer);
+        }
 
         // Sincronizar dados do SectionContainer com StateManager
         if (this.sectionContainer) {
             this.stateManager.setCurrentQuestionIndex(sectionId, this.sectionContainer.currentQuestionIndex);
-            // Messages são atualizados pelo SectionContainer diretamente no StateManager
         }
 
         // Atualizar total de perguntas (perguntas condicionais podem mudar o total)
@@ -391,42 +472,14 @@ class BOApp {
             ? window.calculateSectionTotal(sectionId, answers)
             : this.stateManager.getSectionState(sectionId).totalCount;
         this.stateManager.updateTotalQuestions(sectionId, totalQuestions);
-
-        // Se online, enviar para API (validação + texto gerado se seção completa)
-        if (this.stateManager.getState().isOnline) {
-            try {
-                const response = await this.api.sendAnswer(answer, 'groq', sectionId);
-
-                if (response.validation_error) {
-                    // Mostrar erro de validação
-                    this._showValidationError(response.validation_error);
-                }
-
-                // Se seção foi pulada, armazenar a razão do skip
-                console.log('[BOApp] Verificando skip - section_skipped:', response.section_skipped, 'generated_text:', response.generated_text);
-                if (response.section_skipped && response.generated_text) {
-                    this.stateManager.setGeneratedText(sectionId, response.generated_text);
-                    // Passar o skip reason para o SectionContainer para exibição
-                    if (this.sectionContainer) {
-                        this.sectionContainer.setSkipReason(response.generated_text);
-                    }
-                    console.log('[BOApp] Seção pulada. Razão:', response.generated_text);
-                }
-                // Se seção completou e tem texto gerado, armazenar
-                else if (response.is_section_complete && response.generated_text) {
-                    this.stateManager.setGeneratedText(sectionId, response.generated_text);
-                    console.log('[BOApp] Texto gerado recebido do backend:', response.generated_text.substring(0, 100));
-                }
-            } catch (error) {
-                console.error('[BOApp] Erro ao enviar resposta:', error);
-                // Continuar offline
-            }
-        }
     }
 
     /**
      * Callback: seção completa
      * Usa StateManager para salvar estado (v0.13.1+)
+     *
+     * v0.13.2 (Opção B): Texto já foi gerado pelo _handleInputSubmit quando willGenerateNow=true.
+     * Este callback só precisa garantir o estado e gerar placeholder se offline.
      */
     async _onSectionComplete(sectionId, answers) {
         console.log('[BOApp] Seção completa:', sectionId);
@@ -434,29 +487,53 @@ class BOApp {
         // Marcar seção como completa via StateManager (notifica listeners automaticamente)
         this.stateManager.markSectionCompleted(sectionId, answers);
 
-        // Gerar texto (se online, para todas as seções)
-        if (this.stateManager.getState().isOnline) {
-            await this._generateSectionText(sectionId);
-        } else {
-            // Texto placeholder para modo offline
+        // v0.13.2 (Opção B): Verificar se texto já foi gerado (pelo fluxo willGenerateNow)
+        const existingText = this.stateManager.getGeneratedText(sectionId);
+        if (existingText) {
+            console.log('[BOApp] Texto já existe, não precisa gerar novamente');
+            return;
+        }
+
+        // Se chegou aqui sem texto (modo offline ou fallback), gerar placeholder
+        if (!this.stateManager.getState().isOnline) {
             const generatedText = this._generatePlaceholderText(sectionId, answers);
             this.stateManager.setGeneratedText(sectionId, generatedText);
             if (this.sectionContainer) {
                 this.sectionContainer.setGeneratedText(generatedText);
             }
+        } else {
+            // Fallback: se online mas sem texto, chamar geração
+            console.log('[BOApp] Seção completa sem texto - chamando geração como fallback');
+            await this._generateSectionText(sectionId);
         }
     }
 
     /**
      * Gera texto via API
+     * v0.13.2 (Opção B): Chama endpoint separado /generate/{session_id}/{section_number}
      * Usa StateManager para obter estado (v0.13.1+)
      */
     async _generateSectionText(sectionId) {
-        this._showLoading('Gerando texto...');
+        console.log('[BOApp] _generateSectionText chamado para seção:', sectionId);
 
         try {
-            // O texto já foi gerado e armazenado em _onAnswer quando a última resposta foi enviada
-            // Se não existir (modo offline ou erro), usar placeholder
+            // v0.13.2 (Opção B): Chamar endpoint separado de geração
+            if (this.stateManager.getState().isOnline) {
+                console.log('[BOApp] Chamando API generateText para seção:', sectionId);
+                const response = await this.api.generateText(sectionId, 'groq');
+
+                if (response.generated_text) {
+                    console.log('[BOApp] Texto gerado recebido:', response.generated_text.substring(0, 50) + '...');
+                    this.stateManager.setGeneratedText(sectionId, response.generated_text);
+
+                    if (this.sectionContainer) {
+                        this.sectionContainer.setGeneratedText(response.generated_text);
+                    }
+                    return response.generated_text;
+                }
+            }
+
+            // Fallback: usar placeholder se offline ou sem texto
             let generatedText = this.stateManager.getGeneratedText(sectionId);
 
             if (!generatedText) {
@@ -469,10 +546,12 @@ class BOApp {
                 this.sectionContainer.setGeneratedText(generatedText);
             }
 
+            return generatedText;
+
         } catch (error) {
             console.error('[BOApp] Erro ao gerar texto:', error);
 
-            // Usar placeholder
+            // Usar placeholder em caso de erro
             const answers = this.stateManager.getAnswers(sectionId);
             const generatedText = this._generatePlaceholderText(sectionId, answers);
             this.stateManager.setGeneratedText(sectionId, generatedText);
@@ -480,8 +559,7 @@ class BOApp {
                 this.sectionContainer.setGeneratedText(generatedText);
             }
 
-        } finally {
-            this._hideLoading();
+            return generatedText;
         }
     }
 
@@ -642,9 +720,16 @@ class BOApp {
     _showFinalScreen() {
         console.log('[BOApp] Todas as seções completas!');
 
+        // DEBUG: Log estado das seções antes de passar para FinalScreen
+        const sectionsState = this.stateManager.getState().sections;
+        console.log('[BOApp] Estado das seções para FinalScreen:');
+        Object.entries(sectionsState).forEach(([id, state]) => {
+            console.log(`  Seção ${id}: status=${state.status}, generatedText=${state.generatedText ? state.generatedText.substring(0, 50) + '...' : 'NULL'}`);
+        });
+
         // Criar e renderizar tela final
         this.finalScreen = new FinalScreen('section-container', {
-            sectionsState: this.stateManager.getState().sections,
+            sectionsState: sectionsState,
             startTime: this.sessionStartTime || new Date(),
             onNewBO: () => {
                 this._startNewBO();
@@ -716,9 +801,26 @@ class BOApp {
 
             if (!draft) return false;
 
+            // ✅ NOVO: Validar se draft tem respostas salvas
+            const hasSavedAnswers = draft.sections &&
+                Object.values(draft.sections).some(section =>
+                    section.answers && Object.keys(section.answers).length > 0
+                );
+
+            if (!hasSavedAnswers) {
+                // Draft existe mas está vazio - limpar e não mostrar modal
+                console.log('[BOApp] Draft encontrado mas sem respostas salvas - limpando');
+                this.stateManager.clearDraft();
+                return false;
+            }
+
+            // Só mostra modal se há conteúdo real
+            console.log('[BOApp] Draft com respostas encontrado - exibindo modal');
+
             // Mostrar modal customizado
             this.draftModal.show(
                 draft,
+                this.sections, // Passar dados das seções para o preview
                 // onContinue - continuar do rascunho
                 () => {
                     // Restaurar estado via StateManager

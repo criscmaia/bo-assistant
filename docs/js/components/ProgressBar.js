@@ -133,6 +133,81 @@ class ProgressBar {
             }
         });
 
+        // Adicionar bolinha "BO Final" - SEMPRE visível
+        // Verificar se as seções DISPONÍVEIS estão completas (completed ou skipped)
+        // TEMPORÁRIO: Fluxo limitado às seções 1-3 (até perguntas finais serem implementadas)
+        const availableSections = this.sections.filter(s => s.id <= 3);
+        const allSectionsCompleted = availableSections.every(section => {
+            const state = this.sectionStates[section.id];
+            // Seção está "completa" se status é completed OU skipped
+            return state && (state.status === 'completed' || state.status === 'skipped');
+        });
+
+        // Container da bolinha BO Final
+        const finalNodeWrapper = document.createElement('div');
+        finalNodeWrapper.className = 'progress-node-wrapper progress-node-wrapper--final';
+
+        // Bolinha com estado condicional
+        const finalNode = document.createElement('div');
+        const isLocked = !allSectionsCompleted;
+
+        if (isLocked) {
+            // Estado LOCKED (cinza com cadeado) - não clicável
+            finalNode.className = 'progress-node progress-node--pending progress-node--final progress-node--locked';
+            finalNode.innerHTML = '<span class="node-number">🔒</span>';
+        } else {
+            // Estado COMPLETED (verde com checkmark) - clicável
+            finalNode.className = 'progress-node progress-node--completed progress-node--final';
+            finalNode.innerHTML = '<span class="node-number">✓</span>';
+        }
+
+        finalNode.dataset.sectionId = 'final';
+        finalNode.dataset.locked = isLocked ? 'true' : 'false';
+
+        // Label
+        const finalLabel = document.createElement('div');
+        finalLabel.className = 'progress-node-label';
+        finalLabel.textContent = 'BO Final';
+
+        finalNodeWrapper.appendChild(finalNode);
+        finalNodeWrapper.appendChild(finalLabel);
+
+        // Eventos - só permite clique se não estiver locked
+        // NOTA: Verificar dataset.locked em vez de closure para refletir estado atualizado
+        const finalClickHandler = () => {
+            const currentlyLocked = finalNode.dataset.locked === 'true';
+            if (!currentlyLocked) {
+                this._handleFinalNodeClick();
+            }
+        };
+        const finalMouseEnterHandler = (e) => {
+            const currentlyLocked = finalNode.dataset.locked === 'true';
+            this._showFinalTooltip(e, currentlyLocked);
+        };
+        const finalMouseLeaveHandler = () => this._hideTooltip();
+
+        finalNode.addEventListener('click', finalClickHandler);
+        finalNode.addEventListener('mouseenter', finalMouseEnterHandler);
+        finalNode.addEventListener('mouseleave', finalMouseLeaveHandler);
+
+        // Rastrear listeners para cleanup
+        this._eventListeners.push({ element: finalNode, event: 'click', handler: finalClickHandler });
+        this._eventListeners.push({ element: finalNode, event: 'mouseenter', handler: finalMouseEnterHandler });
+        this._eventListeners.push({ element: finalNode, event: 'mouseleave', handler: finalMouseLeaveHandler });
+
+        // Adicionar linha de conexão antes da bolinha final
+        const lineContainer = document.createElement('div');
+        lineContainer.className = 'progress-line-container progress-line-container--final';
+        // Linha completa se todas seções completas, caso contrário vazia
+        const fillWidth = allSectionsCompleted ? '100%' : '0%';
+        const lineFill = document.createElement('div');
+        lineFill.className = 'progress-line-fill';
+        lineFill.style.width = fillWidth;
+        lineContainer.appendChild(lineFill);
+
+        this.container.appendChild(lineContainer);
+        this.container.appendChild(finalNodeWrapper);
+
         // Aplicar estados iniciais
         this._updateAllLines();
     }
@@ -142,6 +217,12 @@ class ProgressBar {
      */
     _applyNodeState(node, sectionId) {
         const state = this.sectionStates[sectionId];
+
+        // Guard: Se não há estado para esta seção, retornar
+        if (!state) {
+            console.warn('[ProgressBar] _applyNodeState - state not found for section:', sectionId);
+            return;
+        }
 
         // Remover classes anteriores (com hyphen e underscore)
         node.classList.remove(
@@ -199,7 +280,10 @@ class ProgressBar {
         // Atualizar visual de todas as seções
         this.container.querySelectorAll('.progress-node').forEach(node => {
             const id = parseInt(node.dataset.sectionId);
-            this._applyNodeState(node, id);
+            // Skip se não for um número válido (ex: 'final')
+            if (!isNaN(id)) {
+                this._applyNodeState(node, id);
+            }
         });
     }
 
@@ -228,6 +312,7 @@ class ProgressBar {
         this.updateSection(sectionId, 'completed');
         this.sectionStates[sectionId].answeredCount = this.sectionStates[sectionId].totalCount;
         this._updateLineFill(sectionId);
+        this._updateFinalNodeState();
     }
 
     /**
@@ -237,6 +322,40 @@ class ProgressBar {
         this.updateSection(sectionId, 'skipped');
         this.sectionStates[sectionId].skipReason = skipReason || null;
         this._updateLineFill(sectionId);
+        this._updateFinalNodeState();
+    }
+
+    /**
+     * Atualiza estado visual da bolinha BO Final
+     * Chamado quando seções são completadas/puladas
+     */
+    _updateFinalNodeState() {
+        const finalNode = this.container.querySelector('.progress-node--final');
+        if (!finalNode) return;
+
+        // Verificar se seções 1-3 estão completas (temporário: fluxo limitado)
+        const availableSections = this.sections.filter(s => s.id <= 3);
+        const allCompleted = availableSections.every(section => {
+            const state = this.sectionStates[section.id];
+            return state && (state.status === 'completed' || state.status === 'skipped');
+        });
+
+        console.log('[ProgressBar] _updateFinalNodeState - allCompleted:', allCompleted);
+
+        if (allCompleted) {
+            // Mudar para COMPLETED
+            finalNode.classList.remove('progress-node--pending', 'progress-node--locked');
+            finalNode.classList.add('progress-node--completed');
+            finalNode.innerHTML = '<span class="node-number">✓</span>';
+            finalNode.dataset.locked = 'false';
+            finalNode.style.cursor = 'pointer';
+
+            // Atualizar linha de conexão
+            const lineFill = this.container.querySelector('.progress-line-container--final .progress-line-fill');
+            if (lineFill) {
+                lineFill.style.width = '100%';
+            }
+        }
     }
 
     /**
@@ -245,11 +364,18 @@ class ProgressBar {
     _updateLineFill(sectionId) {
         const lineFill = document.getElementById(`line-fill-${sectionId}`);
         if (!lineFill) {
-            console.warn('[ProgressBar] line-fill element not found for section:', sectionId);
+            // Não é erro - a última seção não tem linha após ela
             return;
         }
 
         const state = this.sectionStates[sectionId];
+
+        // Guard: Se não há estado para esta seção, retornar
+        if (!state) {
+            console.warn('[ProgressBar] _updateLineFill - state not found for section:', sectionId);
+            return;
+        }
+
         let percentage = 0;
 
         if (state.status === 'completed' || state.status === 'skipped') {
@@ -304,7 +430,22 @@ class ProgressBar {
     }
 
     /**
+     * Manipula clique na bolinha "BO Final"
+     */
+    _handleFinalNodeClick() {
+        console.log('[ProgressBar] Clique na bolinha BO Final');
+
+        // Emitir evento via EventBus para navegar para tela final
+        if (this.eventBus && typeof Events !== 'undefined') {
+            this.eventBus.emit(Events.FINAL_SCREEN_REQUESTED, {
+                context: 'progress_bar_final_node_click'
+            });
+        }
+    }
+
+    /**
      * Mostra tooltip ao passar mouse
+     * Usa position: fixed com coordenadas do viewport para posicionamento preciso
      */
     _showTooltip(event, section) {
         if (!this.tooltipEl) return;
@@ -338,12 +479,36 @@ class ProgressBar {
             }
         }
 
-        // Posicionar tooltip
-        const rect = event.target.getBoundingClientRect();
-        const containerRect = this.container.parentElement.getBoundingClientRect();
+        // Posicionar tooltip RELATIVO AO VIEWPORT (position: fixed)
+        const nodeRect = event.target.getBoundingClientRect();
 
-        this.tooltipEl.style.left = `${rect.left - containerRect.left + rect.width / 2}px`;
-        this.tooltipEl.style.top = `${rect.top - containerRect.top - 45}px`;
+        // Calcular posição horizontal (centralizado na bolinha)
+        // left do nó + metade da largura = centro da bolinha
+        const left = nodeRect.left + (nodeRect.width / 2);
+
+        // Calcular posição vertical com validação de espaço
+        const tooltipHeight = 50; // Altura estimada do tooltip
+        const spaceAbove = nodeRect.top; // Espaço até o topo do viewport
+        const gap = 10; // Espaçamento entre bolinha e tooltip
+
+        let top;
+
+        // Se NÃO há espaço suficiente acima (menos de 70px), mostrar ABAIXO
+        if (spaceAbove < 70) {
+            // Posicionar ABAIXO da bolinha
+            top = nodeRect.bottom + gap;
+            this.tooltipEl.classList.add('progress-tooltip--bottom');
+            this.tooltipEl.classList.remove('progress-tooltip--top');
+        } else {
+            // Posicionar ACIMA da bolinha (comportamento padrão)
+            top = nodeRect.top - tooltipHeight - gap;
+            this.tooltipEl.classList.add('progress-tooltip--top');
+            this.tooltipEl.classList.remove('progress-tooltip--bottom');
+        }
+
+        // Aplicar posicionamento (coordenadas do viewport)
+        this.tooltipEl.style.left = `${left}px`;
+        this.tooltipEl.style.top = `${top}px`;
 
         this.tooltipEl.classList.remove('hidden');
     }
@@ -355,6 +520,59 @@ class ProgressBar {
         if (this.tooltipEl) {
             this.tooltipEl.classList.add('hidden');
         }
+    }
+
+    /**
+     * Mostra tooltip da bolinha "BO Final"
+     * Usa position: fixed com coordenadas do viewport para posicionamento preciso
+     */
+    _showFinalTooltip(event, isLocked) {
+        if (!this.tooltipEl) return;
+
+        // Conteúdo do tooltip
+        const emojiSpan = this.tooltipEl.querySelector('.tooltip-emoji');
+        const nameSpan = this.tooltipEl.querySelector('.tooltip-name');
+        const statusSpan = this.tooltipEl.querySelector('.tooltip-status');
+
+        if (emojiSpan) emojiSpan.textContent = '📋';
+        if (nameSpan) nameSpan.textContent = 'BO Final';
+
+        if (statusSpan) {
+            if (isLocked) {
+                statusSpan.textContent = '🔒 Aguardando conclusão';
+            } else {
+                statusSpan.textContent = '✅ Clique para ver';
+            }
+        }
+
+        // Posicionar tooltip RELATIVO AO VIEWPORT (position: fixed)
+        const nodeRect = event.target.getBoundingClientRect();
+
+        // Calcular posição horizontal (centralizado na bolinha)
+        const left = nodeRect.left + (nodeRect.width / 2);
+
+        // Calcular posição vertical com validação de espaço
+        const tooltipHeight = 50;
+        const spaceAbove = nodeRect.top;
+        const gap = 10;
+
+        let top;
+        if (spaceAbove < 70) {
+            // Posicionar ABAIXO
+            top = nodeRect.bottom + gap;
+            this.tooltipEl.classList.add('progress-tooltip--bottom');
+            this.tooltipEl.classList.remove('progress-tooltip--top');
+        } else {
+            // Posicionar ACIMA
+            top = nodeRect.top - tooltipHeight - gap;
+            this.tooltipEl.classList.add('progress-tooltip--top');
+            this.tooltipEl.classList.remove('progress-tooltip--bottom');
+        }
+
+        // Aplicar posicionamento (coordenadas do viewport)
+        this.tooltipEl.style.left = `${left}px`;
+        this.tooltipEl.style.top = `${top}px`;
+        this.tooltipEl.classList.remove('hidden');
     }
 
     /**

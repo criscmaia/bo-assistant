@@ -116,14 +116,24 @@ class ChatResponse(BaseModel):
     is_section_complete: bool = False
     current_step: str
     current_section: Optional[int] = 1
-    section_skipped: Optional[bool] = False  # NOVO: True se seção foi pulada
+    section_skipped: Optional[bool] = False  # True se seção foi pulada
     validation_error: Optional[str] = None
     event_id: Optional[str] = None
+    will_generate_text: bool = False  # v0.13.2: True se próxima resposta vai gerar texto
+    will_generate_now: bool = False  # v0.13.2: True se seção completou e frontend deve chamar /generate
 
 class NewSessionResponse(BaseModel):
     session_id: str
     bo_id: str
     first_question: str
+
+class GenerateTextResponse(BaseModel):
+    """v0.13.2: Response para endpoint separado de geração de texto"""
+    session_id: str
+    bo_id: str
+    generated_text: str
+    section: int
+    generation_time_ms: int
 
 class UpdateAnswerRequest(BaseModel):
     message: str
@@ -445,6 +455,10 @@ async def chat(request_body: ChatRequest, request: Request):
     state_machine.store_answer(request_body.message)
     state_machine.next_step()
 
+    # DEBUG: Log para verificar se seção completou
+    import sys
+    print(f"[DEBUG] Após next_step: current_step={state_machine.current_step}, is_complete={state_machine.is_section_complete()}", file=sys.stderr, flush=True)
+
     # AGORA incrementar contador e garantir que sessão está no banco
     # (após armazenar resposta no state machine)
     session_data["answer_count"] = session_data.get("answer_count", 0) + 1
@@ -482,159 +496,19 @@ async def chat(request_body: ChatRequest, request: Request):
                 event_id=event_id
             )
 
-        # Gerar texto com método correto baseado na seção
-        try:
-            start_time = datetime.now()
+        # v0.13.2 (Opção B): NÃO gerar texto aqui - apenas sinalizar que frontend deve chamar /generate
+        # Armazenar llm_provider para o endpoint /generate usar depois
+        session_data["pending_llm_provider"] = request_body.llm_provider
 
-            # Gerar texto usando método específico da seção
-            if current_section == 1:
-                generated_text = await llm_service.generate_section_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section1_text"] = generated_text
-            elif current_section == 2:
-                generated_text = llm_service.generate_section2_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section2_text"] = generated_text
-            elif current_section == 3:
-                generated_text = llm_service.generate_section3_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section3_text"] = generated_text
-            elif current_section == 4:
-                generated_text = llm_service.generate_section4_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section4_text"] = generated_text
-            elif current_section == 5:
-                generated_text = llm_service.generate_section5_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section5_text"] = generated_text
-            elif current_section == 6:
-                generated_text = llm_service.generate_section6_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section6_text"] = generated_text
-            elif current_section == 7:
-                generated_text = llm_service.generate_section7_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section7_text"] = generated_text
-            elif current_section == ACTIVE_SECTIONS_COUNT:
-                # Gerar texto da última seção ativa
-                if ACTIVE_SECTIONS_COUNT == 3:
-                    generated_text = llm_service.generate_section3_text(
-                        section_data=state_machine.get_all_answers(),
-                        provider=request_body.llm_provider
-                    )
-                    session_data["section3_text"] = generated_text
-                elif ACTIVE_SECTIONS_COUNT == 8:
-                    generated_text = llm_service.generate_section8_text(
-                        section_data=state_machine.get_all_answers(),
-                        provider=request_body.llm_provider
-                    )
-                    session_data["section8_text"] = generated_text
-                # IMPORTANTE: A última seção ativa marca BO como completo
-                BOLogger.update_session_status(bo_id, "completed")
-            else:
-                raise ValueError(f"Seção {current_section} não suportada")
-
-            generation_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-
-            # Log: texto gerado
-            if is_logged:
-                BOLogger.log_event(
-                    bo_id=bo_id,
-                    event_type=f"section{current_section}_completed",
-                    data={
-                        "section": current_section,
-                        "llm_provider": request_body.llm_provider,
-                        "generated_text": generated_text,
-                        "generation_time_ms": generation_time_ms,
-                        "answers": state_machine.get_all_answers()
-                    }
-                )
-            else:
-                # Adicionar à fila de eventos pendentes
-                session_data["pending_events"].append({
-                    "event_type": f"section{current_section}_completed",
-                    "data": {
-                        "section": current_section,
-                        "llm_provider": request_body.llm_provider,
-                        "generated_text": generated_text,
-                        "generation_time_ms": generation_time_ms,
-                        "answers": state_machine.get_all_answers()
-                    }
-                })
-
-            # Atualizar status da sessão apenas se todas as seções foram concluídas
-            if current_section == 1:
-                pass  # Não marca como "completed" ainda, pois tem Seção 2, 3, 4, 5, 6 e 7
-            elif current_section == 2:
-                pass  # Não marca como "completed" ainda, pois tem Seção 3, 4, 5, 6 e 7
-            elif current_section == 3:
-                pass  # Não marca como "completed" ainda, pois tem Seção 4, 5, 6 e 7
-            elif current_section == 4:
-                pass  # Não marca como "completed" ainda, pois tem Seção 5, 6 e 7
-            elif current_section == 5:
-                pass  # Não marca como "completed" ainda, pois tem Seção 6 e 7
-            elif current_section == 6:
-                pass  # Não marca como "completed" ainda, pois tem Seção 7
-            elif current_section == 7:
-                pass  # Não marca como "completed" ainda, pois tem Seção 8
-            # Seção 8 marcará como "completed" quando implementada
-
-            return ChatResponse(
-                session_id=session_id,
-                bo_id=bo_id,
-                generated_text=generated_text,
-                is_section_complete=True,
-                current_step=state_machine.current_step,
-                current_section=current_section,
-                event_id=event_id
-            )
-            
-        except Exception as e:
-            error_msg = str(e)
-
-            # Log: erro na geração
-            if is_logged:
-                BOLogger.log_event(
-                    bo_id=bo_id,
-                    event_type="generation_error",
-                    data={
-                        "error": error_msg,
-                        "llm_provider": request_body.llm_provider
-                    }
-                )
-            else:
-                # Adicionar à fila de eventos pendentes
-                session_data["pending_events"].append({
-                    "event_type": "generation_error",
-                    "data": {
-                        "error": error_msg,
-                        "llm_provider": request_body.llm_provider
-                    }
-                })
-
-            # Mensagens mais amigáveis baseadas no tipo de erro
-            if "quota" in error_msg.lower() or "429" in error_msg:
-                user_msg = "⏳ Limite diário da API Gemini atingido. Aguarde ou troque de modelo."
-                status_code = 429
-            else:
-                user_msg = f"❌ Erro ao gerar texto: {error_msg}"
-                status_code = 500
-
-            raise HTTPException(status_code=status_code, detail=user_msg)
+        return ChatResponse(
+            session_id=session_id,
+            bo_id=bo_id,
+            is_section_complete=True,
+            current_step="complete",
+            current_section=current_section,
+            event_id=event_id,
+            will_generate_now=True  # Frontend deve mostrar loading e chamar /generate
+        )
     
     # Próxima pergunta
     next_question = state_machine.get_current_question()
@@ -668,8 +542,182 @@ async def chat(request_body: ChatRequest, request: Request):
         is_section_complete=False,
         current_section=current_section,
         current_step=state_machine.current_step,
-        event_id=event_id
+        validation_error=error_message if not is_valid else None,  # v0.13.2: incluir warning
+        event_id=event_id,
+        # v0.13.2: para frontend mostrar loading (duck typing - nem todas state machines herdam de BaseStateMachine)
+        will_generate_text=state_machine.will_next_response_complete() if hasattr(state_machine, 'will_next_response_complete') else False
     )
+
+@app.post("/generate/{session_id}/{section_number}")
+async def generate_text(session_id: str, section_number: int, request_body: dict = None):
+    """
+    v0.13.2 (Opção B): Endpoint separado para geração de texto com LLM.
+
+    Chamado pelo frontend APÓS /answer retornar will_generate_now=true.
+    Isso permite ao frontend mostrar loading ANTES da geração começar.
+
+    Body (opcional): {"llm_provider": "groq"}  - se não fornecido, usa o da última resposta
+    """
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+
+    session_data = sessions[session_id]
+    bo_id = session_data["bo_id"]
+    current_section = session_data.get("current_section", section_number)
+
+    # Usar llm_provider do body ou o pendente da última resposta
+    llm_provider = "groq"
+    if request_body and request_body.get("llm_provider"):
+        llm_provider = request_body.get("llm_provider")
+    elif session_data.get("pending_llm_provider"):
+        llm_provider = session_data["pending_llm_provider"]
+
+    # Obter state machine da seção
+    # v0.13.2: Corrigido para usar session_data["sections"][N] em vez de state_machine_section{N}
+    if "sections" not in session_data or section_number not in session_data["sections"]:
+        raise HTTPException(status_code=400, detail=f"Seção {section_number} não iniciada")
+
+    state_machine = session_data["sections"][section_number]
+
+    # Verificar se seção realmente completou
+    if not state_machine.is_section_complete():
+        raise HTTPException(status_code=400, detail="Seção ainda não completou todas as perguntas")
+
+    # Se seção foi pulada, não gera texto - apenas retorna a razão
+    if hasattr(state_machine, 'was_section_skipped') and state_machine.was_section_skipped():
+        skip_reason = state_machine.get_skip_reason()
+        return GenerateTextResponse(
+            session_id=session_id,
+            bo_id=bo_id,
+            generated_text=skip_reason,
+            section=section_number,
+            generation_time_ms=0
+        )
+
+    # Gerar texto
+    start_time = datetime.now()
+    is_logged = ensure_session_logged(session_id)
+
+    try:
+        # Gerar texto usando método específico da seção
+        if section_number == 1:
+            generated_text = await llm_service.generate_section_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section1_text"] = generated_text
+        elif section_number == 2:
+            generated_text = llm_service.generate_section2_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section2_text"] = generated_text
+        elif section_number == 3:
+            generated_text = llm_service.generate_section3_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section3_text"] = generated_text
+        elif section_number == 4:
+            generated_text = llm_service.generate_section4_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section4_text"] = generated_text
+        elif section_number == 5:
+            generated_text = llm_service.generate_section5_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section5_text"] = generated_text
+        elif section_number == 6:
+            generated_text = llm_service.generate_section6_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section6_text"] = generated_text
+        elif section_number == 7:
+            generated_text = llm_service.generate_section7_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section7_text"] = generated_text
+        elif section_number == 8:
+            generated_text = llm_service.generate_section8_text(
+                section_data=state_machine.get_all_answers(),
+                provider=llm_provider
+            )
+            session_data["section8_text"] = generated_text
+        else:
+            raise ValueError(f"Seção {section_number} não suportada")
+
+        generation_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+
+        # Se é a última seção ativa, marcar BO como completo
+        if section_number == ACTIVE_SECTIONS_COUNT:
+            BOLogger.update_session_status(bo_id, "completed")
+
+        # Log: texto gerado
+        if is_logged:
+            BOLogger.log_event(
+                bo_id=bo_id,
+                event_type=f"section{section_number}_completed",
+                data={
+                    "section": section_number,
+                    "llm_provider": llm_provider,
+                    "generated_text": generated_text,
+                    "generation_time_ms": generation_time_ms,
+                    "answers": state_machine.get_all_answers()
+                }
+            )
+        else:
+            # Adicionar à fila de eventos pendentes
+            if "pending_events" not in session_data:
+                session_data["pending_events"] = []
+            session_data["pending_events"].append({
+                "event_type": f"section{section_number}_completed",
+                "data": {
+                    "section": section_number,
+                    "llm_provider": llm_provider,
+                    "generated_text": generated_text,
+                    "generation_time_ms": generation_time_ms,
+                    "answers": state_machine.get_all_answers()
+                }
+            })
+
+        return GenerateTextResponse(
+            session_id=session_id,
+            bo_id=bo_id,
+            generated_text=generated_text,
+            section=section_number,
+            generation_time_ms=generation_time_ms
+        )
+
+    except Exception as e:
+        error_msg = str(e)
+
+        # Log: erro na geração
+        if is_logged:
+            BOLogger.log_event(
+                bo_id=bo_id,
+                event_type="generation_error",
+                data={
+                    "error": error_msg,
+                    "llm_provider": llm_provider,
+                    "section": section_number
+                }
+            )
+
+        # Mensagens mais amigáveis baseadas no tipo de erro
+        if "quota" in error_msg.lower() or "429" in error_msg:
+            user_msg = "⏳ Limite diário da API atingido. Aguarde ou troque de modelo."
+            status_code = 429
+        else:
+            user_msg = f"❌ Erro ao gerar texto: {error_msg}"
+            status_code = 500
+
+        raise HTTPException(status_code=status_code, detail=user_msg)
+
 
 @app.post("/start_section/{section_number}")
 async def start_section(section_number: int, request_body: dict):

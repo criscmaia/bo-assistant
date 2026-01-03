@@ -1,10 +1,16 @@
 /**
  * SectionContainer - Gerencia uma seção do BO
  * Inclui chat, input, texto gerado e transição
- * BO Inteligente v0.13.1
+ * BO Inteligente v0.13.2
  *
- * NOTA: A partir da v0.13.1, o estado é sincronizado com StateManager.
- * SectionContainer mantém cópia local para renderização, mas sincroniza com StateManager.
+ * NOTA v0.13.2: Estado agora é delegado para StateManager (Single Source of Truth).
+ * Getters/setters para state, messages, answers, generatedText, skipReason delegam
+ * para StateManager, eliminando duplicação de estado que causava bugs de regressão.
+ *
+ * Variáveis locais mantidas apenas para controle de UI:
+ * - currentQuestionIndex (qual pergunta mostrar)
+ * - isReadOnly (se está em modo leitura)
+ * - followUpQueue (perguntas follow-up pendentes)
  */
 
 class SectionContainer {
@@ -22,15 +28,11 @@ class SectionContainer {
         this.sectionData = options.sectionData || null;
         this.sectionId = options.sectionId || 1;
 
-        // Estado local (sincronizado com StateManager)
-        this.state = 'pending'; // pending, in_progress, completed, skipped
-        this.messages = []; // Histórico de mensagens do chat
-        this.answers = {}; // Respostas do usuário { questionId: answer }
-        this.currentQuestionIndex = 0;
-        this.generatedText = null;
+        // Estado UI local (NÃO duplicar estado do StateManager)
+        // v0.13.2+: state, messages, answers, generatedText, skipReason são delegados ao StateManager
+        this.currentQuestionIndex = 0; // Controle de UI - qual pergunta mostrar
         this.isReadOnly = false;
         this.followUpQueue = []; // Fila de perguntas follow-up (1.5.1, 1.5.2, etc)
-        this.skipReason = null; // Razão pela qual a seção foi pulada (ex: "não havia veículo")
 
         // Callbacks (DEPRECATED - usar EventBus)
         this.onAnswer = options.onAnswer || ((questionId, answer) => {});
@@ -38,9 +40,77 @@ class SectionContainer {
         this.onSkip = options.onSkip || ((sectionId) => {});
         this.onNavigateNext = options.onNavigateNext || ((nextSectionId) => {});
         this.onNavigateBack = options.onNavigateBack || (() => {});
+        // v0.13.2 (Opção B): Callback para gerar texto via endpoint separado
+        this.onGenerateText = options.onGenerateText || (async (sectionId) => null);
 
         // EventBus para comunicação desacoplada (v0.13.1+)
         this.eventBus = typeof window !== 'undefined' && window.eventBus ? window.eventBus : null;
+
+        // =============================================================================
+        // GETTERS - Delegam para StateManager (v0.13.2+ - Single Source of Truth)
+        // =============================================================================
+
+        // Helper para salvar resposta individual (porque getter retorna cópia)
+        this._saveAnswer = (questionId, answer) => {
+            if (this.stateManager) {
+                this.stateManager.saveAnswer(this.sectionId, questionId, answer);
+            }
+        };
+
+        Object.defineProperties(this, {
+            'state': {
+                get: () => this.stateManager?.getSectionStatus(this.sectionId) || 'pending',
+                set: (value) => {
+                    // Setter para compatibilidade - atualiza StateManager
+                    if (value === 'completed') {
+                        this.stateManager?.markSectionCompleted(this.sectionId);
+                    } else if (value === 'skipped') {
+                        this.stateManager?.markSectionSkipped(this.sectionId, this.skipReason);
+                    } else if (this.stateManager) {
+                        // Para pending/in_progress, setar diretamente
+                        const section = this.stateManager._state.sections[this.sectionId];
+                        if (section) section.status = value;
+                    }
+                }
+            },
+            'messages': {
+                get: () => this.stateManager?.getSectionState(this.sectionId)?.messages || [],
+                set: (value) => {
+                    // Setter para compatibilidade - sincroniza com StateManager
+                    if (this.stateManager && this.stateManager._state.sections[this.sectionId]) {
+                        this.stateManager._state.sections[this.sectionId].messages = value;
+                    }
+                }
+            },
+            'answers': {
+                get: () => this.stateManager?.getAnswers(this.sectionId) || {},
+                set: (value) => {
+                    // Setter para compatibilidade - sincroniza com StateManager
+                    if (this.stateManager && this.stateManager._state.sections[this.sectionId]) {
+                        this.stateManager._state.sections[this.sectionId].answers = { ...value };
+                    }
+                }
+            },
+            'generatedText': {
+                get: () => {
+                    const text = this.stateManager?.getGeneratedText(this.sectionId) || null;
+                    console.log('[SectionContainer] getter generatedText - sectionId:', this.sectionId, 'text:', text ? text.substring(0, 50) + '...' : 'NULL');
+                    return text;
+                },
+                set: (value) => {
+                    console.log('[SectionContainer] setter generatedText - sectionId:', this.sectionId, 'value:', value ? value.substring(0, 50) + '...' : 'NULL');
+                    this.stateManager?.setGeneratedText(this.sectionId, value);
+                }
+            },
+            'skipReason': {
+                get: () => this.stateManager?.getSectionState(this.sectionId)?.skipReason || null,
+                set: (value) => {
+                    if (this.stateManager && this.stateManager._state.sections[this.sectionId]) {
+                        this.stateManager._state.sections[this.sectionId].skipReason = value;
+                    }
+                }
+            }
+        });
 
         // Elementos internos
         this.chatEl = null;
@@ -64,13 +134,28 @@ class SectionContainer {
     loadSection(sectionData, options = {}) {
         this.sectionData = sectionData;
         this.sectionId = sectionData.id;
-        this.state = options.state || 'in_progress';
-        this.messages = options.messages || [];
-        this.answers = options.answers || {};
+
+        // v0.13.2+: Atualizar StateManager (Single Source of Truth)
+        // Os getters/setters delegam automaticamente para StateManager
+        if (options.state) {
+            this.state = options.state; // Usa o setter que atualiza StateManager
+        }
+        if (options.messages && options.messages.length > 0) {
+            this.messages = options.messages; // Usa o setter que atualiza StateManager
+        }
+        if (options.answers && Object.keys(options.answers).length > 0) {
+            this.answers = options.answers; // Usa o setter que atualiza StateManager
+        }
+        if (options.generatedText) {
+            this.generatedText = options.generatedText; // Usa o setter que atualiza StateManager
+        }
+        if (options.skipReason) {
+            this.skipReason = options.skipReason; // Usa o setter que atualiza StateManager
+        }
+
+        // Controles de UI local
         this.currentQuestionIndex = options.currentQuestionIndex || 0;
-        this.generatedText = options.generatedText || null;
         this.isReadOnly = options.isReadOnly || false;
-        this.skipReason = options.skipReason || null;
 
         this.render();
 
@@ -93,29 +178,42 @@ class SectionContainer {
                     const willSkipSection = selectedOption?.skipsSection === true;
 
                     // Auto-responder após delay
+                    // CORREÇÃO v0.13.2: Não chamar _saveAnswer aqui, pois _onAnswer agora salva após validação
                     setTimeout(() => {
-                        this.answers[skipQ.id] = options.preAnswerSkipQuestion;
                         this._addUserMessage(options.preAnswerSkipQuestion);
 
                         // Se vai pular a seção, aguardar API e depois chamar _skipSection
                         if (willSkipSection) {
-                            this.onAnswer(skipQ.id, options.preAnswerSkipQuestion).then(() => {
-                                // Após API responder, a skip reason já foi definida
+                            this.onAnswer(skipQ.id, options.preAnswerSkipQuestion).then((result) => {
+                                // Se validação falhou, não pular (cenário raro para skip questions)
+                                if (result?.validationError) {
+                                    console.warn('[SectionContainer] Validação falhou em skip question:', result.validationError);
+                                    this._removeLastUserMessage();
+                                    return;
+                                }
+                                // CORREÇÃO: Usar skipReason retornado pela API
+                                const skipReason = result?.skipReason || null;
                                 setTimeout(() => {
-                                    this._skipSection();
+                                    this._skipSection(skipReason);
                                 }, 300);
                             }).catch((error) => {
                                 console.error('Erro ao processar skip question:', error);
                             });
                         } else {
                             // Resposta normal, apenas enviar para API
-                            this.onAnswer(skipQ.id, options.preAnswerSkipQuestion);
-
-                            // Avançar para próxima pergunta
-                            this.currentQuestionIndex = 1;
-                            setTimeout(() => {
-                                this._showCurrentQuestion();
-                            }, 500);
+                            this.onAnswer(skipQ.id, options.preAnswerSkipQuestion).then((result) => {
+                                // Se validação falhou, não avançar
+                                if (result?.validationError) {
+                                    console.warn('[SectionContainer] Validação falhou:', result.validationError);
+                                    this._removeLastUserMessage();
+                                    return;
+                                }
+                                // Avançar para próxima pergunta
+                                this.currentQuestionIndex = 1;
+                                setTimeout(() => {
+                                    this._showCurrentQuestion();
+                                }, 500);
+                            });
                         }
                     }, 300);
                 } else {
@@ -502,40 +600,45 @@ class SectionContainer {
 
     /**
      * Trata resposta do componente de input
+     *
+     * v0.13.2 (Opção B - 2 Requests): Fluxo simplificado backend-driven
+     * 1. Envia resposta para /answer
+     * 2. Se backend retorna willGenerateNow=true → mostra loading → chama /generate → completa
+     * 3. Senão → continua com próxima pergunta
      */
     _handleInputSubmit(answer, question, option = null, onError = null) {
         // Verificar se deve pular seção (para skipQuestion)
         if (option?.skipsSection) {
             this._addUserMessage(answer);
 
-            // Salvar resposta
-            this.answers[question.id] = answer;
-
             // Chamar onAnswer que vai enviar para API e retornar skip reason
-            this.onAnswer(question.id, answer, { isSkipQuestion: true }).then(() => {
-                // Após API responder, a skip reason já foi definida em _setSkipReason
-                // Apenas renderizar e chamar o callback de skip
+            this.onAnswer(question.id, answer, { isSkipQuestion: true }).then((result) => {
+                // Se validação falhou, não pular
+                if (result?.validationError) {
+                    this._removeLastUserMessage();
+                    if (onError) onError(result.validationError);
+                    return;
+                }
+                // CORREÇÃO: Usar skipReason retornado pela API
+                const skipReason = result?.skipReason || null;
                 setTimeout(() => {
-                    this._skipSection();
+                    this._skipSection(skipReason);
                 }, 300);
             }).catch((error) => {
                 console.error('Erro ao enviar skip question:', error);
-                if (onError) onError();
+                if (onError) onError('Erro ao processar resposta. Tente novamente.');
             });
             return;
         }
 
-        // Adicionar mensagem do usuário
+        // Adicionar mensagem do usuário (será removida se validação falhar)
         this._addUserMessage(answer);
-
-        // Salvar resposta
-        this.answers[question.id] = answer;
 
         // Verificar se é uma pergunta follow-up (tem mais de um ponto no ID)
         const dotCount = (question.id.match(/\./g) || []).length;
         const isFollowUp = dotCount > 1;  // Ex: "1.5.1" tem 2 pontos, "1.5" tem 1 ponto
 
-        // Verificar follow-up da pergunta atual
+        // Verificar follow-up da pergunta atual (para processamento local após resposta)
         let hasFollowUp = false;
         if (question.followUp && question.followUp.condition) {
             const conditionMet = answer.toLowerCase().includes(question.followUp.condition.toLowerCase());
@@ -545,58 +648,80 @@ class SectionContainer {
             );
         }
 
-        // Incrementar currentQuestionIndex ANTES de onAnswer (para auto-save capturar valor correto)
-        // EXCETO se for follow-up ou houver follow-up pendente
-        if (!isFollowUp || this.followUpQueue.length === 0) {
-            if (!hasFollowUp) {
+        // v0.13.2: Incrementar índice APÓS validação (não antes)
+        const shouldIncrementIndex = (!isFollowUp || this.followUpQueue.length === 0) && !hasFollowUp;
+        const previousIndex = this.currentQuestionIndex;
+
+        // v0.13.2 (Opção B): Enviar resposta e aguardar decisão do backend
+        this.onAnswer(question.id, answer).then(async (result) => {
+            // Se validação falhou, reverter e mostrar erro
+            if (result?.validationError) {
+                console.log('[SectionContainer] Validação falhou');
+                this._removeLastUserMessage();
+                this._renderInput(question);
+                if (this.currentInputComponent && typeof this.currentInputComponent.showError === 'function') {
+                    this.currentInputComponent.showError(result.validationError);
+                } else {
+                    this._showError(result.validationError);
+                }
+                return;
+            }
+
+            // Se houve erro de API (rate limit, etc), mostrar no texto gerado
+            if (result?.apiError) {
+                console.log('[SectionContainer] Erro de API:', result.apiError);
+                const errorText = `⚠️ Erro ao gerar texto:\n\n${result.apiError}\n\nAs respostas foram salvas. Tente novamente mais tarde.`;
+                this.generatedText = errorText;
+            }
+
+            // Validação passou - incrementar índice se necessário
+            if (shouldIncrementIndex) {
                 this.currentQuestionIndex++;
                 this._updateBadge();
             }
-        }
 
-        // Chamar callback DEPOIS de incrementar (para auto-save capturar índice correto)
-        // Se a seção vai completar, aguardar para pegar texto gerado da API
-        const willComplete = !hasFollowUp &&
-                            (!isFollowUp || this.followUpQueue.length === 0) &&
-                            this.currentQuestionIndex >= this.sectionData.questions.length;
+            // v0.13.2 (Opção B): Backend disse para gerar texto AGORA
+            if (result?.willGenerateNow) {
+                console.log('[SectionContainer] Backend sinalizou willGenerateNow - mostrando loading e chamando /generate');
 
-        if (willComplete && !this.isReadOnly) {
-            // Aguardar onAnswer para obter texto gerado se seção completar
-            this.onAnswer(question.id, answer).then(() => {
-                // v0.13.1+: Emitir evento ANSWER_SAVED
-                if (this.eventBus && typeof Events !== 'undefined') {
-                    this.eventBus.emit(Events.ANSWER_SAVED, {
-                        sectionId: this.sectionId,
-                        questionId: question.id,
-                        answer: answer
-                    });
+                // Mostrar loading APENAS quando backend confirma que vai gerar
+                this._showGeneratingTextOverlay();
+
+                try {
+                    // Chamar endpoint /generate via callback
+                    await this.onGenerateText(this.sectionId);
+                } catch (error) {
+                    console.error('[SectionContainer] Erro ao gerar texto:', error);
                 }
 
-                // Após onAnswer, processar follow-ups ou completar seção
-                this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);
-            }).catch(error => {
-                console.error('Erro ao salvar resposta:', error);
-                this._showError('Não foi possível salvar a resposta. Tente novamente.');
-            });
-            return;
-        } else {
-            // Aguardar Promise mesmo em casos sem conclusão de seção
-            this.onAnswer(question.id, answer).then(() => {
-                // v0.13.1+: Emitir evento ANSWER_SAVED
-                if (this.eventBus && typeof Events !== 'undefined') {
-                    this.eventBus.emit(Events.ANSWER_SAVED, {
-                        sectionId: this.sectionId,
-                        questionId: question.id,
-                        answer: answer
-                    });
-                }
-            }).catch(error => {
-                console.error('Erro ao salvar resposta:', error);
-                this._showError('Não foi possível salvar a resposta. Tente novamente.');
-            });
-        }
+                // Esconder loading e completar seção
+                this._hideGeneratingTextOverlay();
+                this._completeSection();
+                return;
+            }
 
-        this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);
+            // v0.13.2: Emitir evento ANSWER_SAVED
+            if (this.eventBus && typeof Events !== 'undefined') {
+                this.eventBus.emit(Events.ANSWER_SAVED, {
+                    sectionId: this.sectionId,
+                    questionId: question.id,
+                    answer: answer
+                });
+            }
+
+            // Ainda tem perguntas - continuar fluxo normal
+            this._continueAfterAnswer(question, answer, isFollowUp, hasFollowUp);
+
+        }).catch(error => {
+            console.error('Erro ao salvar resposta:', error);
+            this._removeLastUserMessage();
+            this._renderInput(question);
+            if (this.currentInputComponent && typeof this.currentInputComponent.showError === 'function') {
+                this.currentInputComponent.showError('Erro ao processar resposta. Tente novamente.');
+            } else {
+                this._showError('Não foi possível salvar a resposta. Tente novamente.');
+            }
+        });
     }
 
     /**
@@ -885,6 +1010,41 @@ class SectionContainer {
     }
 
     /**
+     * Busca uma pergunta pelo ID em todas as estruturas da seção
+     * v0.13.2: Helper para arquitetura backend-driven
+     *
+     * @param {string} questionId - ID da pergunta (ex: "3.6", "3.6.1")
+     * @returns {Object|null} - Objeto da pergunta ou null se não encontrar
+     */
+    _findQuestionById(questionId) {
+        if (!this.sectionData || !questionId) return null;
+
+        // Buscar em skipQuestion
+        if (this.sectionData.skipQuestion?.id === questionId) {
+            return this.sectionData.skipQuestion;
+        }
+
+        // Buscar em questions principais
+        for (const q of this.sectionData.questions) {
+            if (q.id === questionId) return q;
+
+            // Buscar em follow-ups (array de questions)
+            if (q.followUp?.questions) {
+                for (const fq of q.followUp.questions) {
+                    if (fq.id === questionId) return fq;
+                }
+            }
+
+            // Buscar em follow-up singular (question)
+            if (q.followUp?.question?.id === questionId) {
+                return q.followUp.question;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Adiciona mensagem do bot
      * Sincroniza com StateManager (v0.13.1+)
      */
@@ -915,6 +1075,36 @@ class SectionContainer {
     }
 
     /**
+     * Remove última mensagem do usuário (para rollback em caso de validação falha)
+     * CORREÇÃO v0.13.2: Necessário para reverter quando backend rejeita resposta
+     */
+    _removeLastUserMessage() {
+        // Remover do array local de mensagens
+        const messages = this.messages;
+        for (let i = messages.length - 1; i >= 0; i--) {
+            if (messages[i].type === 'user') {
+                messages.splice(i, 1);
+                break;
+            }
+        }
+
+        // Sincronizar com StateManager
+        if (this.stateManager && this.sectionId) {
+            const stateMessages = this.stateManager._state.sections[this.sectionId]?.messages;
+            if (stateMessages) {
+                for (let i = stateMessages.length - 1; i >= 0; i--) {
+                    if (stateMessages[i].type === 'user') {
+                        stateMessages.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        this._updateChat();
+    }
+
+    /**
      * Atualiza área de chat
      */
     _updateChat() {
@@ -934,6 +1124,77 @@ class SectionContainer {
             requestAnimationFrame(() => {
                 this.chatEl.scrollTop = this.chatEl.scrollHeight;
             });
+        }
+    }
+
+    /**
+     * Mostra overlay "Gerando texto..." durante chamada API
+     * CORREÇÃO v0.13.2: Mostrar feedback visual durante geração de texto
+     */
+    _showGeneratingTextOverlay() {
+        // Remover overlay anterior se existir
+        this._hideGeneratingTextOverlay();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'generating-text-overlay';
+        overlay.innerHTML = `
+            <div class="generating-text-content">
+                <div class="generating-text-spinner"></div>
+                <div class="generating-text-message">Seção finalizada com sucesso!<br>Gerando texto...</div>
+            </div>
+        `;
+        overlay.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        `;
+        overlay.querySelector('.generating-text-content').style.cssText = `
+            background: white;
+            padding: 24px 32px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        `;
+        overlay.querySelector('.generating-text-spinner').style.cssText = `
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        `;
+        overlay.querySelector('.generating-text-message').style.cssText = `
+            font-size: 16px;
+            color: #374151;
+            font-weight: 500;
+        `;
+
+        // Adicionar keyframes se não existir
+        if (!document.getElementById('generating-text-keyframes')) {
+            const style = document.createElement('style');
+            style.id = 'generating-text-keyframes';
+            style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+            document.head.appendChild(style);
+        }
+
+        document.body.appendChild(overlay);
+        console.log('[SectionContainer] Overlay "Gerando texto..." exibido');
+    }
+
+    /**
+     * Esconde overlay "Gerando texto..."
+     */
+    _hideGeneratingTextOverlay() {
+        const overlay = document.getElementById('generating-text-overlay');
+        if (overlay) {
+            overlay.remove();
+            console.log('[SectionContainer] Overlay "Gerando texto..." removido');
         }
     }
 
@@ -966,6 +1227,9 @@ class SectionContainer {
 
         // Callback - AGUARDAR conclusão antes de renderizar
         await this.onComplete(this.sectionId, this.answers);
+
+        // Esconder overlay após conclusão
+        this._hideGeneratingTextOverlay();
 
         // Re-renderizar SOMENTE depois que onComplete terminar
         this.render();

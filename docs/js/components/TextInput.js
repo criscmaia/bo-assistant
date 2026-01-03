@@ -104,16 +104,37 @@ class TextInput {
             };
         }
 
-        // Pattern (datetime)
+        // Pattern (datetime) - Validação completa v0.13.2
         if (this.validation.pattern === 'datetime') {
+            // Data: DD/MM ou nome do mês em português
             const hasDate = /\d{1,2}\/\d{1,2}/.test(trimmed) ||
                            /(janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)/i.test(trimmed);
-            const hasTime = /\d{1,2}[h:]\d{0,2}/.test(trimmed);
+
+            // Hora: extrair valores para validar
+            const timeMatch = trimmed.match(/(\d{1,2})[h:](\d{0,2})/);
+            const hasTime = !!timeMatch;
 
             if (!hasDate || !hasTime) {
                 return {
                     valid: false,
                     error: 'Informe data e hora. Ex: 22/03/2025, às 19h03'
+                };
+            }
+
+            // Validar hora (0-23) e minuto (0-59)
+            const hour = parseInt(timeMatch[1], 10);
+            const minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+
+            if (hour > 23) {
+                return {
+                    valid: false,
+                    error: `Hora inválida (${hour}h). Use formato 24h (0-23).`
+                };
+            }
+            if (minute > 59) {
+                return {
+                    valid: false,
+                    error: `Minuto inválido (${minute}min). Use 0-59.`
                 };
             }
         }
@@ -246,9 +267,9 @@ class TextInput {
     }
 
     /**
-     * Mostra erro
+     * Mostra erro (público - para uso externo como erros de validação do backend)
      */
-    _showError(message) {
+    showError(message) {
         if (this.errorEl) {
             this.errorEl.textContent = message;
             this.errorEl.style.display = 'flex';
@@ -257,6 +278,13 @@ class TextInput {
             this.inputField.classList.add('text-input__field--error');
         }
         this.isValid = false;
+    }
+
+    /**
+     * Mostra erro (privado - alias para compatibilidade)
+     */
+    _showError(message) {
+        this.showError(message);
     }
 
     /**

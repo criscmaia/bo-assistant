@@ -166,6 +166,11 @@ class BaseStateMachine(ABC):
 
             # Se deve pular, continua o loop para próximo step
 
+        # BUG FIX v0.13.2: Se saímos do loop porque chegamos ao final,
+        # garantir que current_step = "complete"
+        if self.step_index >= len(steps) - 1:
+            self.current_step = steps[-1]  # "complete"
+
     def is_section_complete(self) -> bool:
         """
         Verifica se a seção está completa.
@@ -192,6 +197,48 @@ class BaseStateMachine(ABC):
             str | None: Texto explicativo ou None
         """
         return self._get_skip_reason()
+
+    def will_next_response_complete(self) -> bool:
+        """
+        Verifica se a resposta à pergunta ATUAL PODE completar a seção.
+
+        v0.13.2: Usado pelo frontend para mostrar loading antes de enviar resposta.
+
+        Retorna True se:
+        - É a última pergunta principal (sem follow-up), OU
+        - É pergunta com follow-up condicional (pode ou não completar dependendo da resposta)
+        - É follow-up final
+
+        O frontend deve mostrar loading quando True, e escondê-lo se
+        a resposta não completar (ex: follow-up foi acionado).
+
+        Returns:
+            bool: True se resposta atual PODE gerar texto
+        """
+        if self.current_step == "complete" or self.section_skipped:
+            return False
+
+        steps = self._get_steps()
+        current_step = self.current_step
+
+        # Verificar se o próximo step é follow-up condicional da pergunta atual
+        # Padrão: 1.5 -> 1.5.1, 1.5.2 ou 1.9 -> 1.9.1, 1.9.2
+        test_index = self.step_index
+        while test_index < len(steps) - 1:
+            test_index += 1
+            next_step = steps[test_index]
+
+            # Se próximo step é follow-up da pergunta atual (ex: 1.9 -> 1.9.1)
+            if next_step.startswith(current_step + "."):
+                # É follow-up condicional - PODE completar (depende da resposta)
+                return True
+
+            # Se próximo step não deve ser pulado, verificar se é "complete"
+            if not self._should_skip_step(next_step):
+                return next_step == "complete"
+
+        # Se chegou ao final, próximo é "complete"
+        return True
 
     def get_all_answers(self) -> Dict[str, str]:
         """

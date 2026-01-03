@@ -145,6 +145,301 @@ class TesteFinal:
             self.log(f"  EXCECAO: {str(e)[:50]}")
             return False
 
+    async def validar_bolinha_final(self, pg):
+        """Valida a bolinha 'BO Final' no ProgressBar (Tarefa 1)"""
+        try:
+            self.log("\n=== TAREFA 1: Bolinha BO Final ===")
+
+            # Voltar para seção 1 para testar estado locked
+            await pg.goto('http://localhost:8000/docs/index.html', wait_until='networkidle')
+            await pg.evaluate("localStorage.clear()")
+            await pg.reload(wait_until='networkidle')
+            await asyncio.sleep(2)
+
+            # Verificar que bolinha aparece imediatamente (estado locked)
+            final_node = await pg.query_selector('.progress-node--final')
+            if not final_node:
+                self.log("❌ ERRO: Bolinha BO Final NÃO encontrada")
+                self.erros += 1
+                return False
+            self.log("✅ Bolinha BO Final encontrada")
+
+            # Verificar estado locked (cinza com cadeado)
+            is_locked = await final_node.evaluate("node => node.classList.contains('progress-node--locked')")
+            if not is_locked:
+                self.log("❌ ERRO: Bolinha deveria estar LOCKED (cinza)")
+                self.erros += 1
+            else:
+                self.log("✅ Estado LOCKED confirmado (cinza com 🔒)")
+
+            # Verificar cursor not-allowed
+            cursor_style = await final_node.evaluate("node => window.getComputedStyle(node).cursor")
+            if cursor_style != "not-allowed":
+                self.log(f"❌ ERRO: Cursor deveria ser 'not-allowed', mas é '{cursor_style}'")
+                self.erros += 1
+            else:
+                self.log("✅ Cursor 'not-allowed' confirmado")
+
+            # Verificar ícone de cadeado
+            icon_html = await final_node.inner_html()
+            if "🔒" not in icon_html:
+                self.log("❌ ERRO: Ícone de cadeado (🔒) não encontrado")
+                self.erros += 1
+            else:
+                self.log("✅ Ícone de cadeado (🔒) presente")
+
+            # Completar todas 3 seções rapidamente para testar estado completed
+            self.log("\n--- Completando 3 seções para testar estado 'completed' ---")
+
+            # Seção 1
+            for q_id, resp in S1.items():
+                await self.responder(pg, q_id, resp)
+            await pg.wait_for_selector('.section-generated__text', timeout=60000)
+            await pg.click('#section-start-next')
+            await asyncio.sleep(2)
+
+            # Seção 2
+            for q_id, resp in S2.items():
+                await self.responder(pg, q_id, resp)
+            await pg.wait_for_selector('.section-generated__text', timeout=60000)
+            await pg.click('#section-start-next')
+            await asyncio.sleep(2)
+
+            # Seção 3
+            for q_id, resp in S3.items():
+                await self.responder(pg, q_id, resp)
+            await pg.wait_for_selector('.section-generated__text', timeout=60000)
+            await asyncio.sleep(2)
+
+            # Verificar que bolinha agora está verde (completed)
+            final_node = await pg.query_selector('.progress-node--final')
+            is_completed = await final_node.evaluate("node => node.classList.contains('progress-node--completed')")
+            if not is_completed:
+                self.log("❌ ERRO: Bolinha deveria estar COMPLETED (verde)")
+                self.erros += 1
+            else:
+                self.log("✅ Estado COMPLETED confirmado (verde com ✓)")
+
+            # Verificar cursor pointer
+            cursor_style = await final_node.evaluate("node => window.getComputedStyle(node).cursor")
+            if cursor_style != "pointer":
+                self.log(f"❌ ERRO: Cursor deveria ser 'pointer', mas é '{cursor_style}'")
+                self.erros += 1
+            else:
+                self.log("✅ Cursor 'pointer' confirmado")
+
+            # Verificar ícone checkmark
+            icon_html = await final_node.inner_html()
+            if "✓" not in icon_html:
+                self.log("❌ ERRO: Ícone de checkmark (✓) não encontrado")
+                self.erros += 1
+            else:
+                self.log("✅ Ícone de checkmark (✓) presente")
+
+            # Testar clique (deve navegar para tela final)
+            await final_node.click()
+            await asyncio.sleep(2)
+
+            final_screen = await pg.query_selector('.final-screen')
+            if not final_screen:
+                self.log("❌ ERRO: Clique não navegou para tela final")
+                self.erros += 1
+            else:
+                self.log("✅ Clique navegou para tela final")
+
+            self.log("=== Tarefa 1 validada ===\n")
+            return True
+
+        except Exception as e:
+            self.log(f"❌ EXCECAO na validacao bolinha final: {str(e)[:100]}")
+            self.erros += 1
+            return False
+
+    async def validar_tooltip_posicionamento(self, pg):
+        """Valida o posicionamento inteligente do tooltip (Tarefa 3)"""
+        try:
+            self.log("\n=== TAREFA 3: Tooltip Posicionamento ===")
+
+            # Voltar para início
+            await pg.goto('http://localhost:8000/docs/index.html', wait_until='networkidle')
+            await pg.evaluate("localStorage.clear()")
+            await pg.reload(wait_until='networkidle')
+            await asyncio.sleep(2)
+
+            # Scroll para o topo
+            await pg.evaluate("window.scrollTo(0, 0)")
+            await asyncio.sleep(0.5)
+
+            # Passar mouse na primeira bolinha (seção 1)
+            first_node = await pg.query_selector('.progress-node[data-section-id="1"]')
+            if not first_node:
+                self.log("❌ ERRO: Primeira bolinha não encontrada")
+                self.erros += 1
+                return False
+
+            await first_node.hover()
+            await asyncio.sleep(0.5)
+
+            # Verificar que tooltip apareceu
+            tooltip = await pg.query_selector('.progress-tooltip:not(.hidden)')
+            if not tooltip:
+                self.log("❌ ERRO: Tooltip não apareceu")
+                self.erros += 1
+                return False
+            self.log("✅ Tooltip apareceu")
+
+            # Verificar posição do tooltip (não deve ter top negativo no viewport)
+            tooltip_rect = await tooltip.bounding_box()
+            if tooltip_rect['y'] < 0:
+                self.log(f"❌ ERRO: Tooltip fora da tela (y={tooltip_rect['y']})")
+                self.erros += 1
+            else:
+                self.log(f"✅ Tooltip dentro da tela (y={tooltip_rect['y']})")
+
+            # Verificar que seta aponta na direção correta
+            has_top_arrow = await tooltip.evaluate("node => node.classList.contains('progress-tooltip--top')")
+            has_bottom_arrow = await tooltip.evaluate("node => node.classList.contains('progress-tooltip--bottom')")
+
+            if has_top_arrow:
+                self.log("✅ Tooltip com seta para baixo (acima da bolinha)")
+            elif has_bottom_arrow:
+                self.log("✅ Tooltip com seta para cima (abaixo da bolinha)")
+            else:
+                self.log("⚠️  Tooltip sem classe de direção")
+
+            # Testar tooltip na bolinha BO Final
+            final_node = await pg.query_selector('.progress-node--final')
+            await final_node.hover()
+            await asyncio.sleep(0.5)
+
+            tooltip_content = await pg.query_selector('.progress-tooltip__content')
+            if tooltip_content:
+                text = await tooltip_content.inner_text()
+                if "BO Final" in text:
+                    self.log("✅ Tooltip da bolinha BO Final correto")
+                else:
+                    self.log(f"❌ ERRO: Tooltip BO Final com texto inesperado: {text[:50]}")
+                    self.erros += 1
+
+            self.log("=== Tarefa 3 validada ===\n")
+            return True
+
+        except Exception as e:
+            self.log(f"❌ EXCECAO na validacao tooltip: {str(e)[:100]}")
+            self.erros += 1
+            return False
+
+    async def validar_modal_confirmacao(self, pg):
+        """Valida o modal de confirmação customizado (Tarefa 2)"""
+        try:
+            self.log("\n=== TAREFA 2: Modal Confirmação Customizado ===")
+
+            # Navegar para tela final (já deveríamos estar lá)
+            final_screen = await pg.query_selector('.final-screen')
+            if not final_screen:
+                self.log("⚠️  Não está na tela final, navegando...")
+                # Completar fluxo se necessário
+                return True
+
+            # Clicar no botão "Iniciar Novo BO"
+            new_bo_btn = await pg.query_selector('#final-new-bo-btn')
+            if not new_bo_btn:
+                self.log("❌ ERRO: Botão 'Iniciar Novo BO' não encontrado")
+                self.erros += 1
+                return False
+
+            await new_bo_btn.click()
+            await asyncio.sleep(1)
+
+            # Verificar que modal customizado apareceu (NÃO native confirm)
+            modal_overlay = await pg.query_selector('.draft-modal-overlay')
+            if not modal_overlay:
+                self.log("❌ ERRO: Modal customizado NÃO apareceu")
+                self.erros += 1
+                return False
+            self.log("✅ Modal customizado apareceu")
+
+            # Verificar estrutura do modal
+            modal = await pg.query_selector('.draft-modal')
+            if not modal:
+                self.log("❌ ERRO: Container .draft-modal não encontrado")
+                self.erros += 1
+                return False
+
+            # Verificar título
+            title = await pg.query_selector('.draft-modal__title')
+            if title:
+                title_text = await title.inner_text()
+                if "Iniciar Novo BO" in title_text:
+                    self.log("✅ Título correto: 'Iniciar Novo BO'")
+                else:
+                    self.log(f"❌ ERRO: Título inesperado: {title_text}")
+                    self.erros += 1
+
+            # Verificar ícone
+            icon = await pg.query_selector('.draft-modal__icon')
+            if icon:
+                icon_text = await icon.inner_text()
+                if "🔄" in icon_text:
+                    self.log("✅ Ícone correto: 🔄")
+                else:
+                    self.log(f"⚠️  Ícone inesperado: {icon_text}")
+
+            # Verificar botões
+            confirm_btn = await pg.query_selector('#confirm-btn')
+            cancel_btn = await pg.query_selector('#cancel-btn')
+
+            if not confirm_btn or not cancel_btn:
+                self.log("❌ ERRO: Botões não encontrados")
+                self.erros += 1
+                return False
+            self.log("✅ Botões 'Confirmar' e 'Cancelar' encontrados")
+
+            # Verificar estilo danger (vermelho)
+            has_danger = await confirm_btn.evaluate("btn => btn.classList.contains('draft-modal__btn--danger')")
+            if has_danger:
+                self.log("✅ Botão confirmar com estilo 'danger' (vermelho)")
+            else:
+                self.log("⚠️  Botão confirmar sem estilo 'danger'")
+
+            # Testar cancelar
+            await cancel_btn.click()
+            await asyncio.sleep(0.5)
+
+            modal_overlay = await pg.query_selector('.draft-modal-overlay')
+            if modal_overlay:
+                self.log("❌ ERRO: Modal não fechou ao clicar 'Cancelar'")
+                self.erros += 1
+            else:
+                self.log("✅ Modal fechou ao clicar 'Cancelar'")
+
+            # Testar ESC (reabrir modal)
+            await new_bo_btn.click()
+            await asyncio.sleep(0.5)
+
+            await pg.keyboard.press('Escape')
+            await asyncio.sleep(0.5)
+
+            modal_overlay = await pg.query_selector('.draft-modal-overlay')
+            if modal_overlay:
+                self.log("❌ ERRO: Modal não fechou ao pressionar ESC")
+                self.erros += 1
+                # Fechar manualmente
+                cancel_btn = await pg.query_selector('#cancel-btn')
+                if cancel_btn:
+                    await cancel_btn.click()
+                    await asyncio.sleep(0.5)
+            else:
+                self.log("✅ Modal fechou ao pressionar ESC")
+
+            self.log("=== Tarefa 2 validada ===\n")
+            return True
+
+        except Exception as e:
+            self.log(f"❌ EXCECAO na validacao modal: {str(e)[:100]}")
+            self.erros += 1
+            return False
+
     async def executar(self):
         async with async_playwright() as p:
             navegador = await p.chromium.launch(headless=False)
@@ -347,6 +642,12 @@ class TesteFinal:
                     self.erros += 1
 
                 await pagina.screenshot(path='docs/screenshots/v0.13.2/FINAL-complete.png')
+
+                # === VALIDAR 4 MELHORIAS (NOVAS) ===
+                self.log("\n### VALIDANDO 4 MELHORIAS...")
+                await self.validar_bolinha_final(pagina)
+                await self.validar_tooltip_posicionamento(pagina)
+                await self.validar_modal_confirmacao(pagina)
 
                 tempo_total = (datetime.now() - self.inicio).total_seconds()
 

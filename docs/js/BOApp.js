@@ -150,6 +150,13 @@ class BOApp {
         });
         this._eventBusUnsubscribers.push(unsubscribeSkip);
 
+        // Evento: FINAL_SCREEN_REQUESTED (de SectionContainer, quando usuário clica "Finalizar BO")
+        const unsubscribeFinalScreen = this.eventBus.on(Events.FINAL_SCREEN_REQUESTED, (data) => {
+            console.log('[BOApp] EventBus - FINAL_SCREEN_REQUESTED:', data);
+            this._showFinalScreen();
+        });
+        this._eventBusUnsubscribers.push(unsubscribeFinalScreen);
+
         console.log('[BOApp] EventBus listeners configurados:', this._eventBusUnsubscribers.length);
     }
 
@@ -332,12 +339,15 @@ class BOApp {
         const currentSectionId = this.stateManager.getCurrentSectionId();
         const sectionIndex = currentSectionId - 1;
         const sectionData = SECTIONS_DATA[sectionIndex];
-        const sectionState = this.stateManager.getSectionState(currentSectionId);
 
         // Marcar como em progresso se pendente (StateManager já faz isso em setCurrentSection)
-        if (sectionState.status === 'pending') {
+        const initialState = this.stateManager.getSectionState(currentSectionId);
+        if (initialState.status === 'pending') {
             this.stateManager.setCurrentSection(currentSectionId);
         }
+
+        // Re-ler o estado APÓS marcar como in_progress
+        const sectionState = this.stateManager.getSectionState(currentSectionId);
 
         // Atualizar ProgressBar
         this.progressBar.setCurrentSection(currentSectionId);
@@ -580,17 +590,20 @@ class BOApp {
             this.stateManager.setCurrentSection(sectionId);
         }
 
+        // Re-ler o estado APÓS marcar como in_progress (BUG FIX: seção 2 não iniciava chat)
+        const updatedSectionState = this.stateManager.getSectionState(sectionId);
+
         // Atualizar progresso de todas as seções (preservar barras completas)
         this._updateAllSectionsProgress();
 
         // Carregar no container
         this.sectionContainer.loadSection(sectionData, {
-            state: sectionState.status,
-            messages: sectionState.messages,
-            answers: sectionState.answers,
-            currentQuestionIndex: sectionState.currentQuestionIndex,
-            generatedText: sectionState.generatedText,
-            skipReason: sectionState.skipReason || null,
+            state: updatedSectionState.status,
+            messages: updatedSectionState.messages,
+            answers: updatedSectionState.answers,
+            currentQuestionIndex: updatedSectionState.currentQuestionIndex,
+            generatedText: updatedSectionState.generatedText,
+            skipReason: updatedSectionState.skipReason || null,
             isReadOnly: shouldBeReadOnly,
             preAnswerSkipQuestion: options.preAnswerSkipQuestion,
         });

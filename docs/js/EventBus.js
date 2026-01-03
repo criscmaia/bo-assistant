@@ -38,6 +38,7 @@ const Events = {
     PROGRESS_UPDATED: 'progress:updated',                  // Progresso de seção atualizado
     SECTION_COMPLETED: 'section:completed',                // Seção finalizada
     BO_COMPLETED: 'bo:completed',                          // BO completo (seção 8 finalizada)
+    FINAL_SCREEN_REQUESTED: 'final:screen:requested',     // User solicitou ir para tela final
 
     // Estado global
     STATE_CHANGED: 'state:changed',                        // Estado global mudou

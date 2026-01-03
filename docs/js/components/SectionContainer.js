@@ -750,14 +750,14 @@ class SectionContainer {
         // Finalizar BO (v0.13.2+: quando há limite de seções ativas)
         const finalizeBOBtn = this.container.querySelector('#section-finalize-bo');
         addListener(finalizeBOBtn, 'click', () => {
-            // Emitir evento para mostrar tela final
+            // Emitir evento para mostrar tela final via EventBus
             if (this.eventBus && typeof Events !== 'undefined') {
                 this.eventBus.emit(Events.FINAL_SCREEN_REQUESTED, {
                     context: 'completed_all_active_sections'
                 });
+            } else {
+                console.error('[SectionContainer] EventBus ou Events não disponível para emitir FINAL_SCREEN_REQUESTED');
             }
-            // Fallback: Chamar callback para compatibilidade
-            this.onNavigateNext(-1); // -1 sinaliza mostrar tela final ao invés de próxima seção
         });
 
         // Voltar para seção atual
@@ -1045,11 +1045,10 @@ class SectionContainer {
      */
     setGeneratedText(text) {
         this.generatedText = text;
-        // Não precisa renderizar aqui - _completeSection() já vai renderizar após onComplete
-        // Se precisar atualizar em outros contextos, pode descomentar:
-        // if (this.state === 'completed') {
-        //     this.render();
-        // }
+        // Re-renderizar se seção já está completa (BUG FIX: texto não aparecia)
+        if (this.state === 'completed') {
+            this.render();
+        }
     }
 
     /**

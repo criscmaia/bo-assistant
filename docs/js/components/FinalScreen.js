@@ -16,78 +16,40 @@ class FinalScreen {
     }
 
     /**
-     * Renderiza a tela final
+     * Renderiza a tela final com seções individuais
      */
     render() {
         if (!this.container) return;
 
         const stats = this._calculateStats();
-        const fullText = this._generateFullText();
 
         this.container.innerHTML = `
             <div class="final-screen">
                 <!-- Header comemorativo -->
                 <div class="final-screen__header">
                     <div class="final-screen__icon">🎉</div>
-                    <h1 class="final-screen__title">BO Completo!</h1>
+                    <h1 class="final-screen__title">BO Concluído com Sucesso!</h1>
                     <p class="final-screen__subtitle">
-                        Todas as seções foram preenchidas com sucesso.
+                        Todas as seções foram preenchidas. Tempo total: ${stats.duration}
                     </p>
                 </div>
 
                 <div class="final-screen__content">
-                    <!-- Resumo das seções -->
-                    <div class="final-screen__summary">
-                        <h2 class="final-screen__summary-title">
-                            📊 Resumo das Seções
-                        </h2>
-                        <div class="final-screen__section-list">
-                            ${this._renderSectionsList()}
-                        </div>
+                    <!-- Seções individuais (NOVO) -->
+                    ${this._renderIndividualSections()}
+
+                    <!-- Botão copiar tudo (MOVIDO PARA CÁ) -->
+                    <div class="final-screen__copy-all-container">
+                        <button class="final-screen__copy-all-btn" id="final-copy-all-btn">
+                            📋 Copiar BO Completo (Todas Seções)
+                        </button>
                     </div>
 
-                    <!-- Texto completo -->
-                    <div class="final-screen__text-box">
-                        <div class="final-screen__text-header">
-                            <span class="final-screen__text-title">
-                                📄 Texto Completo do BO
-                            </span>
-                            <button class="final-screen__copy-btn" id="final-copy-btn">
-                                📋 Copiar Tudo
-                            </button>
-                        </div>
-                        <div class="final-screen__text-content" id="final-text-content">
-                            ${this._renderFullText()}
-                        </div>
-                    </div>
-
-                    <!-- Botões de ação -->
+                    <!-- Botão de ação -->
                     <div class="final-screen__actions">
-                        <button class="final-screen__action-btn final-screen__action-btn--primary" id="final-copy-all">
-                            📋 Copiar Texto Completo
+                        <button class="final-screen__action-btn final-screen__action-btn--primary" id="final-new-bo-btn">
+                            ➕ Iniciar Novo BO
                         </button>
-                        <button class="final-screen__action-btn final-screen__action-btn--secondary" id="final-new-bo">
-                            🔄 Iniciar Novo BO
-                        </button>
-                    </div>
-
-                    <!-- Estatísticas -->
-                    <div class="final-screen__stats">
-                        <div class="final-screen__stat">
-                            <span>✅</span>
-                            <span class="final-screen__stat-value">${stats.completed}</span>
-                            <span>seções completas</span>
-                        </div>
-                        <div class="final-screen__stat">
-                            <span style="display: inline-block; margin-right: 3px;">⃠</span>
-                            <span class="final-screen__stat-value">${stats.skipped}</span>
-                            <span>seções puladas</span>
-                        </div>
-                        <div class="final-screen__stat">
-                            <span>⏱️</span>
-                            <span class="final-screen__stat-value">${stats.duration}</span>
-                            <span>de duração</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -159,6 +121,59 @@ class FinalScreen {
     }
 
     /**
+     * Renderiza seções individuais com botões de cópia individuais
+     * @returns {string} HTML das seções
+     */
+    _renderIndividualSections() {
+        // Filtrar seções completas com texto gerado
+        const sections = Object.entries(this.sectionsState)
+            .map(([id, state]) => ({
+                id: parseInt(id),
+                ...state,
+                sectionData: SECTIONS_DATA[parseInt(id) - 1]
+            }))
+            .filter(s => s.status === 'completed' && s.generatedText)
+            .sort((a, b) => a.id - b.id);
+
+        if (sections.length === 0) {
+            return `
+                <div class="final-screen__empty">
+                    <p>Nenhum texto gerado ainda.</p>
+                </div>
+            `;
+        }
+
+        // Renderizar cada seção individualmente
+        return sections.map(section => `
+            <div class="final-screen__section-box" data-section-id="${section.id}">
+                <div class="final-screen__section-header">
+                    <span class="final-screen__section-title">
+                        📄 Seção ${section.id}: ${section.sectionData.name}
+                    </span>
+                    <button
+                        class="final-screen__section-copy-btn"
+                        data-section-id="${section.id}"
+                        title="Copiar Seção ${section.id}">
+                        📋 Copiar Seção ${section.id}
+                    </button>
+                </div>
+                <div class="final-screen__section-content">
+                    ${this._formatTextToHTML(section.generatedText)}
+                </div>
+            </div>
+        `).join('\n');
+    }
+
+    /**
+     * Formata texto para HTML (mantém quebras de linha)
+     */
+    _formatTextToHTML(text) {
+        if (!text) return '';
+        // O CSS já usa white-space: pre-wrap, então só retornamos o texto
+        return text;
+    }
+
+    /**
      * Gera texto completo para copiar (sem HTML)
      */
     _generateFullText() {
@@ -168,9 +183,9 @@ class FinalScreen {
             const state = this.sectionsState[section.id] || {};
 
             if (state.status === 'completed' && state.generatedText) {
-                text += `[SEÇÃO ${section.id}: ${section.name.toUpperCase()}]\n\n`;
+                text += `=== SEÇÃO ${section.id}: ${section.name.toUpperCase()} ===\n\n`;
                 text += `${state.generatedText}\n\n`;
-                text += `${'─'.repeat(50)}\n\n`;
+                text += `${'='.repeat(60)}\n\n`;
             }
         });
 
@@ -212,54 +227,100 @@ class FinalScreen {
      * Bind eventos
      */
     _bindEvents() {
-        // Copiar texto (botão pequeno)
-        const copyBtn = this.container.querySelector('#final-copy-btn');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => this._copyFullText(copyBtn));
-        }
-
-        // Copiar texto (botão grande)
-        const copyAllBtn = this.container.querySelector('#final-copy-all');
+        // Botão "Copiar BO Completo (Todas Seções)"
+        const copyAllBtn = this.container.querySelector('#final-copy-all-btn');
         if (copyAllBtn) {
-            copyAllBtn.addEventListener('click', () => this._copyFullText(copyAllBtn));
+            copyAllBtn.addEventListener('click', () => this._copyAllText());
         }
 
-        // Novo BO
-        const newBoBtn = this.container.querySelector('#final-new-bo');
-        if (newBoBtn) {
-            newBoBtn.addEventListener('click', () => this._handleNewBO());
-        }
-
-        // Clique nas seções
-        const sectionItems = this.container.querySelectorAll('.final-screen__section-item');
-        sectionItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const sectionId = parseInt(item.dataset.sectionId);
-                this.onSectionClick(sectionId);
+        // Botões "Copiar Seção X" (individuais)
+        const sectionCopyBtns = this.container.querySelectorAll('.final-screen__section-copy-btn');
+        sectionCopyBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const sectionId = parseInt(e.target.dataset.sectionId);
+                this._copySectionText(sectionId);
             });
+        });
+
+        // Botão "Iniciar Novo BO"
+        const newBOBtn = this.container.querySelector('#final-new-bo-btn');
+        if (newBOBtn) {
+            newBOBtn.addEventListener('click', () => this._handleNewBO());
+        }
+    }
+
+    /**
+     * Copia texto de uma seção individual
+     * @param {number} sectionId - ID da seção a copiar
+     */
+    _copySectionText(sectionId) {
+        const section = this.sectionsState[sectionId];
+        if (!section || !section.generatedText) {
+            console.warn('[FinalScreen] Seção não encontrada ou sem texto:', sectionId);
+            return;
+        }
+
+        const sectionData = SECTIONS_DATA[sectionId - 1];
+        const header = `=== SEÇÃO ${sectionId}: ${sectionData.name.toUpperCase()} ===\n\n`;
+        const textToCopy = header + section.generatedText;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            console.log('[FinalScreen] Seção copiada:', sectionId);
+            this._showCopyFeedback(sectionId);
+        }).catch(err => {
+            console.error('[FinalScreen] Erro ao copiar seção:', err);
+            alert('Erro ao copiar texto. Tente novamente.');
         });
     }
 
     /**
-     * Copia texto completo
+     * Mostra feedback visual ao copiar seção
+     * @param {number} sectionId - ID da seção copiada
      */
-    _copyFullText(buttonEl) {
-        const text = this._generateFullText();
+    _showCopyFeedback(sectionId) {
+        const btn = this.container.querySelector(`.final-screen__section-copy-btn[data-section-id="${sectionId}"]`);
+        if (!btn) return;
 
-        navigator.clipboard.writeText(text).then(() => {
-            // Feedback visual
-            const originalText = buttonEl.innerHTML;
-            buttonEl.innerHTML = '✅ Copiado!';
-            buttonEl.classList.add('final-screen__copy-btn--copied');
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Copiado!';
+        btn.classList.add('final-screen__section-copy-btn--copied');
 
-            setTimeout(() => {
-                buttonEl.innerHTML = originalText;
-                buttonEl.classList.remove('final-screen__copy-btn--copied');
-            }, 2000);
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('final-screen__section-copy-btn--copied');
+        }, 2000);
+    }
+
+    /**
+     * Copia todo o texto do BO para área de transferência
+     */
+    _copyAllText() {
+        const fullText = this._generateFullText();
+
+        navigator.clipboard.writeText(fullText).then(() => {
+            console.log('[FinalScreen] Texto completo copiado');
+            this._showCopyAllFeedback();
         }).catch(err => {
             console.error('[FinalScreen] Erro ao copiar:', err);
-            alert('Erro ao copiar. Tente selecionar o texto manualmente.');
+            alert('Erro ao copiar texto. Tente novamente.');
         });
+    }
+
+    /**
+     * Mostra feedback visual ao copiar tudo
+     */
+    _showCopyAllFeedback() {
+        const copyBtn = this.container.querySelector('#final-copy-all-btn');
+        if (!copyBtn) return;
+
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = '✅ Copiado!';
+        copyBtn.classList.add('final-screen__copy-all-btn--copied');
+
+        setTimeout(() => {
+            copyBtn.textContent = originalText;
+            copyBtn.classList.remove('final-screen__copy-all-btn--copied');
+        }, 2000);
     }
 
     /**

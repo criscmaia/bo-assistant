@@ -29,6 +29,12 @@ try:
     from validator_section7 import ResponseValidatorSection7
     from validator_section8 import ResponseValidatorSection8
     from validator_dispatcher import get_validator
+    from chat_helpers import (
+        initialize_session_if_needed,
+        initialize_section_if_needed,
+        log_event_with_pending_support,
+        determine_next_action
+    )
     from logger import BOLogger, now_brasilia
     from section_factory import create_section_handler
 except ImportError:
@@ -51,6 +57,12 @@ except ImportError:
     from backend.validator_section7 import ResponseValidatorSection7
     from backend.validator_section8 import ResponseValidatorSection8
     from backend.validator_dispatcher import get_validator
+    from backend.chat_helpers import (
+        initialize_session_if_needed,
+        initialize_section_if_needed,
+        log_event_with_pending_support,
+        determine_next_action
+    )
     from backend.logger import BOLogger, now_brasilia
     from backend.section_factory import create_section_handler
 
@@ -291,53 +303,9 @@ async def chat(request_body: ChatRequest, request: Request):
     session_id = request_body.session_id
     current_section = request_body.current_section or 1
 
-    # Verificar sessão - se não existir, recriar (útil quando backend reinicia)
-    if session_id not in sessions:
-        # Recriar sessão automaticamente
-        bo_id = BOLogger.create_bo()
-        sessions[session_id] = {
-            "bo_id": bo_id,
-            "sections": {
-                1: BOStateMachine()
-            },
-            "section1_text": "",
-            "section2_text": "",
-            "section3_text": "",
-            "section4_text": "",
-            "section5_text": "",
-            "section6_text": "",
-            "section7_text": "",
-            "section8_text": ""
-        }
-        BOLogger.log_event(
-            bo_id=bo_id,
-            event_type="session_recreated",
-            data={"session_id": session_id, "reason": "backend_restart"}
-        )
-
-    session_data = sessions[session_id]
-    bo_id = session_data["bo_id"]
-
-    # Obter state machine da seção atual - criar se não existir
-    if current_section not in session_data["sections"]:
-        if current_section == 1:
-            session_data["sections"][1] = BOStateMachine()
-        elif current_section == 2:
-            session_data["sections"][2] = BOStateMachineSection2()
-        elif current_section == 3:
-            session_data["sections"][3] = BOStateMachineSection3()
-        elif current_section == 4:
-            session_data["sections"][4] = BOStateMachineSection4()
-        elif current_section == 5:
-            session_data["sections"][5] = BOStateMachineSection5()
-        elif current_section == 6:
-            session_data["sections"][6] = BOStateMachineSection6()
-        elif current_section == 7:
-            session_data["sections"][7] = BOStateMachineSection7()
-        elif current_section == 8:
-            session_data["sections"][8] = BOStateMachineSection8()
-        else:
-            raise HTTPException(status_code=400, detail=f"Seção {current_section} não suportada")
+    # v0.13.2+: Inicializar sessão e seção usando helpers
+    session_data, bo_id = initialize_session_if_needed(session_id, sessions)
+    initialize_section_if_needed(current_section, session_data)
 
     state_machine = session_data["sections"][current_section]
     current_step = state_machine.current_step
@@ -349,61 +317,27 @@ async def chat(request_body: ChatRequest, request: Request):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Log único com is_valid correto
-    event_id = None
+    # v0.13.2+: Logging centralizado com pending support
     if is_valid:
-        # Verificar se sessão já está registrada no banco
-        is_already_logged = session_data.get("logged_to_db", False)
-
-        if is_already_logged:
-            # Já está no banco - gravar diretamente
-            event_id = BOLogger.log_event(
-                bo_id=bo_id,
-                event_type="answer_submitted",
-                data={
-                    "step": current_step,
-                    "answer": request_body.message,
-                    "is_valid": is_valid
-                }
-            )
-        else:
-            # Ainda não está no banco - adicionar à fila para ser logado depois
-            session_data["pending_events"].append({
-                "event_type": "answer_submitted",
-                "data": {
-                    "step": current_step,
-                    "answer": request_body.message,
-                    "is_valid": is_valid
-                }
-            })
-            # Usar um pseudo-ID para compatibilidade
-            event_id = f"pending_{len(session_data['pending_events'])}"
-
-    if not is_valid:
-        # Verificar se sessão já está registrada no banco
-        is_already_logged = session_data.get("logged_to_db", False)
-
-        if is_already_logged:
-            # Já está no banco - gravar erro diretamente
-            BOLogger.log_event(
-                bo_id=bo_id,
-                event_type="validation_error",
-                data={
-                    "step": current_step,
-                    "answer": request_body.message,
-                    "error_message": error_message
-                }
-            )
-        else:
-            # Ainda não está no banco - adicionar à fila
-            session_data["pending_events"].append({
-                "event_type": "validation_error",
-                "data": {
-                    "step": current_step,
-                    "answer": request_body.message,
-                    "error_message": error_message
-                }
-            })
+        event_id = log_event_with_pending_support(
+            session_data, bo_id,
+            "answer_submitted",
+            {
+                "step": current_step,
+                "answer": request_body.message,
+                "is_valid": is_valid
+            }
+        )
+    else:
+        event_id = log_event_with_pending_support(
+            session_data, bo_id,
+            "validation_error",
+            {
+                "step": current_step,
+                "answer": request_body.message,
+                "error_message": error_message
+            }
+        )
 
         return ChatResponse(
             session_id=session_id,

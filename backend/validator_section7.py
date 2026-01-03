@@ -20,9 +20,12 @@ class ResponseValidatorSection7:
     Elimina duplicação de código (~200 linhas) mantendo compatibilidade total.
     """
 
-    def validate_answer(self, question_id: str, answer: str, context: Dict[str, Any] = None) -> Tuple[bool, str]:
+    @classmethod
+    def validate(cls, question_id: str, answer: str, context: Dict[str, Any] = None) -> Tuple[bool, str]:
         """
         Valida resposta usando ValidationFactory.
+
+        Método de classe para compatibilidade com main.py.
 
         Args:
             question_id: ID da pergunta (ex: "7.1", "7.2", etc.)
@@ -39,3 +42,7 @@ class ResponseValidatorSection7:
             return (True, "OK")
         else:
             return (False, result.get("error", "Resposta inválida"))
+
+    def validate_answer(self, question_id: str, answer: str, context: Dict[str, Any] = None) -> Tuple[bool, str]:
+        """Alias para validate() para compatibilidade."""
+        return self.__class__.validate(question_id, answer, context)

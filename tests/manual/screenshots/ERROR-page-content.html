@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BO Inteligente - Tráfico de Drogas</title>
+
+    <!-- Meta Tags -->
+    <meta name="description" content="Sistema inteligente para geração de Boletim de Ocorrência de Tráfico de Drogas">
+    <meta name="author" content="BO Inteligente">
+
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/progress-bar.css">
+    <link rel="stylesheet" href="css/section-container.css">
+    <link rel="stylesheet" href="css/inputs.css">
+    <link rel="stylesheet" href="css/final-screen.css">
+    <link rel="stylesheet" href="css/draft-modal.css">
+    <link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- =================================== -->
+    <!-- HEADER -->
+    <!-- =================================== -->
+    <header>
+        <div class="header-content">
+            <div>
+                <h1 class="header-title">
+                    <span class="header-icon">📝</span>
+                    BO Inteligente
+                </h1>
+                <p class="header-subtitle">Tráfico de Drogas</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- =================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- =================================== -->
+    <main>
+        <!-- Barra de Progresso -->
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"><div class="progress-node-wrapper"><div class="progress-node progress-node--completed" data-section-id="1"><span class="node-number">1</span></div><div class="progress-node-label">Seção 1</div></div><div class="progress-line-container" data-line-after="1" data-section-status="completed"><div class="progress-line-fill" id="line-fill-1" style="width: 100%;"></div></div><div class="progress-node-wrapper"><div class="progress-node progress-node--completed" data-section-id="2"><span class="node-number">2</span></div><div class="progress-node-label">Seção 2</div></div><div class="progress-line-container" data-line-after="2" data-section-status="completed"><div class="progress-line-fill" id="line-fill-2" style="width: 100%;"></div></div><div class="progress-node-wrapper"><div class="progress-node progress-node--completed" data-section-id="3"><span class="node-number">3</span></div><div class="progress-node-label">Seção 3</div></div></div>
+        </div>
+
+        <!-- Tooltip da Barra de Progresso -->
+        <div id="progress-tooltip" class="progress-tooltip hidden">
+            <span class="tooltip-emoji"></span>
+            <span class="tooltip-name"></span>
+            <span class="tooltip-status"></span>
+        </div>
+
+        <!-- Container da Seção Atual -->
+        <div id="section-container" class="section-container section-container--visible" data-section-id="3" data-state="completed">
+            <!-- Header da Seção -->
+            <div class="section-header">
+                <div class="section-header__title">
+                    <span class="section-header__emoji">👁️</span>
+                    <span>Seção 3: Campana</span>
+                </div>
+                <span class="section-header__badge section-header__badge--completed">
+                    ✓ Completa
+                </span>
+            </div>
+
+            <!-- Chat (Accordion) - Oculto se seção foi pulada -->
+            
+            <button class="section-chat-toggle section-chat-toggle--collapsed" id="section-chat-toggle">
+                Histórico do Chat (14 mensagens)
+            </button>
+            <div class="section-chat " id="section-chat">
+                
+                    <div class="chat-message chat-message--bot">
+                        <div class="chat-message__bubble chat-message__bubble--bot">
+                            <div class="chat-message__text"><span class="question-id">3.1</span> Houve campana/observação prévia antes da abordagem?</div>
+                            <div class="chat-message__hint">Monitoramento do local antes de agir</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--user">
+                        <div class="chat-message__bubble chat-message__bubble--user">
+                            <div class="chat-message__text">sim</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--bot">
+                        <div class="chat-message__bubble chat-message__bubble--bot">
+                            <div class="chat-message__text"><span class="question-id">3.2</span> Quanto tempo durou a campana?</div>
+                            <div class="chat-message__hint">Ex: aproximadamente 30 minutos</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--user">
+                        <div class="chat-message__bubble chat-message__bubble--user">
+                            <div class="chat-message__text">aproximadamente 30 minutos</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--bot">
+                        <div class="chat-message__bubble chat-message__bubble--bot">
+                            <div class="chat-message__text"><span class="question-id">3.3</span> De onde a guarnição observava?</div>
+                            <div class="chat-message__hint">Ex: de dentro da viatura, a 50 metros do local</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--user">
+                        <div class="chat-message__bubble chat-message__bubble--user">
+                            <div class="chat-message__text">de dentro da viatura, a 50 metros do local</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--bot">
+                        <div class="chat-message__bubble chat-message__bubble--bot">
+                            <div class="chat-message__text"><span class="question-id">3.4</span> O que foi observado durante a campana?</div>
+                            <div class="chat-message__hint">Descreva movimentações, pessoas, transações suspeitas</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--user">
+                        <div class="chat-message__bubble chat-message__bubble--user">
+                            <div class="chat-message__text">Observamos movimentação constante de pessoas entrando e saindo rapidamente de um imóvel. Havia sinais de nervosismo ao avistar a viatura</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--bot">
+                        <div class="chat-message__bubble chat-message__bubble--bot">
+                            <div class="chat-message__text"><span class="question-id">3.5</span> Quantas pessoas foram vistas no local?</div>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--user">
+                        <div class="chat-message__bubble chat-message__bubble--user">
+                            <div class="chat-message__text">aproximadamente 5 pessoas</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--bot">
+                        <div class="chat-message__bubble chat-message__bubble--bot">
+                            <div class="chat-message__text"><span class="question-id">3.6</span> Foram observadas transações de compra e venda?</div>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--user">
+                        <div class="chat-message__bubble chat-message__bubble--user">
+                            <div class="chat-message__text">SIM</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--bot">
+                        <div class="chat-message__bubble chat-message__bubble--bot">
+                            <div class="chat-message__text"><span class="question-id">3.6.1</span> Descreva as transações observadas.</div>
+                            <div class="chat-message__hint">Quantas, entre quem, como ocorreram</div>
+                        </div>
+                    </div>
+                
+                    <div class="chat-message chat-message--user">
+                        <div class="chat-message__bubble chat-message__bubble--user">
+                            <div class="chat-message__text">Foram observadas 3 transações entre diferentes pessoas, com troca rápida de objetos e dinheiro</div>
+                        </div>
+                    </div>
+                
+            </div>
+            
+
+
+            <!-- Área de Input Dinâmica -->
+            
+
+            <!-- Texto Gerado (se completed) -->
+            
+            <div class="section-generated" id="section-generated">
+                <div class="section-generated__header">
+                    <span class="section-generated__title">
+                        📄 Texto Gerado - Seção 3
+                    </span>
+                    <button class="section-generated__copy" id="section-copy-btn">
+                        📋 Copiar
+                    </button>
+                </div>
+                <div class="section-generated__text">Motivados pela observação de movimentação constante de pessoas entrando e saindo rapidamente de um imóvel, bem como sinais de nervosismo ao avistarem a viatura, a equipe realizou uma campana vigilante.  O policial posicionou-se dentro da viatura, estacionada a aproximadamente 50 metros do local, com visão direta do imóvel. 
+
+Durante aproximadamente 30 minutos de vigilância, foram observadas cerca de 5 pessoas entrando e saindo do imóvel, o que reforçou a suspeita inicial.  Foi possível observar atos concretos que indicavam uma atividade ilegal, embora não tenha sido especificado o que exatamente foi observado. 
+
+Diante das observações concretas realizadas durante a campana, caracterizou-se fundada suspeita para a abordagem, uma vez que os atos observados estavam compatíveis com uma atividade criminosa.  A equipe decidiu então realizar a abordagem, com base nas evidências coletadas durante a vigilância.</div>
+            </div>
+            
+
+            <!-- Transição para próxima seção (se completed/skipped e não for última) -->
+            
+                <div class="section-transition">
+                    <div class="section-transition__preview">
+                        <span class="section-transition__preview-emoji">✅</span>
+                        <div class="section-transition__preview-info">
+                            <div class="section-transition__preview-label">Próxima etapa</div>
+                            <div class="section-transition__preview-name">Tela Final - Resumo do BO</div>
+                        </div>
+                    </div>
+                    <div class="section-transition__buttons">
+                        <button class="section-transition__btn section-transition__btn--start" id="section-finalize-bo">
+                            ✅ Finalizar BO
+                        </button>
+                    </div>
+                </div>
+            
+
+            <!-- Aviso de modo leitura -->
+            
+        </div>
+    </main>
+
+    <!-- Modal para Restaurar Rascunho -->
+    <div id="draft-modal-container"></div>
+
+    <!-- =================================== -->
+    <!-- JAVASCRIPT MODULAR -->
+    <!-- =================================== -->
+
+    <!-- 1. Dados -->
+    <script src="js/data/sections.js"></script>
+
+    <!-- 2. Estado Centralizado (v0.13.1+) -->
+    <script src="js/StateManager.js"></script>
+
+    <!-- 3. Serviços -->
+    <script src="js/services/APIClient.js"></script>
+
+    <!-- 4. Componentes -->
+    <script src="js/components/ProgressBar.js"></script>
+    <script src="js/components/TextInput.js"></script>
+    <script src="js/components/SingleChoice.js"></script>
+    <script src="js/components/MultipleChoice.js"></script>
+    <script src="js/components/SectionContainer.js"></script>
+    <script src="js/components/FinalScreen.js"></script>
+    <script src="js/components/DraftModal.js"></script>
+
+    <!-- 5. Orquestrador Principal -->
+    <script src="js/BOApp.js"></script>
+
+    <!-- 6. Inicialização -->
+    <script src="js/main.js"></script>
+
+
+<div id="app-loading-overlay" style="position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+                <div class="loading-content" style="background: white; padding: 24px 32px; border-radius: 12px; display: flex; align-items: center; gap: 16px;">
+                    <div class="loading-spinner" style="width: 24px; height: 24px; border-width: 3px; border-style: solid; border-color: rgb(59, 130, 246) rgb(229, 231, 235) rgb(229, 231, 235); border-image: initial; border-radius: 50%; animation: 1s linear 0s infinite normal none running spin;"></div>
+                    <div class="loading-message">Gerando texto...</div>
+                </div>
+            </div></body></html>

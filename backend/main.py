@@ -28,6 +28,7 @@ try:
     from validator_section6 import ResponseValidatorSection6
     from validator_section7 import ResponseValidatorSection7
     from validator_section8 import ResponseValidatorSection8
+    from validator_dispatcher import get_validator
     from logger import BOLogger, now_brasilia
     from section_factory import create_section_handler
 except ImportError:
@@ -49,6 +50,7 @@ except ImportError:
     from backend.validator_section6 import ResponseValidatorSection6
     from backend.validator_section7 import ResponseValidatorSection7
     from backend.validator_section8 import ResponseValidatorSection8
+    from backend.validator_dispatcher import get_validator
     from backend.logger import BOLogger, now_brasilia
     from backend.section_factory import create_section_handler
 
@@ -340,49 +342,12 @@ async def chat(request_body: ChatRequest, request: Request):
     state_machine = session_data["sections"][current_section]
     current_step = state_machine.current_step
 
-    # Validar resposta usando validator correto
-    if current_section == 1:
-        is_valid, error_message = ResponseValidator.validate(
-            current_step,
-            request_body.message
-        )
-    elif current_section == 2:
-        is_valid, error_message = ResponseValidatorSection2.validate(
-            current_step,
-            request_body.message
-        )
-    elif current_section == 3:
-        is_valid, error_message = ResponseValidatorSection3.validate(
-            current_step,
-            request_body.message
-        )
-    elif current_section == 4:
-        is_valid, error_message = ResponseValidatorSection4.validate(
-            current_step,
-            request_body.message
-        )
-    elif current_section == 5:
-        is_valid, error_message = ResponseValidatorSection5.validate(
-            current_step,
-            request_body.message
-        )
-    elif current_section == 6:
-        is_valid, error_message = ResponseValidatorSection6.validate(
-            current_step,
-            request_body.message
-        )
-    elif current_section == 7:
-        is_valid, error_message = ResponseValidatorSection7.validate(
-            current_step,
-            request_body.message
-        )
-    elif current_section == 8:
-        is_valid, error_message = ResponseValidatorSection8.validate(
-            current_step,
-            request_body.message
-        )
-    else:
-        raise HTTPException(status_code=400, detail=f"Seção {current_section} não suportada")
+    # Validar resposta usando dispatcher centralizado (v0.13.2+)
+    try:
+        validator = get_validator(current_section)
+        is_valid, error_message = validator.validate(current_step, request_body.message)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     # Log único com is_valid correto
     event_id = None
@@ -869,22 +834,11 @@ async def sync_session(request_body: dict):
         # Obter state machine da seção
         state_machine = session_data["sections"][current_section]
 
-        # Validar resposta
-        if current_section == 1:
-            is_valid, error_message = ResponseValidator.validate(step, answer)
-        elif current_section == 2:
-            is_valid, error_message = ResponseValidatorSection2.validate(step, answer)
-        elif current_section == 3:
-            is_valid, error_message = ResponseValidatorSection3.validate(step, answer)
-        elif current_section == 4:
-            is_valid, error_message = ResponseValidatorSection4.validate(step, answer)
-        elif current_section == 5:
-            is_valid, error_message = ResponseValidatorSection5.validate(step, answer)
-        elif current_section == 6:
-            is_valid, error_message = ResponseValidatorSection6.validate(step, answer)
-        elif current_section == 7:
-            is_valid, error_message = ResponseValidatorSection7.validate(step, answer)
-        else:
+        # Validar resposta usando dispatcher centralizado (v0.13.2+)
+        try:
+            validator = get_validator(current_section)
+            is_valid, error_message = validator.validate(step, answer)
+        except ValueError:
             continue  # Seção não suportada, pular
 
         if not is_valid:
@@ -988,25 +942,13 @@ async def update_answer(session_id: str, step: str, update_request: UpdateAnswer
     if step not in valid_steps:
         raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
 
-    # Validar nova resposta usando validator correto
-    if step.startswith("1."):
-        is_valid, error_message = ResponseValidator.validate(step, update_request.message)
-    elif step.startswith("2."):
-        is_valid, error_message = ResponseValidatorSection2.validate(step, update_request.message)
-    elif step.startswith("3."):
-        is_valid, error_message = ResponseValidatorSection3.validate(step, update_request.message)
-    elif step.startswith("4."):
-        is_valid, error_message = ResponseValidatorSection4.validate(step, update_request.message)
-    elif step.startswith("5."):
-        is_valid, error_message = ResponseValidatorSection5.validate(step, update_request.message)
-    elif step.startswith("6."):
-        is_valid, error_message = ResponseValidatorSection6.validate(step, update_request.message)
-    elif step.startswith("7."):
-        is_valid, error_message = ResponseValidatorSection7.validate(step, update_request.message)
-    elif step.startswith("8."):
-        is_valid, error_message = ResponseValidatorSection8.validate(step, update_request.message)
-    else:
-        raise HTTPException(status_code=400, detail=f"Step inválido: {step}")
+    # Validar nova resposta usando dispatcher centralizado (v0.13.2+)
+    section_number = int(step.split('.')[0])
+    try:
+        validator = get_validator(section_number)
+        is_valid, error_message = validator.validate(step, update_request.message)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_message)

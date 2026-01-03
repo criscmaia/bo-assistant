@@ -14,26 +14,21 @@ Uso:
 """
 
 from typing import Tuple, Type
+import sys
+import os
 
-# Imports compatíveis com local E Render
-try:
-    from validator import ResponseValidator
-    from validator_section2 import ResponseValidatorSection2
-    from validator_section3 import ResponseValidatorSection3
-    from validator_section4 import ResponseValidatorSection4
-    from validator_section5 import ResponseValidatorSection5
-    from validator_section6 import ResponseValidatorSection6
-    from validator_section7 import ResponseValidatorSection7
-    from validator_section8 import ResponseValidatorSection8
-except ImportError:
-    from backend.validator import ResponseValidator
-    from backend.validator_section2 import ResponseValidatorSection2
-    from backend.validator_section3 import ResponseValidatorSection3
-    from backend.validator_section4 import ResponseValidatorSection4
-    from backend.validator_section5 import ResponseValidatorSection5
-    from backend.validator_section6 import ResponseValidatorSection6
-    from backend.validator_section7 import ResponseValidatorSection7
-    from backend.validator_section8 import ResponseValidatorSection8
+# Add project root to sys.path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Backend imports
+from backend.validator import ResponseValidator
+from backend.validator_section2 import ResponseValidatorSection2
+from backend.validator_section3 import ResponseValidatorSection3
+from backend.validator_section4 import ResponseValidatorSection4
+from backend.validator_section5 import ResponseValidatorSection5
+from backend.validator_section6 import ResponseValidatorSection6
+from backend.validator_section7 import ResponseValidatorSection7
+from backend.validator_section8 import ResponseValidatorSection8
 
 
 # Mapa de seção -> classe de validador

@@ -9,28 +9,22 @@ v0.13.2+: Refatoração para reduzir complexidade do endpoint /chat
 
 from typing import Dict, Any, Tuple
 from fastapi import HTTPException
+import sys
+import os
 
-# Imports compatíveis com local E Render
-try:
-    from state_machine import BOStateMachine
-    from state_machine_section2 import BOStateMachineSection2
-    from state_machine_section3 import BOStateMachineSection3
-    from state_machine_section4 import BOStateMachineSection4
-    from state_machine_section5 import BOStateMachineSection5
-    from state_machine_section6 import BOStateMachineSection6
-    from state_machine_section7 import BOStateMachineSection7
-    from state_machine_section8 import BOStateMachineSection8
-    from logger import BOLogger
-except ImportError:
-    from backend.state_machine import BOStateMachine
-    from backend.state_machine_section2 import BOStateMachineSection2
-    from backend.state_machine_section3 import BOStateMachineSection3
-    from backend.state_machine_section4 import BOStateMachineSection4
-    from backend.state_machine_section5 import BOStateMachineSection5
-    from backend.state_machine_section6 import BOStateMachineSection6
-    from backend.state_machine_section7 import BOStateMachineSection7
-    from backend.state_machine_section8 import BOStateMachineSection8
-    from backend.logger import BOLogger
+# Add project root to sys.path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Backend imports
+from backend.state_machine import BOStateMachine
+from backend.state_machine_section2 import BOStateMachineSection2
+from backend.state_machine_section3 import BOStateMachineSection3
+from backend.state_machine_section4 import BOStateMachineSection4
+from backend.state_machine_section5 import BOStateMachineSection5
+from backend.state_machine_section6 import BOStateMachineSection6
+from backend.state_machine_section7 import BOStateMachineSection7
+from backend.state_machine_section8 import BOStateMachineSection8
+from backend.logger import BOLogger
 
 
 def initialize_session_if_needed(

@@ -7,64 +7,39 @@ from typing import Optional, Dict, Any, List
 import uvicorn
 from pathlib import Path
 from datetime import datetime
+import sys
+import os
 
-# Imports compatíveis com local E Render
-try:
-    # Tenta import direto (funciona quando roda de dentro de backend/)
-    from state_machine import BOStateMachine
-    from state_machine_section2 import BOStateMachineSection2
-    from state_machine_section3 import BOStateMachineSection3
-    from state_machine_section4 import BOStateMachineSection4
-    from state_machine_section5 import BOStateMachineSection5
-    from state_machine_section6 import BOStateMachineSection6
-    from state_machine_section7 import BOStateMachineSection7
-    from state_machine_section8 import BOStateMachineSection8
-    from llm_service import LLMService
-    from validator import ResponseValidator
-    from validator_section2 import ResponseValidatorSection2
-    from validator_section3 import ResponseValidatorSection3
-    from validator_section4 import ResponseValidatorSection4
-    from validator_section5 import ResponseValidatorSection5
-    from validator_section6 import ResponseValidatorSection6
-    from validator_section7 import ResponseValidatorSection7
-    from validator_section8 import ResponseValidatorSection8
-    from validator_dispatcher import get_validator
-    from chat_helpers import (
-        initialize_session_if_needed,
-        initialize_section_if_needed,
-        log_event_with_pending_support,
-        determine_next_action
-    )
-    from logger import BOLogger, now_brasilia
-    from section_factory import create_section_handler
-except ImportError:
-    # Fallback quando roda de fora da pasta backend/ (Render)
-    from backend.state_machine import BOStateMachine
-    from backend.state_machine_section2 import BOStateMachineSection2
-    from backend.state_machine_section3 import BOStateMachineSection3
-    from backend.state_machine_section4 import BOStateMachineSection4
-    from backend.state_machine_section5 import BOStateMachineSection5
-    from backend.state_machine_section6 import BOStateMachineSection6
-    from backend.state_machine_section7 import BOStateMachineSection7
-    from backend.state_machine_section8 import BOStateMachineSection8
-    from backend.llm_service import LLMService
-    from backend.validator import ResponseValidator
-    from backend.validator_section2 import ResponseValidatorSection2
-    from backend.validator_section3 import ResponseValidatorSection3
-    from backend.validator_section4 import ResponseValidatorSection4
-    from backend.validator_section5 import ResponseValidatorSection5
-    from backend.validator_section6 import ResponseValidatorSection6
-    from backend.validator_section7 import ResponseValidatorSection7
-    from backend.validator_section8 import ResponseValidatorSection8
-    from backend.validator_dispatcher import get_validator
-    from backend.chat_helpers import (
-        initialize_session_if_needed,
-        initialize_section_if_needed,
-        log_event_with_pending_support,
-        determine_next_action
-    )
-    from backend.logger import BOLogger, now_brasilia
-    from backend.section_factory import create_section_handler
+# Add project root to sys.path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Backend imports
+from backend.state_machine import BOStateMachine
+from backend.state_machine_section2 import BOStateMachineSection2
+from backend.state_machine_section3 import BOStateMachineSection3
+from backend.state_machine_section4 import BOStateMachineSection4
+from backend.state_machine_section5 import BOStateMachineSection5
+from backend.state_machine_section6 import BOStateMachineSection6
+from backend.state_machine_section7 import BOStateMachineSection7
+from backend.state_machine_section8 import BOStateMachineSection8
+from backend.llm_service import LLMService
+from backend.validator import ResponseValidator
+from backend.validator_section2 import ResponseValidatorSection2
+from backend.validator_section3 import ResponseValidatorSection3
+from backend.validator_section4 import ResponseValidatorSection4
+from backend.validator_section5 import ResponseValidatorSection5
+from backend.validator_section6 import ResponseValidatorSection6
+from backend.validator_section7 import ResponseValidatorSection7
+from backend.validator_section8 import ResponseValidatorSection8
+from backend.validator_dispatcher import get_validator
+from backend.chat_helpers import (
+    initialize_session_if_needed,
+    initialize_section_if_needed,
+    log_event_with_pending_support,
+    determine_next_action
+)
+from backend.logger import BOLogger, now_brasilia
+from backend.section_factory import create_section_handler
 
 # Versão do sistema
 APP_VERSION = "0.12.12"

@@ -1129,73 +1129,18 @@ class SectionContainer {
 
     /**
      * Mostra overlay "Gerando texto..." durante chamada API
-     * CORREÇÃO v0.13.2: Mostrar feedback visual durante geração de texto
+     * v0.13.2+: Refatorado para usar UIOverlay
      */
     _showGeneratingTextOverlay() {
-        // Remover overlay anterior se existir
-        this._hideGeneratingTextOverlay();
-
-        const overlay = document.createElement('div');
-        overlay.id = 'generating-text-overlay';
-        overlay.innerHTML = `
-            <div class="generating-text-content">
-                <div class="generating-text-spinner"></div>
-                <div class="generating-text-message">Seção finalizada com sucesso!<br>Gerando texto...</div>
-            </div>
-        `;
-        overlay.style.cssText = `
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        `;
-        overlay.querySelector('.generating-text-content').style.cssText = `
-            background: white;
-            padding: 24px 32px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        `;
-        overlay.querySelector('.generating-text-spinner').style.cssText = `
-            width: 24px;
-            height: 24px;
-            border: 3px solid #e5e7eb;
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        `;
-        overlay.querySelector('.generating-text-message').style.cssText = `
-            font-size: 16px;
-            color: #374151;
-            font-weight: 500;
-        `;
-
-        // Adicionar keyframes se não existir
-        if (!document.getElementById('generating-text-keyframes')) {
-            const style = document.createElement('style');
-            style.id = 'generating-text-keyframes';
-            style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
-            document.head.appendChild(style);
-        }
-
-        document.body.appendChild(overlay);
-        console.log('[SectionContainer] Overlay "Gerando texto..." exibido');
+        UIOverlay.showGenerating('Seção finalizada com sucesso!<br>Gerando texto...');
     }
 
     /**
      * Esconde overlay "Gerando texto..."
+     * v0.13.2+: Refatorado para usar UIOverlay
      */
     _hideGeneratingTextOverlay() {
-        const overlay = document.getElementById('generating-text-overlay');
-        if (overlay) {
-            overlay.remove();
-            console.log('[SectionContainer] Overlay "Gerando texto..." removido');
-        }
+        UIOverlay.hideGenerating();
     }
 
     /**

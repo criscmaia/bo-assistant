@@ -917,91 +917,29 @@ class BOApp {
 
     /**
      * Mostra loading overlay
+     * v0.13.2+: Refatorado para usar UIOverlay
      */
     _showLoading(message = 'Carregando...') {
         this.isLoading = true;
-
-        let overlay = document.getElementById('app-loading-overlay');
-
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'app-loading-overlay';
-            overlay.innerHTML = `
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-message">${message}</div>
-                </div>
-            `;
-            overlay.style.cssText = `
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-            `;
-            overlay.querySelector('.loading-content').style.cssText = `
-                background: white;
-                padding: 24px 32px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                gap: 16px;
-            `;
-            overlay.querySelector('.loading-spinner').style.cssText = `
-                width: 24px;
-                height: 24px;
-                border: 3px solid #e5e7eb;
-                border-top-color: #3b82f6;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            `;
-            document.body.appendChild(overlay);
-        } else {
-            overlay.querySelector('.loading-message').textContent = message;
-            overlay.style.display = 'flex';
-        }
+        UIOverlay.showLoading(message);
     }
 
     /**
      * Esconde loading overlay
+     * v0.13.2+: Refatorado para usar UIOverlay
      */
     _hideLoading() {
         this.isLoading = false;
-
-        const overlay = document.getElementById('app-loading-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
+        UIOverlay.hideLoading();
     }
 
     /**
      * Mostra aviso temporário
+     * v0.13.2+: Refatorado para usar UIOverlay
      */
     _showWarning(message) {
         console.warn('[BOApp]', message);
-
-        const toast = document.createElement('div');
-        toast.textContent = `⚠️ ${message}`;
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #fef3c7;
-            color: #92400e;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1001;
-            animation: fadeIn 0.3s ease;
-        `;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
-        }, 5000);
+        UIOverlay.warning(message);
     }
 
     /**

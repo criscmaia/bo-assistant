@@ -1,0 +1,194 @@
+/**
+ * Overlay CSS - Estilos unificados para todos os overlays do sistema
+ *
+ * Substitui CSS inline duplicado em:
+ * - BOApp.js (_showLoading, _showWarning)
+ * - SectionContainer.js (_showGeneratingTextOverlay)
+ *
+ * v0.13.2+: Centralizado para manutenibilidade
+ */
+
+/* ============================================================================
+   KEYFRAMES
+   ============================================================================ */
+
+@keyframes overlay-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes overlay-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes overlay-fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes overlay-slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================================
+   BASE OVERLAY (backdrop + centering)
+   ============================================================================ */
+
+.ui-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: overlay-fadeIn 0.2s ease;
+}
+
+.ui-overlay--hidden {
+    display: none;
+}
+
+.ui-overlay--closing {
+    animation: overlay-fadeOut 0.2s ease forwards;
+}
+
+/* ============================================================================
+   CONTENT BOX (white card)
+   ============================================================================ */
+
+.ui-overlay__content {
+    background: white;
+    padding: 24px 32px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: overlay-slideIn 0.3s ease;
+}
+
+/* Variante: conteúdo vertical (para mensagens longas) */
+.ui-overlay__content--vertical {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+}
+
+/* ============================================================================
+   SPINNER
+   ============================================================================ */
+
+.ui-overlay__spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: overlay-spin 1s linear infinite;
+    flex-shrink: 0;
+}
+
+/* Spinner grande (para overlays principais) */
+.ui-overlay__spinner--large {
+    width: 32px;
+    height: 32px;
+    border-width: 4px;
+}
+
+/* ============================================================================
+   MESSAGE TEXT
+   ============================================================================ */
+
+.ui-overlay__message {
+    font-size: 16px;
+    color: #374151;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.ui-overlay__message--small {
+    font-size: 14px;
+}
+
+/* ============================================================================
+   TOAST NOTIFICATIONS
+   ============================================================================ */
+
+.ui-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    animation: overlay-slideIn 0.3s ease;
+    max-width: 400px;
+}
+
+.ui-toast--warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.ui-toast--error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.ui-toast--success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.ui-toast--info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.ui-toast--closing {
+    animation: overlay-fadeOut 0.3s ease forwards;
+}
+
+/* ============================================================================
+   OVERLAY TYPES (semantic aliases)
+   ============================================================================ */
+
+/* Loading overlay (app-wide) */
+.ui-overlay--loading .ui-overlay__content {
+    min-width: 200px;
+}
+
+/* Generating text overlay (section-specific) */
+.ui-overlay--generating .ui-overlay__content {
+    min-width: 280px;
+}
+
+.ui-overlay--generating .ui-overlay__message {
+    text-align: left;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 480px) {
+    .ui-overlay__content {
+        margin: 16px;
+        padding: 20px 24px;
+    }
+
+    .ui-toast {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+    }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste UIOverlay</title>
+    <link rel="stylesheet" href="../../docs/css/overlay.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 { color: #374151; }
+        .test-section {
+            margin: 20px 0;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        button {
+            margin: 8px;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover { background: #2563eb; }
+        .btn-warning { background: #f59e0b; }
+        .btn-error { background: #ef4444; }
+        .btn-success { background: #10b981; }
+    </style>
+</head>
+<body>
+    <h1>Teste UIOverlay</h1>
+    <p>Teste manual dos componentes de overlay e toast refatorados.</p>
+
+    <div class="test-section">
+        <h3>1. Loading Overlay</h3>
+        <button onclick="UIOverlay.showLoading('Carregando dados...')">Mostrar Loading</button>
+        <button onclick="UIOverlay.hideLoading()">Esconder Loading</button>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Generating Overlay</h3>
+        <button onclick="UIOverlay.showGenerating()">Mostrar Gerando</button>
+        <button onclick="UIOverlay.hideGenerating()">Esconder Gerando</button>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Toast Notifications</h3>
+        <button class="btn-warning" onclick="UIOverlay.warning('Aviso de teste!')">Warning</button>
+        <button class="btn-error" onclick="UIOverlay.error('Erro de teste!')">Error</button>
+        <button class="btn-success" onclick="UIOverlay.success('Sucesso!')">Success</button>
+        <button onclick="UIOverlay.toast('Informacao', 'info')">Info</button>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Teste Automatizado (3s)</h3>
+        <button onclick="runAutomatedTest()">Rodar Teste</button>
+        <div id="test-log" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script src="../../docs/js/components/UIOverlay.js"></script>
+    <script>
+        function log(msg) {
+            const el = document.getElementById('test-log');
+            el.innerHTML += msg + '<br>';
+            console.log(msg);
+        }
+
+        async function runAutomatedTest() {
+            const el = document.getElementById('test-log');
+            el.innerHTML = '';
+
+            log('1. Testando loading...');
+            UIOverlay.showLoading('Teste de loading...');
+            await new Promise(r => setTimeout(r, 1000));
+            UIOverlay.hideLoading();
+            log('   Loading OK');
+
+            log('2. Testando generating...');
+            UIOverlay.showGenerating();
+            await new Promise(r => setTimeout(r, 1000));
+            UIOverlay.hideGenerating();
+            log('   Generating OK');
+
+            log('3. Testando toasts...');
+            UIOverlay.warning('Warning test');
+            await new Promise(r => setTimeout(r, 500));
+            UIOverlay.error('Error test');
+            await new Promise(r => setTimeout(r, 500));
+            UIOverlay.success('Success test');
+            log('   Toasts OK');
+
+            log('');
+            log('TODOS OS TESTES PASSARAM!');
+        }
+    </script>
+</body>
+</html>

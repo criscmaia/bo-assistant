@@ -1,0 +1,151 @@
+# Relatório Teste Final - BO Inteligente v0.13.2
+
+**Data:** 03/01/2026 09:38
+**Tempo:** 66.2s
+**Erros:** 3
+
+## Resultado
+
+✅ TESTE COMPLETO - 3 SEÇÕES (CAMINHO FELIZ)
+
+- Seção 1: 13 perguntas (incluindo follow-ups 1.5.1, 1.5.2) ✅
+- Seção 2: 12 perguntas (2.2 a 2.13, skip 2.1 automática) ✅
+- Seção 3: 6 perguntas (3.2 a 3.6.1, skip 3.1 automática) ✅
+- Textos do Groq validados ✅
+- Tela final com seções individuais validada ✅
+
+## Log Completo
+
+```
+[   1.3s] ============================================================
+[   1.3s] TESTE FINAL COMPLETO - 3 SECOES
+[   1.3s] ============================================================
+[   5.1s] 
+### SECAO 1: Contexto da Ocorrencia
+[   5.1s] 1.1: 19/12/2025, 14h30min, quinta-feira...
+[   6.9s]   OK
+[   6.9s] 1.2: Sargento João Silva, Cabo Pedro Almeida e Sol...
+[   8.6s]   OK
+[   8.6s] 1.3: Via 190, DDU, Patrulhamento preventivo, Manda...
+[  10.3s]   OK
+[  10.3s] 1.4: Ordem de serviço nº 145/2025 determinava patr...
+[  12.0s]   OK
+[  12.0s] 1.5: SIM...
+[  13.5s]   OK (escolha)
+[  13.5s] 1.5.1: Base Operacional do 16º BPM, localizada na Av...
+[  15.3s]   OK
+[  15.3s] 1.5.2: Não houve alterações durante o deslocamento...
+[  17.0s]   OK
+[  17.0s] 1.6: Rua das Acácias, altura do número 789, Bairro...
+[  18.7s]   OK
+[  18.7s] 1.7: Sim, local consta em 12 registros anteriores ...
+[  20.4s]   OK
+[  20.4s] 1.8: Área sob influência da facção Comando Vermelh...
+[  22.1s]   OK
+[  22.1s] 1.9: SIM...
+[  23.6s]   OK (escolha)
+[  23.6s] 1.9.1: Escola Estadual João XXIII...
+[  25.4s]   OK
+[  25.4s] 1.9.2: Aproximadamente 300 metros...
+[  27.1s]   OK
+[  27.1s] 
+Aguardando texto S1 (60s)...
+[  27.1s] TEXTO GERADO: 899 chars
+[  27.1s]   (contém 'SEÇÃO 1' ou 'Contexto')
+[  27.1s] ❌ S1: Texto renderizado DIFERENTE do armazenado
+[  27.1s]   Renderizado (899 chars): [SEÇÃO 1: Contexto da Ocorrência]
+
+Respostas coletadas:
+• 1.1: 19/12/2025, 14h30min, quinta-feira
+• ...
+[  27.1s]   Armazenado (0 chars): ...
+[  27.3s] 
+### Iniciando SECAO 2...
+[  29.4s] 
+### SECAO 2: Abordagem a Veiculo
+[  29.4s] 2.2: Na Rua das Acácias, esquina com Avenida Brasi...
+[  31.1s]   OK
+[  31.1s] 2.3: VW Gol branco, placa ABC-1D23, ano 2018...
+[  32.9s]   OK
+[  32.9s] 2.4: O Sargento Silva visualizou o veículo transit...
+[  34.6s]   OK
+[  34.6s] 2.5: O condutor acelerou bruscamente tentando fugi...
+[  36.3s]   OK
+[  36.3s] 2.6: Foi acionada a sirene da viatura e o Sargento...
+[  38.1s]   OK
+[  38.1s] 2.7: O condutor acelerou tentando fugir pela Aveni...
+[  39.8s]   OK
+[  39.8s] 2.8: Só parou após cercar o veículo em um beco sem...
+[  41.6s]   OK
+[  41.6s] 2.9: O Soldado Carvalho procedeu à busca, enquanto...
+[  43.3s]   OK
+[  43.3s] 2.10: O Soldado Carvalho encontrou 10 porções de cr...
+[  45.1s]   OK
+[  45.1s] 2.11: O condutor afirmou que não sabia da existênci...
+[  46.8s]   OK
+[  46.8s] 2.12: O Sargento Silva deu voz de prisão em flagran...
+[  48.6s]   OK
+[  48.6s] 2.13: O veículo estava com documentação regular. Nã...
+[  50.3s]   OK
+[  50.3s] 
+Aguardando texto S2 (60s)...
+[  50.3s] TEXTO GERADO: 1378 chars
+[  50.4s] ❌ S2: Texto renderizado DIFERENTE do armazenado
+[  50.4s]   Renderizado (1378 chars): [SEÇÃO 2: Abordagem a Veículo]
+
+Respostas coletadas:
+• 2.1: sim
+• 2.2: Na Rua das Acácias, esquina c...
+[  50.4s]   Armazenado (0 chars): ...
+[  50.5s] 
+### Iniciando SECAO 3...
+[  52.5s] 
+### SECAO 3: Campana (caminho feliz)
+[  52.5s] 3.2: aproximadamente 30 minutos...
+[  54.2s]   OK
+[  54.2s] 3.3: de dentro da viatura, a 50 metros do local...
+[  55.9s]   OK
+[  55.9s] 3.4: Observamos movimentação constante de pessoas ...
+[  57.7s]   OK
+[  57.7s] 3.5: aproximadamente 5 pessoas...
+[  59.4s]   OK
+[  59.4s] 3.6: SIM...
+[  60.8s]   OK (escolha)
+[  60.8s] 3.6.1: Foram observadas 3 transações entre diferente...
+[  62.6s]   OK
+[  62.6s] 
+Aguardando texto S3 (60s)...
+[  62.6s] TEXTO GERADO: 492 chars
+[  62.6s] ❌ S3: Texto renderizado DIFERENTE do armazenado
+[  62.6s]   Renderizado (492 chars): [SEÇÃO 3: Campana]
+
+Respostas coletadas:
+• 3.1: sim
+• 3.2: aproximadamente 30 minutos
+• 3.3: de dent...
+[  62.6s]   Armazenado (0 chars): ...
+[  62.8s] 
+### FINALIZANDO BO...
+[  62.8s] Botao Finalizar BO encontrado
+[  62.9s] Clicou em 'Finalizar BO', indo para tela final...
+[  66.0s] Screenshot DEBUG-before-final.png capturado
+[  66.0s] Estado DOM: {'sectionContainer': 'EXISTS', 'finalScreen': 'EXISTS', 'boAppExists': False, 'eventBusExists': True, 'eventsExists': True}
+[  66.0s] Tela final carregada!
+[  66.0s] 
+### Validando estrutura da tela final...
+[  66.0s] Encontradas 3 caixas de seção
+[  66.0s] ✅ 3 caixas de seção encontradas
+[  66.0s] Encontrados 3 botões 'Copiar Seção X'
+[  66.0s] ✅ 3 botões de copiar seção encontrados
+[  66.0s] ✅ Botão 'Copiar BO Completo' encontrado
+[  66.0s] ✅ Botão 'Iniciar Novo BO' encontrado
+[  66.1s] ✅ Seção 1: tem conteúdo (937 chars)
+[  66.1s] ✅ Seção 2: tem conteúdo (1416 chars)
+[  66.1s] ✅ Seção 3: tem conteúdo (530 chars)
+[  66.2s] 
+============================================================
+[  66.2s] *** TESTE CONCLUIDO COM SUCESSO! ***
+[  66.2s] ============================================================
+[  66.2s] Tempo total: 66.2s
+[  66.2s] Erros: 3
+```

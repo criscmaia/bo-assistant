@@ -599,57 +599,15 @@ async def generate_text(session_id: str, section_number: int, request_body: dict
     is_logged = ensure_session_logged(session_id)
 
     try:
-        # Gerar texto usando método específico da seção
-        if section_number == 1:
-            generated_text = await llm_service.generate_section_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section1_text"] = generated_text
-        elif section_number == 2:
-            generated_text = llm_service.generate_section2_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section2_text"] = generated_text
-        elif section_number == 3:
-            generated_text = llm_service.generate_section3_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section3_text"] = generated_text
-        elif section_number == 4:
-            generated_text = llm_service.generate_section4_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section4_text"] = generated_text
-        elif section_number == 5:
-            generated_text = llm_service.generate_section5_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section5_text"] = generated_text
-        elif section_number == 6:
-            generated_text = llm_service.generate_section6_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section6_text"] = generated_text
-        elif section_number == 7:
-            generated_text = llm_service.generate_section7_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section7_text"] = generated_text
-        elif section_number == 8:
-            generated_text = llm_service.generate_section8_text(
-                section_data=state_machine.get_all_answers(),
-                provider=llm_provider
-            )
-            session_data["section8_text"] = generated_text
-        else:
-            raise ValueError(f"Seção {section_number} não suportada")
+        # v0.13.2+: Gerar texto usando método unificado (Template Method Pattern)
+        generated_text = llm_service.generate_section_text(
+            section=section_number,
+            section_data=state_machine.get_all_answers(),
+            provider=llm_provider
+        )
+
+        # Armazenar texto gerado na sessão
+        session_data[f"section{section_number}_text"] = generated_text
 
         generation_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
 

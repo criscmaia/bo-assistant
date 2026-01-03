@@ -7,6 +7,14 @@ from datetime import datetime
 import re
 import locale
 
+# Importar geradores do novo package
+from backend.generators import (
+    Section1Generator,
+    Section2Generator,
+    Section3Generator,
+    Section4Generator,
+)
+
 # Carregar variáveis do .env
 load_dotenv()
 
@@ -37,7 +45,46 @@ class LLMService:
             self.groq_client = Groq(api_key=self.groq_api_key)
         else:
             self.groq_client = None
-    
+
+        # Inicializar geradores (Template Method Pattern)
+        self._generators = {
+            1: Section1Generator(self.gemini_model, self.groq_client),
+            2: Section2Generator(self.gemini_model, self.groq_client),
+            3: Section3Generator(self.gemini_model, self.groq_client),
+            4: Section4Generator(self.gemini_model, self.groq_client),
+        }
+
+    # ==================== MÉTODO UNIFICADO (NOVO) ====================
+
+    def generate_section_text(self, section: int, section_data: Dict[str, str], provider: str = "groq") -> str:
+        """
+        Método unificado para gerar texto de qualquer seção.
+
+        Este método substitui os 8 métodos generate_sectionX_text() duplicados
+        usando o Template Method Pattern.
+
+        Args:
+            section: Número da seção (1-8)
+            section_data: Dicionário com respostas da seção (ex: {"1.1": "...", "1.2": "..."})
+            provider: "gemini" ou "groq" (padrão: "groq")
+
+        Returns:
+            Texto gerado pela LLM ou string vazia se seção pulada
+
+        Raises:
+            ValueError: Se seção não suportada ou provider inválido
+
+        Exemplo:
+            >>> text = llm_service.generate_section_text(1, {"1.1": "22/03/2025 21:11", ...}, "groq")
+        """
+        generator = self._generators.get(section)
+        if not generator:
+            raise ValueError(f"Seção {section} não suportada. Seções disponíveis: {list(self._generators.keys())}")
+
+        return generator.generate(section_data, provider)
+
+    # ==================== MÉTODOS LEGADOS (serão removidos após validação) ====================
+
     def _enrich_datetime(self, datetime_str: str) -> str:
         """
         Enriquece string de data/hora com ano e dia da semana se necessário.
@@ -194,14 +241,17 @@ FORMATO DE SAÍDA:
 GERE AGORA o texto da Seção 1 usando SOMENTE as informações fornecidas:"""
 
         return prompt
-    
-    async def generate_section_text(
+
+    async def generate_section1_text(
         self,
         section_data: Dict[str, str],
         provider: str = "groq"
     ) -> str:
         """
-        Gera o texto da seção usando o LLM escolhido.
+        ⚠️ DEPRECATED: Use generate_section_text(section=1, section_data, provider) instead.
+
+        Este método será removido após validação.
+        Mantido temporariamente para compatibilidade com código existente.
         """
         if provider == "gemini":
             return self._generate_with_gemini(section_data)
@@ -406,14 +456,10 @@ Gere APENAS o texto da Seção 2 agora (um único parágrafo contínuo):"""
 
     def generate_section2_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
-        Gera texto narrativo da Seção 2 (Abordagem a Veículo).
+        ⚠️ DEPRECATED: Use generate_section_text(section=2, section_data, provider) instead.
 
-        Args:
-            section_data: Dicionário com respostas {step: answer}
-            provider: "gemini", "claude" ou "openai"
-
-        Returns:
-            Texto gerado ou string vazia se seção foi pulada
+        Este método será removido após validação.
+        Mantido temporariamente para compatibilidade com código existente.
         """
         # Se não havia veículo, retorna vazio (pergunta 2.1)
         if section_data.get("2.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
@@ -594,14 +640,10 @@ Gere APENAS o texto da Seção 3 agora (2-3 parágrafos fluidos):"""
 
     def generate_section3_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
-        Gera texto narrativo da Seção 3 (Campana - Vigilância Velada).
+        ⚠️ DEPRECATED: Use generate_section_text(section=3, section_data, provider) instead.
 
-        Args:
-            section_data: Dicionário com respostas {step: answer}
-            provider: "gemini", "groq", "claude" ou "openai"
-
-        Returns:
-            Texto gerado ou string vazia se seção foi pulada
+        Este método será removido após validação.
+        Mantido temporariamente para compatibilidade com código existente.
         """
         # Se não houve campana, retorna vazio
         if section_data.get("3.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:
@@ -789,14 +831,10 @@ Gere APENAS o texto da Seção 4 agora (2-3 parágrafos fluidos):"""
 
     def generate_section4_text(self, section_data: Dict[str, str], provider: str = "groq") -> str:
         """
-        Gera texto narrativo da Seção 4 (Entrada em Domicílio).
+        ⚠️ DEPRECATED: Use generate_section_text(section=4, section_data, provider) instead.
 
-        Args:
-            section_data: Dicionário com respostas {step: answer}
-            provider: "gemini", "groq", "claude" ou "openai"
-
-        Returns:
-            Texto gerado ou string vazia se seção foi pulada
+        Este método será removido após validação.
+        Mantido temporariamente para compatibilidade com código existente.
         """
         # Se não houve entrada em domicílio, retorna vazio
         if section_data.get("4.1", "").strip().upper() in ["NÃO", "NAO", "N", "NENHUM", "NEGATIVO"]:

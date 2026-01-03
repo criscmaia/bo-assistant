@@ -23,12 +23,14 @@ class ProgressBar {
         this.stateManager = typeof StateManager !== 'undefined' ? StateManager.getInstance() : null;
 
         // Dados das seções (do sections.js ou passado por opções)
-        this.sections = options.sections || (window.SECTIONS_DATA ? window.SECTIONS_DATA.map(s => ({
+        const maxSections = window.ACTIVE_SECTIONS_COUNT || 8;
+        const allSections = window.SECTIONS_DATA || [];
+        this.sections = options.sections || allSections.slice(0, maxSections).map(s => ({
             id: s.id,
             name: s.name,
             emoji: s.emoji,
             totalQuestions: s.questions.length + (s.skipQuestion ? 1 : 0)
-        })) : []);
+        }));
 
         // Estado visual de cada seção (sincronizado via callbacks do BOApp)
         this.sectionStates = {};

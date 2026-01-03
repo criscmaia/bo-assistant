@@ -18,6 +18,12 @@
  * - multiple_choice: Seleção múltipla (checkboxes)
  */
 
+// ========================================
+// CONFIGURAÇÃO TEMPORÁRIA - SEÇÕES ATIVAS
+// ========================================
+// Mudar para 8 quando Claudio enviar as perguntas finais das seções 4-8
+const ACTIVE_SECTIONS_COUNT = 3;
+
 // Versionamento do esquema de seções
 const SECTIONS_VERSION = '1.0';
 const SECTIONS_SCHEMA = {
@@ -991,10 +997,11 @@ function calculateSectionTotal(sectionId, answers = {}) {
   return total;
 }
 
-// Exportar funções auxiliares
+// Exportar funções auxiliares e configuração
 window.countTotalQuestions = countTotalQuestions;
 window.getSectionById = getSectionById;
 window.getQuestionById = getQuestionById;
 window.calculateSectionTotal = calculateSectionTotal;
+window.ACTIVE_SECTIONS_COUNT = ACTIVE_SECTIONS_COUNT;
 
-console.log(`[sections.js] Carregado: ${SECTIONS_DATA.length} seções, ~${countTotalQuestions()} perguntas`);
+console.log(`[sections.js] Carregado: ${SECTIONS_DATA.length} seções, ~${countTotalQuestions()} perguntas (Ativas até seção ${ACTIVE_SECTIONS_COUNT})`);

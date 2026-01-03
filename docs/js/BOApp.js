@@ -604,11 +604,12 @@ class BOApp {
      */
     _navigateToNextSection() {
         const nextIndex = this.currentSectionIndex + 1;
+        const maxSections = window.ACTIVE_SECTIONS_COUNT || SECTIONS_DATA.length;
 
-        if (nextIndex < SECTIONS_DATA.length) {
+        if (nextIndex < maxSections) {
             this._navigateToSection(nextIndex + 1);
         } else {
-            // Todas as seções completas
+            // Todas as seções ativas completas
             this._showFinalScreen();
         }
     }

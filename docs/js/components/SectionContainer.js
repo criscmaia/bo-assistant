@@ -358,6 +358,30 @@ class SectionContainer {
         // Não mostrar botões de transição em modo read-only
         if (this.isReadOnly) return '';
 
+        // Verificar se esta é a última seção ativa
+        const maxSections = window.ACTIVE_SECTIONS_COUNT || 8;
+        const isLastActiveSection = this.sectionId === maxSections;
+
+        if (isLastActiveSection) {
+            // Mostrar botão para finalizar o BO
+            return `
+                <div class="section-transition">
+                    <div class="section-transition__preview">
+                        <span class="section-transition__preview-emoji">✅</span>
+                        <div class="section-transition__preview-info">
+                            <div class="section-transition__preview-label">Próxima etapa</div>
+                            <div class="section-transition__preview-name">Tela Final - Resumo do BO</div>
+                        </div>
+                    </div>
+                    <div class="section-transition__buttons">
+                        <button class="section-transition__btn section-transition__btn--start" id="section-finalize-bo">
+                            ✅ Finalizar BO
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         const nextSection = window.SECTIONS_DATA ? window.SECTIONS_DATA.find(s => s.id === this.sectionId + 1) : null;
 
         if (!nextSection) return '';
@@ -721,6 +745,19 @@ class SectionContainer {
             }
             // Fallback: Manter callback para compatibilidade (DEPRECATED)
             this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'não' });
+        });
+
+        // Finalizar BO (v0.13.2+: quando há limite de seções ativas)
+        const finalizeBOBtn = this.container.querySelector('#section-finalize-bo');
+        addListener(finalizeBOBtn, 'click', () => {
+            // Emitir evento para mostrar tela final
+            if (this.eventBus && typeof Events !== 'undefined') {
+                this.eventBus.emit(Events.FINAL_SCREEN_REQUESTED, {
+                    context: 'completed_all_active_sections'
+                });
+            }
+            // Fallback: Chamar callback para compatibilidade
+            this.onNavigateNext(-1); // -1 sinaliza mostrar tela final ao invés de próxima seção
         });
 
         // Voltar para seção atual

@@ -55,6 +55,12 @@ except ImportError:
 # Versão do sistema
 APP_VERSION = "0.12.12"
 
+# ========================================
+# CONFIGURAÇÃO TEMPORÁRIA - SEÇÕES ATIVAS
+# ========================================
+# Mudar para 8 quando Claudio enviar as perguntas finais das seções 4-8
+ACTIVE_SECTIONS_COUNT = 3
+
 app = FastAPI(title="BO Inteligente API", version=APP_VERSION)
 
 # Configurar CORS
@@ -456,9 +462,9 @@ async def chat(request_body: ChatRequest, request: Request):
                 }
             )
 
-            # Atualizar status como finalizado apenas se for a última seção (Seção 8)
-            # IMPORTANTE: Seção 6 e 7 NÃO marcam como "completed" - apenas Seção 8
-            if current_section == 8:
+            # Atualizar status como finalizado apenas se for a última seção ativa
+            # IMPORTANTE: Seção 6 e 7 NÃO marcam como "completed" - apenas a última seção ativa
+            if current_section == ACTIVE_SECTIONS_COUNT:
                 BOLogger.update_session_status(bo_id, "completed")
 
             return ChatResponse(
@@ -519,13 +525,21 @@ async def chat(request_body: ChatRequest, request: Request):
                     provider=request_body.llm_provider
                 )
                 session_data["section7_text"] = generated_text
-            elif current_section == 8:
-                generated_text = llm_service.generate_section8_text(
-                    section_data=state_machine.get_all_answers(),
-                    provider=request_body.llm_provider
-                )
-                session_data["section8_text"] = generated_text
-                # IMPORTANTE: Seção 8 é a ÚLTIMA - marcar BO como completo
+            elif current_section == ACTIVE_SECTIONS_COUNT:
+                # Gerar texto da última seção ativa
+                if ACTIVE_SECTIONS_COUNT == 3:
+                    generated_text = llm_service.generate_section3_text(
+                        section_data=state_machine.get_all_answers(),
+                        provider=request_body.llm_provider
+                    )
+                    session_data["section3_text"] = generated_text
+                elif ACTIVE_SECTIONS_COUNT == 8:
+                    generated_text = llm_service.generate_section8_text(
+                        section_data=state_machine.get_all_answers(),
+                        provider=request_body.llm_provider
+                    )
+                    session_data["section8_text"] = generated_text
+                # IMPORTANTE: A última seção ativa marca BO como completo
                 BOLogger.update_session_status(bo_id, "completed")
             else:
                 raise ValueError(f"Seção {current_section} não suportada")

@@ -14,7 +14,7 @@ import os
 # Adicionar backend ao path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'backend'))
 
-from validator_section2 import ResponseValidatorSection2, VALIDATION_RULES_SECTION2
+from backend.validator_section2 import ResponseValidatorSection2
 
 
 class Colors:
@@ -40,13 +40,14 @@ class TestSection2Validator:
         """Testa que 2.1 aceita SIM"""
         valid, error = ResponseValidatorSection2.validate("2.1", "SIM")
         assert valid == True
-        assert error == ""
+        # v0.13.2+: Validador retorna "OK" em vez de ""
+        assert error == "OK" or error == ""
 
     def test_validate_2_1_accepts_no(self):
         """Testa que 2.1 aceita NÃO"""
         valid, error = ResponseValidatorSection2.validate("2.1", "NÃO")
         assert valid == True
-        assert error == ""
+        assert error == "OK" or error == ""
 
     # ========== PERGUNTA 2.2 - LOCAL + CONTEXTO ==========
     def test_validate_2_2_with_location_and_context(self):
@@ -56,7 +57,7 @@ class TestSection2Validator:
             "Na Rua das Flores, altura do nº 123, Bairro Centro. O veículo estava estacionado em frente ao bar."
         )
         assert valid == True
-        assert error == ""
+        assert error == "OK" or error == ""
 
     def test_validate_2_2_rejects_only_location(self):
         """Testa que 2.2 rejeita apenas local sem contexto"""
@@ -75,7 +76,7 @@ class TestSection2Validator:
             "VW Gol branco, placa ABC-1D23"
         )
         assert valid == True
-        assert error == ""
+        assert error == "OK" or error == ""
 
     def test_validate_2_3_valid_plate_without_hyphen(self):
         """Testa validação de placa Mercosul sem hífen (ABC1D23)"""

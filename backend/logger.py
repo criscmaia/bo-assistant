@@ -188,7 +188,24 @@ class BOLogger:
         )
 
         return bo_id
-    
+
+    @staticmethod
+    def create_bo(
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+        app_version: Optional[str] = None
+    ) -> str:
+        """
+        Alias para create_session() - mantém compatibilidade.
+        Gera novo bo_id automaticamente.
+        """
+        return BOLogger.create_session(
+            bo_id=None,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            app_version=app_version
+        )
+
     @staticmethod
     def log_event(bo_id: str, event_type: str, data: Optional[Dict[str, Any]] = None) -> str:
         """

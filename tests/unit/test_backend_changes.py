@@ -14,7 +14,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
 
 from backend.state_machine_section2 import BOStateMachineSection2, SECTION2_QUESTIONS, SECTION2_STEPS
-from backend.validator_section2 import ResponseValidatorSection2, VALIDATION_RULES_SECTION2
+from backend.validator_section2 import ResponseValidatorSection2
 
 # Cores para output
 class Colors:

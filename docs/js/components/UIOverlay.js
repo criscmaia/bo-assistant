@@ -115,8 +115,11 @@ class UIOverlay {
      * @private
      */
     static _showOverlay(id, message, type) {
-        // Remover existente se houver
-        this._hideOverlay(id);
+        // Remover existente imediatamente (sem animação)
+        const existing = document.getElementById(id);
+        if (existing) {
+            existing.remove();
+        }
 
         const overlay = document.createElement('div');
         overlay.id = id;
@@ -139,10 +142,18 @@ class UIOverlay {
     static _hideOverlay(id) {
         const overlay = document.getElementById(id);
         if (overlay) {
+            // Evitar múltiplas animações de fechamento
+            if (overlay.classList.contains('ui-overlay--closing')) {
+                return;
+            }
             overlay.classList.add('ui-overlay--closing');
             setTimeout(() => {
-                overlay.remove();
-                console.log(`[UIOverlay] Overlay ${id} removido`);
+                // Verificar se ainda é o mesmo overlay (pode ter sido substituído)
+                const currentOverlay = document.getElementById(id);
+                if (currentOverlay && currentOverlay.classList.contains('ui-overlay--closing')) {
+                    currentOverlay.remove();
+                    console.log(`[UIOverlay] Overlay ${id} removido`);
+                }
             }, 200);
         }
     }

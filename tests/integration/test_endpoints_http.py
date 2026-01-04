@@ -187,16 +187,17 @@ class TestChatEndpoint:
         session_id = start_response.json()["session_id"]
 
         # Responder todas as perguntas da seção 1
+        # Nota: 1.5 e 1.9 são perguntas SIM/NÃO
         answers = [
-            "22/03/2025 21:11",  # 1.1
-            "Sgt Silva, Cb Almeida",  # 1.2
-            "COPOM",  # 1.3
-            "Ordem de serviço patrulhamento",  # 1.4
-            "NÃO",  # 1.5
-            "Rua das Flores, 123",  # 1.6
-            "Bairro Centro",  # 1.7
-            "Denúncia anônima de briga",  # 1.8
-            "Acionamento via 190"  # 1.9
+            "22/03/2025 21:11",  # 1.1 - data/hora
+            "Sgt Silva, Cb Almeida, prefixo 1234",  # 1.2 - guarnição
+            "COPOM",  # 1.3 - acionamento
+            "Ordem de serviço patrulhamento na região do Bairro Centro",  # 1.4 - motivação
+            "NÃO",  # 1.5 - há câmeras?
+            "Rua das Flores, 123, Centro",  # 1.6 - endereço
+            "Bairro Centro, próximo à praça principal",  # 1.7 - bairro/referência
+            "Denúncia anônima de briga em andamento no local",  # 1.8 - denúncia
+            "NÃO"  # 1.9 - local é/próximo de interesse público?
         ]
 
         last_response = None

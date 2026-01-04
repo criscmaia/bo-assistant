@@ -237,9 +237,12 @@ class BOApp {
      * Inicializa SectionContainer
      */
     _initSectionContainer() {
-        // v0.13.2+: Apenas onGenerateText callback mantido
+        // v0.13.2+: Callbacks essenciais mantidos
         // Navegação usa apenas EventBus (SECTION_CHANGE_REQUESTED)
         this.sectionContainer = new SectionContainer('section-container', {
+            onAnswer: async (questionId, answer, options = {}) => {
+                return await this._onAnswer(questionId, answer, options);
+            },
             onGenerateText: async (sectionId) => {
                 return await this._generateSectionText(sectionId);
             },
@@ -539,9 +542,25 @@ class BOApp {
         } catch (error) {
             console.error('[BOApp] Erro ao gerar texto:', error);
 
-            // Usar placeholder em caso de erro
+            // Gerar texto de erro + placeholder das respostas
+            // Isso permite que a seção seja completada mesmo com erro de API
             const answers = this.stateManager.getAnswers(sectionId);
-            const generatedText = this._generatePlaceholderText(sectionId, answers);
+            const placeholderText = this._generatePlaceholderText(sectionId, answers);
+
+            // Extrair mensagem de erro limpa
+            let errorMessage = error.message || 'Erro desconhecido';
+            if (errorMessage.includes('Erro ao gerar texto:')) {
+                errorMessage = errorMessage.replace(/^.*Erro ao gerar texto:\s*/, '');
+            }
+
+            // Criar texto com erro + placeholder
+            const generatedText = `⚠️ ERRO NA GERAÇÃO DE TEXTO\n\n` +
+                `Motivo: ${errorMessage}\n\n` +
+                `As respostas foram salvas. Você pode:\n` +
+                `- Copiar o placeholder abaixo e editar manualmente\n` +
+                `- Tentar novamente mais tarde\n\n` +
+                `---\n\n${placeholderText}`;
+
             this.stateManager.setGeneratedText(sectionId, generatedText);
             if (this.sectionContainer) {
                 this.sectionContainer.setGeneratedText(generatedText);
@@ -794,13 +813,23 @@ class BOApp {
                 draft,
                 this.sections, // Passar dados das seções para o preview
                 // onContinue - continuar do rascunho
-                () => {
+                async () => {
                     // Restaurar estado via StateManager
                     this.stateManager.restoreFromDraft(draft);
 
-                    // Restaurar sessão API se disponível
-                    if (draft.sessionId) {
-                        this.api.restoreSession(draft.sessionId, draft.boId);
+                    // CRÍTICO: Criar nova sessão no backend
+                    // O backend pode ter reiniciado, então a sessão antiga não existe mais
+                    try {
+                        const response = await this.api.startNewSession();
+                        console.log('[BOApp] Nova sessão criada para rascunho:', response.session_id);
+                        // Atualizar IDs no StateManager
+                        this.stateManager.setSession(response.session_id, response.bo_id);
+                    } catch (error) {
+                        console.error('[BOApp] Erro ao criar sessão para rascunho:', error);
+                        // Tentar restaurar sessão antiga como fallback
+                        if (draft.sessionId) {
+                            this.api.restoreSession(draft.sessionId, draft.boId);
+                        }
                     }
 
                     // Atualizar ProgressBar com estados salvos

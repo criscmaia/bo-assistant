@@ -34,8 +34,15 @@ class SectionContainer {
         this.isReadOnly = false;
         this.followUpQueue = []; // Fila de perguntas follow-up (1.5.1, 1.5.2, etc)
 
-        // v0.13.2 (Opção B): Callback para gerar texto via endpoint separado
+        // Callbacks essenciais (v0.13.2+)
+        // onAnswer: processa resposta via API e retorna resultado
+        this.onAnswer = options.onAnswer || (async (questionId, answer, opts) => ({}));
+        // onGenerateText: gera texto via endpoint separado
         this.onGenerateText = options.onGenerateText || (async (sectionId) => null);
+        // onComplete: callback quando seção é completada (default vazio)
+        this.onComplete = options.onComplete || (async (sectionId, answers) => {});
+        // onSkip: callback quando seção é pulada (default vazio)
+        this.onSkip = options.onSkip || (async (sectionId, skipReason) => {});
 
         // EventBus para comunicação desacoplada (v0.13.1+)
         this.eventBus = typeof window !== 'undefined' && window.eventBus ? window.eventBus : null;

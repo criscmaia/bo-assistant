@@ -1,6 +1,6 @@
 /**
  * EventBus - Mediator Pattern para comunicação desacoplada
- * BO Inteligente v0.13.1
+ * BO Inteligente v0.13.2
  *
  * Implementa padrão Mediator para eliminar acoplamento direto entre componentes.
  * Componentes comunicam via eventos ao invés de referências diretas.
@@ -16,45 +16,256 @@
  */
 
 // ============================================
+// SCHEMAS DE EVENTOS (JSDoc @typedef)
+// ============================================
+
+/**
+ * Dados para mudança de seção
+ * @typedef {Object} SectionChangeData
+ * @property {number} sectionId - ID da seção destino (1-8)
+ * @property {Object} [context] - Contexto adicional opcional
+ * @property {string} [context.preAnswerSkipQuestion] - Resposta para skip question ('sim'/'não')
+ */
+
+/**
+ * Dados de resposta salva
+ * @typedef {Object} AnswerSavedData
+ * @property {number} sectionId - ID da seção (1-8)
+ * @property {string} questionId - ID da pergunta (ex: '1.1', '2.3')
+ * @property {string} answer - Resposta do usuário
+ */
+
+/**
+ * Dados de seção completada
+ * @typedef {Object} SectionCompletedData
+ * @property {number} sectionId - ID da seção completada (1-8)
+ * @property {Object.<string, string>} answers - Map questionId → answer
+ */
+
+/**
+ * Dados para tela final
+ * @typedef {Object} FinalScreenData
+ * @property {number[]} completedSections - IDs das seções completadas
+ */
+
+/**
+ * Dados de erro genérico
+ * @typedef {Object} ErrorData
+ * @property {string} message - Mensagem de erro
+ * @property {string} [code] - Código do erro (opcional)
+ * @property {Object} [details] - Detalhes adicionais (opcional)
+ */
+
+/**
+ * Dados de sessão
+ * @typedef {Object} SessionData
+ * @property {string} sessionId - UUID da sessão
+ * @property {string} boId - ID do BO (ex: 'BO-20260103-abc123')
+ */
+
+/**
+ * Dados de texto gerado
+ * @typedef {Object} TextGeneratedData
+ * @property {number} sectionId - ID da seção
+ * @property {string} text - Texto gerado pela LLM
+ */
+
+// ============================================
 // EVENTOS PADRONIZADOS
 // ============================================
 
 /**
  * Catálogo de eventos do sistema.
  * Centralizando aqui para evitar typos e facilitar descoberta.
+ *
+ * Legenda:
+ * - [ATIVO] = Evento em uso no código
+ * - [RESERVADO] = Declarado para uso futuro
  */
 const Events = {
-    // Navegação entre seções
-    SECTION_CHANGE_REQUESTED: 'section:change:requested',  // User clicou em seção
-    SECTION_LOADED: 'section:loaded',                      // Seção carregada com sucesso
-    SECTION_LOAD_ERROR: 'section:load:error',              // Erro ao carregar seção
+    // ==========================================
+    // NAVEGAÇÃO ENTRE SEÇÕES
+    // ==========================================
 
-    // Respostas
-    ANSWER_SUBMITTED: 'answer:submitted',                  // User submeteu resposta
-    ANSWER_SAVED: 'answer:saved',                          // Resposta salva no backend
-    ANSWER_SAVE_ERROR: 'answer:save:error',                // Erro ao salvar resposta
+    /**
+     * User solicitou mudança de seção (clique no ProgressBar ou botão transição)
+     * @type {string}
+     * @fires {SectionChangeData}
+     * @status ATIVO - Emitido por: ProgressBar, SectionContainer
+     */
+    SECTION_CHANGE_REQUESTED: 'section:change:requested',
 
-    // Progresso
-    PROGRESS_UPDATED: 'progress:updated',                  // Progresso de seção atualizado
-    SECTION_COMPLETED: 'section:completed',                // Seção finalizada
-    BO_COMPLETED: 'bo:completed',                          // BO completo (seção 8 finalizada)
-    FINAL_SCREEN_REQUESTED: 'final:screen:requested',     // User solicitou ir para tela final
+    /**
+     * Seção carregada com sucesso
+     * @type {string}
+     * @fires {{ sectionId: number }}
+     * @status RESERVADO
+     */
+    SECTION_LOADED: 'section:loaded',
 
-    // Estado global
-    STATE_CHANGED: 'state:changed',                        // Estado global mudou
-    SESSION_CREATED: 'session:created',                    // Nova sessão criada
-    SESSION_LOADED: 'session:loaded',                      // Sessão existente carregada
+    /**
+     * Erro ao carregar seção
+     * @type {string}
+     * @fires {ErrorData}
+     * @status RESERVADO
+     */
+    SECTION_LOAD_ERROR: 'section:load:error',
 
+    // ==========================================
+    // RESPOSTAS
+    // ==========================================
+
+    /**
+     * User submeteu resposta (antes de salvar)
+     * @type {string}
+     * @fires {{ sectionId: number, questionId: string, answer: string }}
+     * @status RESERVADO
+     */
+    ANSWER_SUBMITTED: 'answer:submitted',
+
+    /**
+     * Resposta salva com sucesso (backend confirmou)
+     * @type {string}
+     * @fires {AnswerSavedData}
+     * @status ATIVO - Emitido por: SectionContainer
+     */
+    ANSWER_SAVED: 'answer:saved',
+
+    /**
+     * Erro ao salvar resposta
+     * @type {string}
+     * @fires {ErrorData}
+     * @status RESERVADO
+     */
+    ANSWER_SAVE_ERROR: 'answer:save:error',
+
+    // ==========================================
+    // PROGRESSO
+    // ==========================================
+
+    /**
+     * Progresso de seção atualizado
+     * @type {string}
+     * @fires {{ sectionId: number, progress: number, answeredCount: number }}
+     * @status RESERVADO
+     */
+    PROGRESS_UPDATED: 'progress:updated',
+
+    /**
+     * Seção finalizada (todas perguntas respondidas + texto gerado)
+     * @type {string}
+     * @fires {SectionCompletedData}
+     * @status ATIVO - Emitido por: SectionContainer
+     */
+    SECTION_COMPLETED: 'section:completed',
+
+    /**
+     * BO completo (todas seções finalizadas)
+     * @type {string}
+     * @fires {{ boId: string, completedSections: number[] }}
+     * @status RESERVADO
+     */
+    BO_COMPLETED: 'bo:completed',
+
+    /**
+     * User solicitou ir para tela final
+     * @type {string}
+     * @fires {FinalScreenData}
+     * @status ATIVO - Emitido por: ProgressBar, SectionContainer
+     */
+    FINAL_SCREEN_REQUESTED: 'final:screen:requested',
+
+    // ==========================================
+    // ESTADO GLOBAL
+    // ==========================================
+
+    /**
+     * Estado global mudou (StateManager)
+     * @type {string}
+     * @fires {{ key: string, value: any }}
+     * @status RESERVADO
+     */
+    STATE_CHANGED: 'state:changed',
+
+    /**
+     * Nova sessão criada
+     * @type {string}
+     * @fires {SessionData}
+     * @status RESERVADO
+     */
+    SESSION_CREATED: 'session:created',
+
+    /**
+     * Sessão existente carregada (ex: restauração de draft)
+     * @type {string}
+     * @fires {SessionData}
+     * @status RESERVADO
+     */
+    SESSION_LOADED: 'session:loaded',
+
+    // ==========================================
     // UI
-    SHOW_LOADING: 'ui:loading:show',                       // Mostrar indicador de loading
-    HIDE_LOADING: 'ui:loading:hide',                       // Esconder loading
-    SHOW_ERROR: 'ui:error:show',                           // Mostrar erro
-    SHOW_SUCCESS: 'ui:success:show',                       // Mostrar sucesso
+    // ==========================================
 
-    // Texto gerado
-    TEXT_GENERATED: 'text:generated',                      // Texto BO gerado
-    TEXT_COPY_REQUESTED: 'text:copy:requested',            // User pediu para copiar
-    TEXT_COPIED: 'text:copied'                             // Texto copiado para clipboard
+    /**
+     * Mostrar indicador de loading
+     * @type {string}
+     * @fires {{ message?: string }}
+     * @status RESERVADO
+     */
+    SHOW_LOADING: 'ui:loading:show',
+
+    /**
+     * Esconder loading
+     * @type {string}
+     * @fires {void}
+     * @status RESERVADO
+     */
+    HIDE_LOADING: 'ui:loading:hide',
+
+    /**
+     * Mostrar mensagem de erro
+     * @type {string}
+     * @fires {ErrorData}
+     * @status RESERVADO
+     */
+    SHOW_ERROR: 'ui:error:show',
+
+    /**
+     * Mostrar mensagem de sucesso
+     * @type {string}
+     * @fires {{ message: string }}
+     * @status RESERVADO
+     */
+    SHOW_SUCCESS: 'ui:success:show',
+
+    // ==========================================
+    // TEXTO GERADO
+    // ==========================================
+
+    /**
+     * Texto BO gerado pela LLM
+     * @type {string}
+     * @fires {TextGeneratedData}
+     * @status RESERVADO
+     */
+    TEXT_GENERATED: 'text:generated',
+
+    /**
+     * User pediu para copiar texto
+     * @type {string}
+     * @fires {{ sectionId?: number, copyAll?: boolean }}
+     * @status RESERVADO
+     */
+    TEXT_COPY_REQUESTED: 'text:copy:requested',
+
+    /**
+     * Texto copiado para clipboard
+     * @type {string}
+     * @fires {{ success: boolean, sectionId?: number }}
+     * @status RESERVADO
+     */
+    TEXT_COPIED: 'text:copied'
 };
 
 // ============================================

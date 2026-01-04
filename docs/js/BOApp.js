@@ -57,12 +57,7 @@ class BOApp {
         // Tracking
         this.sessionStartTime = new Date();
 
-        // Bind de métodos para callbacks (mantidos para fallback/compatibilidade)
-        this._onAnswer = this._onAnswer.bind(this);
-        this._onSectionComplete = this._onSectionComplete.bind(this);
-        this._onSectionSkip = this._onSectionSkip.bind(this);
-        this._onNavigateNext = this._onNavigateNext.bind(this);
-        this._onNavigateBack = this._onNavigateBack.bind(this);
+        // Bind de métodos para callbacks internos
         this._onProgressBarClick = this._onProgressBarClick.bind(this);
 
         // Subscrever ao StateManager para sincronizar componentes
@@ -129,24 +124,21 @@ class BOApp {
         // Evento: ANSWER_SAVED (de SectionContainer)
         const unsubscribeAnswer = this.eventBus.on(Events.ANSWER_SAVED, (data) => {
             console.log('[BOApp] EventBus - ANSWER_SAVED:', data);
-            // StateManager já foi atualizado pelo callback _onAnswer
-            // Este evento é para outros componentes que queiram reagir
+            // v0.13.2+: Este evento é para tracking/analytics
         });
         this._eventBusUnsubscribers.push(unsubscribeAnswer);
 
         // Evento: SECTION_COMPLETED (de SectionContainer)
         const unsubscribeComplete = this.eventBus.on(Events.SECTION_COMPLETED, (data) => {
             console.log('[BOApp] EventBus - SECTION_COMPLETED:', data);
-            // StateManager já foi atualizado pelo callback _onSectionComplete
-            // Este evento é para outros componentes que queiram reagir
+            // v0.13.2+: Este evento é para tracking/analytics
         });
         this._eventBusUnsubscribers.push(unsubscribeComplete);
 
         // Evento: section:skipped (de SectionContainer)
         const unsubscribeSkip = this.eventBus.on('section:skipped', (data) => {
             console.log('[BOApp] EventBus - section:skipped:', data);
-            // StateManager já foi atualizado pelo callback _onSectionSkip
-            // Este evento é para outros componentes que queiram reagir
+            // v0.13.2+: Este evento é para tracking/analytics
         });
         this._eventBusUnsubscribers.push(unsubscribeSkip);
 
@@ -245,13 +237,9 @@ class BOApp {
      * Inicializa SectionContainer
      */
     _initSectionContainer() {
+        // v0.13.2+: Apenas onGenerateText callback mantido
+        // Navegação usa apenas EventBus (SECTION_CHANGE_REQUESTED)
         this.sectionContainer = new SectionContainer('section-container', {
-            onAnswer: this._onAnswer,
-            onComplete: this._onSectionComplete,
-            onSkip: this._onSectionSkip,
-            onNavigateNext: this._onNavigateNext,
-            onNavigateBack: this._onNavigateBack,
-            // v0.13.2 (Opção B): Callback para gerar texto via endpoint separado
             onGenerateText: async (sectionId) => {
                 return await this._generateSectionText(sectionId);
             },
@@ -595,22 +583,6 @@ class BOApp {
         this.stateManager.markSectionSkipped(sectionId, skipReason);
 
         // NÃO avançar automaticamente - deixar usuário ver mensagem de skip e decidir
-    }
-
-    /**
-     * Callback: navegar para próxima seção
-     */
-    _onNavigateNext(nextSectionId, options = {}) {
-        console.log('[BOApp] Navegar para seção:', nextSectionId, 'com opções:', options);
-        this._navigateToSection(nextSectionId, false, options);
-    }
-
-    /**
-     * Callback: voltar para seção atual
-     */
-    _onNavigateBack() {
-        console.log('[BOApp] Voltar para seção atual');
-        this._loadCurrentSection();
     }
 
     /**

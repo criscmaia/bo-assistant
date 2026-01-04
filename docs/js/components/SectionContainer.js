@@ -34,12 +34,6 @@ class SectionContainer {
         this.isReadOnly = false;
         this.followUpQueue = []; // Fila de perguntas follow-up (1.5.1, 1.5.2, etc)
 
-        // Callbacks (DEPRECATED - usar EventBus)
-        this.onAnswer = options.onAnswer || ((questionId, answer) => {});
-        this.onComplete = options.onComplete || ((sectionId, answers) => {});
-        this.onSkip = options.onSkip || ((sectionId) => {});
-        this.onNavigateNext = options.onNavigateNext || ((nextSectionId) => {});
-        this.onNavigateBack = options.onNavigateBack || (() => {});
         // v0.13.2 (Opção B): Callback para gerar texto via endpoint separado
         this.onGenerateText = options.onGenerateText || (async (sectionId) => null);
 
@@ -844,58 +838,38 @@ class SectionContainer {
         const copyBtn = this.container.querySelector('#section-copy-btn');
         addListener(copyBtn, 'click', () => this._copyGeneratedText());
 
-        // Iniciar próxima seção
+        // Iniciar próxima seção (EventBus only - v0.13.2+)
         const startNextBtn = this.container.querySelector('#section-start-next');
         addListener(startNextBtn, 'click', () => {
-            // v0.13.1+: Emitir evento via EventBus para navegação
-            if (this.eventBus && typeof Events !== 'undefined') {
-                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
-                    sectionId: this.sectionId + 1,
-                    context: { preAnswerSkipQuestion: 'sim' }
-                });
-            }
-            // Fallback: Manter callback para compatibilidade (DEPRECATED)
-            this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'sim' });
+            this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
+                sectionId: this.sectionId + 1,
+                context: { preAnswerSkipQuestion: 'sim' }
+            });
         });
 
-        // Pular próxima seção
+        // Pular próxima seção (EventBus only - v0.13.2+)
         const skipNextBtn = this.container.querySelector('#section-skip-next');
         addListener(skipNextBtn, 'click', () => {
-            // v0.13.1+: Emitir evento via EventBus para navegação
-            if (this.eventBus && typeof Events !== 'undefined') {
-                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
-                    sectionId: this.sectionId + 1,
-                    context: { preAnswerSkipQuestion: 'não' }
-                });
-            }
-            // Fallback: Manter callback para compatibilidade (DEPRECATED)
-            this.onNavigateNext(this.sectionId + 1, { preAnswerSkipQuestion: 'não' });
+            this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
+                sectionId: this.sectionId + 1,
+                context: { preAnswerSkipQuestion: 'não' }
+            });
         });
 
-        // Finalizar BO (v0.13.2+: quando há limite de seções ativas)
+        // Finalizar BO (EventBus only - v0.13.2+)
         const finalizeBOBtn = this.container.querySelector('#section-finalize-bo');
         addListener(finalizeBOBtn, 'click', () => {
-            // Emitir evento para mostrar tela final via EventBus
-            if (this.eventBus && typeof Events !== 'undefined') {
-                this.eventBus.emit(Events.FINAL_SCREEN_REQUESTED, {
-                    context: 'completed_all_active_sections'
-                });
-            } else {
-                console.error('[SectionContainer] EventBus ou Events não disponível para emitir FINAL_SCREEN_REQUESTED');
-            }
+            this.eventBus.emit(Events.FINAL_SCREEN_REQUESTED, {
+                context: 'completed_all_active_sections'
+            });
         });
 
-        // Voltar para seção atual
+        // Voltar para seção anterior (EventBus only - v0.13.2+)
         const backBtn = this.container.querySelector('#section-back-btn');
         addListener(backBtn, 'click', () => {
-            // v0.13.1+: Emitir evento via EventBus para navegação
-            if (this.eventBus && typeof Events !== 'undefined') {
-                this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
-                    sectionId: this.sectionId - 1
-                });
-            }
-            // Fallback: Manter callback para compatibilidade (DEPRECATED)
-            this.onNavigateBack();
+            this.eventBus.emit(Events.SECTION_CHANGE_REQUESTED, {
+                sectionId: this.sectionId - 1
+            });
         });
 
         console.log('[SectionContainer] Listeners bindados:', this._eventListeners.length);
